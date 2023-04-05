@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './screens/attendance_screen.dart';
 import './screens/home_screen.dart';
 
 void main(List<String> args) {
@@ -12,7 +13,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: HomeScreen(),
+      routes: {
+        '/': (_) => HomeScreen(),
+        AttendanceScreen.routeName: (_) => AttendanceScreen()
+      },
     );
   }
 }
