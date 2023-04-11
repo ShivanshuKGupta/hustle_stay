@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/dummy_data.dart';
+import 'package:hustle_stay/models/room.dart';
 import '../models/user.dart';
 
 class AttendanceScreen extends StatelessWidget {
@@ -14,34 +15,69 @@ class AttendanceScreen extends StatelessWidget {
         title: const Text('Attendance'),
       ),
       backgroundColor: Colors.white70,
-      body: Room(),
+      body: SingleChildScrollView(
+        child: Column(
+          children: dummy_rooms.map((e) {
+            return RoomList(room: e);
+          }).toList(),
+        ),
+      ),
     );
   }
 }
 
-class Room extends StatelessWidget {
-  const Room({super.key});
+class RoomList extends StatelessWidget {
+  final Room room;
+  const RoomList({super.key, required this.room});
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 5,
-      child: UserTile(user: dummy_users[0]),
+      child: Column(children: [
+        Text(
+          room.id,
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        ...room.getRoomates.map((e) => UserTile(user: e)).toList()
+      ]),
     );
   }
 }
 
-class UserTile extends StatelessWidget {
+class UserTile extends StatefulWidget {
   final User user;
   const UserTile({super.key, required this.user});
 
   @override
+  State<UserTile> createState() => _UserTileState();
+}
+
+class _UserTileState extends State<UserTile> {
+  bool isPresent = false;
+  @override
   Widget build(BuildContext context) {
+    isPresent = dummy_attendance.contains(widget.user.id);
     return ListTile(
-      onTap: () {},
-      leading: Image.asset(user.img),
-      title: Text(user.name),
-      subtitle: Text(user.id),
+      onTap: () {
+        setState(() {
+          if (isPresent) {
+            dummy_attendance.remove(widget.user.id);
+          } else {
+            dummy_attendance.add(widget.user.id);
+          }
+        });
+      },
+      leading: Image.asset(widget.user.img),
+      title: Text(widget.user.name),
+      trailing: isPresent
+          ? const Icon(
+              Icons.check_circle_rounded,
+              color: Colors.blue,
+            )
+          : const Icon(
+              Icons.check_circle_outline_rounded,
+            ),
+      subtitle: Text(widget.user.id),
     );
   }
 }
