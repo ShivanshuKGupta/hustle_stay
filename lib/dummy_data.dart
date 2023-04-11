@@ -1,7 +1,7 @@
 import './models/user.dart';
 import './models/room.dart';
 
-List<User> dummyUsers = [
+List<User> dummy_users = [
   User(
       id: 'cs21b1027',
       name: 'Shivanshu Gupta',

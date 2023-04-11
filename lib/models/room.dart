@@ -6,7 +6,7 @@ class Room {
   List<String> students;
   Room({required this.id, required this.students});
   List<User> get getRoomates {
-    return dummyUsers
+    return dummy_users
         .where((element) => students.contains(element.id))
         .toList();
   }
