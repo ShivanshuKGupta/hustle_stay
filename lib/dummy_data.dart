@@ -83,4 +83,4 @@ List<Room> dummy_rooms = [
   ]),
 ];
 
-Set<String> dummy_attendance = {'cs21b1027'};
+Set<String> dummy_attendance = {};
