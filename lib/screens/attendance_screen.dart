@@ -17,7 +17,7 @@ class AttendanceScreen extends StatelessWidget {
       backgroundColor: Colors.white70,
       body: SingleChildScrollView(
         child: Column(
-          children: dummy_rooms.map((e) {
+          children: dummyRooms.map((e) {
             return RoomList(room: e);
           }).toList(),
         ),
@@ -56,14 +56,14 @@ class _UserTileState extends State<UserTile> {
   bool isPresent = false;
   @override
   Widget build(BuildContext context) {
-    isPresent = dummy_attendance.contains(widget.user.id);
+    isPresent = dummyAttendance.contains(widget.user.id);
     return ListTile(
       onTap: () {
         setState(() {
           if (isPresent) {
-            dummy_attendance.remove(widget.user.id);
+            dummyAttendance.remove(widget.user.id);
           } else {
-            dummy_attendance.add(widget.user.id);
+            dummyAttendance.add(widget.user.id);
           }
         });
       },

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import './attendance_screen.dart';
+import './login_screen.dart';
 
-enum names {
+enum Names {
   bottomNavigationBarItem,
   screen,
 }
 
 class HomeScreen extends StatefulWidget {
-  HomeScreen({super.key});
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -17,35 +18,35 @@ class _HomeScreenState extends State<HomeScreen> {
   var currentIndex = 2;
   final List<Map> barItems = [
     {
-      names.bottomNavigationBarItem: const BottomNavigationBarItem(
+      Names.bottomNavigationBarItem: const BottomNavigationBarItem(
           icon: Icon(Icons.airport_shuttle_rounded), label: 'Vehicle'),
-      names.screen: HomePage()
+      Names.screen: HomePage()
     },
     {
-      names.bottomNavigationBarItem: const BottomNavigationBarItem(
+      Names.bottomNavigationBarItem: const BottomNavigationBarItem(
           icon: Icon(Icons.question_answer_rounded), label: 'Complaint'),
-      names.screen: HomePage()
+      Names.screen: HomePage()
     },
     {
-      names.bottomNavigationBarItem: const BottomNavigationBarItem(
+      Names.bottomNavigationBarItem: const BottomNavigationBarItem(
           icon: Icon(Icons.home_rounded), label: 'Home'),
-      names.screen: HomePage()
+      Names.screen: HomePage()
     },
     {
-      names.bottomNavigationBarItem: const BottomNavigationBarItem(
+      Names.bottomNavigationBarItem: const BottomNavigationBarItem(
           icon: Icon(Icons.co_present_rounded), label: 'Attendance'),
-      names.screen: AttendanceScreen()
+      Names.screen: const AttendanceScreen()
     },
     {
-      names.bottomNavigationBarItem: const BottomNavigationBarItem(
+      Names.bottomNavigationBarItem: const BottomNavigationBarItem(
           icon: Icon(Icons.question_answer_rounded), label: 'FAQ'),
-      names.screen: HomePage()
+      Names.screen: HomePage()
     }
   ];
   List<BottomNavigationBarItem> get bottomItems {
     final List<BottomNavigationBarItem> ans = [];
     for (var element in barItems) {
-      ans.add(element[names.bottomNavigationBarItem]);
+      ans.add(element[Names.bottomNavigationBarItem]);
     }
     return ans;
   }
@@ -66,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedItemColor: Colors.black,
       ),
       backgroundColor: Colors.white70,
-      body: barItems[currentIndex][names.screen],
+      body: barItems[currentIndex][Names.screen],
     );
   }
 }
@@ -99,22 +100,6 @@ class HomePage extends StatelessWidget {
           const Text('Hostel Life, Hustle Life, HustleStay Life'),
           LoginPage()
         ],
-      ),
-    );
-  }
-}
-
-class LoginPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(50),
-      child: Card(
-        child: TextButton.icon(
-          label: const Text('Login'),
-          icon: const Icon(Icons.login_rounded),
-          onPressed: () {},
-        ),
       ),
     );
   }

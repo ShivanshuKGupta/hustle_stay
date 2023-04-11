@@ -1,7 +1,7 @@
 import './models/user.dart';
 import './models/room.dart';
 
-List<User> dummy_users = [
+List<User> dummyUsers = [
   User(
       id: 'cs21b1027',
       name: 'Shivanshu Gupta',
@@ -64,7 +64,7 @@ List<User> dummy_users = [
       type: UserType.student),
 ];
 
-List<Room> dummy_rooms = [
+List<Room> dummyRooms = [
   Room(id: 'A8', students: [
     'cs21b1027',
     'cs21b1022',
@@ -83,4 +83,4 @@ List<Room> dummy_rooms = [
   ]),
 ];
 
-Set<String> dummy_attendance = {};
+Set<String> dummyAttendance = {};
