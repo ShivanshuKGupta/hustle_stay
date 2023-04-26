@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/tools.dart';
 import './attendance_screen.dart';
 import './login_screen.dart';
+import 'main_drawer.dart';
 
 enum Names {
   bottomNavigationBarItem,
@@ -15,59 +17,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  var currentIndex = 2;
-  final List<Map> barItems = [
-    {
-      Names.bottomNavigationBarItem: const BottomNavigationBarItem(
-          icon: Icon(Icons.airport_shuttle_rounded), label: 'Vehicle'),
-      Names.screen: HomePage()
-    },
-    {
-      Names.bottomNavigationBarItem: const BottomNavigationBarItem(
-          icon: Icon(Icons.question_answer_rounded), label: 'Complaint'),
-      Names.screen: HomePage()
-    },
-    {
-      Names.bottomNavigationBarItem: const BottomNavigationBarItem(
-          icon: Icon(Icons.home_rounded), label: 'Home'),
-      Names.screen: HomePage()
-    },
-    {
-      Names.bottomNavigationBarItem: const BottomNavigationBarItem(
-          icon: Icon(Icons.co_present_rounded), label: 'Attendance'),
-      Names.screen: const AttendanceScreen()
-    },
-    {
-      Names.bottomNavigationBarItem: const BottomNavigationBarItem(
-          icon: Icon(Icons.question_answer_rounded), label: 'FAQ'),
-      Names.screen: HomePage()
-    }
-  ];
-  List<BottomNavigationBarItem> get bottomItems {
-    final List<BottomNavigationBarItem> ans = [];
-    for (var element in barItems) {
-      ans.add(element[Names.bottomNavigationBarItem]);
-    }
-    return ans;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: BottomNavigationBar(
-        items: bottomItems,
-        backgroundColor: Colors.black,
-        currentIndex: currentIndex,
-        onTap: (index) {
-          setState(() {
-            currentIndex = index;
-          });
-        },
-        unselectedItemColor: Colors.black45,
-        selectedItemColor: Colors.black,
-      ),
-      backgroundColor: Colors.white70,
-      body: barItems[currentIndex][Names.screen],
+      appBar: AppBar(),
+      drawer: MainDrawer(),
+      body: HomePage(),
     );
   }
 }
