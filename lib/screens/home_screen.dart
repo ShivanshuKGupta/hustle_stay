@@ -28,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class HomePage extends StatelessWidget {
+  static String routeName = "HomeScreen";
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -52,8 +53,7 @@ class HomePage extends StatelessWidget {
             'Hustle Stay',
             style: Theme.of(context).textTheme.titleLarge,
           ),
-          const Text('Hostel Life, Hustle Life, HustleStay Life'),
-          LoginPage()
+          const Text('Hostel Life, Hustle Life, HustleStay Life')
         ],
       ),
     );

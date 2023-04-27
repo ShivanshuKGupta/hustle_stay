@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../dummy_data.dart';
 import '../widgets/room_list.dart';
 
 class HostelRooms extends StatelessWidget {
@@ -10,10 +9,10 @@ class HostelRooms extends StatelessWidget {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
-        children: dummyRooms.map((e) {
-          return RoomList(room: e);
-        }).toList(),
-      ),
+          // children: dummyRooms.map((e) {
+          //   return RoomList(room: e);
+          // }).toList(),
+          ),
     );
   }
 }

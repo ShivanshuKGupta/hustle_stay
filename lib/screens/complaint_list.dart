@@ -9,7 +9,7 @@ class HostelComplaint extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Your Complaints'),
       ),
-      body: 
+      body: Container(),
     );
   }
 }

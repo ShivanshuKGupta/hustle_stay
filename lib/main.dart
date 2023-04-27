@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hustle_stay/screens/add_user_screen.dart';
+import 'package:hustle_stay/screens/login_screen.dart';
 import './screens/attendance_screen.dart';
 import './screens/home_screen.dart';
 
 void main(List<String> args) {
-  runApp(const MyApp());
+  runApp(
+    const ProviderScope(child: MyApp()),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -24,8 +29,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: theme,
       routes: {
-        '/': (_) => const HomeScreen(),
-        AttendanceScreen.routeName: (_) => const AttendanceScreen()
+        HomePage.routeName: (_) => const HomeScreen(),
+        AttendanceScreen.routeName: (_) => const AttendanceScreen(),
+        LoginScreen.routeName: (_) => LoginScreen(),
+        AddUserScreen.routeName: (_) => AddUserScreen()
       },
     );
   }
