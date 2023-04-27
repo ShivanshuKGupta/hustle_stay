@@ -37,7 +37,7 @@ class HostelScreen extends StatelessWidget {
             'Federal Hostel',
             'Trash Hostel',
             Image.network(
-                'https://iiitr.ac.in/assets/images/campus/hostel/1.jpeg'),
+                'https://content.jdmagicbox.com/comp/raichur/a4/9999p8532.8532.190924162150.l8a4/catalogue/federal-public-school-english-medium-and-federal-pu-college-and-degree-and-ded-college-raichur-luneimezla.jpg'),
           ),
         ],
       ),
