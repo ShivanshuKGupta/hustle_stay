@@ -10,11 +10,25 @@ enum UserType {
   student,
 }
 
-class Permissions{
+class Permissions {
   bool canTakeAttendance,
-  canModifyUsers,
-  canRegisterComplaint,
-  canModifyComplaints;
+      canModifyUsers,
+      canRegisterComplaint,
+      canModifyComplaints;
+  Permissions({
+    this.canTakeAttendance = false,
+    this.canModifyUsers = false,
+    this.canRegisterComplaint = false,
+    this.canModifyComplaints = false,
+  });
+  String encode() {
+    return json.encode({
+      "canTakeAttendance": canTakeAttendance,
+      "canModifyUsers": canModifyUsers,
+      "canRegisterComplaint": canRegisterComplaint,
+      "canModifyComplaints": canModifyComplaints,
+    });
+  }
 }
 
 class User {
@@ -22,27 +36,29 @@ class User {
   String? password;
   String? name, img;
   String? email;
-  UserType type;
+  UserType? type;
   String? hostel;
   String? room;
   String? phone;
-  Permissions
+  Permissions? permissions = Permissions();
 
   User(
       {this.rollNo,
       this.name,
-      required this.type,
+      this.type,
       this.hostel,
       this.room,
+      this.permissions,
       this.password});
 
   String encode() {
     return json.encode({
       "name": name,
-      "type": type.name,
+      "type": type != null ? type!.name : "null",
       "hostel": hostel,
       "room": room,
       "password": password,
+      "permissions": permissions != null ? permissions!.encode() : "null",
     });
   }
 }
@@ -58,6 +74,19 @@ User decodeAsUser(String response) {
     hostel: details['hostel'],
     room: details['room'],
     password: details['password'],
+    permissions: decodeAsPermissions(details['permissions']),
+  );
+}
+
+Permissions? decodeAsPermissions(String response) {
+  if (response == 'null') return null;
+  Map<String, dynamic> details = json.decode(response);
+  details = details.values.firstWhere((element) => true);
+  return Permissions(
+    canTakeAttendance: details['canTakeAttendance'],
+    canModifyUsers: details['canModifyUsers'],
+    canRegisterComplaint: details['canRegisterComplaint'],
+    canModifyComplaints: details['canModifyComplaints'],
   );
 }
 
