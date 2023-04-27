@@ -33,7 +33,7 @@ class Complaint {
   String encode() {
     return json.encode({
       "location": location,
-      "cType": cType,
+      "cType": cType.name,
       "heading": heading,
       "posterID": posterID,
       "body": body,
@@ -45,12 +45,15 @@ class Complaint {
 Complaint decodeAsComplaint(Map details) {
   return Complaint(
     location: details["location"],
-    cType: details["cType"],
+    cType: ComplaintType.values
+        .firstWhere((element) => element.name == details["cType"]),
     heading: details["heading"],
     posterID: details["posterID"],
     body: details["body"],
     id: details["id"],
-    entryTime: DateTime.parse(details["entryTime"]),
+    entryTime: details["entryTime"] == null
+        ? null
+        : DateTime.parse(details["entryTime"]),
   );
 }
 
