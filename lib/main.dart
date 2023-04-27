@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hustle_stay/screens/add_user_screen.dart';
 import 'package:hustle_stay/screens/login_screen.dart';
+import 'package:hustle_stay/screens/profile_screen.dart';
 import './screens/attendance_screen.dart';
 import './screens/home_screen.dart';
 
@@ -30,9 +31,10 @@ class MyApp extends StatelessWidget {
       theme: theme,
       routes: {
         HomePage.routeName: (_) => const HomeScreen(),
-        AttendanceScreen.routeName: (_) => const AttendanceScreen(),
         LoginScreen.routeName: (_) => LoginScreen(),
-        AddUserScreen.routeName: (_) => AddUserScreen()
+        AttendanceScreen.routeName: (_) => const AttendanceScreen(),
+        AddUserScreen.routeName: (_) => AddUserScreen(),
+        ProfileScreen.routeName: (_) => ProfileScreen(),
       },
     );
   }

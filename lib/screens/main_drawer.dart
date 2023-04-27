@@ -1,52 +1,48 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hustle_stay/providers/user.dart';
-import 'package:hustle_stay/screens/attendance_hostel_screen.dart';
-import 'package:hustle_stay/screens/login_screen.dart';
+import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/screens/attendance_screen.dart';
+import 'package:hustle_stay/screens/profile_screen.dart';
 
-import '../tools.dart';
+import '../tools/tools.dart';
 import 'add_user_screen.dart';
-import 'attendance_screen.dart';
 import 'home_screen.dart';
-import 'login_screen.dart';
 
-class MainDrawer extends ConsumerWidget {
+class MainDrawer extends StatelessWidget {
   const MainDrawer({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.read(userProvider);
+  Widget build(BuildContext context) {
     return Drawer(
       child: Column(
         children: [
+          const SizedBox(
+            height: 20,
+          ),
           ListTile(
-            shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(topRight: Radius.circular(16))),
             onTap: () {
-              Navigator.of(context).pushNamed(LoginScreen.routeName);
+              Navigator.of(context).pushNamed(ProfileScreen.routeName);
             },
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 20,
               vertical: 20,
             ),
-            leading: user.img == null
+            leading: currentUser.img == null
                 ? const CircleAvatar(child: Icon(Icons.person))
-                : Image.network(user.img!),
-            title: Text(user.name == null ? "Guest" : user.name!),
+                : Image.network(currentUser.img!),
+            title: Text(currentUser.name == null ? "Guest" : currentUser.name!),
           ),
           const Divider(),
           ListTile(
             onTap: () {
-              Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (ctx) => const HomeScreen()));
+              Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
             },
             leading: const Icon(Icons.home_rounded),
             title: const Text('Home'),
           ),
           ListTile(
             onTap: () {
-              Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (ctx) => const HostelScreen()));
+              Navigator.of(context)
+                  .pushReplacementNamed(AttendanceScreen.routeName);
             },
             leading: const Icon(Icons.co_present_rounded),
             title: const Text('Attendance'),

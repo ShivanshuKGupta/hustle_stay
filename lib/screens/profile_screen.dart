@@ -1,48 +1,19 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user.dart';
 import '../tools/tools.dart';
-import '../tools/user_tools.dart';
 
-class AddUserScreen extends StatefulWidget {
-  static String routeName = "AddUserScreen";
-  AddUserScreen({super.key});
+class ProfileScreen extends StatelessWidget {
+  static const String routeName = "ProfileScreen";
+  ProfileScreen({super.key});
 
-  @override
-  State<AddUserScreen> createState() => _AddUserScreenState();
-}
-
-class _AddUserScreenState extends State<AddUserScreen> {
   final _formKey = GlobalKey<FormState>();
-
-  User user = User(type: UserType.student);
-
-  bool _isLoading = false;
-
-  void _save(BuildContext context) async {
-    if (!_formKey.currentState!.validate()) return;
-    _formKey.currentState!.save();
-    setState(() {
-      _isLoading = true;
-    });
-    try {
-      await uploadUser(user);
-    } catch (e) {
-      showMsg(context, e.toString());
-    }
-    setState(() {
-      _isLoading = false;
-    });
-    if (context.mounted) {
-      showMsg(context, "User Added");
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add user'),
+        title: const Text('Your Profile'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -51,51 +22,57 @@ class _AddUserScreenState extends State<AddUserScreen> {
               key: _formKey,
               child: Column(
                 children: [
+                  CircleAvatar(
+                    radius: 80,
+                    child: currentUser.img == null
+                        ? const Icon(
+                            Icons.person,
+                            size: 80,
+                          )
+                        : Image.network(currentUser.img!),
+                  ),
+                  const SizedBox(height: 20),
                   TextFormField(
                     maxLength: 9,
+                    readOnly: true,
                     decoration: const InputDecoration(
                       label: Text("Roll number"),
                     ),
+                    initialValue: currentUser.rollNo,
                     validator: (value) {
                       if (value == null) return "Roll number cannot be empty";
-                      if (value.length < 9) {
+                      if (value.length < 9)
                         return "Length cannot be less than 9";
-                      }
                       return null;
                     },
                     onSaved: (value) {
-                      user.rollNo = value;
-                    },
-                  ),
-                  TextFormField(
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      label: Text("Password"),
-                    ),
-                    onSaved: (value) {
-                      user.password = value;
+                      // currentUser.rollNo = value;
                     },
                   ),
                   TextFormField(
                     maxLength: 50,
+                    readOnly: true,
                     keyboardType: TextInputType.name,
                     decoration: const InputDecoration(
                       label: Text("Name"),
                     ),
+                    initialValue: currentUser.name,
                     validator: (value) {
                       if (value == null) return "Name is required";
                     },
                     onSaved: (value) {
-                      user.name = value;
+                      currentUser.name = value;
                     },
                   ),
                   TextFormField(
                     keyboardType: TextInputType.emailAddress,
+                    readOnly: true,
+                    initialValue: currentUser.email,
                     decoration: const InputDecoration(
                       label: Text("Email"),
                     ),
                     onSaved: (value) {
-                      user.email = value;
+                      currentUser.email = value;
                     },
                   ),
                   TextFormField(
@@ -103,15 +80,19 @@ class _AddUserScreenState extends State<AddUserScreen> {
                       label: Text("Hostel"),
                     ),
                     onSaved: (value) {
-                      user.hostel = value;
+                      currentUser.hostel = value;
                     },
+                    initialValue: currentUser.hostel,
+                    readOnly: true,
                   ),
                   TextFormField(
                     decoration: const InputDecoration(
                       label: Text("Room Number"),
                     ),
+                    readOnly: true,
+                    initialValue: currentUser.room,
                     onSaved: (value) {
-                      user.room = value;
+                      currentUser.room = value;
                     },
                   ),
                   TextFormField(
@@ -119,8 +100,10 @@ class _AddUserScreenState extends State<AddUserScreen> {
                     decoration: const InputDecoration(
                       label: Text("Phone Number"),
                     ),
+                    initialValue: currentUser.phone,
+                    readOnly: true,
                     onSaved: (value) {
-                      user.phone = value;
+                      currentUser.phone = value;
                     },
                   ),
                   const SizedBox(
@@ -130,20 +113,9 @@ class _AddUserScreenState extends State<AddUserScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       ElevatedButton.icon(
-                        onPressed: _isLoading ? null : () => _save(context),
+                        onPressed: () {},
                         icon: const Icon(Icons.save_rounded),
-                        label: _isLoading
-                            ? const SizedBox(
-                                height: 16,
-                                width: 16,
-                                child: CircularProgressIndicator(),
-                              )
-                            : const Text('Save'),
-                      ),
-                      TextButton.icon(
-                        onPressed: _reset,
-                        icon: const Icon(Icons.delete),
-                        label: const Text('Reset'),
+                        label: const Text('Save'),
                       ),
                     ],
                   ),

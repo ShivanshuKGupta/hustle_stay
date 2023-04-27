@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/providers/user.dart';
+import 'package:hustle_stay/models/user.dart';
 
 import '../models/room.dart';
 
@@ -12,7 +12,7 @@ class RoomList extends StatelessWidget {
     return Card(
       child: Column(children: [
         Text(
-          room.id,
+          room.name,
           style: Theme.of(context).textTheme.titleLarge,
         ),
         // ...room.getRoomates.map((e) => UserTile(user: e)).toList()

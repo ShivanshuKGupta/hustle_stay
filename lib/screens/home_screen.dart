@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/tools.dart';
+import 'package:hustle_stay/tools/tools.dart';
 import './attendance_screen.dart';
 import './login_screen.dart';
 import 'main_drawer.dart';
@@ -10,6 +10,7 @@ enum Names {
 }
 
 class HomeScreen extends StatefulWidget {
+  static const String routeName = "HomeScreen";
   const HomeScreen({super.key});
 
   @override

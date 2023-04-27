@@ -13,3 +13,7 @@ void showMsg(BuildContext context, String msg) {
         showCloseIcon: true,
       ));
 }
+
+String convertDate(DateTime dateTime) {
+  return "${dateTime.year}-${dateTime.month}-${dateTime.day}";
+}
