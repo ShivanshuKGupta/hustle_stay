@@ -39,6 +39,7 @@ User decodeAsUser(Map details) {
 }
 
 void login(String id, String pwd) {
+  print("Login called for $id , $pwd");
   final matchedUser = allUsers.firstWhere(
       (usr) => usr.rollNo!.toLowerCase() == id.toLowerCase(), orElse: () {
     return User(rollNo: "-1");

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/tools/tools.dart';
 import 'package:hustle_stay/tools/user_tools.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'home_screen.dart';
 
@@ -19,12 +20,29 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    _loadAllUsers();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _loadAllUsers();
+      SharedPreferences.getInstance().then((prefs) {
+        String? userName = prefs.getString('userName');
+        String? pwd = prefs.getString('pwd');
+        if (userName == null || pwd == null) {
+          return;
+        }
+        print(userName);
+        print(pwd);
+        user.rollNo = userName;
+        user.password = pwd;
+        _login(context);
+      });
+      print('After Build');
+    });
   }
 
   void _login(BuildContext context) {
-    if (!_formKey.currentState!.validate()) return;
-    _formKey.currentState!.save();
+    if (_formKey.currentState != null) {
+      if (!_formKey.currentState!.validate()) return;
+      _formKey.currentState!.save();
+    }
     setState(() {
       _loading = true;
     });
@@ -40,6 +58,12 @@ class _LoginScreenState extends State<LoginScreen> {
     }
     setState(() {
       _loading = false;
+    });
+    // saving state
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setString('userName', '${user.rollNo}');
+      prefs.setString('pwd', '${user.password}');
+      print("State saved.");
     });
     if (!context.mounted) return;
     showMsg(context, "Logged In");

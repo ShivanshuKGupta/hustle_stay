@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/tools/tools.dart';
+import 'package:transparent_image/transparent_image.dart';
 import './attendance_screen.dart';
 import './login_screen.dart';
 import 'main_drawer.dart';
@@ -44,10 +45,11 @@ class HomePage extends StatelessWidget {
             backgroundColor: Colors.black,
             child: Padding(
               padding: const EdgeInsets.all(30),
-              child: Image.network(
-                  fit: BoxFit.cover,
-                  color: Colors.white,
-                  'https://upload.wikimedia.org/wikipedia/en/thumb/d/d8/Indian_Institute_of_Information_Technology%2C_Raichur_Logo.svg/1200px-Indian_Institute_of_Information_Technology%2C_Raichur_Logo.svg.png'),
+              child: FadeInImage.memoryNetwork(
+                placeholder: kTransparentImage,
+                image:
+                    'https://upload.wikimedia.org/wikipedia/en/thumb/d/d8/Indian_Institute_of_Information_Technology%2C_Raichur_Logo.svg/1200px-Indian_Institute_of_Information_Technology%2C_Raichur_Logo.svg.png',
+              ),
             ),
           ),
           Text(

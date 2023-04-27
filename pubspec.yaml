@@ -38,6 +38,8 @@ dependencies:
   google_fonts: ^4.0.3
   flutter_riverpod: ^2.3.6
   image_picker: ^0.8.7+4
+  transparent_image: ^2.0.1
+  shared_preferences: ^2.0.8
 
 dev_dependencies:
   flutter_test:
