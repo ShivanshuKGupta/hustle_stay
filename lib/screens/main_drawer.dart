@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/attendance_screen.dart';
+import 'package:hustle_stay/screens/complaint_screen.dart';
 import 'package:hustle_stay/screens/profile_screen.dart';
 
 import '../tools/tools.dart';
@@ -49,7 +50,8 @@ class MainDrawer extends StatelessWidget {
           ),
           ListTile(
             onTap: () {
-              showMsg(context, "Directing to complaints page");
+              Navigator.of(context).push(
+                  MaterialPageRoute(builder: (ctx) => const ComplaintScreen()));
             },
             leading: const Icon(Icons.question_answer_rounded),
             title: const Text('Complaints'),

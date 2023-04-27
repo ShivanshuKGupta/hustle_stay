@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/tools/tools.dart';
 import 'package:transparent_image/transparent_image.dart';
-import './attendance_screen.dart';
-import './login_screen.dart';
 import 'main_drawer.dart';
 
 enum Names {
@@ -42,7 +39,7 @@ class HomePage extends StatelessWidget {
         children: [
           CircleAvatar(
             maxRadius: 100,
-            backgroundColor: Colors.black,
+            backgroundColor: Colors.white70,
             child: Padding(
               padding: const EdgeInsets.all(30),
               child: FadeInImage.memoryNetwork(

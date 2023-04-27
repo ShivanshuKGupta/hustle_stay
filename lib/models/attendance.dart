@@ -1,61 +1,40 @@
 import 'dart:convert';
+import 'package:http/http.dart' as https;
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import "package:http/http.dart" as https;
-
-import '../tools/tools.dart';
+import 'package:hustle_stay/models/room.dart';
+import 'package:hustle_stay/tools/tools.dart';
 
 class AttendanceSheet {
-  Map<String, Map<String, bool>> sheet = {};
+  String? title;
+  List<Room> roomList = [];
+  AttendanceSheet({this.title, this.roomList = const []});
 
-  setSheet(newSheet) {
-    sheet = newSheet;
-  }
-
-  toggle(String id) {
-    // if (!sheet.containsKey(id)) {
-    //   sheet[id] = false;
-    // } else {
-    //   sheet[id] = !(sheet[id]!);
-    // }
+  String encode() {
+    return json.encode({"title": title, "roomList": roomList});
   }
 }
 
-createSheet(DateTime dateTime) async {
-  String date = convertDate(dateTime);
-  // Map<String, Map<String, bool>> newSheet = ;
+AttendanceSheet decodeAsAttendanceSheet(Map details) {
+  return AttendanceSheet(
+      title: details['title'], roomList: details['roomList']);
 }
 
-class AttendanceNotifier extends StateNotifier<AttendanceSheet> {
-  AttendanceNotifier() : super(AttendanceSheet());
-
-  void setSheet(AttendanceSheet sheet) {
-    state = sheet;
-  }
-
-  downloadSheet(DateTime dateTime) async {
-    final date = convertDate(dateTime);
-    final url = Uri.https(
-        "hustlestay-default-rtdb.firebaseio.com", "attendance/$date.json");
-    final response = await https.get(url);
-    if (response.body == 'null') {
-      throw "Sheet not found";
-    }
-    print(response.body);
-    state.setSheet(
-        json.decode(response.body).values.firstWhere((element) => true));
-  }
-
-  uploadSheet(DateTime dateTime) async {
-    final date = convertDate(dateTime);
-    final url = Uri.https(
-        "hustlestay-default-rtdb.firebaseio.com", "attendance/$date.json");
-    final response = await https.post(url, body: json.encode(state.sheet));
-    print(response);
-  }
+AttendanceSheet createAttendanceSheet(DateTime dateTime) {
+  return AttendanceSheet();
 }
 
-final attendanceProvider =
-    StateNotifierProvider<AttendanceNotifier, AttendanceSheet>((ref) {
-  return AttendanceNotifier();
-});
+Future<AttendanceSheet> fetchAttendanceSheet(DateTime dateTime) async {
+  final url = Uri.https("hustlestay-default-rtdb.firebaseio.com",
+      "attendance/${convertDate(dateTime)}.json");
+  final response = await https.get(url);
+  Map<String, dynamic> m = json.decode(response.body);
+  AttendanceSheet ans = m.values.firstWhere((element) => true);
+  return ans;
+}
+
+uploadAttendanceSheet(DateTime dateTime, AttendanceSheet sheet) async {
+  final url = Uri.https("hustlestay-default-rtdb.firebaseio.com",
+      "attendance/${convertDate(dateTime)}.json");
+  final response = await https.post(url, body: sheet.encode());
+  print(response.body);
+}

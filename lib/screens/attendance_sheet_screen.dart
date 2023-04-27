@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/attendance.dart';
-import 'package:hustle_stay/screens/attendance_screen.dart';
-
-import '../models/user.dart';
-import '../widgets/room_list.dart';
 
 class AttendanceSheetScreen extends ConsumerStatefulWidget {
   final String hostelName;
@@ -26,10 +22,10 @@ class _AttendanceSheetScreen extends ConsumerState<AttendanceSheetScreen> {
       _isLoading = true;
     });
     try {
-      attendanceSheet =
-          await ref.read(attendanceProvider.notifier).downloadSheet(dateChosen);
+      attendanceSheet = await fetchAttendanceSheet(dateChosen);
+      ;
     } catch (e) {
-      await createSheet(dateChosen);
+      await createAttendanceSheet(dateChosen);
     }
     setState(() {
       _isLoading = false;
@@ -73,12 +69,12 @@ class _AttendanceSheetScreen extends ConsumerState<AttendanceSheetScreen> {
             )
           : SingleChildScrollView(
               child: Column(
-                children: attendanceSheet.sheet.entries.map(
-                  (e) {
-                    return UserTile(e.key);
-                  },
-                ).toList(),
-              ),
+                  // children: attendanceSheet.sheet.entries.map(
+                  //   (e) {
+                  //     return UserTile(e.key);
+                  //   },
+                  // ).toList(),
+                  ),
             ),
     );
   }

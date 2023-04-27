@@ -37,7 +37,7 @@ class Complaint {
       "heading": heading,
       "posterID": posterID,
       "body": body,
-      "entryTime": entryTime,
+      "entryTime": entryTime == null ? "null" : entryTime.toString(),
     });
   }
 }
@@ -50,7 +50,7 @@ Complaint decodeAsComplaint(Map details) {
     posterID: details["posterID"],
     body: details["body"],
     id: details["id"],
-    entryTime: details["entryTime"],
+    entryTime: DateTime.parse(details["entryTime"]),
   );
 }
 
@@ -66,6 +66,10 @@ Future<void> fetchAllComplaints() async {
   final url =
       Uri.https("hustlestay-default-rtdb.firebaseio.com", "complaints.json");
   final response = await https.get(url);
+  if (response.body == "null") {
+    // no complaints
+    return;
+  }
   Map<String, dynamic> m = json.decode(response.body);
   List<Complaint> ans = [];
   m.forEach((key, value) => ans.add(decodeAsComplaint(value)));
