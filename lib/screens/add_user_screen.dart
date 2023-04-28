@@ -20,7 +20,16 @@ class _AddUserScreenState extends State<AddUserScreen> {
 
   bool _isLoading = false;
 
-  String dropdownValue = allHostels.first.name;
+  String? dropdownValue;
+  @override
+  void initState() {
+    super.initState();
+    fetchAllHostels().then((value) {
+      setState(() {
+        dropdownValue = allHostels.first.name;
+      });
+    });
+  }
 
   void _save(BuildContext context) async {
     if (!_formKey.currentState!.validate()) return;
@@ -29,6 +38,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
       _isLoading = true;
     });
     try {
+      user.hostel = dropdownValue;
       await uploadUser(user);
     } catch (e) {
       showMsg(context, e.toString());

@@ -6,6 +6,7 @@ import 'package:hustle_stay/tools/user_tools.dart';
 
 class AttendanceSheet {
   // String? title;
+  String? id;
   Map<String, bool> studentIDList; // = {}
   AttendanceSheet({this.studentIDList = const {}});
 
@@ -42,9 +43,11 @@ Future<void> fetchAttendanceSheet(DateTime dateTime, String hostelID) async {
   }
   print(response.body);
   Map<String, dynamic> m = json.decode(response.body);
+  String id = m.entries.first.key;
   print(m.values.first);
   Map<String, dynamic> studentID = m.values.first;
   AttendanceSheet ans = decodeAsAttendanceSheet(studentID);
+  ans.id = id;
   currentSheet = ans;
 }
 
@@ -53,7 +56,15 @@ uploadAttendanceSheet(
   final url = Uri.https("hustlestay-default-rtdb.firebaseio.com",
       "attendance/$hostelID/${convertDate(dateTime)}.json");
   final response = await https.post(url, body: sheet.encode());
+  currentSheet.id = json.decode(response.body)['name'];
   print(response.body);
+}
+
+deleteAttendanceSheet(DateTime dateTime, String hostelID) async {
+  final url = Uri.https("hustlestay-default-rtdb.firebaseio.com",
+      "attendance/$hostelID/${convertDate(dateTime)}/${currentSheet.id}.json");
+
+  final response = await https.delete(url, body: json.encode(true));
 }
 
 AttendanceSheet currentSheet = AttendanceSheet();

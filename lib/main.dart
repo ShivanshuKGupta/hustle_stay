@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hustle_stay/screens/add_hostel_screen.dart';
 import 'package:hustle_stay/screens/add_user_screen.dart';
 import 'package:hustle_stay/screens/login_screen.dart';
 import 'package:hustle_stay/screens/profile_screen.dart';
@@ -35,6 +36,7 @@ class MyApp extends StatelessWidget {
         AttendanceScreen.routeName: (_) => const AttendanceScreen(),
         AddUserScreen.routeName: (_) => AddUserScreen(),
         ProfileScreen.routeName: (_) => ProfileScreen(),
+        // '/': (_) => AddHostel(),
       },
     );
   }

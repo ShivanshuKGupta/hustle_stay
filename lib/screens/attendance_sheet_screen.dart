@@ -19,9 +19,15 @@ class _AttendanceSheetScreen extends State<AttendanceSheetScreen> {
 
   bool _isLoading = false;
 
+  Future<void> updateSheet() async {
+    await deleteAttendanceSheet(dateChosen, widget.hostelName);
+    await uploadAttendanceSheet(dateChosen, currentSheet, widget.hostelName);
+  }
+
   @override
   void initState() {
     super.initState();
+    print("hostel chosen: " + widget.hostelName.toString());
     getSheet();
   }
 
@@ -98,7 +104,12 @@ class _AttendanceSheetScreen extends State<AttendanceSheetScreen> {
                         final isPresent = entry.value;
                         User user = allUsers
                             .firstWhere((element) => element.rollNo == userID);
-                        return UserTile(user.rollNo!, user.name!, isPresent);
+                        return UserTile(
+                          userID: user.rollNo!,
+                          name: user.name!,
+                          isPresent: isPresent,
+                          updateSheet: updateSheet,
+                        );
                       },
                     ).toList(),
                   ),
@@ -108,23 +119,45 @@ class _AttendanceSheetScreen extends State<AttendanceSheetScreen> {
 }
 
 class UserTile extends StatefulWidget {
-  String userID;
-  String name;
+  final String userID;
+  final String name;
   bool isPresent;
-  UserTile(this.userID, this.name, this.isPresent);
+  final Future<void> Function() updateSheet;
+  UserTile({
+    required this.userID,
+    required this.name,
+    required this.isPresent,
+    required this.updateSheet,
+  });
 
   @override
   State<UserTile> createState() => _UserTileState();
 }
 
 class _UserTileState extends State<UserTile> {
+  bool _isLoading = false;
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      onTap: () {
+      onTap: () async {
         setState(() {
-          // toggleAttendance();
+          _isLoading = true;
+        });
+        widget.isPresent = !widget.isPresent;
+        currentSheet.studentIDList[widget.userID] = widget.isPresent;
+        try {
+          await widget.updateSheet();
+        } catch (e) {
           widget.isPresent = !widget.isPresent;
+          currentSheet.studentIDList[widget.userID] = widget.isPresent;
+          showMsg(context, e.toString());
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
+        setState(() {
+          _isLoading = false;
         });
       },
       leading: const Icon(Icons.person),
@@ -132,15 +165,21 @@ class _UserTileState extends State<UserTile> {
         widget.name,
         style: Theme.of(context).textTheme.bodyLarge,
       ),
-      trailing: widget.isPresent
-          ? const Icon(
-              Icons.check_rounded,
-              color: Colors.green,
+      trailing: _isLoading
+          ? const SizedBox(
+              height: 16,
+              width: 16,
+              child: CircularProgressIndicator(),
             )
-          : const Icon(
-              Icons.close_rounded,
-              color: Colors.red,
-            ),
+          : widget.isPresent
+              ? const Icon(
+                  Icons.check_rounded,
+                  color: Colors.green,
+                )
+              : const Icon(
+                  Icons.close_rounded,
+                  color: Colors.red,
+                ),
       subtitle: Text(
         widget.userID,
         style: Theme.of(context).textTheme.bodyMedium,

@@ -32,7 +32,23 @@ class _LoginScreenState extends State<LoginScreen> {
         print(pwd);
         user.rollNo = userName;
         user.password = pwd;
-        _login(context);
+
+        setState(() {
+          _loading = true;
+        });
+        try {
+          login(user.rollNo!, user.password!);
+        } catch (e) {
+          print("got error: $e");
+          showMsg(context, e.toString());
+          setState(() {
+            _loading = false;
+          });
+          return;
+        }
+        setState(() {
+          _loading = false;
+        });
       });
       print('After Build');
     });
@@ -48,6 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
     });
     try {
       login(user.rollNo!, user.password!);
+      Navigator.of(context).pushReplacementNamed(HomePage.routeName);
     } catch (e) {
       print("got error: $e");
       showMsg(context, e.toString());
@@ -80,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         title: const Text('Login'),
       ),
-      body: allUsers.isEmpty
+      body: _loading
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -176,6 +193,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await fetchAllUsers();
     } catch (e) {
+      print("error in fetching users");
       showMsg(context, e.toString());
     }
     setState(() {});

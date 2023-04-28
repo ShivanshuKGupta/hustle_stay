@@ -12,12 +12,14 @@ class Permissions {
     this.canModifyComplaints = false,
   });
   String encode() {
-    return json.encode({
-      "canTakeAttendance": canTakeAttendance,
-      "canModifyUsers": canModifyUsers,
-      "canRegisterComplaint": canRegisterComplaint,
-      "canModifyComplaints": canModifyComplaints,
-    });
+    String str =
+        "${canTakeAttendance ? "0" : "1"}${canModifyUsers ? "0" : "1"}${canRegisterComplaint ? "0" : "1"}${canModifyComplaints ? "0" : "1"}";
+    return json.encode(str);
+  }
+
+  void decode(String str) {
+    String str =
+        "${canTakeAttendance ? "0" : "1"}${canModifyUsers ? "0" : "1"}${canRegisterComplaint ? "0" : "1"}${canModifyComplaints ? "0" : "1"}";
   }
 }
 

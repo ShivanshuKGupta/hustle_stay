@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hustle_stay/screens/login_screen.dart';
+
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 import '../tools/tools.dart';
 
@@ -14,6 +16,21 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your Profile'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              SharedPreferences.getInstance().then((prefs) {
+                prefs.clear();
+              });
+              while (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop();
+              }
+              Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (ctx) => LoginScreen()));
+            },
+            icon: Icon(Icons.logout_outlined),
+          )
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
