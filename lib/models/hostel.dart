@@ -23,6 +23,7 @@ class Hostel {
         "name": name,
         "description": description,
         "img": img,
+        // "rooms": json.encode(rooms),
       },
     );
   }
@@ -44,6 +45,7 @@ Future<void> fetchAllHostels() async {
   if (response.body == "null") {
     throw "No hostels found";
   }
+  print(response.body.toString());
   Map<String, dynamic> m = json.decode(response.body);
   List<Hostel> ans = [];
   m.forEach((key, value) => ans.add(decodeAsHostel(value)));

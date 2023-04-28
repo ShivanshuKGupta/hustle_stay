@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hustle_stay/models/hostel.dart';
 import 'package:hustle_stay/tools/tools.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-
-import '../models/room.dart';
 
 class AddHostel extends StatefulWidget {
   AddHostel({super.key});
@@ -134,79 +131,3 @@ class _AddHostelState extends State<AddHostel> {
     );
   }
 }
-
-
-// List<TextEditingController> _roomIDs = [];
-
-// class _RoomAdder extends StatefulWidget {
-//   const _RoomAdder({super.key});
-
-//   @override
-//   State<_RoomAdder> createState() => _RoomAdderState();
-// }
-
-// class _RoomAdderState extends State<_RoomAdder> {
-//   TextEditingController _lengthTxtField = TextEditingController();
-//   int length = 0;
-//   @override
-//   Widget build(BuildContext context) {
-//     final deviceSize = MediaQuery.of(context).size;
-//     return Card(
-//       color: Theme.of(context).colorScheme.onBackground.withOpacity(0.4),
-//       child: Padding(
-//         padding: const EdgeInsets.all(10.0),
-//         child: Column(
-//           children: [
-//             Row(
-//               children: [
-//                 Flexible(
-//                   flex: 3,
-//                   child: TextField(
-//                     keyboardType: TextInputType.number,
-//                     controller: _lengthTxtField,
-//                     decoration: const InputDecoration(
-//                       label: Text("Total Rooms"),
-//                     ),
-//                   ),
-//                 ),
-//                 Flexible(
-//                   flex: 1,
-//                   child: TextButton(
-//                       onPressed: () {
-//                         final value = _lengthTxtField.text;
-//                         if (value.isEmpty) return;
-//                         int newLen = 0;
-//                         try {
-//                           newLen = int.parse(value);
-//                         } catch (e) {
-//                           return;
-//                         }
-//                         if (newLen >= 1) {
-//                           setState(() {
-//                             length = newLen;
-//                             _roomIDs = [
-//                               for (int i = 0; i < length; ++i)
-//                                 TextEditingController()
-//                             ];
-//                           });
-//                         }
-//                       },
-//                       child: const Text('List Rooms')),
-//                 )
-//               ],
-//             ),
-//             for (int i = 0; i < length; ++i)
-//               ListTile(
-//                 title: TextField(
-//                   controller: _roomIDs[i],
-//                   decoration: const InputDecoration(
-//                     label: Text("Room ID"),
-//                   ),
-//                 ),
-//               )
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }

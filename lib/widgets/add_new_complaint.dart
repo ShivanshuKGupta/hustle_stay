@@ -11,24 +11,33 @@ class NewComplaint extends StatefulWidget {
   State<NewComplaint> createState() => _NewComplaintState();
 }
 
-void _addComplaint(String title, String body, String location) {
-  print("Title: $title");
-  print("Body: $body");
-  print("Location: $location");
-  postComplaint(Complaint(
+class _NewComplaintState extends State<NewComplaint> {
+  String? dropdownValue;
+
+  void _addComplaint(String title, String body, String location) async {
+    setState(() {
+      _isLoading = true;
+    });
+    await postComplaint(Complaint(
       location: location,
       cType: ComplaintType.other,
       heading: title,
       posterID: currentUser.rollNo!,
-      body: body));
-}
-
-class _NewComplaintState extends State<NewComplaint> {
-  String? dropdownValue;
+      body: body,
+      entryTime: DateTime.now(),
+    ));
+    setState(() {
+      _isLoading = false;
+    });
+    Navigator.of(context).pop();
+  }
 
   final _titleController = TextEditingController();
 
   final _bodyController = TextEditingController();
+
+  bool _isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     final viewPadding = MediaQuery.of(context).viewInsets;
@@ -43,16 +52,11 @@ class _NewComplaintState extends State<NewComplaint> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 TextField(
-                  decoration: InputDecoration(labelText: 'Title'),
+                  decoration: const InputDecoration(labelText: 'Title'),
                   controller: _titleController,
                   onSubmitted: (_) {},
                 ),
-
-                // TextField(
-                //   decoration: InputDecoration(labelText: 'Title'),
-                //   controller: _titleController,
-                //   onSubmitted: (_) {},
-                SizedBox(
+                const SizedBox(
                   height: 15,
                 ),
                 Row(
@@ -60,7 +64,7 @@ class _NewComplaintState extends State<NewComplaint> {
                     Text('Location',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: Theme.of(context).colorScheme.onBackground)),
-                    SizedBox(width: 20),
+                    const SizedBox(width: 20),
                     DropdownButton(
                       value: dropdownValue,
                       items: [
@@ -69,10 +73,6 @@ class _NewComplaintState extends State<NewComplaint> {
                             value: allHostels[i].name,
                             child: Text(allHostels[i].name),
                           ),
-                        // DropdownMenuItem(
-                        //     value: 'Tunga', child: Text('Tungabhadra')),
-                        // DropdownMenuItem(value: 'Krishna', child: Text('Krishna')),
-                        // DropdownMenuItem(value: 'Acad', child: Text('Acad Block')),
                       ],
                       onChanged: (str) {
                         setState(() {
@@ -82,32 +82,40 @@ class _NewComplaintState extends State<NewComplaint> {
                     ),
                   ],
                 ),
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 TextField(
-                  decoration: InputDecoration(labelText: 'Body'),
+                  decoration: const InputDecoration(labelText: 'Body'),
                   controller: _bodyController,
                   onSubmitted: (_) {},
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Container(
-                  margin: EdgeInsets.all(10),
+                  margin: const EdgeInsets.all(10),
                   child: ElevatedButton(
-                    onPressed: () {
-                      _addComplaint(_titleController.text, _bodyController.text,
-                          dropdownValue!);
-                    },
-                    child: Text('Submit'),
+                    onPressed: _isLoading
+                        ? null
+                        : () {
+                            _addComplaint(_titleController.text,
+                                _bodyController.text, dropdownValue!);
+                          },
                     style: ButtonStyle(
-                      padding: MaterialStateProperty.all(EdgeInsets.all(10)),
+                      padding:
+                          MaterialStateProperty.all(const EdgeInsets.all(10)),
                       elevation: MaterialStateProperty.all(10),
                       backgroundColor: MaterialStateProperty.all(
                         Colors.purple,
                       ),
                       foregroundColor: MaterialStateProperty.all(
-                        // Theme.of(context).textTheme.button.color,
                         Colors.white,
                       ),
                     ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 16,
+                            width: 16,
+                            child: CircularProgressIndicator(),
+                          )
+                        : const Text('Submit'),
                   ),
                 ),
               ],

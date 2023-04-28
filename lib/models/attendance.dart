@@ -1,40 +1,59 @@
 import 'dart:convert';
 import 'package:http/http.dart' as https;
 
-import 'package:hustle_stay/models/room.dart';
 import 'package:hustle_stay/tools/tools.dart';
+import 'package:hustle_stay/tools/user_tools.dart';
 
 class AttendanceSheet {
-  String? title;
-  List<Room> roomList = [];
-  AttendanceSheet({this.title, this.roomList = const []});
+  // String? title;
+  Map<String, bool> studentIDList; // = {}
+  AttendanceSheet({this.studentIDList = const {}});
 
   String encode() {
-    return json.encode({"title": title, "roomList": roomList});
+    return json.encode(studentIDList);
   }
 }
 
-AttendanceSheet decodeAsAttendanceSheet(Map details) {
-  return AttendanceSheet(
-      title: details['title'], roomList: details['roomList']);
+AttendanceSheet decodeAsAttendanceSheet(Map<String, dynamic> details) {
+  var newSheet = AttendanceSheet();
+  newSheet.studentIDList = {};
+  details.forEach((key, value) {
+    newSheet.studentIDList[key] = value;
+  });
+  return newSheet;
 }
 
-AttendanceSheet createAttendanceSheet(DateTime dateTime) {
-  return AttendanceSheet();
+AttendanceSheet createAttendanceSheet(DateTime dateTime, String hostelID) {
+  AttendanceSheet newSheet = AttendanceSheet();
+  newSheet.studentIDList = {};
+  for (final user in allUsers) {
+    if (user.hostel == hostelID) newSheet.studentIDList[user.rollNo!] = false;
+  }
+  return newSheet;
 }
 
-Future<AttendanceSheet> fetchAttendanceSheet(DateTime dateTime) async {
+Future<void> fetchAttendanceSheet(DateTime dateTime, String hostelID) async {
   final url = Uri.https("hustlestay-default-rtdb.firebaseio.com",
-      "attendance/${convertDate(dateTime)}.json");
+      "attendance/$hostelID/${convertDate(dateTime)}.json");
   final response = await https.get(url);
+  if (response.body == "null") {
+    currentSheet.studentIDList = {};
+    return;
+  }
+  print(response.body);
   Map<String, dynamic> m = json.decode(response.body);
-  AttendanceSheet ans = m.values.firstWhere((element) => true);
-  return ans;
+  print(m.values.first);
+  Map<String, dynamic> studentID = m.values.first;
+  AttendanceSheet ans = decodeAsAttendanceSheet(studentID);
+  currentSheet = ans;
 }
 
-uploadAttendanceSheet(DateTime dateTime, AttendanceSheet sheet) async {
+uploadAttendanceSheet(
+    DateTime dateTime, AttendanceSheet sheet, String hostelID) async {
   final url = Uri.https("hustlestay-default-rtdb.firebaseio.com",
-      "attendance/${convertDate(dateTime)}.json");
+      "attendance/$hostelID/${convertDate(dateTime)}.json");
   final response = await https.post(url, body: sheet.encode());
   print(response.body);
 }
+
+AttendanceSheet currentSheet = AttendanceSheet();

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../models/hostel.dart';
 import '../models/user.dart';
 import '../tools/tools.dart';
 import '../tools/user_tools.dart';
@@ -18,6 +19,8 @@ class _AddUserScreenState extends State<AddUserScreen> {
   User user = User(type: UserType.student);
 
   bool _isLoading = false;
+
+  String dropdownValue = allHostels.first.name;
 
   void _save(BuildContext context) async {
     if (!_formKey.currentState!.validate()) return;
@@ -98,12 +101,23 @@ class _AddUserScreenState extends State<AddUserScreen> {
                       user.email = value;
                     },
                   ),
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      label: Text("Hostel"),
-                    ),
-                    onSaved: (value) {
-                      user.hostel = value;
+                  DropdownButtonFormField(
+                    value: dropdownValue,
+                    items: [
+                      for (int i = 0; i < allHostels.length; ++i)
+                        DropdownMenuItem(
+                          value: allHostels[i].name,
+                          child: Text(allHostels[i].name),
+                        ),
+                    ],
+                    validator: (value) {
+                      if (value == null || value.isEmpty)
+                        return "Hostel is required";
+                    },
+                    onChanged: (str) {
+                      setState(() {
+                        dropdownValue = str!;
+                      });
                     },
                   ),
                   TextFormField(

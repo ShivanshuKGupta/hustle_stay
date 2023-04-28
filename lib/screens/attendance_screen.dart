@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/screens/add_hostel_screen.dart';
+import 'package:hustle_stay/screens/rooms_screen.dart';
 import 'package:hustle_stay/tools/tools.dart';
 
 import '../models/hostel.dart';
@@ -63,34 +64,27 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                       maxCrossAxisExtent: 400, childAspectRatio: 3 / 2),
                   children: [
-                    for (int i = 0; i < allHostels.length; ++i)
-                      gridTile(
-                        context,
-                        allHostels[i].name,
-                        allHostels[i].description,
-                        allHostels[i].img,
-                      )
-                    // gridTile(
-                    //   context,
-                    //   'Krishna Hostel',
-                    //   'Boys Hostel',
-                    //   Image.network(
-                    //       'https://iiitr.ac.in/assets/images/campus/hostel/2.jpeg'),
-                    // ),
-                    // gridTile(
-                    //   context,
-                    //   'Tungabhadra Hostel',
-                    //   'Girls Hostel',
-                    //   Image.network(
-                    //       'https://iiitr.ac.in/assets/images/campus/hostel/1.jpeg'),
-                    // ),
-                    // gridTile(
-                    //   context,
-                    //   'Federal Hostel',
-                    //   'Trash Hostel',
-                    //   Image.network(
-                    //       'https://content.jdmagicbox.com/comp/raichur/a4/9999p8532.8532.190924162150.l8a4/catalogue/federal-public-school-english-medium-and-federal-pu-college-and-degree-and-ded-college-raichur-luneimezla.jpg'),
-                    // ),
+                    gridTile(
+                      context,
+                      'Krishna',
+                      'Boys Hostel',
+                      Image.network(
+                          'https://iiitr.ac.in/assets/images/campus/hostel/2.jpeg'),
+                    ),
+                    gridTile(
+                      context,
+                      'Tungabhadra',
+                      'Girls Hostel',
+                      Image.network(
+                          'https://iiitr.ac.in/assets/images/campus/hostel/1.jpeg'),
+                    ),
+                    gridTile(
+                      context,
+                      'Federal',
+                      'Trash Hostel',
+                      Image.network(
+                          'https://content.jdmagicbox.com/comp/raichur/a4/9999p8532.8532.190924162150.l8a4/catalogue/federal-public-school-english-medium-and-federal-pu-college-and-degree-and-ded-college-raichur-luneimezla.jpg'),
+                    ),
                   ],
                 ),
     );
@@ -103,6 +97,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     try {
       await fetchAllHostels();
     } catch (e) {
+      print("error in fetching");
       showMsg(context, e.toString());
     }
     setState(() {
@@ -129,7 +124,7 @@ Widget gridTile(
           backgroundColor: Colors.black54,
           subtitle: Text(subtitle),
           title: Text(
-            title,
+            "$title Hostel",
             style: Theme.of(context).textTheme.bodyLarge,
           ),
         ),

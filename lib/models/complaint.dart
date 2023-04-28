@@ -37,7 +37,7 @@ class Complaint {
       "heading": heading,
       "posterID": posterID,
       "body": body,
-      "entryTime": entryTime == null ? "null" : entryTime.toString(),
+      "entryTime": entryTime.toString(),
     });
   }
 }
@@ -61,21 +61,36 @@ postComplaint(Complaint complaint) async {
   final url =
       Uri.https("hustlestay-default-rtdb.firebaseio.com", "complaints.json");
   final response = await https.post(url, body: complaint.encode());
+  print("response: ${response.body}");
   print(response.body);
+  if (response.body == "null") throw "Cannot delete";
+  complaint.id = json.decode(response.body)['name'];
   allComplaints.add(complaint);
+}
+
+removeComplaint(Complaint complaint) async {
+  final url = Uri.https("hustlestay-default-rtdb.firebaseio.com",
+      "complaints/${complaint.id}.json");
+  final response = await https.delete(url);
+  print(response.body);
 }
 
 Future<void> fetchAllComplaints() async {
   final url =
       Uri.https("hustlestay-default-rtdb.firebaseio.com", "complaints.json");
   final response = await https.get(url);
+  print("get response: ${response.body}");
   if (response.body == "null") {
-    // no complaints
+    allComplaints = [];
     return;
   }
   Map<String, dynamic> m = json.decode(response.body);
   List<Complaint> ans = [];
-  m.forEach((key, value) => ans.add(decodeAsComplaint(value)));
+  m.forEach((key, value) {
+    var newComplaint = decodeAsComplaint(value);
+    newComplaint.id = key;
+    ans.add(newComplaint);
+  });
   allComplaints = ans;
   // state = response.body;
 }
