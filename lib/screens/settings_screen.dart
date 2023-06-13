@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/edit_profile_screen.dart';
-import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/profile_image.dart';
 
 class SettingsScreen extends ConsumerWidget {
