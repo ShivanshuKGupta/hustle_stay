@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/providers/settings.dart';
+import 'package:hustle_stay/screens/edit_profile_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/profile_image.dart';
 
@@ -37,8 +38,8 @@ class SettingsScreen extends ConsumerWidget {
                 trailing: IconButton(
                     color: Theme.of(context).colorScheme.primary,
                     onPressed: () {
-                      // TODO: move to the profile edit page here
-                      showMsg(context, "TODO: move to the 'profile edit' page");
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (ctx) => EditProfile()));
                     },
                     icon: const Icon(Icons.edit_rounded)),
               ),
