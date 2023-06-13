@@ -29,6 +29,7 @@ class _AuthFormState extends State<AuthForm> {
     });
     try {
       await widget.onSubmit(_email.trim(), _password);
+      return;
     } catch (e) {
       showMsg(context, e.toString());
     }
