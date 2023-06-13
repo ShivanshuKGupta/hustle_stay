@@ -1,77 +1,169 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/models/user.dart';
-import 'package:hustle_stay/screens/attendance_screen.dart';
-import 'package:hustle_stay/screens/complaint_screen.dart';
-import 'package:hustle_stay/screens/profile_screen.dart';
+import 'package:hustle_stay/screens/settings_screen.dart';
 
-import '../tools/tools.dart';
-import 'add_user_screen.dart';
-import 'home_screen.dart';
+import 'package:hustle_stay/tools.dart';
 
 class MainDrawer extends StatelessWidget {
   const MainDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Drawer(
+    return SafeArea(
       child: Column(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const SizedBox(
-            height: 20,
-          ),
-          ListTile(
-            onTap: () {
-              Navigator.of(context).pushNamed(ProfileScreen.routeName);
-            },
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 20,
+          Expanded(
+            child: SingleChildScrollView(
+              child: body(context),
             ),
-            leading: currentUser.img == null
-                ? const CircleAvatar(child: Icon(Icons.person))
-                : Image.network(currentUser.img!),
-            title: Text(currentUser.name == null ? "Guest" : currentUser.name!),
           ),
-          const Divider(),
-          ListTile(
-            onTap: () {
-              Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
-            },
-            leading: const Icon(Icons.home_rounded),
-            title: const Text('Home'),
-          ),
-          ListTile(
-            onTap: () {
-              Navigator.of(context)
-                  .pushReplacementNamed(AttendanceScreen.routeName);
-            },
-            leading: const Icon(Icons.co_present_rounded),
-            title: const Text('Attendance'),
-          ),
-          ListTile(
-            onTap: () {
-              Navigator.of(context).push(
-                  MaterialPageRoute(builder: (ctx) => const ComplaintScreen()));
-            },
-            leading: const Icon(Icons.question_answer_rounded),
-            title: const Text('Complaints'),
-          ),
-          ListTile(
-            onTap: () {
-              showMsg(context, "Directing to vehicle request page");
-            },
-            leading: const Icon(Icons.airport_shuttle_rounded),
-            title: const Text('Vehicle Request'),
-          ),
-          ListTile(
-            onTap: () {
-              Navigator.of(context).pushNamed(AddUserScreen.routeName);
-            },
-            leading: const Icon(Icons.supervised_user_circle_rounded),
-            title: const Text('Add User'),
-          ),
+          footer(context),
         ],
       ),
     );
+  }
+
+  Widget body(context) {
+    final auth = FirebaseAuth.instance;
+    return Column(
+      children: [
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 20,
+            horizontal: 20,
+          ),
+          leading: const CircleAvatar(
+            child: Icon(Icons.person_rounded),
+          ),
+          title: Text(
+            auth.currentUser!.displayName ?? "Display Name",
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          subtitle: Text(
+            auth.currentUser!.email!,
+            style: TextStyle(color: Theme.of(context).colorScheme.primary),
+          ),
+          onTap: () {
+            // TODO: add a profile screen
+            showMsg(context, 'TODO: add a profile screen');
+          },
+        ),
+        const Divider(),
+        _drawerTile(
+          context,
+          title: "Attendance",
+          icon: Icons.co_present_rounded,
+          subtitle: "View/Take Attendance",
+          onTap: () {
+            // TODO: Add a attendance screen
+            showMsg(context, "TODO: Add a attendance screen");
+          },
+        ),
+        _drawerTile(
+          context,
+          title: "Complaint",
+          icon: Icons.question_answer_rounded,
+          subtitle: "View/Post Complaints",
+          onTap: () {
+            // TODO: Add a Complaint screen
+            showMsg(context, "TODO: Add a Complaint screen");
+          },
+        ),
+        _drawerTile(
+          context,
+          title: "Vehicle Request",
+          icon: Icons.airport_shuttle_rounded,
+          subtitle: "Make/Manage Vehicle Requests",
+          onTap: () {
+            // TODO: Add a Vehicle Request screen
+            showMsg(context, "TODO: Add a Vehicle Request screen");
+          },
+        ),
+        _drawerTile(
+          context,
+          title: "Settings",
+          icon: Icons.settings_rounded,
+          subtitle: "Customize the app to your needs",
+          onTap: () {
+            Navigator.of(context).push(
+                MaterialPageRoute(builder: (ctx) => const SettingsScreen()));
+          },
+        ),
+        _drawerTile(
+          context,
+          title: "How to use?",
+          icon: Icons.help_rounded,
+          subtitle: "Help on how to use the app",
+          onTap: () {
+            // TODO: Add a help screen
+            showMsg(context, "TODO: Add a Help Screen");
+          },
+        ),
+        _drawerTile(
+          context,
+          title: "About us",
+          icon: Icons.info_rounded,
+          subtitle: "Know more about us and the app",
+          onTap: () {
+            // TODO: add a about us page
+            showMsg(context, "TODO: Add a About us Screen");
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget footer(context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Divider(),
+        ListTile(
+          contentPadding:
+              const EdgeInsets.only(left: 15, right: 15, bottom: 10),
+          leading: const Icon(
+            Icons.emergency_share_rounded,
+            color: Colors.red,
+          ),
+          title: Text(
+            'Medical Emergency',
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium!
+                .copyWith(color: Colors.red),
+          ),
+          subtitle: Text(
+            'Make emergency vehicle request and inform all wardens',
+            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+          ),
+          onTap: () {
+            // TODO: add a medical emergency screen
+            showMsg(context, 'TODO: add a medical emergency screen');
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _drawerTile(context,
+      {required String title,
+      required String subtitle,
+      void Function()? onTap,
+      IconData? icon}) {
+    return ListTile(
+        leading: icon == null ? null : Icon(icon),
+        subtitle: Text(
+          subtitle,
+          style: TextStyle(color: Theme.of(context).colorScheme.primary),
+        ),
+        title: Text(
+          title,
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        onTap: onTap);
   }
 }

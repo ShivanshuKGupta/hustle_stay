@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "658237700413",
+    "project_id": "hustle-stay",
+    "storage_bucket": "hustle-stay.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:658237700413:android:2d53d2d3f76c9fa48e2d54",
+        "android_client_info": {
+          "package_name": "com.example.hustle_stay"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "658237700413-hps9c3buli8u4h3441aa62674lf5bi99.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWsHu1fL1bugpswXlHz_C2c_bgEPjb_Bk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "658237700413-hps9c3buli8u4h3441aa62674lf5bi99.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,43 +1,47 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hustle_stay/screens/add_hostel_screen.dart';
-import 'package:hustle_stay/screens/add_user_screen.dart';
-import 'package:hustle_stay/screens/login_screen.dart';
-import 'package:hustle_stay/screens/profile_screen.dart';
-import './screens/attendance_screen.dart';
-import './screens/home_screen.dart';
+import 'package:hustle_stay/screens/auth_screen.dart';
+import 'firebase_options.dart';
 
-void main(List<String> args) {
-  runApp(
-    const ProviderScope(child: MyApp()),
+import 'package:hustle_stay/providers/settings.dart';
+import 'package:hustle_stay/screens/home_screen.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
   );
+  runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final theme = ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          brightness: Brightness.dark,
-          seedColor: const Color.fromARGB(255, 0, 9, 131),
-        ),
-        textTheme:
-            GoogleFonts.quicksandTextTheme().apply(bodyColor: Colors.white));
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: theme,
-      routes: {
-        HomePage.routeName: (_) => const HomeScreen(),
-        LoginScreen.routeName: (_) => LoginScreen(),
-        AttendanceScreen.routeName: (_) => const AttendanceScreen(),
-        AddUserScreen.routeName: (_) => AddUserScreen(),
-        ProfileScreen.routeName: (_) => ProfileScreen(),
-        // '/': (_) => AddHostel(),
-      },
+      title: 'Hustle Stay',
+      theme: ThemeData(
+          useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(
+            brightness: settings.darkMode ? Brightness.dark : Brightness.light,
+            seedColor: const Color.fromARGB(255, 0, 17, 255),
+          ),
+          textTheme: GoogleFonts.quicksandTextTheme().apply(
+            bodyColor: settings.darkMode ? Colors.white : Colors.black,
+            displayColor: settings.darkMode ? Colors.white : Colors.black,
+          )),
+      home: StreamBuilder(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (ctx, user) {
+            if (user.hasData) return const HomeScreen();
+            return const AuthScreen();
+          }),
     );
   }
 }
