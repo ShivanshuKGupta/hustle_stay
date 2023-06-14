@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/tools.dart';
@@ -24,9 +25,12 @@ class _EditProfileState extends State<EditProfile> {
     setState(() {
       _loading = true;
     });
+    final auth = FirebaseAuth.instance;
+    final user = auth.currentUser!;
     try {
-      // TODO: upload saved data here
-      showMsg(context, "TODO: add saving code here");
+      final store = FirebaseFirestore.instance;
+      final userRef = store.collection('users').doc(user.email);
+      userRef.set({"name": displayName});
       return;
     } catch (e) {
       showMsg(context, e.toString());

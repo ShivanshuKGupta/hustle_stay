@@ -87,6 +87,17 @@ class _AuthFormState extends State<AuthForm> {
                   )
                 : const Text('Login'),
           ),
+          TextButton.icon(
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.blue,
+            ),
+            onPressed: () {
+              // TODO: add a google oauth provider
+              showMsg(context, "TODO: add a google oauth provider");
+            },
+            icon: const Icon(Icons.web),
+            label: const Text('Google OAuth Provider'),
+          ),
         ],
       ),
     );

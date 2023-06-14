@@ -2,7 +2,8 @@
     "files.exclude": {
         ".idea/": true,
         ".dart_tool/": true,
-        "android/": true,
+        // "android/": true,
+        // ".vscode/": true,
         "ios/": true,
         "build/": true,
         "test/": true,

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -30,7 +31,7 @@ class MyApp extends ConsumerWidget {
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(
             brightness: settings.darkMode ? Brightness.dark : Brightness.light,
-            seedColor: const Color.fromARGB(255, 0, 17, 255),
+            seedColor: Colors.blue,
           ),
           textTheme: GoogleFonts.quicksandTextTheme().apply(
             bodyColor: settings.darkMode ? Colors.white : Colors.black,

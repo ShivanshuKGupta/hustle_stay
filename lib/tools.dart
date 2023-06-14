@@ -79,7 +79,7 @@ showSnackBar(BuildContext context, SnackBar snackBar) {
   return ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
 
-/// contains validations for input text fields
+/// contains validating functions for input text fields
 class Validate {
   static String? email(String? email) {
     if (email == null || email.isEmpty) return "Email is required";
