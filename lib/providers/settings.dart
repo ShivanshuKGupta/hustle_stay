@@ -15,7 +15,7 @@ class _Settings {
   }
 
   /// converts string into setting parameters
-  void reload(String str) {
+  void load(String str) {
     final settings = json.decode(str);
     darkMode = settings["darkMode"] ?? false;
   }
@@ -30,7 +30,7 @@ class _SettingsProvider extends StateNotifier<_Settings> {
   /// loads settings previously stored using shared preferences
   Future<bool> loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    state.reload(prefs.getString('settings') ?? "{}");
+    state.load(prefs.getString('settings') ?? "{}");
     notifyListeners();
     return true;
   }

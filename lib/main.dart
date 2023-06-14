@@ -1,9 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/auth_screen.dart';
 import 'firebase_options.dart';
 
@@ -15,6 +15,11 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  final auth = FirebaseAuth.instance;
+  if (auth.currentUser != null) {
+    currentUser = await fetchUserData(auth.currentUser!.email!);
+    debugPrint(currentUser.encode().toString());
+  }
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -41,7 +46,7 @@ class MyApp extends ConsumerWidget {
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (ctx, user) {
             if (user.hasData) return const HomeScreen();
-            return const AuthScreen();
+            return AuthScreen();
           }),
     );
   }

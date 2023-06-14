@@ -1,6 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+SizedBox circularProgressIndicator({
+  double height = 16,
+  double width = 16,
+}) {
+  return SizedBox(
+    height: height,
+    width: width,
+    child: const CircularProgressIndicator(),
+  );
+}
+
 /// a widget which works like a clickable link
 /// can be used to open a [url]
 /// or can be used to initaite a call to [phone]
@@ -81,16 +92,22 @@ showSnackBar(BuildContext context, SnackBar snackBar) {
 
 /// contains validating functions for input text fields
 class Validate {
-  static String? email(String? email) {
-    if (email == null || email.isEmpty) return "Email is required";
+  static String? email(String? email, {bool required = true}) {
+    if (email != null) email = email.trim();
+    if (email == null || email.isEmpty) {
+      return required ? "Email is required" : null;
+    }
     if (!(email.contains('@') && email.contains('.'))) {
       return "Enter a valid email";
     }
     return null;
   }
 
-  static String? name(String? name) {
-    if (name == null || name.isEmpty) return "Username is required";
+  static String? name(String? name, {bool required = true}) {
+    if (name != null) name = name.trim();
+    if (name == null || name.isEmpty) {
+      return required ? "Username is required" : null;
+    }
     for (final ch in name.characters) {
       if (!(ch.compareTo('a') >= 0 && ch.compareTo('z') <= 0) &&
           !(ch.compareTo('A') >= 0 && ch.compareTo('Z') <= 0) &&
@@ -101,8 +118,41 @@ class Validate {
     return null;
   }
 
-  static String? password(String? pwd) {
-    if (pwd == null || pwd.isEmpty) return "Password is required";
+  static String? text(String? txt, {bool required = true}) {
+    if (txt != null) txt = txt.trim();
+    if (txt == null || txt.isEmpty) {
+      return required ? "This is required" : null;
+    }
+    return null;
+  }
+
+  static String? phone(String? phoneNumber, {bool required = true}) {
+    if (phoneNumber != null) {
+      String newPhoneNumber = "";
+      for (final ch in phoneNumber.characters) {
+        if (ch.compareTo(' ') == 0) continue;
+        newPhoneNumber += ch;
+      }
+      phoneNumber = newPhoneNumber;
+    }
+    if (phoneNumber == null || phoneNumber.isEmpty) {
+      return required ? "Phone Number is required" : null;
+    }
+    bool firstCharacter = true;
+    for (final ch in phoneNumber.characters) {
+      if (firstCharacter && ch.compareTo('+') == 0) {
+      } else if (!(ch.compareTo('0') >= 0 && ch.compareTo('9') <= 0)) {
+        return "Enter a valid number";
+      }
+      firstCharacter = false;
+    }
+    return null;
+  }
+
+  static String? password(String? pwd, {bool required = true}) {
+    if (pwd == null || pwd.isEmpty) {
+      return required ? "Password is required" : null;
+    }
     bool small = false, big = false, num = false, special = false;
     if (pwd.length < 8) return "Password is too short";
     for (final ch in pwd.characters) {

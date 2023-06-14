@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/settings_screen.dart';
 
 import 'package:hustle_stay/tools.dart';
@@ -38,7 +39,7 @@ class MainDrawer extends StatelessWidget {
             child: Icon(Icons.person_rounded),
           ),
           title: Text(
-            auth.currentUser!.displayName ?? "Display Name",
+            currentUser.name ?? "Error",
             style: Theme.of(context).textTheme.bodyLarge,
           ),
           subtitle: Text(

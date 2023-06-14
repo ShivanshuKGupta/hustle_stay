@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/profile_image.dart';
 
@@ -16,7 +17,7 @@ class _EditProfileState extends State<EditProfile> {
 
   bool _loading = false;
 
-  String displayName = "";
+  UserData formUser = currentUser;
 
   Future<void> save(context) async {
     FocusScope.of(context).unfocus();
@@ -26,12 +27,10 @@ class _EditProfileState extends State<EditProfile> {
       _loading = true;
     });
     final auth = FirebaseAuth.instance;
-    final user = auth.currentUser!;
     try {
       final store = FirebaseFirestore.instance;
-      final userRef = store.collection('users').doc(user.email);
-      userRef.set({"name": displayName});
-      return;
+      final userRef = store.collection('users').doc(currentUser.email);
+      await userRef.set(formUser.encode());
     } catch (e) {
       showMsg(context, e.toString());
     }
@@ -43,7 +42,6 @@ class _EditProfileState extends State<EditProfile> {
   @override
   Widget build(BuildContext context) {
     final auth = FirebaseAuth.instance;
-    final user = auth.currentUser!;
     return Scaffold(
       appBar: AppBar(),
       body: Form(
@@ -55,7 +53,7 @@ class _EditProfileState extends State<EditProfile> {
               children: [
                 ProfileImage(onChanged: (img) {}),
                 Text(
-                  user.email!,
+                  currentUser.email!,
                   style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                         color: Theme.of(context).colorScheme.primary,
                       ),
@@ -66,12 +64,39 @@ class _EditProfileState extends State<EditProfile> {
                   decoration: const InputDecoration(
                     label: Text("Name"),
                   ),
-                  initialValue: user.displayName,
+                  initialValue: currentUser.name,
                   validator: (name) {
                     return Validate.name(name);
                   },
                   onSaved: (value) {
-                    displayName = value!;
+                    formUser.name = value!.trim();
+                  },
+                ),
+                TextFormField(
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(
+                    label: Text("Phone Number"),
+                  ),
+                  initialValue: currentUser.phoneNumber,
+                  validator: (name) {
+                    return Validate.phone(name, required: false);
+                  },
+                  onSaved: (value) {
+                    formUser.phoneNumber = value!.trim();
+                  },
+                ),
+                TextFormField(
+                  maxLength: 200,
+                  keyboardType: TextInputType.streetAddress,
+                  decoration: const InputDecoration(
+                    label: Text("Address"),
+                  ),
+                  initialValue: currentUser.address,
+                  validator: (name) {
+                    return Validate.text(name, required: false);
+                  },
+                  onSaved: (value) {
+                    formUser.address = value!.trim();
                   },
                 ),
                 // TODO: add more fields about the person here
@@ -79,10 +104,14 @@ class _EditProfileState extends State<EditProfile> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     ElevatedButton.icon(
-                      onPressed: () {
-                        save(context);
-                      },
-                      icon: const Icon(Icons.save_rounded),
+                      onPressed: _loading
+                          ? null
+                          : () {
+                              save(context);
+                            },
+                      icon: _loading
+                          ? circularProgressIndicator()
+                          : const Icon(Icons.save_rounded),
                       label: const Text('Save'),
                     ),
                     TextButton.icon(

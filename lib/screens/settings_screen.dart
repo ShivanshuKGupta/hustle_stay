@@ -8,6 +8,8 @@ import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/edit_profile_screen.dart';
 import 'package:hustle_stay/widgets/profile_image.dart';
 
+import '../models/user.dart';
+
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -27,8 +29,8 @@ class SettingsScreen extends ConsumerWidget {
             }),
             Expanded(
               child: ListTile(
-                title: Text(auth.currentUser!.displayName ??
-                    "Display Name"), // TODO: store other details about the user like name
+                title: Text(currentUser.name ??
+                    "Error"), // TODO: store other details about the user like name
                 subtitle: Text(
                   auth.currentUser!.email!,
                   style:
