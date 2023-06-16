@@ -44,7 +44,7 @@ class MainDrawer extends StatelessWidget {
             style: Theme.of(context).textTheme.bodyLarge,
           ),
           subtitle: Text(
-            auth.currentUser!.email!,
+            currentUser.email!,
             style: TextStyle(color: Theme.of(context).colorScheme.primary),
           ),
           onTap: () {
@@ -69,10 +69,7 @@ class MainDrawer extends StatelessWidget {
           icon: Icons.question_answer_rounded,
           subtitle: "View/Post Complaints",
           onTap: () {
-            while (Navigator.of(context).canPop()) {
-              Navigator.of(context).pop();
-            }
-            Navigator.of(context).pushReplacement(
+            Navigator.of(context).push(
                 MaterialPageRoute(builder: (ctx) => const ComplaintsScreen()));
           },
         ),

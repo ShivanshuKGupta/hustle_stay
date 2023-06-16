@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/complaint.dart';
-import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/tools.dart';
 
 class ComplaintList extends StatefulWidget {

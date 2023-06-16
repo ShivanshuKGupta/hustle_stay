@@ -44,7 +44,7 @@ class MyApp extends ConsumerWidget {
       home: StreamBuilder(
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (ctx, user) {
-            if (user.hasData) return const HomeScreen();
+            if (user.hasData) return HomeScreen();
             return AuthScreen();
           }),
     );

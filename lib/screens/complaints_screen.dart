@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/complaint.dart';
-import 'package:hustle_stay/screens/main_drawer.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_form.dart';
 
 import '../widgets/complaints/complaints_list.dart';
@@ -11,10 +10,6 @@ class ComplaintsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Complaints'),
-      ),
-      drawer: const Drawer(elevation: 5, child: MainDrawer()),
       body: const ComplaintList(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

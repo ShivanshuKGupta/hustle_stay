@@ -41,7 +41,6 @@ class ComplaintData {
     scope = Scope.values
         .firstWhere((element) => element.name == complaintData["scope"]);
     title = complaintData["title"];
-    print(complaintData['to']);
     to = (complaintData["to"] as List<dynamic>)
         .map((e) => e.toString())
         .toList();

@@ -32,7 +32,7 @@ class SettingsScreen extends ConsumerWidget {
                 title: Text(currentUser.name ??
                     "Error"), // TODO: store other details about the user like name
                 subtitle: Text(
-                  auth.currentUser!.email!,
+                  currentUser.email!,
                   style:
                       TextStyle(color: Theme.of(context).colorScheme.primary),
                 ),
@@ -80,10 +80,12 @@ class SettingsScreen extends ConsumerWidget {
                   ),
             ),
             onTap: () {
-              auth.signOut();
               while (Navigator.of(context).canPop()) {
                 Navigator.of(context).pop();
               }
+              // Navigator.pushReplacement(
+              //     context, MaterialPageRoute(builder: (_) => AuthScreen()));
+              auth.signOut();
             },
           ),
         ],
@@ -91,9 +93,6 @@ class SettingsScreen extends ConsumerWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
       body: ListView.separated(
         itemCount: widgetList.length,
         separatorBuilder: (ctx, _) => const Divider(),
