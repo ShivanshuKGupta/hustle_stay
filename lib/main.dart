@@ -18,7 +18,6 @@ void main() async {
   final auth = FirebaseAuth.instance;
   if (auth.currentUser != null) {
     currentUser = await fetchUserData(auth.currentUser!.email!);
-    debugPrint(currentUser.encode().toString());
   }
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -45,7 +44,7 @@ class MyApp extends ConsumerWidget {
       home: StreamBuilder(
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (ctx, user) {
-            if (user.hasData) return const HomeScreen();
+            if (user.hasData) return HomeScreen();
             return AuthScreen();
           }),
     );

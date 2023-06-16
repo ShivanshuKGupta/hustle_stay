@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/screens/complaints_screen.dart';
 import 'package:hustle_stay/screens/settings_screen.dart';
 
 import 'package:hustle_stay/tools.dart';
@@ -43,7 +44,7 @@ class MainDrawer extends StatelessWidget {
             style: Theme.of(context).textTheme.bodyLarge,
           ),
           subtitle: Text(
-            auth.currentUser!.email!,
+            currentUser.email!,
             style: TextStyle(color: Theme.of(context).colorScheme.primary),
           ),
           onTap: () {
@@ -68,8 +69,8 @@ class MainDrawer extends StatelessWidget {
           icon: Icons.question_answer_rounded,
           subtitle: "View/Post Complaints",
           onTap: () {
-            // TODO: Add a Complaint screen
-            showMsg(context, "TODO: Add a Complaint screen");
+            Navigator.of(context).push(
+                MaterialPageRoute(builder: (ctx) => const ComplaintsScreen()));
           },
         ),
         _drawerTile(
