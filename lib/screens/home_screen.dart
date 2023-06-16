@@ -51,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
         body = Container();
         break;
       case 1:
-        body = ComplaintsScreen();
+        body = const ComplaintsScreen();
         break;
       case 2:
         body = Container();
@@ -60,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
         body = Container();
         break;
       case 4:
-        body = SettingsScreen();
+        body = const SettingsScreen();
         break;
     }
     return Scaffold(
@@ -73,7 +73,9 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.notifications_none_rounded),
+            icon: const CircleAvatar(
+              child: Icon(Icons.person_rounded),
+            ),
           )
         ],
       ),
@@ -87,8 +89,6 @@ class _HomeScreenState extends State<HomeScreen> {
             _currentIndex = index;
           });
         },
-        showUnselectedLabels: false,
-        showSelectedLabels: true,
       ),
       body: body,
     );

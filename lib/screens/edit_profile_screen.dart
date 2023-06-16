@@ -17,7 +17,7 @@ class _EditProfileState extends State<EditProfile> {
 
   bool _loading = false;
 
-  UserData formUser = currentUser;
+  UserData user = currentUser;
 
   Future<void> save(context) async {
     FocusScope.of(context).unfocus();
@@ -26,11 +26,8 @@ class _EditProfileState extends State<EditProfile> {
     setState(() {
       _loading = true;
     });
-    final auth = FirebaseAuth.instance;
     try {
-      final store = FirebaseFirestore.instance;
-      final userRef = store.collection('users').doc(currentUser.email);
-      await userRef.set(formUser.encode());
+      updateUserData(user);
     } catch (e) {
       showMsg(context, e.toString());
     }
@@ -69,7 +66,7 @@ class _EditProfileState extends State<EditProfile> {
                     return Validate.name(name);
                   },
                   onSaved: (value) {
-                    formUser.name = value!.trim();
+                    user.name = value!.trim();
                   },
                 ),
                 TextFormField(
@@ -82,7 +79,7 @@ class _EditProfileState extends State<EditProfile> {
                     return Validate.phone(name, required: false);
                   },
                   onSaved: (value) {
-                    formUser.phoneNumber = value!.trim();
+                    user.phoneNumber = value!.trim();
                   },
                 ),
                 TextFormField(
@@ -96,7 +93,7 @@ class _EditProfileState extends State<EditProfile> {
                     return Validate.text(name, required: false);
                   },
                   onSaved: (value) {
-                    formUser.address = value!.trim();
+                    user.address = value!.trim();
                   },
                 ),
                 // TODO: add more fields about the person here

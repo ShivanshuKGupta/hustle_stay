@@ -53,46 +53,46 @@ class MainDrawer extends StatelessWidget {
           },
         ),
         const Divider(),
-        _drawerTile(
-          context,
-          title: "Attendance",
-          icon: Icons.co_present_rounded,
-          subtitle: "View/Take Attendance",
-          onTap: () {
-            // TODO: Add a attendance screen
-            showMsg(context, "TODO: Add a attendance screen");
-          },
-        ),
-        _drawerTile(
-          context,
-          title: "Complaint",
-          icon: Icons.question_answer_rounded,
-          subtitle: "View/Post Complaints",
-          onTap: () {
-            Navigator.of(context).push(
-                MaterialPageRoute(builder: (ctx) => const ComplaintsScreen()));
-          },
-        ),
-        _drawerTile(
-          context,
-          title: "Vehicle Request",
-          icon: Icons.airport_shuttle_rounded,
-          subtitle: "Make/Manage Vehicle Requests",
-          onTap: () {
-            // TODO: Add a Vehicle Request screen
-            showMsg(context, "TODO: Add a Vehicle Request screen");
-          },
-        ),
-        _drawerTile(
-          context,
-          title: "Settings",
-          icon: Icons.settings_rounded,
-          subtitle: "Customize the app to your needs",
-          onTap: () {
-            Navigator.of(context).push(
-                MaterialPageRoute(builder: (ctx) => const SettingsScreen()));
-          },
-        ),
+        // _drawerTile(
+        //   context,
+        //   title: "Attendance",
+        //   icon: Icons.co_present_rounded,
+        //   subtitle: "View/Take Attendance",
+        //   onTap: () {
+        //     // TODO: Add a attendance screen
+        //     showMsg(context, "TODO: Add a attendance screen");
+        //   },
+        // ),
+        // _drawerTile(
+        //   context,
+        //   title: "Complaint",
+        //   icon: Icons.question_answer_rounded,
+        //   subtitle: "View/Post Complaints",
+        //   onTap: () {
+        //     Navigator.of(context).push(
+        //         MaterialPageRoute(builder: (ctx) => const ComplaintsScreen()));
+        //   },
+        // ),
+        // _drawerTile(
+        //   context,
+        //   title: "Vehicle Request",
+        //   icon: Icons.airport_shuttle_rounded,
+        //   subtitle: "Make/Manage Vehicle Requests",
+        //   onTap: () {
+        //     // TODO: Add a Vehicle Request screen
+        //     showMsg(context, "TODO: Add a Vehicle Request screen");
+        //   },
+        // ),
+        // _drawerTile(
+        //   context,
+        //   title: "Settings",
+        //   icon: Icons.settings_rounded,
+        //   subtitle: "Customize the app to your needs",
+        //   onTap: () {
+        //     Navigator.of(context).push(
+        //         MaterialPageRoute(builder: (ctx) => const SettingsScreen()));
+        //   },
+        // ),
         _drawerTile(
           context,
           title: "How to use?",
