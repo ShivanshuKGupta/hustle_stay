@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/screens/complaints_screen.dart';
 import 'package:hustle_stay/screens/settings_screen.dart';
 
 import 'package:hustle_stay/tools.dart';
@@ -68,8 +69,11 @@ class MainDrawer extends StatelessWidget {
           icon: Icons.question_answer_rounded,
           subtitle: "View/Post Complaints",
           onTap: () {
-            // TODO: Add a Complaint screen
-            showMsg(context, "TODO: Add a Complaint screen");
+            while (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            }
+            Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (ctx) => const ComplaintsScreen()));
           },
         ),
         _drawerTile(

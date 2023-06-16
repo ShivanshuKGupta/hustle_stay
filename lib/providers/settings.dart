@@ -53,6 +53,7 @@ class _SettingsProvider extends StateNotifier<_Settings> {
   /// If watch listeners do not react to changes automatically,
   /// then use this function to notify all watch listeners
   void notifyListeners() {
+    saveSettings();
     final _Settings savedSettings = state;
     state = _Settings();
     state = savedSettings;

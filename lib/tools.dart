@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 SizedBox circularProgressIndicator({
-  double height = 16,
-  double width = 16,
+  double? height = 16,
+  double? width = 16,
 }) {
   return SizedBox(
     height: height,

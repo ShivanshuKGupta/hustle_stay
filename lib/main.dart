@@ -18,7 +18,6 @@ void main() async {
   final auth = FirebaseAuth.instance;
   if (auth.currentUser != null) {
     currentUser = await fetchUserData(auth.currentUser!.email!);
-    debugPrint(currentUser.encode().toString());
   }
   runApp(const ProviderScope(child: MyApp()));
 }
