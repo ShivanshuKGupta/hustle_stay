@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/complaints_screen.dart';
 import 'package:hustle_stay/screens/settings_screen.dart';
 
@@ -6,18 +8,17 @@ import 'package:hustle_stay/tools.dart';
 
 import 'main_drawer.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0;
-
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
+    final settings = ref.read(settingsProvider);
     var bottomNavigationBarItems = const [
       BottomNavigationBarItem(
         icon: Icon(Icons.co_present_rounded),
@@ -28,11 +29,6 @@ class _HomeScreenState extends State<HomeScreen> {
         icon: Icon(Icons.report_rounded),
         label: 'Complaints',
         tooltip: "Complaints",
-      ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.home_rounded),
-        label: 'Home',
-        tooltip: "Hustle Stay",
       ),
       BottomNavigationBarItem(
         icon: Icon(Icons.airport_shuttle_rounded),
@@ -46,20 +42,11 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     ];
     Widget body = Container();
-    switch (_currentIndex) {
-      case 0:
-        body = Container();
-        break;
+    switch (settings.currentPage) {
       case 1:
         body = const ComplaintsScreen();
         break;
-      case 2:
-        body = Container();
-        break;
       case 3:
-        body = Container();
-        break;
-      case 4:
         body = const SettingsScreen();
         break;
     }
@@ -67,8 +54,8 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: shaderText(
           context,
-          title:
-              bottomNavigationBarItems[_currentIndex].tooltip ?? "Hustle Stay",
+          title: bottomNavigationBarItems[settings.currentPage].tooltip ??
+              "Hustle Stay",
         ),
         actions: [
           IconButton(
@@ -83,11 +70,12 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         items: bottomNavigationBarItems,
-        currentIndex: _currentIndex,
+        currentIndex: settings.currentPage,
         onTap: (index) {
           setState(() {
-            _currentIndex = index;
+            settings.currentPage = index;
           });
+          ref.read(settingsProvider.notifier).saveSettings();
         },
       ),
       body: body,

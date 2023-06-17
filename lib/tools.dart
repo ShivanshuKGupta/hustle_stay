@@ -181,3 +181,9 @@ class Validate {
     return null;
   }
 }
+
+/// Navigator.of(context).push(MaterialPageRoute(builder: (ctx)=>newPage));
+navigatorPush(context, newPage) {
+  return Navigator.of(context)
+      .push(MaterialPageRoute(builder: (ctx) => newPage));
+}

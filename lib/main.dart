@@ -5,16 +5,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/auth_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/home_screen.dart';
+
+SharedPreferences? prefs;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  // for loading settings
+  prefs = await SharedPreferences.getInstance();
+  // for fetching user info
   final auth = FirebaseAuth.instance;
   if (auth.currentUser != null) {
     currentUser = await fetchUserData(auth.currentUser!.email!);

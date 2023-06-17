@@ -1,16 +1,20 @@
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hustle_stay/main.dart';
 
 class _Settings {
   /// whether dark mode is on
   bool darkMode = false;
 
+  /// the last visited page
+  int currentPage = 0;
+
   /// converts setting parameters into a string
   String encode() {
     return json.encode({
       "darkMode": darkMode,
+      "currentPage": currentPage,
     });
   }
 
@@ -18,6 +22,7 @@ class _Settings {
   void load(String str) {
     final settings = json.decode(str);
     darkMode = settings["darkMode"] ?? false;
+    currentPage = settings["currentPage"] ?? 0;
   }
 }
 
@@ -29,24 +34,21 @@ class _SettingsProvider extends StateNotifier<_Settings> {
 
   /// loads settings previously stored using shared preferences
   Future<bool> loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    state.load(prefs.getString('settings') ?? "{}");
+    state.load(prefs!.getString('settings') ?? "{}");
     notifyListeners();
     return true;
   }
 
   /// saves settings onto the device using shared preferences
   Future<bool> saveSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString('settings', state.encode());
+    prefs!.setString('settings', state.encode());
     return true;
   }
 
   /// deletes previously stored settings on the device
   /// and also reloads the setting parameters
   Future<void> clearSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    await prefs!.clear();
     loadSettings();
   }
 

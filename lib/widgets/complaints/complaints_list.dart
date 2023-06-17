@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/models/chat.dart';
 import 'package:hustle_stay/models/complaint.dart';
+import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/screens/chat_screen.dart';
 import 'package:hustle_stay/tools.dart';
 
 class ComplaintList extends StatefulWidget {
@@ -32,11 +35,31 @@ class _ComplaintListState extends State<ComplaintList> {
               itemBuilder: (ctx, index) {
                 final complaint = complaints[index];
                 return ListTile(
+                  leading: Icon(
+                    Icons.info_rounded,
+                    size: 40,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                   title: Text(complaint.title),
                   subtitle: complaint.description == null
                       ? null
                       : Text(complaint.description!),
-                  onTap: () {},
+                  onTap: () {
+                    navigatorPush(
+                      context,
+                      ChatScreen(
+                        chat: ChatData(
+                          path: "complaints/${complaint.id}",
+                          owner: UserData(email: complaint.from),
+                          receivers: complaint.to
+                              .map((e) => UserData(email: e))
+                              .toList(),
+                          title: complaint.title,
+                          description: complaint.description,
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
               itemCount: complaints.length,

@@ -35,7 +35,7 @@ Future<UserData> fetchUserData(String email) async {
   final response =
       await store.collection('users').doc("$email/editable/details").get();
   if (!response.exists) {
-    throw Exception("User doesn't exists");
+    throw Exception("User details not found");
   }
   userData.load(response.data()!);
   userData.email = email;
