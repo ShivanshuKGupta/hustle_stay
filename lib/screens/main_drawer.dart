@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/screens/addHostel.dart';
 import 'package:hustle_stay/screens/complaints_screen.dart';
 import 'package:hustle_stay/screens/settings_screen.dart';
 
@@ -50,6 +51,23 @@ class MainDrawer extends StatelessWidget {
           onTap: () {
             // TODO: add a profile screen
             showMsg(context, 'TODO: add a profile screen');
+          },
+        ),
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 20,
+            horizontal: 20,
+          ),
+          leading: const CircleAvatar(
+            child: Icon(Icons.home_filled),
+          ),
+          title: Text(
+            "Add new Hostel",
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          onTap: () {
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => AddHostelForm()));
           },
         ),
         const Divider(),
