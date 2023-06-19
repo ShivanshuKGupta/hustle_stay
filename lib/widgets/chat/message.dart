@@ -64,7 +64,13 @@ class Message extends StatelessWidget {
                 data: msg.txt,
                 selectable: true,
                 onTapText: () {
-                  showMsg(context, "TODO: Add a menu to do something.");
+                  Navigator.of(context).push(
+                    DialogRoute<void>(
+                      context: context,
+                      builder: (BuildContext context) => const AlertDialog(
+                          title: Text('You clicked a message')),
+                    ),
+                  );
                 },
                 onTapLink: (text, href, title) {
                   if (href != null) launchUrl(Uri.parse(href));
