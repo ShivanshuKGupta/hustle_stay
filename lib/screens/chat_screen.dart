@@ -35,9 +35,7 @@ class ChatScreen extends StatelessWidget {
             child: MessageList(chat: chat),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 5.0,
-            ),
+            padding: const EdgeInsets.only(bottom: 5.0, left: 5, top: 5),
             child: MessageInputField(
               onSubmit: sendMessage,
             ),
