@@ -117,8 +117,9 @@ class _ComplaintFormState extends State<ComplaintForm> {
             },
           ),
           TextFormField(
-            keyboardType: TextInputType.text,
-            maxLines: 5,
+            keyboardType: TextInputType.multiline,
+            minLines: 5,
+            maxLines: null,
             decoration: InputDecoration(
               icon: const Icon(Icons.description_rounded),
               iconColor: Theme.of(context).colorScheme.onBackground,

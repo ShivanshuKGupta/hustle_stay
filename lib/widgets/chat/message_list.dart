@@ -36,8 +36,9 @@ class _MessageListState extends State<MessageList> {
             ),
           );
         }
-        widget.chat.messages =
-            snapshot.data!.docs.map((e) => MessageData.load(e.data())).toList();
+        widget.chat.messages = snapshot.data!.docs
+            .map((e) => MessageData.load(e.id, e.data()))
+            .toList();
         widget.chat.messages = widget.chat.messages.reversed.toList();
         return ListView.separated(
           reverse: true,
@@ -54,6 +55,7 @@ class _MessageListState extends State<MessageList> {
           itemBuilder: (ctx, index) {
             final currentMsg = widget.chat.messages[index];
             return Message(
+              chat: widget.chat,
               msg: currentMsg,
               last: index == 0 ||
                   widget.chat.messages[index - 1].from != currentMsg.from,

@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'chat.dart';
 
 class MessageData {
+  late String id;
+
   /// The markdown text
   late String txt;
 
@@ -16,6 +18,7 @@ class MessageData {
   DateTime? modifiedAt;
 
   MessageData({
+    required this.id,
     required this.txt,
     required this.from,
     required this.createdAt,
@@ -32,7 +35,7 @@ class MessageData {
     };
   }
 
-  MessageData.load(Map<String, dynamic> data) {
+  MessageData.load(this.id, Map<String, dynamic> data) {
     txt = data["txt"];
     from = data["from"];
     createdAt = DateTime.fromMillisecondsSinceEpoch(data["createdAt"]);
@@ -48,4 +51,10 @@ Future<void> addMessage(ChatData chat, MessageData msg) async {
   await chatMessages
       .doc(DateTime.now().millisecondsSinceEpoch.toString())
       .set(msg.encode());
+}
+
+Future<void> deleteMessage(ChatData chat, MessageData msg) async {
+  final store = FirebaseFirestore.instance;
+  final chatMessages = store.doc(chat.path).collection("chat");
+  await chatMessages.doc(msg.id).delete();
 }

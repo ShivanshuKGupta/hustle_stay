@@ -24,6 +24,7 @@ class ChatData {
 Future<ChatData> fetchChatData(ChatData chat) async {
   final store = FirebaseFirestore.instance;
   final response = await store.collection("${chat.path}/chat").get();
-  chat.messages = response.docs.map((e) => MessageData.load(e.data())).toList();
+  chat.messages =
+      response.docs.map((e) => MessageData.load(e.id, e.data())).toList();
   return chat;
 }
