@@ -7,6 +7,7 @@ import 'package:hustle_stay/screens/settings_screen.dart';
 
 import 'package:hustle_stay/tools.dart';
 
+import 'hostel_screen.dart';
 import 'main_drawer.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -45,7 +46,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     Widget body = Container();
     switch (settings.currentPage) {
       case 0:
-        body = const AttendanceScreen();
+        body = const HostelScreen();
         break;
       case 1:
         body = const ComplaintsScreen();
