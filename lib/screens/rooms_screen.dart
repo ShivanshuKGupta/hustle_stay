@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/room.dart';
+import 'package:hustle_stay/screens/roommate_form.dart';
 
 import '../tools.dart';
 
@@ -30,6 +31,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    setState(() {});
     getnumRooms();
   }
 
@@ -39,71 +41,87 @@ class _RoomsScreenState extends State<RoomsScreen> {
         appBar: AppBar(
           title: shaderText(context, title: "Rooms"),
         ),
-        body: FutureBuilder(
-          future: fetchRooms(widget.hostelName),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: circularProgressIndicator(
-                  height: null,
-                  width: null,
-                ),
-              );
-            }
-            if (!snapshot.hasData) {
-              return Center(
-                child: Text('No Rooms added yet!'),
-              );
-            }
-            print(snapshot.data);
-            print(snapshot.data![0]);
-            return ListView.builder(
-              itemCount: numberOfRooms,
-              itemBuilder: (context, index) {
-                final roomData = snapshot.data![index];
-                return Container(
-                  padding: EdgeInsets.all(16),
-                  child: Expanded(
-                    child: Card(
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                  child: ListTile(
-                                title: Text(roomData.roomName),
-                                subtitle:
-                                    Text("Capacity: ${roomData.capacity}"),
-                              )),
-                              TextButton.icon(
-                                  onPressed: () {},
-                                  icon: Icon(Icons.add),
-                                  label: Text("Add Roommates")),
-                            ],
-                          ),
-                          Column(children: [
-                            roomData.numberOfRoommates == 0
-                                ? Text("No roommates added yet")
-                                : Text('Roommates'),
-                            // Text('Roommates'),
-                            for (int index = 0;
-                                index < roomData.numberOfRoommates;
-                                index++)
-                              ListTile(
-                                  title:
-                                      Text(roomData.roomMatesData![index].name),
-                                  subtitle: Text(
-                                    roomData.roomMatesData![index].rollNumber,
-                                  )),
-                          ])
-                        ],
-                      ),
-                    ),
+        body: RefreshIndicator(
+          onRefresh: () async {
+            setState(() {});
+          },
+          child: FutureBuilder(
+            future: fetchRooms(widget.hostelName),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: circularProgressIndicator(
+                    height: null,
+                    width: null,
                   ),
                 );
-              },
-            );
-          },
+              }
+              if (!snapshot.hasData) {
+                return Center(
+                  child: Text('No Rooms added yet!'),
+                );
+              }
+              print(snapshot.data);
+              print(snapshot.data![0]);
+              return ListView.builder(
+                itemCount: numberOfRooms,
+                itemBuilder: (context, index) {
+                  final roomData = snapshot.data![index];
+                  return Container(
+                    padding: EdgeInsets.all(16),
+                    child: Expanded(
+                      child: Card(
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                    child: ListTile(
+                                  title: Text(roomData.roomName),
+                                  subtitle:
+                                      Text("Capacity: ${roomData.capacity}"),
+                                )),
+                                TextButton.icon(
+                                    onPressed: () {
+                                      Navigator.of(context)
+                                          .push(MaterialPageRoute(
+                                              builder: (_) => RoommateForm(
+                                                    capacity: roomData.capacity,
+                                                    hostelName:
+                                                        widget.hostelName,
+                                                    roomName: roomData.roomName,
+                                                    numRoommates: roomData
+                                                        .numberOfRoommates,
+                                                  )));
+                                    },
+                                    icon: Icon(Icons.add),
+                                    label: Text("Add Roommates")),
+                              ],
+                            ),
+                            Column(children: [
+                              roomData.numberOfRoommates == 0
+                                  ? Text("No roommates added yet")
+                                  : Text('Roommates'),
+                              // Text('Roommates'),
+                              for (int index = 0;
+                                  index < roomData.numberOfRoommates;
+                                  index++)
+                                ListTile(
+                                    title: Text(
+                                        roomData.roomMatesData![index].name),
+                                    subtitle: Text(
+                                      roomData.roomMatesData![index].rollNumber,
+                                    )),
+                            ])
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
         ));
   }
 }
