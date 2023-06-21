@@ -12,14 +12,14 @@ import 'add_rooms.dart';
 
 final _firebase = FirebaseAuth.instance;
 
-class AttendanceScreen extends StatefulWidget {
-  const AttendanceScreen({super.key});
+class HostelScreen extends StatefulWidget {
+  const HostelScreen({super.key});
 
   @override
-  State<AttendanceScreen> createState() => _AttendanceScreenState();
+  State<HostelScreen> createState() => _HostelScreenState();
 }
 
-class _AttendanceScreenState extends State<AttendanceScreen> {
+class _HostelScreenState extends State<HostelScreen> {
   final store = FirebaseFirestore.instance;
 
   @override
@@ -91,30 +91,48 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         height: 200,
                         fit: BoxFit.cover,
                       ),
-                      Row(
-                        children: [
-                          Column(
-                            children: [
-                              Text(
-                                hostel.hostelName,
-                                style: Theme.of(context).textTheme.bodyLarge,
+                      Container(
+                        padding: EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    hostel.hostelName,
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    "${hostel.hostelType} Hostel",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    "${hostel.numberOfRooms}",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              SizedBox(height: 2),
-                              Text("${hostel.hostelType} Hostel",
-                                  style: Theme.of(context).textTheme.bodySmall)
-                            ],
-                          ),
-                          Container(
-                            alignment: AlignmentDirectional.bottomEnd,
-                            child: TextButton.icon(
+                            ),
+                            TextButton.icon(
                                 onPressed: () => Navigator.of(context).push(
                                     MaterialPageRoute(
                                         builder: (_) => AddRoom(
                                             hostelName: hostel.hostelName))),
                                 icon: Icon(Icons.add),
                                 label: Text("Add Room")),
-                          )
-                        ],
+                          ],
+                        ),
                       )
                     ],
                   ),

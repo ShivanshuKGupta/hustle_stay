@@ -20,7 +20,7 @@ class _AddHostelFormState extends State<AddHostelForm> {
   Future<void> uploadHostel(String hostelName, String hostelType, int capacity,
       int numberOfRooms, int numberOfFloorsorBlocks) async {
     final store = FirebaseFirestore.instance;
-    print(store);
+    // print(store);
     final storageRef = FirebaseStorage.instance
         .ref()
         .child('hostel_images')
@@ -51,11 +51,11 @@ class _AddHostelFormState extends State<AddHostelForm> {
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      print(hostelName);
-      print(hostelType);
-      print(capacity);
-      print(numberOfRooms);
-      print(numberOfFloorsorBlocks);
+      // print(hostelName);
+      // print(hostelType);
+      // print(capacity);
+      // print(numberOfRooms);
+      // print(numberOfFloorsorBlocks);
       await uploadHostel(hostelName, hostelType, capacity, numberOfRooms,
           numberOfFloorsorBlocks);
 
