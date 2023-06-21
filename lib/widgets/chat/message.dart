@@ -191,14 +191,21 @@ class Message extends StatelessWidget {
               IconButton(
                 iconSize: 30,
                 onPressed: () async {
-                  try {
-                    await deleteMessage(chat, msg);
-                    if (context.mounted) {
-                      Navigator.of(context).pop();
-                      showMsg(context, "Message Deleted Successfully");
+                  final String? res = await askUser(
+                      context, "Do you really wish to delete this msg?",
+                      yes: true, no: true, ok: false);
+                  if (res == "yes") {
+                    try {
+                      await deleteMessage(chat, msg);
+                      if (context.mounted) {
+                        Navigator.of(context).pop();
+                        showMsg(context, "Message Deleted Successfully");
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        showMsg(context, e.toString());
+                      }
                     }
-                  } catch (e) {
-                    showMsg(context, e.toString());
                   }
                 },
                 icon: const Icon(Icons.delete_rounded),

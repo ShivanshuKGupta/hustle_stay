@@ -183,7 +183,69 @@ class Validate {
 }
 
 /// Navigator.of(context).push(MaterialPageRoute(builder: (ctx)=>newPage));
-navigatorPush(context, newPage) {
+navigatorPush(context, newPage) async {
   return Navigator.of(context)
       .push(MaterialPageRoute(builder: (ctx) => newPage));
+}
+
+Future<String?> askUser(
+  context,
+  String msg, {
+  bool yes = false,
+  bool ok = true,
+  bool no = false,
+  bool cancel = false,
+  List<String> custom = const [],
+}) async {
+  return await Navigator.push(
+    context,
+    DialogRoute(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(msg),
+        actions: [
+          if (ok == true)
+            TextButton.icon(
+              label: const Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop("ok");
+              },
+              icon: const Icon(Icons.check_rounded),
+            ),
+          if (yes == true)
+            TextButton.icon(
+              label: const Text("Yes"),
+              onPressed: () {
+                Navigator.of(context).pop("yes");
+              },
+              icon: const Icon(Icons.check_rounded),
+            ),
+          if (no == true)
+            TextButton.icon(
+              label: const Text("No"),
+              onPressed: () {
+                Navigator.of(context).pop("no");
+              },
+              icon: const Icon(Icons.close_rounded),
+            ),
+          if (cancel == true)
+            TextButton.icon(
+              label: const Text("Cancel"),
+              onPressed: () {
+                Navigator.of(context).pop("cancel");
+              },
+              icon: const Icon(Icons.close_rounded),
+            ),
+          ...custom.map(
+            (e) => TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(e);
+              },
+              child: Text(e),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
