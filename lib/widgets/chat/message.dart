@@ -107,20 +107,23 @@ class Message extends StatelessWidget {
       navigatorPush(
         context,
         Scaffold(
-          backgroundColor: Theme.of(context).colorScheme.onBackground,
+          backgroundColor: Colors.black,
           appBar: AppBar(
-            backgroundColor: Theme.of(context).colorScheme.onBackground,
-            foregroundColor: Theme.of(context).colorScheme.background,
+            backgroundColor: Colors.black,
+            foregroundColor: Colors.white,
             actions: [
-              TextButton.icon(
-                onPressed: () {
-                  showInfo(context, msg);
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: Theme.of(context).colorScheme.background,
+              if (msg.from == currentUser.email)
+                IconButton(
+                  onPressed: () => delMsg(context),
+                  icon: const Icon(Icons.delete_rounded),
                 ),
+              IconButton(
+                onPressed: () => copyMsg(context),
+                icon: const Icon(Icons.copy_rounded),
+              ),
+              IconButton(
+                onPressed: () => showInfo(context, msg),
                 icon: const Icon(Icons.info_outline_rounded),
-                label: const Text('Details'),
               ),
             ],
           ),
@@ -217,13 +220,7 @@ class Message extends StatelessWidget {
           actions: [
             IconButton(
               iconSize: 30,
-              onPressed: () async {
-                await Clipboard.setData(ClipboardData(text: msg.txt));
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-                  showMsg(context, "Copied");
-                }
-              },
+              onPressed: () => copyMsg(context),
               icon: const Icon(Icons.copy_rounded),
             ),
             if (msg.from == currentUser.email)
@@ -239,54 +236,7 @@ class Message extends StatelessWidget {
             if (msg.from == currentUser.email)
               IconButton(
                 iconSize: 30,
-                onPressed: () async {
-                  final String? res = await showMsgBox(
-                    context,
-                    "Do you really wish to delete this msg?",
-                    yes: true,
-                    no: true,
-                  );
-                  if (res == "yes") {
-                    try {
-                      await deleteMessage(chat, msg);
-                    } catch (e) {
-                      if (context.mounted) {
-                        showMsg(context, e.toString());
-                      }
-                      return;
-                    }
-                    if (context.mounted) {
-                      showMsg(context, "Message Deleted Successfully");
-                    }
-                    try {
-                      bool isImg = isImage(msg);
-                      if (isImg && context.mounted) {
-                        String? ans = await showMsgBox(
-                          context,
-                          "Do you want to delete the image from cloud as well?",
-                          yes: true,
-                          no: true,
-                        );
-                        if (ans == "yes") {
-                          final storage = FirebaseStorage.instance;
-                          String url = msg.txt.split('(').last;
-                          url = url.substring(0, url.length - 1);
-                          await storage.refFromURL(url).delete();
-                          if (context.mounted) {
-                            showMsg(context, "Image Deleted Successfully");
-                          }
-                        }
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        showMsg(context, e.toString());
-                      }
-                    }
-                    if (context.mounted) {
-                      Navigator.of(context).pop();
-                    }
-                  }
-                },
+                onPressed: () => delMsg(context),
                 icon: const Icon(Icons.delete_rounded),
               ),
           ],
@@ -311,5 +261,62 @@ class Message extends StatelessWidget {
         uri.toString(),
       ),
     );
+  }
+
+  void delMsg(context) async {
+    final String? res = await showMsgBox(
+      context,
+      "Do you really wish to delete this msg?",
+      yes: true,
+      no: true,
+    );
+    if (res == "yes") {
+      try {
+        await deleteMessage(chat, msg);
+      } catch (e) {
+        if (context.mounted) {
+          showMsg(context, e.toString());
+        }
+        return;
+      }
+      if (context.mounted) {
+        showMsg(context, "Message Deleted Successfully");
+      }
+      try {
+        bool isImg = isImage(msg);
+        if (isImg && context.mounted) {
+          String? ans = await showMsgBox(
+            context,
+            "Do you want to delete the image from cloud as well?",
+            yes: true,
+            no: true,
+          );
+          if (ans == "yes") {
+            final storage = FirebaseStorage.instance;
+            String url = msg.txt.split('(').last;
+            url = url.substring(0, url.length - 1);
+            await storage.refFromURL(url).delete();
+            if (context.mounted) {
+              showMsg(context, "Image was deleted successfully from the cloud");
+            }
+          }
+        }
+      } catch (e) {
+        if (context.mounted) {
+          showMsg(context, e.toString());
+        }
+      }
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+    }
+  }
+
+  copyMsg(context) async {
+    await Clipboard.setData(ClipboardData(text: msg.txt));
+    if (context.mounted) {
+      Navigator.of(context).pop();
+      showMsg(context, "Copied");
+    }
   }
 }
