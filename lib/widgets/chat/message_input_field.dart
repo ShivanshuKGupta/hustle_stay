@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/message.dart';
 import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/providers/image.dart';
 import 'package:hustle_stay/tools.dart';
 
 class MessageInputField extends StatefulWidget {
@@ -47,41 +48,12 @@ class _MessageInputFieldState extends State<MessageInputField> {
           Row(
             children: [
               IconButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    DialogRoute<void>(
-                      context: context,
-                      builder: (BuildContext context) => AlertDialog(
-                        actionsAlignment: MainAxisAlignment.center,
-                        scrollable: true,
-                        actionsPadding: const EdgeInsets.all(10),
-                        buttonPadding: const EdgeInsets.all(20),
-                        actions: [
-                          IconButton(
-                            iconSize: 30,
-                            onPressed: () {
-                              showMsg(context, "In development...");
-                            },
-                            icon: const Icon(Icons.image_rounded),
-                          ),
-                          IconButton(
-                            iconSize: 30,
-                            onPressed: () {
-                              showMsg(context, "In development...");
-                            },
-                            icon: const Icon(Icons.camera_alt_rounded),
-                          ),
-                          IconButton(
-                            iconSize: 30,
-                            onPressed: () {
-                              showMsg(context, "In development...");
-                            },
-                            icon: const Icon(Icons.poll_rounded),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
+                onPressed: () async {
+                  final url = await getLocalImageOnCloud(context,
+                      fileName: "${DateTime.now().millisecondsSinceEpoch}.jpg");
+                  if (url == null) return;
+                  _msgTxtBox.text = "![image]($url)";
+                  submit(context);
                 },
                 icon: const Icon(Icons.add_rounded),
                 color: Theme.of(context).colorScheme.primary,

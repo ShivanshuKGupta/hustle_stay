@@ -1,3 +1,4 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -5,6 +6,7 @@ import 'package:hustle_stay/models/chat.dart';
 
 import 'package:hustle_stay/models/message.dart';
 import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/providers/image.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -33,9 +35,7 @@ class Message extends StatelessWidget {
           msgAlignment ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
         GestureDetector(
-          onTap: () {
-            showMsgInfo(context, msg);
-          },
+          onTap: () => showMsgInfo(context, msg),
           child: Container(
             width: size.width * 3 / 4,
             padding: const EdgeInsets.only(left: 5, right: 5),
@@ -74,6 +74,7 @@ class Message extends StatelessWidget {
                   onTapLink: (text, href, title) {
                     if (href != null) launchUrl(Uri.parse(href));
                   },
+                  imageBuilder: imageBuilder,
                 ),
                 Padding(
                   padding:
@@ -99,6 +100,51 @@ class Message extends StatelessWidget {
   }
 
   showMsgInfo(context, MessageData msg) {
+    if (!isImage(msg)) {
+      showInfo(context, msg);
+    } else {
+      final size = MediaQuery.of(context).size;
+      navigatorPush(
+        context,
+        Scaffold(
+          backgroundColor: Theme.of(context).colorScheme.onBackground,
+          appBar: AppBar(
+            backgroundColor: Theme.of(context).colorScheme.onBackground,
+            foregroundColor: Theme.of(context).colorScheme.background,
+            actions: [
+              TextButton.icon(
+                onPressed: () {
+                  showInfo(context, msg);
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.background,
+                ),
+                icon: const Icon(Icons.info_outline_rounded),
+                label: const Text('Details'),
+              ),
+            ],
+          ),
+          body: SizedBox(
+            height: size.height,
+            width: size.width,
+            child: Expanded(
+              child: InteractiveViewer(
+                maxScale: 5,
+                child: Center(
+                  child: MarkdownBody(
+                    data: msg.txt,
+                    imageBuilder: imageBuilder,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
+  void showInfo(context, MessageData msg) {
     Navigator.of(context).push(
       DialogRoute<void>(
         context: context,
@@ -109,7 +155,10 @@ class Message extends StatelessWidget {
           contentPadding: const EdgeInsets.only(top: 15, left: 20, right: 20),
           content: Column(
             children: [
-              Text(msg.txt),
+              MarkdownBody(
+                data: msg.txt,
+                imageBuilder: imageBuilder,
+              ),
               const Divider(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -191,20 +240,50 @@ class Message extends StatelessWidget {
               IconButton(
                 iconSize: 30,
                 onPressed: () async {
-                  final String? res = await askUser(
-                      context, "Do you really wish to delete this msg?",
-                      yes: true, no: true, ok: false);
+                  final String? res = await showMsgBox(
+                    context,
+                    "Do you really wish to delete this msg?",
+                    yes: true,
+                    no: true,
+                  );
                   if (res == "yes") {
                     try {
                       await deleteMessage(chat, msg);
+                    } catch (e) {
                       if (context.mounted) {
-                        Navigator.of(context).pop();
-                        showMsg(context, "Message Deleted Successfully");
+                        showMsg(context, e.toString());
+                      }
+                      return;
+                    }
+                    if (context.mounted) {
+                      showMsg(context, "Message Deleted Successfully");
+                    }
+                    try {
+                      bool isImg = isImage(msg);
+                      if (isImg && context.mounted) {
+                        String? ans = await showMsgBox(
+                          context,
+                          "Do you want to delete the image from cloud as well?",
+                          yes: true,
+                          no: true,
+                        );
+                        if (ans == "yes") {
+                          final storage = FirebaseStorage.instance;
+                          String url = msg.txt.split('(').last;
+                          url = url.substring(0, url.length - 1);
+                          await storage.refFromURL(url).delete();
+                          if (context.mounted) {
+                            showMsg(context, "Image Deleted Successfully");
+                          }
+                        }
                       }
                     } catch (e) {
                       if (context.mounted) {
                         showMsg(context, e.toString());
                       }
+                    }
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
                     }
                   }
                 },
@@ -212,6 +291,24 @@ class Message extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget imageBuilder(Uri uri, String? title, String? alt) {
+    return Image(
+      errorBuilder:
+          (BuildContext context, Object exception, StackTrace? stackTrace) {
+        return Text(
+          exception.toString(),
+          style: Theme.of(context)
+              .textTheme
+              .bodyMedium!
+              .copyWith(color: Colors.red),
+        );
+      },
+      image: NetworkImage(
+        uri.toString(),
       ),
     );
   }
