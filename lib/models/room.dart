@@ -90,3 +90,45 @@ Future<bool> isRoomExists(String hostelName, String roomName) async {
       .get();
   return storageRef.exists;
 }
+
+Future<bool> deleteRoom(String roomName, String hostelName) async {
+  try {
+    final storage = FirebaseFirestore.instance;
+    final storageRef = await storage
+      ..collection('hostels')
+          .doc(hostelName)
+          .collection('Rooms')
+          .doc(roomName)
+          .delete();
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+Future<bool> changeRoom(String email, String hostelName, String roomName,
+    String destHostelName, String destRoomName) async {
+  try {
+    final storage = FirebaseFirestore.instance;
+    final sourceRef = storage
+        .collection('hostels')
+        .doc(hostelName)
+        .collection('Rooms')
+        .doc(roomName)
+        .collection('Roommates')
+        .doc(email);
+    final sData = await sourceRef.get();
+    final destLoc = await storage
+        .collection('hostels')
+        .doc(destHostelName)
+        .collection('Rooms')
+        .doc(destRoomName)
+        .collection('Roommates');
+    final sourceData = sData.data();
+    await destLoc.doc(email).set(sourceData!);
+    sourceRef.delete();
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
