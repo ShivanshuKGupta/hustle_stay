@@ -6,11 +6,14 @@ import 'package:hustle_stay/models/message.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:image_picker/image_picker.dart';
 
+/// Ask the user for an image
+/// uploads it on cloud and
+/// return the download URL
 Future<String?> getLocalImageOnCloud(context,
     {String fileName = "image.jpg"}) async {
-  const int imageQuality = 100;
-  const double maxWidth = 500;
-  const double maxHeight = 500;
+  const int imageQuality = 50;
+  const double maxWidth = double.infinity;
+  const double maxHeight = double.infinity;
 
   File? imageFile = await Navigator.of(context).push<File?>(
     DialogRoute(

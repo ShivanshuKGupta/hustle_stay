@@ -27,36 +27,51 @@ class Message extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double r = 15;
     final size = MediaQuery.of(context).size;
     return Row(
-      mainAxisSize: MainAxisSize.max,
       mainAxisAlignment:
-          msgAlignment ? MainAxisAlignment.end : MainAxisAlignment.start,
+          !msgAlignment ? MainAxisAlignment.start : MainAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        GestureDetector(
-          onTap: () => showMsgInfo(context, msg),
-          child: Container(
-            width: size.width * 3 / 4,
-            padding: const EdgeInsets.only(left: 5, right: 5),
-            margin: const EdgeInsets.symmetric(
-              horizontal: 10,
-            ),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(first && msgAlignment ? r : 0),
-                topRight: Radius.circular(first && !msgAlignment ? r : 0),
-                bottomLeft: Radius.circular(last ? r : 0),
-                bottomRight: Radius.circular(last ? r : 0),
-              ),
-              color: msgAlignment
-                  ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
-                  : Theme.of(context).colorScheme.secondary.withOpacity(0.3),
-            ),
-            child: Column(
+        chatBubble(context),
+      ],
+    );
+  }
+
+  Widget chatBubble(BuildContext context) {
+    double r = 13;
+    final size = MediaQuery.of(context).size;
+
+    return GestureDetector(
+      onTap: () => showMsgInfo(context, msg),
+      child: Container(
+        constraints: BoxConstraints(
+          minWidth: 100,
+          maxWidth: size.width - 20,
+          maxHeight: size.height / 2,
+        ),
+        padding: const EdgeInsets.only(left: 10, right: 10, top: 5),
+        margin: const EdgeInsets.symmetric(
+          horizontal: 10,
+        ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(first && !msgAlignment ? 0 : r),
+            topRight: Radius.circular(first && msgAlignment ? 0 : r),
+            bottomLeft: Radius.circular(r),
+            bottomRight: Radius.circular(r),
+          ),
+          color: msgAlignment
+              ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
+              : Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+        ),
+        child: Stack(
+          children: [
+            Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (first)
+                if (first && msg.from != currentUser.email)
                   Padding(
                     padding: const EdgeInsets.only(right: 5.0, left: 1, top: 2),
                     child: Text(
@@ -76,26 +91,27 @@ class Message extends StatelessWidget {
                   },
                   imageBuilder: imageBuilder,
                 ),
-                Padding(
-                  padding:
-                      const EdgeInsets.only(right: 5.0, left: 5, bottom: 2),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        "${msg.createdAt.hour}:${msg.createdAt.minute}",
-                        style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
+                const SizedBox(
+                  height: 20,
+                )
               ],
             ),
-          ),
+            Positioned(
+              right: 0,
+              bottom: 0,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 5.0, bottom: 2),
+                child: Text(
+                  "${msg.createdAt.hour > 12 ? msg.createdAt.hour - 12 : msg.createdAt.hour}:${msg.createdAt.minute} ${msg.createdAt.hour < 12 ? 'am' : 'pm'}",
+                  style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                ),
+              ),
+            )
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -312,7 +328,7 @@ class Message extends StatelessWidget {
     }
   }
 
-  copyMsg(context) async {
+  Future<void> copyMsg(context) async {
     await Clipboard.setData(ClipboardData(text: msg.txt));
     if (context.mounted) {
       Navigator.of(context).pop();
