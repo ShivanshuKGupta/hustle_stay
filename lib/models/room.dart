@@ -79,3 +79,14 @@ Future<List<Room>> fetchRooms(String hostelName) async {
   print(roomDataList);
   return roomDataList;
 }
+
+Future<bool> isRoomExists(String hostelName, String roomName) async {
+  final storage = FirebaseFirestore.instance;
+  final storageRef = await storage
+      .collection('hostels')
+      .doc(hostelName)
+      .collection('Rooms')
+      .doc(roomName)
+      .get();
+  return storageRef.exists;
+}
