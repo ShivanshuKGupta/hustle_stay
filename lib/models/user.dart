@@ -29,11 +29,14 @@ class UserData {
 
 var currentUser = UserData();
 
-Future<UserData> fetchUserData(String email) async {
+Future<UserData> fetchUserData(String email,
+    {Source src = Source.cache}) async {
   final store = FirebaseFirestore.instance;
   UserData userData = UserData();
   final response =
-      await store.collection('users').doc("$email/editable/details").get();
+      await store.collection('users').doc("$email/editable/details").get(
+            GetOptions(source: src),
+          );
   if (!response.exists) {
     throw Exception("User details not found");
   }
@@ -48,4 +51,16 @@ Future<void> updateUserData(UserData userData) async {
       .collection('users')
       .doc("${userData.email}/editable/details")
       .set(userData.encode());
+}
+
+Map<String, UserData> userInfo = {};
+
+Future<UserData> getUserInfo(String email) async {
+  if (userInfo.containsKey(email)) {
+    return userInfo[email]!;
+  } else {
+    UserData user = await fetchUserData(email);
+    userInfo[email] = user;
+    return user;
+  }
 }

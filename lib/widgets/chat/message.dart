@@ -48,7 +48,6 @@ class Message extends StatelessWidget {
         constraints: BoxConstraints(
           minWidth: 100,
           maxWidth: size.width - 20,
-          maxHeight: size.height / 2,
         ),
         padding: const EdgeInsets.only(left: 10, right: 10, top: 5),
         margin: const EdgeInsets.symmetric(
@@ -74,11 +73,23 @@ class Message extends StatelessWidget {
                 if (first && msg.from != currentUser.email)
                   Padding(
                     padding: const EdgeInsets.only(right: 5.0, left: 1, top: 2),
-                    child: Text(
-                      msg.from,
-                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                    child: FutureBuilder(
+                      future: fetchUserData(msg.from),
+                      builder: (context, snapshot) {
+                        return Text(
+                          (!snapshot.hasData)
+                              ? msg.from
+                              : (snapshot.data!.name == null
+                                  ? "no name"
+                                  : snapshot.data!.name!),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall!
+                              .copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                        );
+                      },
                     ),
                   ),
                 MarkdownBody(
@@ -89,7 +100,7 @@ class Message extends StatelessWidget {
                   onTapLink: (text, href, title) {
                     if (href != null) launchUrl(Uri.parse(href));
                   },
-                  imageBuilder: imageBuilder,
+                  imageBuilder: (uri, title, alt) => imageBuilder(uri, msg.id),
                 ),
                 const SizedBox(
                   height: 20,
@@ -120,6 +131,8 @@ class Message extends StatelessWidget {
       showInfo(context, msg);
     } else {
       final size = MediaQuery.of(context).size;
+      String url = msg.txt.split('(').last;
+      url = url.substring(0, url.length - 1);
       navigatorPush(
         context,
         Scaffold(
@@ -150,10 +163,7 @@ class Message extends StatelessWidget {
               child: InteractiveViewer(
                 maxScale: 5,
                 child: Center(
-                  child: MarkdownBody(
-                    data: msg.txt,
-                    imageBuilder: imageBuilder,
-                  ),
+                  child: imageBuilder(Uri.parse(url), msg.id),
                 ),
               ),
             ),
@@ -176,7 +186,8 @@ class Message extends StatelessWidget {
             children: [
               MarkdownBody(
                 data: msg.txt,
-                imageBuilder: imageBuilder,
+                imageBuilder: (uri, title, alt) =>
+                    imageBuilder(uri, msg.id, title: title, alt: alt),
               ),
               const Divider(),
               Row(
@@ -261,20 +272,34 @@ class Message extends StatelessWidget {
     );
   }
 
-  Widget imageBuilder(Uri uri, String? title, String? alt) {
-    return Image(
-      errorBuilder:
-          (BuildContext context, Object exception, StackTrace? stackTrace) {
-        return Text(
-          exception.toString(),
-          style: Theme.of(context)
-              .textTheme
-              .bodyMedium!
-              .copyWith(color: Colors.red),
-        );
-      },
-      image: NetworkImage(
+  Widget imageBuilder(Uri uri, String id, {String? title, String? alt}) {
+    return Hero(
+      tag: id,
+      child: Image.network(
         uri.toString(),
+        errorBuilder:
+            (BuildContext context, Object exception, StackTrace? stackTrace) {
+          return const Icon(Icons.error_outline_rounded);
+        },
+        loadingBuilder: (BuildContext context, Widget child,
+            ImageChunkEvent? loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  value: loadingProgress.expectedTotalBytes != null
+                      ? loadingProgress.cumulativeBytesLoaded /
+                          loadingProgress.expectedTotalBytes!
+                      : null,
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

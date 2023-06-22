@@ -11,6 +11,8 @@ git checkout master
 git pull origin master
 git merge %branchName%
 git push -u origin master
+git branch -d %branchName% 
+git branch %branchName% 
 git checkout %branchName%
 
 @REM For any kind of conflict in merging you need to manage it manually.

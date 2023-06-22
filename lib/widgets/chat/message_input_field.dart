@@ -47,17 +47,6 @@ class _MessageInputFieldState extends State<MessageInputField> {
         children: [
           Row(
             children: [
-              IconButton(
-                onPressed: () async {
-                  final url = await getLocalImageOnCloud(context,
-                      fileName: "${DateTime.now().millisecondsSinceEpoch}.jpg");
-                  if (url == null) return;
-                  _msgTxtBox.text = "![image]($url)";
-                  submit(context);
-                },
-                icon: const Icon(Icons.add_rounded),
-                color: Theme.of(context).colorScheme.primary,
-              ),
               Expanded(
                 child: TextFormField(
                   key: GlobalKey(),
@@ -68,6 +57,18 @@ class _MessageInputFieldState extends State<MessageInputField> {
                   controller: _msgTxtBox,
                   validator: Validate.text,
                   decoration: InputDecoration(
+                    prefixIcon: IconButton(
+                      onPressed: () async {
+                        final url = await getLocalImageOnCloud(context,
+                            fileName:
+                                "${DateTime.now().millisecondsSinceEpoch}.jpg");
+                        if (url == null) return;
+                        _msgTxtBox.text = "![image]($url)";
+                        submit(context);
+                      },
+                      icon: const Icon(Icons.add_rounded),
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),

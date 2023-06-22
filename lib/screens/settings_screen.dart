@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/edit_profile_screen.dart';
+import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/profile_image.dart';
 
 import '../models/user.dart';
@@ -19,35 +20,44 @@ class SettingsScreen extends ConsumerWidget {
     final settings = ref.read(settingsProvider);
     final settingsClass = ref.read(settingsProvider.notifier);
     final widgetList = [
-      Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: Row(
-          children: [
-            ProfileImage(onChanged: (image) {
-              debugPrint("New image taken");
-              // TODO: upload this image for the current user
-            }),
-            Expanded(
-              child: ListTile(
-                title: Text(currentUser.name ??
-                    "Error"), // TODO: store other details about the user like name
-                subtitle: Text(
-                  currentUser.email!,
-                  style:
-                      TextStyle(color: Theme.of(context).colorScheme.primary),
+      if (currentUser.email != null)
+        Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Row(
+            children: [
+              ProfileImage(onChanged: (image) {
+                debugPrint("New image taken");
+                // TODO: upload this image for the current user
+              }),
+              Expanded(
+                child: FutureBuilder(
+                  future: fetchUserData(currentUser.email!),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return circularProgressIndicator();
+                    }
+                    return ListTile(
+                      title: Text(currentUser.name ??
+                          "Error"), // TODO: store other details about the user like name
+                      subtitle: Text(
+                        currentUser.email!,
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary),
+                      ),
+                      trailing: IconButton(
+                          color: Theme.of(context).colorScheme.primary,
+                          onPressed: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (ctx) => EditProfile()));
+                          },
+                          icon: const Icon(Icons.edit_rounded)),
+                    );
+                  },
                 ),
-                trailing: IconButton(
-                    color: Theme.of(context).colorScheme.primary,
-                    onPressed: () {
-                      Navigator.of(context).push(
-                          MaterialPageRoute(builder: (ctx) => EditProfile()));
-                    },
-                    icon: const Icon(Icons.edit_rounded)),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       // TODO: add the profile avatar here and a pencil icon on top of it when clicked should move the user to view/edit profile page
       Column(
         children: [
