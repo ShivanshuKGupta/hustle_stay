@@ -45,38 +45,52 @@ class _ComplaintListState extends State<ComplaintList> {
       onRefresh: () async {
         setState(() {});
       },
-      child: ListView.builder(
-        itemBuilder: (ctx, index) {
-          final complaint = complaints[index];
-          return ListTile(
-            leading: Icon(
-              Icons.info_rounded,
-              size: 40,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            title: Text(complaint.title),
-            subtitle: complaint.description == null
-                ? null
-                : Text(complaint.description!),
-            onTap: () {
-              navigatorPush(
-                context,
-                ChatScreen(
-                  chat: ChatData(
-                    path: "complaints/${complaint.id}",
-                    owner: UserData(email: complaint.from),
-                    receivers:
-                        complaint.to.map((e) => UserData(email: e)).toList(),
-                    title: complaint.title,
-                    description: complaint.description,
+      child: complaints.isEmpty
+          ? ListView(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Text(
+                    'No Complaints ✨',
+                    style: Theme.of(context).textTheme.titleLarge,
+                    textAlign: TextAlign.center,
                   ),
                 ),
-              );
-            },
-          );
-        },
-        itemCount: complaints.length,
-      ),
+              ],
+            )
+          : ListView.builder(
+              itemBuilder: (ctx, index) {
+                final complaint = complaints[index];
+                return ListTile(
+                  leading: Icon(
+                    Icons.info_rounded,
+                    size: 40,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  title: Text(complaint.title),
+                  subtitle: complaint.description == null
+                      ? null
+                      : Text(complaint.description!),
+                  onTap: () {
+                    navigatorPush(
+                      context,
+                      ChatScreen(
+                        chat: ChatData(
+                          path: "complaints/${complaint.id}",
+                          owner: UserData(email: complaint.from),
+                          receivers: complaint.to
+                              .map((e) => UserData(email: e))
+                              .toList(),
+                          title: complaint.title,
+                          description: complaint.description,
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+              itemCount: complaints.length,
+            ),
     );
   }
 }

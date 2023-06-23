@@ -8,7 +8,8 @@ import '../models/message.dart';
 
 class ChatScreen extends StatelessWidget {
   final ChatData chat;
-  const ChatScreen({super.key, required this.chat});
+  final MessageData? initialMsg;
+  const ChatScreen({super.key, required this.chat, this.initialMsg});
 
   Future<void> sendMessage(MessageData msg) async {
     await addMessage(chat, msg);
@@ -37,6 +38,7 @@ class ChatScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: 5.0, left: 5, top: 5),
             child: MessageInputField(
+              initialValue: initialMsg != null ? initialMsg!.txt : "",
               onSubmit: sendMessage,
             ),
           ),

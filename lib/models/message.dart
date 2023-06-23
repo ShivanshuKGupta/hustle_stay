@@ -1,10 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:hustle_stay/providers/image.dart';
 
 import 'chat.dart';
 
 class MessageData {
+  /// The datetime object representing the
   late String id;
 
   /// The markdown text

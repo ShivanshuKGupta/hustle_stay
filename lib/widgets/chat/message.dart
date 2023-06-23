@@ -82,7 +82,7 @@ class Message extends StatelessWidget {
                           (!snapshot.hasData)
                               ? msg.from
                               : (snapshot.data!.name == null
-                                  ? "no name"
+                                  ? msg.from
                                   : snapshot.data!.name!),
                           style: Theme.of(context)
                               .textTheme

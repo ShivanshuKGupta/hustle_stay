@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hustle_stay/models/message.dart';
 import 'package:hustle_stay/models/user.dart';
 
 enum Scope {
@@ -48,10 +49,12 @@ class ComplaintData {
 }
 
 /// updates an exisiting complaint or will create if complaint does not exists
-Future<void> addComplaint(ComplaintData complaint) async {
+Future<ComplaintData> addComplaint(ComplaintData complaint) async {
   final store = FirebaseFirestore.instance;
   String id = DateTime.now().microsecondsSinceEpoch.toString();
+  complaint.id = id;
   await store.doc('complaints/$id').set(complaint.encode());
+  return complaint;
 }
 
 /// updates an exisiting complaint or will create if complaint does not exists

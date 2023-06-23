@@ -7,7 +7,7 @@ import 'package:hustle_stay/tools.dart';
 
 class ComplaintForm extends StatefulWidget {
   String? id;
-  final Future<void> Function(ComplaintData) onSubmit;
+  final Future<ComplaintData> Function(ComplaintData) onSubmit;
   ComplaintForm({super.key, required this.onSubmit, this.id});
 
   @override
@@ -63,9 +63,9 @@ class _ComplaintFormState extends State<ComplaintForm> {
       _loading = true;
     });
     try {
-      await widget.onSubmit(complaint);
+      complaint = await widget.onSubmit(complaint);
       if (context.mounted) {
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(complaint);
       }
       return;
     } catch (e) {
