@@ -82,6 +82,7 @@ class _RoomDataWidgetState extends State<RoomDataWidget> {
                   widget.roomData.numberOfRoommates == 0
                       ? Center(child: Text("No roommates added yet"))
                       : RoommateWidget(
+                          hostelName: widget.hostelName,
                           roomData: widget.roomData,
                         ),
               ],
