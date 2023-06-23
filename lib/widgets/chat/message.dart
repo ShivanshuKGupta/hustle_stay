@@ -1,9 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:hustle_stay/models/chat.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
+import 'package:hustle_stay/models/chat.dart';
 import 'package:hustle_stay/models/message.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/image.dart';
@@ -74,7 +76,7 @@ class Message extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(right: 5.0, left: 1, top: 2),
                     child: FutureBuilder(
-                      future: fetchUserData(msg.from),
+                      future: fetchUserData(msg.from, src: Source.cache),
                       builder: (context, snapshot) {
                         return Text(
                           (!snapshot.hasData)
@@ -159,13 +161,9 @@ class Message extends StatelessWidget {
           body: SizedBox(
             height: size.height,
             width: size.width,
-            child: Expanded(
-              child: InteractiveViewer(
-                maxScale: 5,
-                child: Center(
-                  child: imageBuilder(Uri.parse(url), msg.id),
-                ),
-              ),
+            child: InteractiveViewer(
+              maxScale: 5,
+              child: imageBuilder(Uri.parse(url), msg.id),
             ),
           ),
         ),
@@ -275,15 +273,11 @@ class Message extends StatelessWidget {
   Widget imageBuilder(Uri uri, String id, {String? title, String? alt}) {
     return Hero(
       tag: id,
-      child: Image.network(
-        uri.toString(),
-        errorBuilder:
-            (BuildContext context, Object exception, StackTrace? stackTrace) {
-          return const Icon(Icons.error_outline_rounded);
-        },
-        loadingBuilder: (BuildContext context, Widget child,
-            ImageChunkEvent? loadingProgress) {
-          if (loadingProgress == null) return child;
+      child: CachedNetworkImage(
+        fadeInCurve: Curves.decelerate,
+        fadeOutDuration: const Duration(milliseconds: 0),
+        imageUrl: uri.toString(),
+        progressIndicatorBuilder: (context, url, progress) {
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(20.0),
@@ -291,16 +285,42 @@ class Message extends StatelessWidget {
                 height: 20,
                 width: 20,
                 child: CircularProgressIndicator(
-                  value: loadingProgress.expectedTotalBytes != null
-                      ? loadingProgress.cumulativeBytesLoaded /
-                          loadingProgress.expectedTotalBytes!
-                      : null,
+                  value: progress.progress,
                 ),
               ),
             ),
           );
         },
+        errorWidget: (context, url, error) {
+          return const Icon(Icons.error_outline_rounded);
+        },
       ),
+      // child: Image.network(
+      //   uri.toString(),
+      //   errorBuilder:
+      //       (BuildContext context, Object exception, StackTrace? stackTrace) {
+      //     return const Icon(Icons.error_outline_rounded);
+      //   },
+      //   loadingBuilder: (BuildContext context, Widget child,
+      //       ImageChunkEvent? loadingProgress) {
+      //     if (loadingProgress == null) return child;
+      //     return Center(
+      //       child: Padding(
+      //         padding: const EdgeInsets.all(20.0),
+      //         child: SizedBox(
+      //           height: 20,
+      //           width: 20,
+      //           child: CircularProgressIndicator(
+      //             value: loadingProgress.expectedTotalBytes != null
+      //                 ? loadingProgress.cumulativeBytesLoaded /
+      //                     loadingProgress.expectedTotalBytes!
+      //                 : null,
+      //           ),
+      //         ),
+      //       ),
+      //     );
+      //   },
+      // ),
     );
   }
 

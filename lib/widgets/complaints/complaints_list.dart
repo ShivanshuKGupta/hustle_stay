@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/chat.dart';
 import 'package:hustle_stay/models/complaint.dart';
@@ -19,52 +20,63 @@ class _ComplaintListState extends State<ComplaintList> {
         future: fetchComplaints(),
         builder: (ctx, snapshot) {
           if (!snapshot.hasData) {
-            return Center(
-              child: circularProgressIndicator(
-                height: null,
-                width: null,
-              ),
-            );
-          }
-          List<ComplaintData> complaints = snapshot.data!;
-          return RefreshIndicator(
-            onRefresh: () async {
-              setState(() {});
-            },
-            child: ListView.builder(
-              itemBuilder: (ctx, index) {
-                final complaint = complaints[index];
-                return ListTile(
-                  leading: Icon(
-                    Icons.info_rounded,
-                    size: 40,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  title: Text(complaint.title),
-                  subtitle: complaint.description == null
-                      ? null
-                      : Text(complaint.description!),
-                  onTap: () {
-                    navigatorPush(
-                      context,
-                      ChatScreen(
-                        chat: ChatData(
-                          path: "complaints/${complaint.id}",
-                          owner: UserData(email: complaint.from),
-                          receivers: complaint.to
-                              .map((e) => UserData(email: e))
-                              .toList(),
-                          title: complaint.title,
-                          description: complaint.description,
-                        ),
+            return FutureBuilder(
+                future: fetchComplaints(src: Source.cache),
+                builder: (ctx, snapshot) {
+                  if (!snapshot.hasData || snapshot.error != null) {
+                    return Center(
+                      child: circularProgressIndicator(
+                        height: null,
+                        width: null,
                       ),
                     );
-                  },
-                );
-              },
-              itemCount: complaints.length,
-            ),
-          );
+                  }
+                  List<ComplaintData> complaints = snapshot.data!;
+                  return complaintsList(complaints);
+                });
+          }
+          List<ComplaintData> complaints = snapshot.data!;
+          return complaintsList(complaints);
         });
+  }
+
+  Widget complaintsList(List<ComplaintData> complaints) {
+    return RefreshIndicator(
+      onRefresh: () async {
+        setState(() {});
+      },
+      child: ListView.builder(
+        itemBuilder: (ctx, index) {
+          final complaint = complaints[index];
+          return ListTile(
+            leading: Icon(
+              Icons.info_rounded,
+              size: 40,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            title: Text(complaint.title),
+            subtitle: complaint.description == null
+                ? null
+                : Text(complaint.description!),
+            onTap: () {
+              navigatorPush(
+                context,
+                ChatScreen(
+                  chat: ChatData(
+                    path: "complaints/${complaint.id}",
+                    owner: UserData(email: complaint.from),
+                    receivers:
+                        complaint.to.map((e) => UserData(email: e)).toList(),
+                    title: complaint.title,
+                    description: complaint.description,
+                  ),
+                ),
+              );
+            },
+          );
+        },
+        itemCount: complaints.length,
+      ),
+    );
   }
 }

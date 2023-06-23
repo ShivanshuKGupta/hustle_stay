@@ -34,7 +34,12 @@ class SettingsScreen extends ConsumerWidget {
                   future: fetchUserData(currentUser.email!),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
-                      return circularProgressIndicator();
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          circularProgressIndicator(),
+                        ],
+                      );
                     }
                     return ListTile(
                       title: Text(currentUser.name ??
@@ -93,8 +98,7 @@ class SettingsScreen extends ConsumerWidget {
               while (Navigator.of(context).canPop()) {
                 Navigator.of(context).pop();
               }
-              // Navigator.pushReplacement(
-              //     context, MaterialPageRoute(builder: (_) => AuthScreen()));
+              settingsClass.clearSettings();
               auth.signOut();
             },
           ),

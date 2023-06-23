@@ -71,13 +71,13 @@ Future<ComplaintData> fetchComplaint(String id) async {
 }
 
 /// fetches all complaints
-Future<List<ComplaintData>> fetchComplaints() async {
+Future<List<ComplaintData>> fetchComplaints({Source? src}) async {
   final store = FirebaseFirestore.instance;
   // Fetching all public complaints
   final publicComplaints = await store
       .collection('complaints')
       .where('scope', isEqualTo: 'public')
-      .get();
+      .get(src != null ? GetOptions(source: src) : null);
   List<ComplaintData> ans = publicComplaints.docs
       .map((e) => ComplaintData.convert(e.id, e.data()))
       .toList();
@@ -86,9 +86,19 @@ Future<List<ComplaintData>> fetchComplaints() async {
       .collection('complaints')
       .where('from', isEqualTo: currentUser.email)
       .where('scope', isEqualTo: 'private')
-      .get();
+      .get(src != null ? GetOptions(source: src) : null);
   ans += myComplaints.docs
       .map((e) => ComplaintData.convert(e.id, e.data()))
       .toList();
+  // Fetching all complaints in which the user is included
+  final includedComplaints = await store
+      .collection('complaints')
+      .where('to', arrayContains: currentUser.email)
+      .where('scope', isEqualTo: 'private')
+      .get(src != null ? GetOptions(source: src) : null);
+  ans += includedComplaints.docs
+      .map((e) => ComplaintData.convert(e.id, e.data()))
+      .toList();
+  ans.sort((a, b) => (int.parse(a.id) < int.parse(b.id)) ? 1 : 0);
   return ans;
 }
