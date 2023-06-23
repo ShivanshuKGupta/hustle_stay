@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/chat.dart';
 import 'package:hustle_stay/models/complaint.dart';
@@ -19,19 +20,45 @@ class _ComplaintListState extends State<ComplaintList> {
         future: fetchComplaints(),
         builder: (ctx, snapshot) {
           if (!snapshot.hasData) {
-            return Center(
-              child: circularProgressIndicator(
-                height: null,
-                width: null,
-              ),
-            );
+            return FutureBuilder(
+                future: fetchComplaints(src: Source.cache),
+                builder: (ctx, snapshot) {
+                  if (!snapshot.hasData || snapshot.error != null) {
+                    return Center(
+                      child: circularProgressIndicator(
+                        height: null,
+                        width: null,
+                      ),
+                    );
+                  }
+                  List<ComplaintData> complaints = snapshot.data!;
+                  return complaintsList(complaints);
+                });
           }
           List<ComplaintData> complaints = snapshot.data!;
-          return RefreshIndicator(
-            onRefresh: () async {
-              setState(() {});
-            },
-            child: ListView.builder(
+          return complaintsList(complaints);
+        });
+  }
+
+  Widget complaintsList(List<ComplaintData> complaints) {
+    return RefreshIndicator(
+      onRefresh: () async {
+        setState(() {});
+      },
+      child: complaints.isEmpty
+          ? ListView(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Text(
+                    'No Complaints ✨',
+                    style: Theme.of(context).textTheme.titleLarge,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            )
+          : ListView.builder(
               itemBuilder: (ctx, index) {
                 final complaint = complaints[index];
                 return ListTile(
@@ -64,7 +91,6 @@ class _ComplaintListState extends State<ComplaintList> {
               },
               itemCount: complaints.length,
             ),
-          );
-        });
+    );
   }
 }

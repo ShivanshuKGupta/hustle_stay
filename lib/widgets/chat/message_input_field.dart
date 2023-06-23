@@ -5,7 +5,9 @@ import 'package:hustle_stay/providers/image.dart';
 import 'package:hustle_stay/tools.dart';
 
 class MessageInputField extends StatefulWidget {
-  MessageInputField({super.key, required this.onSubmit});
+  final String initialValue;
+  MessageInputField(
+      {super.key, required this.onSubmit, required this.initialValue});
 
   final Future<void> Function(MessageData msg) onSubmit;
 
@@ -19,6 +21,12 @@ class _MessageInputFieldState extends State<MessageInputField> {
   String txt = "";
 
   final _msgTxtBox = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _msgTxtBox.text = widget.initialValue;
+  }
 
   void submit(context) async {
     if (!_formKey.currentState!.validate()) return;
