@@ -26,7 +26,7 @@ class Room {
   });
 }
 
-Future<List<Room>> fetchRooms(String hostelName) async {
+Future<List<Room>> fetchRooms(String hostelName, {Source? src}) async {
   List<Room> roomDataList = [];
   final storage = FirebaseFirestore.instance;
 
@@ -34,7 +34,7 @@ Future<List<Room>> fetchRooms(String hostelName) async {
       .collection('hostels')
       .doc(hostelName)
       .collection('Rooms')
-      .get();
+      .get(src != null ? GetOptions(source: src) : null);
   final roomDocs = roomSnapshot.docs;
   print(roomDocs.length);
   for (int i = 0; i < roomSnapshot.docs.length; i++) {
@@ -42,8 +42,9 @@ Future<List<Room>> fetchRooms(String hostelName) async {
     print(roomDocs[i]['capacity']);
     print(roomDocs[i]['roomName']);
     final roomRef = roomDocs[i].reference;
-    final roommatesSnapshot = await roomRef.collection('Roommates').get();
-    print('done here');
+    final roommatesSnapshot = await roomRef
+        .collection('Roommates')
+        .get(src != null ? GetOptions(source: src) : null);
     if (roommatesSnapshot.docs.isNotEmpty) {
       final List<RoommateData> roommatesData = [];
       for (var roommateDoc in roommatesSnapshot.docs) {
@@ -62,11 +63,9 @@ Future<List<Room>> fetchRooms(String hostelName) async {
         roomName: roomDocs[i]['roomName'],
         roomMatesData: roommatesData,
       );
-      print("reached here too");
       roomDataList.add(roomData);
       print(roomDataList);
     } else {
-      print("reached else part ");
       final roomData = Room(
         capacity: roomDocs[i]['capacity'],
         numberOfRoommates: roomDocs[i]['numRoommates'],
@@ -74,7 +73,6 @@ Future<List<Room>> fetchRooms(String hostelName) async {
         roomMatesData: [],
       );
       roomDataList.add(roomData);
-      print("reached end");
     }
   }
   print(roomDataList);

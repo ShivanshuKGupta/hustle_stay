@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/room.dart';
@@ -25,33 +26,43 @@ class _RoomListState extends State<RoomList> {
       child: FutureBuilder(
         future: fetchRooms(widget.hostelName),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: circularProgressIndicator(
-                height: null,
-                width: null,
-              ),
-            );
-          }
           if (!snapshot.hasData) {
-            return Center(
-              child: Text('No Rooms added yet!'),
+            return FutureBuilder(
+              future: fetchRooms(widget.hostelName, src: Source.cache),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting ||
+                    snapshot.hasData && snapshot.error != null) {
+                  return Center(
+                    child: circularProgressIndicator(
+                      height: null,
+                      width: null,
+                    ),
+                  );
+                }
+                return RoomListWidget(
+                    snapshot.data!, widget.hostelName, widget.numberOfRooms);
+              },
             );
           }
           print(snapshot.data);
           print(snapshot.data![0]);
-          return ListView.builder(
-            itemCount: widget.numberOfRooms,
-            itemBuilder: (context, index) {
-              final roomData = snapshot.data![index];
-              return RoomDataWidget(
-                hostelName: widget.hostelName,
-                roomData: roomData,
-              );
-            },
-          );
+          return RoomListWidget(
+              snapshot.data!, widget.hostelName, widget.numberOfRooms);
         },
       ),
     );
   }
+}
+
+Widget RoomListWidget(List<Room> room, String hostelName, int numberOfRooms) {
+  return ListView.builder(
+    itemCount: numberOfRooms,
+    itemBuilder: (context, index) {
+      final roomData = room[index];
+      return RoomDataWidget(
+        hostelName: hostelName,
+        roomData: roomData,
+      );
+    },
+  );
 }
