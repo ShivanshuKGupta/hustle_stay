@@ -45,6 +45,7 @@ dependencies:
   cloud_firestore: ^4.8.1
   flutter_markdown: ^0.6.15
   firebase_storage: ^11.2.3
+  cached_network_image: ^3.2.3
 
 dev_dependencies:
   flutter_test:
