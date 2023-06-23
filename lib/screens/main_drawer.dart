@@ -2,8 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/addHostel.dart';
-import 'package:hustle_stay/screens/complaints_screen.dart';
-import 'package:hustle_stay/screens/settings_screen.dart';
+import 'package:hustle_stay/screens/edit_profile_screen.dart';
 
 import 'package:hustle_stay/tools.dart';
 
@@ -71,16 +70,19 @@ class MainDrawer extends StatelessWidget {
           },
         ),
         const Divider(),
-        // _drawerTile(
-        //   context,
-        //   title: "Attendance",
-        //   icon: Icons.co_present_rounded,
-        //   subtitle: "View/Take Attendance",
-        //   onTap: () {
-        //     // TODO: Add a attendance screen
-        //     showMsg(context, "TODO: Add a attendance screen");
-        //   },
-        // ),
+        if (currentUser.readonly.isAdmin)
+          _drawerTile(
+            context,
+            title: "Add a user",
+            icon: Icons.person_add_rounded,
+            subtitle: "Add a user",
+            onTap: () async {
+              navigatorPush(
+                context,
+                EditProfile(),
+              );
+            },
+          ),
         // _drawerTile(
         //   context,
         //   title: "Complaint",

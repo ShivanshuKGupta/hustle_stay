@@ -41,6 +41,7 @@ class SettingsScreen extends ConsumerWidget {
                         ],
                       );
                     }
+                    currentUser = snapshot.data!;
                     return ListTile(
                       title: Text(currentUser.name ??
                           "Error"), // TODO: store other details about the user like name
@@ -52,8 +53,13 @@ class SettingsScreen extends ConsumerWidget {
                       trailing: IconButton(
                           color: Theme.of(context).colorScheme.primary,
                           onPressed: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (ctx) => EditProfile()));
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (ctx) => EditProfile(
+                                  user: currentUser,
+                                ),
+                              ),
+                            );
                           },
                           icon: const Icon(Icons.edit_rounded)),
                     );

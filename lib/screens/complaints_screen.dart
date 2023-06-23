@@ -62,7 +62,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
                   initialMsg: MessageData(
                     id: "_",
                     txt:
-                        "Hi ${complaint.to}, \n\nI hope you're doing well. I wanted to bring to your attention a concerning issue regarding **${complaint.title}**. ${complaint.description ?? ""}\n\nI kindly request your immediate attention to this matter. Clear communication and updates throughout the process would be greatly appreciated.\n\nThank you for your understanding, and I look forward to a satisfactory resolution.\n\nBest regards, \n${currentUser.name ?? currentUser.email}\n\n---\n\n[Image]",
+                        "Hi ${complaint.to}, \n\nI hope you're doing well. I wanted to bring to your attention a concerning issue regarding **${complaint.title}**. ${complaint.description ?? ""}\n\nI kindly request your immediate attention to this matter. Clear communication and updates throughout the process would be greatly appreciated.\n\nThank you for your understanding, and I look forward to a satisfactory resolution.\n\nBest regards, \n\n${currentUser.name ?? currentUser.email}\n\n---\n\n[Image]",
                     from: currentUser.email!,
                     createdAt: DateTime.now(),
                   ),

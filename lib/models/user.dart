@@ -2,15 +2,36 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum Role {
   student,
-  admin,
   warden,
   attender,
 }
 
+class ReadOnly {
+  bool isAdmin = false;
+  String type = "student";
+
+  void load(Map<String, dynamic> data) {
+    isAdmin = data['isAdmin'] ?? false;
+    type = data['type'] ?? "student";
+  }
+
+  Map<String, dynamic> encode() {
+    return {
+      "isAdmin": isAdmin,
+      "type": type,
+    };
+  }
+}
+
 class UserData {
   String? email, name, phoneNumber, address;
-  Role? role;
-  UserData({this.email, this.name, this.phoneNumber, this.address});
+  ReadOnly readonly = ReadOnly();
+  UserData({
+    this.email,
+    this.name,
+    this.phoneNumber,
+    this.address,
+  });
 
   Map<String, dynamic> encode() {
     return {
@@ -44,11 +65,18 @@ Future<UserData> fetchUserData(String email, {Source? src}) async {
           await store.collection('users').doc("$email/editable/details").get();
     }
   }
-  userData.load(response?.data() ?? {});
   userData.email = email;
-  // if (!response.exists) {
-  //   throw Exception("User details not found");
-  // }
+  userData.load(response?.data() ?? {});
+  try {
+    response = await store.collection('users').doc(email).get(
+          src == null ? null : GetOptions(source: src),
+        );
+  } catch (e) {
+    if (src == Source.cache) {
+      response = await store.collection('users').doc(email).get();
+    }
+  }
+  userData.readonly.load(response?.data() ?? {});
   return userData;
 }
 
@@ -58,16 +86,10 @@ Future<void> updateUserData(UserData userData) async {
       .collection('users')
       .doc("${userData.email}/editable/details")
       .set(userData.encode());
-}
-
-Map<String, UserData> userInfo = {};
-
-Future<UserData> getUserInfo(String email) async {
-  if (userInfo.containsKey(email)) {
-    return userInfo[email]!;
-  } else {
-    UserData user = await fetchUserData(email);
-    userInfo[email] = user;
-    return user;
+  if (currentUser.readonly.isAdmin) {
+    await store
+        .collection('users')
+        .doc(userData.email)
+        .set(userData.readonly.encode());
   }
 }

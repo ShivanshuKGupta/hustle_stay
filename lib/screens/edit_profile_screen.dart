@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user.dart';
@@ -6,18 +5,18 @@ import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/profile_image.dart';
 
 class EditProfile extends StatefulWidget {
-  EditProfile({super.key});
+  EditProfile({super.key, UserData? user}) {
+    this.user = user ?? UserData();
+  }
 
+  late final UserData user;
   @override
   State<EditProfile> createState() => _EditProfileState();
 }
 
 class _EditProfileState extends State<EditProfile> {
   final _formKey = GlobalKey<FormState>();
-
   bool _loading = false;
-
-  UserData user = currentUser;
 
   Future<void> save(context) async {
     FocusScope.of(context).unfocus();
@@ -27,7 +26,7 @@ class _EditProfileState extends State<EditProfile> {
       _loading = true;
     });
     try {
-      updateUserData(user);
+      await updateUserData(widget.user);
     } catch (e) {
       showMsg(context, e.toString());
     }
@@ -50,53 +49,101 @@ class _EditProfileState extends State<EditProfile> {
               children: [
                 ProfileImage(onChanged: (img) {}),
                 Text(
-                  currentUser.email!,
+                  widget.user.email ?? "",
                   style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                         color: Theme.of(context).colorScheme.primary,
                       ),
                 ),
                 const Divider(),
+                if (widget.user.email == null)
+                  TextFormField(
+                    key: UniqueKey(),
+                    maxLength: 50,
+                    enabled: widget.user.email == null,
+                    decoration: const InputDecoration(
+                      label: Text("Email"),
+                    ),
+                    initialValue: widget.user.name,
+                    validator: (email) {
+                      return Validate.email(email);
+                    },
+                    onSaved: (email) {
+                      widget.user.email = email!.trim();
+                    },
+                  ),
                 TextFormField(
+                  key: UniqueKey(),
                   maxLength: 50,
                   decoration: const InputDecoration(
                     label: Text("Name"),
                   ),
-                  initialValue: currentUser.name,
+                  initialValue: widget.user.name,
                   validator: (name) {
                     return Validate.name(name);
                   },
                   onSaved: (value) {
-                    user.name = value!.trim();
+                    widget.user.name = value!.trim();
                   },
                 ),
                 TextFormField(
+                  key: UniqueKey(),
                   keyboardType: TextInputType.phone,
                   decoration: const InputDecoration(
                     label: Text("Phone Number"),
                   ),
-                  initialValue: currentUser.phoneNumber,
+                  initialValue: widget.user.phoneNumber,
                   validator: (name) {
                     return Validate.phone(name, required: false);
                   },
                   onSaved: (value) {
-                    user.phoneNumber = value!.trim();
+                    widget.user.phoneNumber = value!.trim();
                   },
                 ),
                 TextFormField(
+                  key: UniqueKey(),
                   maxLength: 200,
                   keyboardType: TextInputType.streetAddress,
                   decoration: const InputDecoration(
                     label: Text("Address"),
                   ),
-                  initialValue: currentUser.address,
+                  initialValue: widget.user.address,
                   validator: (name) {
                     return Validate.text(name, required: false);
                   },
                   onSaved: (value) {
-                    user.address = value!.trim();
+                    widget.user.address = value!.trim();
                   },
                 ),
-                // TODO: add more fields about the person here
+                DropdownButtonFormField(
+                    key: UniqueKey(),
+                    decoration: const InputDecoration(label: Text('Type')),
+                    value: widget.user.readonly.type,
+                    items: ['attender', 'warden', 'student', 'other', "club"]
+                        .map(
+                          (e) => DropdownMenuItem(
+                            value: e,
+                            child: Text(e),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      widget.user.readonly.type = value ?? "student";
+                    }),
+                DropdownButtonFormField(
+                    key: UniqueKey(),
+                    decoration: const InputDecoration(label: Text('Admin')),
+                    value: widget.user.readonly.isAdmin,
+                    items: [true, false]
+                        .map(
+                          (e) => DropdownMenuItem(
+                            value: e,
+                            child: Text(e.toString()),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      widget.user.readonly.isAdmin = value ?? false;
+                    }),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -108,8 +155,12 @@ class _EditProfileState extends State<EditProfile> {
                             },
                       icon: _loading
                           ? circularProgressIndicator()
-                          : const Icon(Icons.save_rounded),
-                      label: const Text('Save'),
+                          : Icon(
+                              widget.user.email == null
+                                  ? Icons.person_add_rounded
+                                  : Icons.save_rounded,
+                            ),
+                      label: Text(widget.user.email == null ? 'Add' : 'Save'),
                     ),
                     TextButton.icon(
                       onPressed: () {
