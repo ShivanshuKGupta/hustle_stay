@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 class RoommateData {
   String name;
@@ -107,28 +108,58 @@ Future<bool> deleteRoom(String roomName, String hostelName) async {
 }
 
 Future<bool> changeRoom(String email, String hostelName, String roomName,
-    String destHostelName, String destRoomName) async {
+    String destHostelName, String destRoomName, BuildContext context) async {
   try {
     final storage = FirebaseFirestore.instance;
-    final sourceRef = storage
+    final sourceRoomRef = storage
         .collection('hostels')
         .doc(hostelName)
         .collection('Rooms')
-        .doc(roomName)
-        .collection('Roommates')
-        .doc(email);
+        .doc(roomName);
+    final sourceRef = sourceRoomRef.collection('Roommates').doc(email);
     final sData = await sourceRef.get();
-    final destLoc = await storage
+    final destRoomLoc = await storage
         .collection('hostels')
         .doc(destHostelName)
         .collection('Rooms')
-        .doc(destRoomName)
-        .collection('Roommates');
-    final sourceData = sData.data();
-    await destLoc.doc(email).set(sourceData!);
-    sourceRef.delete();
+        .doc(destRoomName);
+    if (await destRoomLoc.get().then((value) {
+      return value['capacity'] > value['numRoommates'];
+    })) {
+      final destLoc = destRoomLoc.collection('Roommates');
+      final sourceData = sData.data();
+      await destRoomLoc.update({'numRoommates': FieldValue.increment(1)});
+      await destLoc.doc(email).set(sourceData!);
+      await sourceRoomRef.update({'numRoommates': FieldValue.increment(-1)});
+      sourceRef.delete();
+    } else {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$destRoomName is filled with its capacity')));
+      return false;
+    }
     return true;
   } catch (e) {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(e.toString())));
     return false;
   }
+}
+
+Future<List<DropdownMenuItem>> fetchRoomNames(String hostelName) async {
+  List<DropdownMenuItem> list = [];
+  final storage = FirebaseFirestore.instance;
+  final storageRef = await storage
+      .collection('hostels')
+      .doc(hostelName)
+      .collection('Rooms')
+      .get();
+  storageRef.docs.forEach((element) {
+    list.add(DropdownMenuItem(
+      child: Text(element.id),
+      value: element.id,
+    ));
+  });
+  return list;
 }

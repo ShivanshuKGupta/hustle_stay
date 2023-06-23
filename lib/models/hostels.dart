@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 // enum String {
 //   boys,
@@ -43,27 +44,6 @@ Future<List<Hostels>> fetchHostels() async {
   return HostelDataList;
 }
 
-// final currentHostels = [
-//   Hostels(
-//       capacity: 48,
-//       hostelName: 'Tungabhadra',
-//       hostelType: String.girls,
-//       numberOfRooms: 16,
-//       numberOfFloorsorBlocks: 2),
-//   Hostels(
-//       capacity: 48,
-//       hostelName: 'Krishna',
-//       hostelType: String.boys,
-//       numberOfRooms: 16,
-//       numberOfFloorsorBlocks: 2),
-//   Hostels(
-//       capacity: 83,
-//       hostelName: 'Federal',
-//       hostelType: String.boys,
-//       numberOfRooms: 13,
-//       numberOfFloorsorBlocks: 2),
-// ];
-
 Future<void> uploadHostel(Hostels hostel) async {
   final store = FirebaseFirestore.instance;
   print(store);
@@ -76,12 +56,15 @@ Future<void> uploadHostel(Hostels hostel) async {
   });
 }
 
-// void addHostel(String hostelName, String hostelType, int capacity,
-//     int numberOfRooms, int numberOfFloorsorBlocks) {
-//   currentHostels.add(Hostels(
-//       capacity: capacity,
-//       hostelName: hostelName,
-//       hostelType: hostelType,
-//       numberOfRooms: numberOfRooms,
-//       numberOfFloorsorBlocks: numberOfFloorsorBlocks));
-// }
+Future<List<DropdownMenuItem>> fetchHostelNames() async {
+  List<DropdownMenuItem> list = [];
+  final storage = FirebaseFirestore.instance;
+  final storageRef = await storage.collection('hostels').get();
+  storageRef.docs.forEach((element) {
+    list.add(DropdownMenuItem(
+      child: Text(element.id),
+      value: element.id,
+    ));
+  });
+  return list;
+}

@@ -4,8 +4,14 @@ import '../../../models/room.dart';
 import '../../../screens/profile_view_screen.dart';
 
 class RoommateDataWidget extends StatefulWidget {
-  RoommateDataWidget({super.key, required this.roommateData});
+  RoommateDataWidget(
+      {super.key,
+      required this.roommateData,
+      required this.hostelName,
+      required this.roomName});
   RoommateData roommateData;
+  String hostelName;
+  String roomName;
 
   @override
   State<RoommateDataWidget> createState() => _RoommateDataWidgetState();
@@ -18,11 +24,15 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
   var currentIcon = Icon(Icons.close_rounded, color: Colors.red);
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return GestureDetector(
       onTap: () {
         Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) =>
-                ProfileViewScreen(email: widget.roommateData.email)));
+            builder: (_) => ProfileViewScreen(
+                  userName: widget.roommateData.name,
+                  email: widget.roommateData.email,
+                  hostelName: widget.hostelName,
+                  roomName: widget.roomName,
+                )));
       },
       child: ListTile(
           leading: const CircleAvatar(
