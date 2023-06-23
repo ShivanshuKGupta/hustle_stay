@@ -25,10 +25,12 @@ class Hostels {
   });
 }
 
-Future<List<Hostels>> fetchHostels() async {
+Future<List<Hostels>> fetchHostels({Source? src}) async {
   List<Hostels> HostelDataList = [];
   final storage = FirebaseFirestore.instance;
-  final hostelList = await storage.collection('hostels').get();
+  final hostelList = await storage
+      .collection('hostels')
+      .get(src != null ? GetOptions(source: src) : null);
   final listHostel = hostelList.docs.toList();
   for (int i = 0; i < listHostel.length; i++) {
     HostelDataList.add(Hostels(
@@ -56,10 +58,12 @@ Future<void> uploadHostel(Hostels hostel) async {
   });
 }
 
-Future<List<DropdownMenuItem>> fetchHostelNames() async {
+Future<List<DropdownMenuItem>> fetchHostelNames({Source? src}) async {
   List<DropdownMenuItem> list = [];
   final storage = FirebaseFirestore.instance;
-  final storageRef = await storage.collection('hostels').get();
+  final storageRef = await storage
+      .collection('hostels')
+      .get(src == null ? null : GetOptions(source: src));
   storageRef.docs.forEach((element) {
     list.add(DropdownMenuItem(
       child: Text(element.id),

@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import "package:flutter_riverpod/flutter_riverpod.dart";
-
 import '../tools.dart';
 
 class RoommateForm extends ConsumerStatefulWidget {
@@ -24,7 +22,17 @@ class RoommateForm extends ConsumerStatefulWidget {
 class _RoommateFormState extends ConsumerState<RoommateForm> {
   List<GlobalKey<FormState>> _formKeyList = [];
   final storage = FirebaseFirestore.instance;
-  // final _formKeyList = GlobalKey<FormState>();
+  String capitalizeEachWord(String value) {
+    List<String> subValue = value.split(' ');
+    for (int i = 0; i < subValue.length; i++) {
+      String word = subValue[i];
+      if (word.isNotEmpty) {
+        subValue[i] = word[0].toUpperCase() + word.substring(1);
+      }
+    }
+    return subValue.join(' ');
+  }
+
   int currentRoommateNumber = 0;
   String roommateName = "";
   String roommateEmail = "";
@@ -132,7 +140,7 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
                               return null;
                             },
                             onChanged: (value) {
-                              roommateName = value.toLowerCase();
+                              roommateName = capitalizeEachWord(value);
                             },
                           ),
                           TextFormField(
@@ -148,7 +156,7 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
                               return null;
                             },
                             onChanged: (value) {
-                              roommateEmail = value;
+                              roommateEmail = value.toLowerCase();
                             },
                           ),
                           TextFormField(

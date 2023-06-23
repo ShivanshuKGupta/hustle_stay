@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../../models/hostels.dart';
@@ -7,9 +8,11 @@ import 'fetch_rooms.dart';
 class FetchHostelNames extends StatefulWidget {
   FetchHostelNames(
       {super.key,
+      required this.isSwap,
       required this.email,
       required this.roomName,
       required this.hostelName});
+  bool isSwap;
   String email;
   String roomName;
   String hostelName;
@@ -27,45 +30,60 @@ class _FetchHostelNamesState extends State<FetchHostelNames> {
         FutureBuilder(
           future: fetchHostelNames(),
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: circularProgressIndicator(
-                  height: null,
-                  width: null,
-                ),
+            if (!snapshot.hasData) {
+              return FutureBuilder(
+                future: fetchHostelNames(src: Source.cache),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting ||
+                      !snapshot.hasData ||
+                      snapshot.error != null) {
+                    return Center(
+                      child: circularProgressIndicator(
+                        height: null,
+                        width: null,
+                      ),
+                    );
+                  }
+                  return HostelDropDown(snapshot.data!);
+                },
               );
             }
-            return Container(
-              width: MediaQuery.of(context).size.width,
-              child: Row(
-                children: [
-                  Text(
-                    'Choose new Hostel',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  SizedBox(
-                    width: 5,
-                  ),
-                  DropdownButton(
-                      items: snapshot.data,
-                      value: destHostelName,
-                      onChanged: (value) {
-                        setState(() {
-                          destHostelName = value;
-                        });
-                      }),
-                ],
-              ),
-            );
+            return HostelDropDown(snapshot.data!);
           },
         ),
         if (destHostelName != null && destHostelName != "")
           FetchRooms(
+              isSwap: widget.isSwap,
               destHostelName: destHostelName!,
               email: widget.email,
               roomName: widget.roomName,
               hostelName: widget.hostelName)
       ],
+    );
+  }
+
+  Widget HostelDropDown(List<DropdownMenuItem> list) {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      child: Row(
+        children: [
+          Text(
+            !widget.isSwap ? 'Choose new Hostel' : 'Choose Hostel to Swap',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          SizedBox(
+            width: 5,
+          ),
+          DropdownButton(
+              items: list,
+              value: destHostelName,
+              onChanged: (value) {
+                setState(() {
+                  destHostelName = value;
+                });
+              }),
+        ],
+      ),
     );
   }
 }

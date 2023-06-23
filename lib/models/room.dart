@@ -145,17 +145,93 @@ Future<bool> changeRoom(String email, String hostelName, String roomName,
   }
 }
 
-Future<List<DropdownMenuItem>> fetchRoomNames(String hostelName) async {
+Future<bool> swapRoom(
+    String email,
+    String hostelName,
+    String roomName,
+    String destRoommateEmail,
+    String destHostelName,
+    String destRoomName,
+    BuildContext context) async {
+  try {
+    final storage = FirebaseFirestore.instance;
+
+    final swapResult = await storage.runTransaction((transaction) async {
+      final sourceLoc = storage
+          .collection('hostels')
+          .doc(hostelName)
+          .collection('Rooms')
+          .doc(roomName)
+          .collection('Roommates');
+      final sourceRef = sourceLoc.doc(email);
+      final sData = await transaction.get(sourceRef);
+
+      final destLoc = storage
+          .collection('hostels')
+          .doc(destHostelName)
+          .collection('Rooms')
+          .doc(destRoomName)
+          .collection('Roommates');
+      final destRef = destLoc.doc(destRoommateEmail);
+      final dData = await transaction.get(destRef);
+
+      final sourceData = sData.data();
+      final destData = dData.data();
+
+      transaction.delete(destRef);
+      transaction.delete(sourceRef);
+      transaction.set(destLoc.doc(email), sourceData!);
+      transaction.set(sourceLoc.doc(destRoommateEmail), destData!);
+
+      return true;
+    });
+
+    if (swapResult == true) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(e.toString())));
+    return false;
+  }
+}
+
+Future<List<DropdownMenuItem>> fetchRoomNames(String hostelName,
+    {Source? src}) async {
   List<DropdownMenuItem> list = [];
   final storage = FirebaseFirestore.instance;
   final storageRef = await storage
       .collection('hostels')
       .doc(hostelName)
       .collection('Rooms')
-      .get();
+      .get(src == null ? null : GetOptions(source: src));
   storageRef.docs.forEach((element) {
     list.add(DropdownMenuItem(
       child: Text(element.id),
+      value: element.id,
+    ));
+  });
+  return list;
+}
+
+Future<List<DropdownMenuItem>> fetchRoommateNames(
+    String hostelName, String roomName,
+    {Source? src}) async {
+  List<DropdownMenuItem> list = [];
+  final storage = FirebaseFirestore.instance;
+  final storageRef = await storage
+      .collection('hostels')
+      .doc(hostelName)
+      .collection('Rooms')
+      .doc(roomName)
+      .collection('Roommates')
+      .get(src == null ? null : GetOptions(source: src));
+  storageRef.docs.forEach((element) {
+    list.add(DropdownMenuItem(
+      child: Text(element['name']),
       value: element.id,
     ));
   });

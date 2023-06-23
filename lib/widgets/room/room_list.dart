@@ -19,50 +19,50 @@ class RoomList extends StatefulWidget {
 class _RoomListState extends State<RoomList> {
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: fetchRooms(widget.hostelName),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return FutureBuilder(
+            future: fetchRooms(widget.hostelName, src: Source.cache),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting ||
+                  snapshot.hasData && snapshot.error != null) {
+                return Center(
+                  child: circularProgressIndicator(
+                    height: null,
+                    width: null,
+                  ),
+                );
+              }
+              return RoomListWidget(
+                  snapshot.data!, widget.hostelName, widget.numberOfRooms);
+            },
+          );
+        }
+        print(snapshot.data);
+        print(snapshot.data![0]);
+        return RoomListWidget(
+            snapshot.data!, widget.hostelName, widget.numberOfRooms);
+      },
+    );
+  }
+
+  Widget RoomListWidget(List<Room> room, String hostelName, int numberOfRooms) {
     return RefreshIndicator(
       onRefresh: () async {
         setState(() {});
       },
-      child: FutureBuilder(
-        future: fetchRooms(widget.hostelName),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return FutureBuilder(
-              future: fetchRooms(widget.hostelName, src: Source.cache),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting ||
-                    snapshot.hasData && snapshot.error != null) {
-                  return Center(
-                    child: circularProgressIndicator(
-                      height: null,
-                      width: null,
-                    ),
-                  );
-                }
-                return RoomListWidget(
-                    snapshot.data!, widget.hostelName, widget.numberOfRooms);
-              },
-            );
-          }
-          print(snapshot.data);
-          print(snapshot.data![0]);
-          return RoomListWidget(
-              snapshot.data!, widget.hostelName, widget.numberOfRooms);
+      child: ListView.builder(
+        itemCount: numberOfRooms,
+        itemBuilder: (context, index) {
+          final roomData = room[index];
+          return RoomDataWidget(
+            hostelName: hostelName,
+            roomData: roomData,
+          );
         },
       ),
     );
   }
-}
-
-Widget RoomListWidget(List<Room> room, String hostelName, int numberOfRooms) {
-  return ListView.builder(
-    itemCount: numberOfRooms,
-    itemBuilder: (context, index) {
-      final roomData = room[index];
-      return RoomDataWidget(
-        hostelName: hostelName,
-        roomData: roomData,
-      );
-    },
-  );
 }

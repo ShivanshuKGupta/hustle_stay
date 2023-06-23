@@ -4,9 +4,11 @@ import 'package:hustle_stay/widgets/room/change_room/fetch_hostels.dart';
 class ChangeRoomWidget extends StatefulWidget {
   ChangeRoomWidget(
       {super.key,
+      required this.isSwap,
       required this.email,
       required this.roomName,
       required this.hostelName});
+  bool isSwap;
   String email;
   String roomName;
   String hostelName;
@@ -18,6 +20,7 @@ class _ChangeRoomWidgetState extends State<ChangeRoomWidget> {
   @override
   Widget build(BuildContext context) {
     return FetchHostelNames(
+        isSwap: widget.isSwap,
         email: widget.email,
         roomName: widget.roomName,
         hostelName: widget.hostelName);

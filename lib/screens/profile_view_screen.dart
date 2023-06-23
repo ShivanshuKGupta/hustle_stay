@@ -136,9 +136,17 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                           if (dropdownVal != null &&
                               dropdownVal == 'Change Hostel/Room')
                             ChangeRoomWidget(
+                                isSwap: false,
                                 email: widget.email,
                                 roomName: widget.roomName,
-                                hostelName: widget.hostelName)
+                                hostelName: widget.hostelName),
+                          if (dropdownVal != null &&
+                              dropdownVal == "Swap Hostel/Room")
+                            ChangeRoomWidget(
+                                isSwap: true,
+                                email: widget.email,
+                                roomName: widget.roomName,
+                                hostelName: widget.hostelName),
                         ],
                       )),
                 ],
