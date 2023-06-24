@@ -200,7 +200,7 @@ Future<bool> swapRoom(
 }
 
 Future<List<DropdownMenuItem>> fetchRoomNames(String hostelName,
-    {Source? src}) async {
+    {String? roomname, Source? src}) async {
   List<DropdownMenuItem> list = [];
   final storage = FirebaseFirestore.instance;
   final storageRef = await storage
@@ -209,10 +209,12 @@ Future<List<DropdownMenuItem>> fetchRoomNames(String hostelName,
       .collection('Rooms')
       .get(src == null ? null : GetOptions(source: src));
   storageRef.docs.forEach((element) {
-    list.add(DropdownMenuItem(
-      child: Text(element.id),
-      value: element.id,
-    ));
+    if (roomname == null || element.id != roomname) {
+      list.add(DropdownMenuItem(
+        child: Text(element.id),
+        value: element.id,
+      ));
+    }
   });
   return list;
 }

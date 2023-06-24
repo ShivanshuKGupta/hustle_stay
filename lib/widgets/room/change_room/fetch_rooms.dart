@@ -23,6 +23,14 @@ class FetchRooms extends StatefulWidget {
 }
 
 class _FetchRoomsState extends State<FetchRooms> {
+  @override
+  void didUpdateWidget(covariant FetchRooms oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    setState(() {
+      destRoomName = null;
+    });
+  }
+
   bool isRunning = false;
   String? destRoomName;
   void _submitForm() async {
@@ -40,7 +48,7 @@ class _FetchRoomsState extends State<FetchRooms> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: fetchRoomNames(widget.destHostelName),
+      future: fetchRoomNames(widget.destHostelName, roomname: widget.roomName),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return FutureBuilder(

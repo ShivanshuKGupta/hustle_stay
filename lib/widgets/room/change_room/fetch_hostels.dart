@@ -25,31 +25,56 @@ class _FetchHostelNamesState extends State<FetchHostelNames> {
   String? destHostelName;
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: fetchHostelNames(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return FutureBuilder(
+            future: fetchHostelNames(src: Source.cache),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting ||
+                  !snapshot.hasData ||
+                  snapshot.error != null) {
+                return Center(
+                  child: circularProgressIndicator(
+                    height: null,
+                    width: null,
+                  ),
+                );
+              }
+              return HostelDropDown(snapshot.data!);
+            },
+          );
+        }
+        return HostelDropDown(snapshot.data!);
+      },
+    );
+  }
+
+  Widget HostelDropDown(List<DropdownMenuItem> list) {
     return Column(
       children: [
-        FutureBuilder(
-          future: fetchHostelNames(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return FutureBuilder(
-                future: fetchHostelNames(src: Source.cache),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting ||
-                      !snapshot.hasData ||
-                      snapshot.error != null) {
-                    return Center(
-                      child: circularProgressIndicator(
-                        height: null,
-                        width: null,
-                      ),
-                    );
-                  }
-                  return HostelDropDown(snapshot.data!);
-                },
-              );
-            }
-            return HostelDropDown(snapshot.data!);
-          },
+        Container(
+          width: MediaQuery.of(context).size.width,
+          child: Row(
+            children: [
+              Text(
+                !widget.isSwap ? 'Choose new Hostel' : 'Choose Hostel to Swap',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              SizedBox(
+                width: 5,
+              ),
+              DropdownButton(
+                  items: list,
+                  value: destHostelName,
+                  onChanged: (value) {
+                    setState(() {
+                      destHostelName = value;
+                    });
+                  }),
+            ],
+          ),
         ),
         if (destHostelName != null && destHostelName != "")
           FetchRooms(
@@ -59,31 +84,6 @@ class _FetchHostelNamesState extends State<FetchHostelNames> {
               roomName: widget.roomName,
               hostelName: widget.hostelName)
       ],
-    );
-  }
-
-  Widget HostelDropDown(List<DropdownMenuItem> list) {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      child: Row(
-        children: [
-          Text(
-            !widget.isSwap ? 'Choose new Hostel' : 'Choose Hostel to Swap',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          SizedBox(
-            width: 5,
-          ),
-          DropdownButton(
-              items: list,
-              value: destHostelName,
-              onChanged: (value) {
-                setState(() {
-                  destHostelName = value;
-                });
-              }),
-        ],
-      ),
     );
   }
 }

@@ -103,7 +103,7 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
                       ScaffoldMessenger.of(context).clearSnackBars();
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           content: Text(
-                              "Capacity Overflow. Only ${widget.capacity - widget.numRoommates} rooms can be added.")));
+                              "Capacity Overflow. Only ${widget.capacity - widget.numRoommates}  more roommates can be added.")));
                     }
                     for (int i = 0; i < numOfRoommates; i++) {
                       _formKeyList.add(GlobalKey<FormState>());
