@@ -1,29 +1,33 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProfileImage extends StatefulWidget {
   final void Function(File fileImage) onChanged;
-  const ProfileImage({super.key, required this.onChanged});
+  File? img;
+  String? url;
+  ProfileImage({super.key, required this.onChanged, this.img, this.url});
 
   @override
   State<ProfileImage> createState() => _ProfileImageState();
 }
 
 class _ProfileImageState extends State<ProfileImage> {
-  XFile? _pickedImage;
-
   @override
   Widget build(BuildContext context) {
     return Stack(
       fit: StackFit.passthrough,
       children: [
         CircleAvatar(
-          backgroundImage:
-              _pickedImage == null ? null : FileImage(File(_pickedImage!.path)),
+          backgroundImage: widget.img == null
+              ? (widget.url == null
+                  ? null
+                  : CachedNetworkImageProvider(widget.url!) as ImageProvider)
+              : FileImage(widget.img!),
           radius: 50,
-          child: _pickedImage != null
+          child: widget.img != null || widget.url != null
               ? null
               : const Icon(
                   Icons.person_rounded,
@@ -44,12 +48,12 @@ class _ProfileImageState extends State<ProfileImage> {
                 source: ImageSource.camera,
                 preferredCameraDevice: CameraDevice.front,
                 imageQuality: 50,
-                maxWidth: 140,
+                maxWidth: 200,
               )
                   .then((value) {
                 if (value == null) return;
-                setState(() => _pickedImage = value);
-                widget.onChanged(File(_pickedImage!.path));
+                setState(() => widget.img = File(value.path));
+                widget.onChanged(widget.img!);
               });
             },
             icon: const Icon(Icons.camera_rounded),
@@ -68,11 +72,14 @@ class _ProfileImageState extends State<ProfileImage> {
               onPressed: () {
                 ImagePicker()
                     .pickImage(
-                        source: ImageSource.gallery,
-                        preferredCameraDevice: CameraDevice.front)
+                  source: ImageSource.gallery,
+                  imageQuality: 50,
+                  maxWidth: 200,
+                )
                     .then((value) {
                   if (value == null) return;
-                  setState(() => _pickedImage = value);
+                  setState(() => widget.img = File(value.path));
+                  widget.onChanged(widget.img!);
                 });
               },
               icon: const Icon(Icons.image_rounded)),

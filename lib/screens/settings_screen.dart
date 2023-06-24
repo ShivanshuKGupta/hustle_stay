@@ -1,5 +1,6 @@
 // import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -7,7 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/edit_profile_screen.dart';
 import 'package:hustle_stay/tools.dart';
-import 'package:hustle_stay/widgets/profile_image.dart';
 
 import '../models/user.dart';
 
@@ -25,10 +25,18 @@ class SettingsScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(15.0),
           child: Row(
             children: [
-              ProfileImage(onChanged: (image) {
-                debugPrint("New image taken");
-                // TODO: upload this image for the current user
-              }),
+              CircleAvatar(
+                backgroundImage: currentUser.imgUrl == null
+                    ? null
+                    : CachedNetworkImageProvider(currentUser.imgUrl!),
+                radius: 50,
+                child: currentUser.imgUrl != null
+                    ? null
+                    : const Icon(
+                        Icons.person_rounded,
+                        size: 50,
+                      ),
+              ),
               Expanded(
                 child: FutureBuilder(
                   future: fetchUserData(currentUser.email!),
@@ -52,14 +60,17 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                       trailing: IconButton(
                           color: Theme.of(context).colorScheme.primary,
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (ctx) => EditProfile(
-                                  user: currentUser,
-                                ),
-                              ),
-                            );
+                          onPressed: () async {
+                            if (await Navigator.of(context).push<bool?>(
+                                  MaterialPageRoute(
+                                    builder: (ctx) => EditProfile(
+                                      user: currentUser,
+                                    ),
+                                  ),
+                                ) ==
+                                true) {
+                              settingsClass.notifyListeners();
+                            }
                           },
                           icon: const Icon(Icons.edit_rounded)),
                     );

@@ -46,6 +46,7 @@ class Message extends StatelessWidget {
 
     return GestureDetector(
       onTap: () => showMsgInfo(context, msg),
+      onLongPress: () => showInfo(context, msg),
       child: Container(
         constraints: BoxConstraints(
           minWidth: 100,
@@ -295,32 +296,6 @@ class Message extends StatelessWidget {
           return const Icon(Icons.error_outline_rounded);
         },
       ),
-      // child: Image.network(
-      //   uri.toString(),
-      //   errorBuilder:
-      //       (BuildContext context, Object exception, StackTrace? stackTrace) {
-      //     return const Icon(Icons.error_outline_rounded);
-      //   },
-      //   loadingBuilder: (BuildContext context, Widget child,
-      //       ImageChunkEvent? loadingProgress) {
-      //     if (loadingProgress == null) return child;
-      //     return Center(
-      //       child: Padding(
-      //         padding: const EdgeInsets.all(20.0),
-      //         child: SizedBox(
-      //           height: 20,
-      //           width: 20,
-      //           child: CircularProgressIndicator(
-      //             value: loadingProgress.expectedTotalBytes != null
-      //                 ? loadingProgress.cumulativeBytesLoaded /
-      //                     loadingProgress.expectedTotalBytes!
-      //                 : null,
-      //           ),
-      //         ),
-      //       ),
-      //     );
-      //   },
-      // ),
     );
   }
 
