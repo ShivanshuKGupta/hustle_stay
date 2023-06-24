@@ -113,7 +113,7 @@ class _AddRoomWidState extends ConsumerState<AddRoomWid> {
                             return null;
                           },
                           onChanged: (value) {
-                            roomName = value;
+                            roomName = value.toUpperCase();
                           },
                         ),
                         TextFormField(

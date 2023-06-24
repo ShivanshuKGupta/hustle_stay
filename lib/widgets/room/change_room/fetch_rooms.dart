@@ -48,7 +48,10 @@ class _FetchRoomsState extends State<FetchRooms> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: fetchRoomNames(widget.destHostelName, roomname: widget.roomName),
+      future: fetchRoomNames(widget.destHostelName,
+          roomname: widget.destHostelName == widget.hostelName
+              ? widget.roomName
+              : null),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return FutureBuilder(
@@ -65,7 +68,11 @@ class _FetchRoomsState extends State<FetchRooms> {
               }
               return RoomDropdownWithSubmit(snapshot.data!);
             },
-            future: fetchRoomNames(widget.destHostelName, src: Source.cache),
+            future: fetchRoomNames(widget.destHostelName,
+                src: Source.cache,
+                roomname: widget.destHostelName == widget.hostelName
+                    ? widget.roomName
+                    : null),
           );
         }
         return RoomDropdownWithSubmit(snapshot.data!);
