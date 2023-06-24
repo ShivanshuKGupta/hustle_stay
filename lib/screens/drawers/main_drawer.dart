@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/addHostel.dart';
-import 'package:hustle_stay/screens/edit_profile_screen.dart';
+import 'package:hustle_stay/screens/auth/edit_profile_screen.dart';
 
 import 'package:hustle_stay/tools.dart';
 

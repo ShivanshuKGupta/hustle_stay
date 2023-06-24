@@ -4,12 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/complaints/complaints_screen.dart';
-import 'package:hustle_stay/screens/settings_screen.dart';
+import 'package:hustle_stay/screens/settings/settings_screen.dart';
 
 import 'package:hustle_stay/tools.dart';
 
 import 'hostel_screen.dart';
-import 'main_drawer.dart';
+import 'drawers/main_drawer.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   HomeScreen({super.key});

@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/providers/settings.dart';
-import 'package:hustle_stay/screens/edit_profile_screen.dart';
+import 'package:hustle_stay/screens/auth/edit_profile_screen.dart';
 
-import '../models/user.dart';
+import '../../models/user.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
