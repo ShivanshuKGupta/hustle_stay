@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-import 'package:hustle_stay/models/chat.dart';
+import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/message.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/image.dart';

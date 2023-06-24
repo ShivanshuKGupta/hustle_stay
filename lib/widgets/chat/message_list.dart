@@ -5,7 +5,7 @@ import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/chat/message.dart';
 
-import 'package:hustle_stay/models/chat.dart';
+import 'package:hustle_stay/models/chat/chat.dart';
 
 class MessageList extends StatefulWidget {
   ChatData chat;

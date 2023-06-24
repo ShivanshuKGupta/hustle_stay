@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/models/chat.dart';
+import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/complaint.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/chat_screen.dart';
@@ -13,6 +13,9 @@ class ComplaintList extends StatefulWidget {
   State<ComplaintList> createState() => _ComplaintListState();
 }
 
+/// This contains fetched complaints which are mostly upto date
+List<ComplaintData> complaints = [];
+
 class _ComplaintListState extends State<ComplaintList> {
   @override
   Widget build(BuildContext context) {
@@ -23,24 +26,23 @@ class _ComplaintListState extends State<ComplaintList> {
             return FutureBuilder(
                 future: fetchComplaints(src: Source.cache),
                 builder: (ctx, snapshot) {
-                  if (!snapshot.hasData || snapshot.error != null) {
+                  if (snapshot.hasData) {
+                    complaints = snapshot.data!;
+                  } else if (complaints.isEmpty) {
                     return Center(
-                      child: circularProgressIndicator(
-                        height: null,
-                        width: null,
-                      ),
+                      child:
+                          circularProgressIndicator(height: null, width: null),
                     );
                   }
-                  List<ComplaintData> complaints = snapshot.data!;
-                  return complaintsList(complaints);
+                  return complaintsList();
                 });
           }
-          List<ComplaintData> complaints = snapshot.data!;
-          return complaintsList(complaints);
+          complaints = snapshot.data!;
+          return complaintsList();
         });
   }
 
-  Widget complaintsList(List<ComplaintData> complaints) {
+  Widget complaintsList() {
     return RefreshIndicator(
       onRefresh: () async {
         setState(() {});

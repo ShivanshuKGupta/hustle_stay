@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:hustle_stay/tools.dart';
 
 class ReadOnly {
   bool isAdmin = false;
@@ -49,7 +47,11 @@ class UserData {
   }
 }
 
-Future<UserData> fetchUserData(String email, {Source? src}) async {
+Future<UserData> fetchUserData(
+  String email, {
+  Source? src = Source.cache,
+  bool keepUptoDate = false,
+}) async {
   final store = FirebaseFirestore.instance;
   UserData userData = UserData();
   DocumentSnapshot<Map<String, dynamic>>? response;
@@ -58,6 +60,9 @@ Future<UserData> fetchUserData(String email, {Source? src}) async {
         await store.collection('users').doc("$email/editable/details").get(
               src == null ? null : GetOptions(source: src),
             );
+    if (keepUptoDate) {
+      store.collection('users').doc("$email/editable/details").get();
+    }
   } catch (e) {
     if (src == Source.cache) {
       response =
@@ -70,6 +75,9 @@ Future<UserData> fetchUserData(String email, {Source? src}) async {
     response = await store.collection('users').doc(email).get(
           src == null ? null : GetOptions(source: src),
         );
+    if (keepUptoDate) {
+      store.collection('users').doc(email).get();
+    }
   } catch (e) {
     if (src == Source.cache) {
       response = await store.collection('users').doc(email).get();

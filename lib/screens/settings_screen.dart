@@ -1,13 +1,13 @@
 // import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/edit_profile_screen.dart';
-import 'package:hustle_stay/tools.dart';
 
 import '../models/user.dart';
 
@@ -42,38 +42,19 @@ class SettingsScreen extends ConsumerWidget {
                   future: fetchUserData(currentUser.email!),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          circularProgressIndicator(),
-                        ],
-                      );
+                      return FutureBuilder(
+                          future: fetchUserData(currentUser.email!,
+                              src: Source.cache),
+                          builder: (ctx, snapshot) {
+                            if (snapshot.hasData) {
+                              currentUser = snapshot.data!;
+                            }
+                            return userTile(
+                                context, currentUser, settingsClass);
+                          });
                     }
                     currentUser = snapshot.data!;
-                    return ListTile(
-                      title: Text(currentUser.name ??
-                          "Error"), // TODO: store other details about the user like name
-                      subtitle: Text(
-                        currentUser.email!,
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary),
-                      ),
-                      trailing: IconButton(
-                          color: Theme.of(context).colorScheme.primary,
-                          onPressed: () async {
-                            if (await Navigator.of(context).push<bool?>(
-                                  MaterialPageRoute(
-                                    builder: (ctx) => EditProfile(
-                                      user: currentUser,
-                                    ),
-                                  ),
-                                ) ==
-                                true) {
-                              settingsClass.notifyListeners();
-                            }
-                          },
-                          icon: const Icon(Icons.edit_rounded)),
-                    );
+                    return userTile(context, currentUser, settingsClass);
                   },
                 ),
               ),
@@ -129,6 +110,32 @@ class SettingsScreen extends ConsumerWidget {
         separatorBuilder: (ctx, _) => const Divider(),
         itemBuilder: (ctx, index) => widgetList[index],
       ),
+    );
+  }
+
+  Widget userTile(context, UserData currentUser, settingsClass) {
+    return ListTile(
+      title: Text(currentUser.name ??
+          "Error"), // TODO: store other details about the user like name
+      subtitle: Text(
+        currentUser.email!,
+        style: TextStyle(color: Theme.of(context).colorScheme.primary),
+      ),
+      trailing: IconButton(
+          color: Theme.of(context).colorScheme.primary,
+          onPressed: () async {
+            if (await Navigator.of(context).push<bool?>(
+                  MaterialPageRoute(
+                    builder: (ctx) => EditProfile(
+                      user: currentUser,
+                    ),
+                  ),
+                ) ==
+                true) {
+              settingsClass.notifyListeners();
+            }
+          },
+          icon: const Icon(Icons.edit_rounded)),
     );
   }
 }

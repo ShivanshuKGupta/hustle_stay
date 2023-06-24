@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/models/chat.dart';
+import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/complaint.dart';
 import 'package:hustle_stay/models/message.dart';
 import 'package:hustle_stay/models/user.dart';
@@ -40,11 +40,12 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: const ComplaintList(),
+      body: ComplaintList(
+        key: UniqueKey(),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           ComplaintData? complaint = await showAddComplaintPage(context);
-          print(complaint?.title);
           if (complaint != null) {
             final chat = ChatData(
               path: "complaints/${complaint.id}",
@@ -53,7 +54,9 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
               title: complaint.title,
               description: complaint.description,
             );
-            setState(() {});
+            setState(() {
+              complaints.insert(0, complaint);
+            });
             if (context.mounted) {
               navigatorPush(
                 context,

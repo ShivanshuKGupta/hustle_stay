@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'chat.dart';
+import 'chat/chat.dart';
 
 class MessageData {
   /// The datetime object representing the
