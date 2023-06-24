@@ -1,5 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/complaint.dart';
 import 'package:hustle_stay/models/user.dart';
 
@@ -39,9 +39,8 @@ class _ComplaintFormState extends State<ComplaintForm> {
     if (widget.id != null) {
       complaint = await fetchComplaint(widget.id!);
     }
-    final store = FirebaseFirestore.instance;
     final querySnapshot =
-        await store.collection('users').where('type', whereIn: [
+        await firestore.collection('users').where('type', whereIn: [
       'attender',
       'warden',
     ]).get();

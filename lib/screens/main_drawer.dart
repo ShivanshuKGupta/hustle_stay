@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/addHostel.dart';
@@ -28,7 +27,6 @@ class MainDrawer extends StatelessWidget {
   }
 
   Widget body(context) {
-    final auth = FirebaseAuth.instance;
     return Column(
       children: [
         ListTile(

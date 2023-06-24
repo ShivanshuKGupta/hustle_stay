@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hustle_stay/main.dart';
 
 import 'chat/chat.dart';
 
@@ -47,15 +47,13 @@ class MessageData {
 }
 
 Future<void> addMessage(ChatData chat, MessageData msg) async {
-  final store = FirebaseFirestore.instance;
-  final chatMessages = store.doc(chat.path).collection("chat");
+  final chatMessages = firestore.doc(chat.path).collection("chat");
   await chatMessages
       .doc(DateTime.now().millisecondsSinceEpoch.toString())
       .set(msg.encode());
 }
 
 Future<void> deleteMessage(ChatData chat, MessageData msg) async {
-  final store = FirebaseFirestore.instance;
-  final chatMessages = store.doc(chat.path).collection("chat");
+  final chatMessages = firestore.doc(chat.path).collection("chat");
   await chatMessages.doc(msg.id).delete();
 }

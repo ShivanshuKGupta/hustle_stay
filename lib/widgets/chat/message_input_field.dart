@@ -72,6 +72,7 @@ class _MessageInputFieldState extends State<MessageInputField> {
                                 "${DateTime.now().millisecondsSinceEpoch}.jpg");
                         if (url == null) return;
                         _msgTxtBox.text = "![image]($url)";
+                        // ignore: use_build_context_synchronously
                         submit(context);
                       },
                       icon: const Icon(Icons.add_rounded),

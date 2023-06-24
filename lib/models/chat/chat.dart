@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/message.dart';
 import 'package:hustle_stay/models/user.dart';
 
@@ -22,8 +22,7 @@ class ChatData {
 }
 
 Future<ChatData> fetchChatData(ChatData chat) async {
-  final store = FirebaseFirestore.instance;
-  final response = await store.collection("${chat.path}/chat").get();
+  final response = await firestore.collection("${chat.path}/chat").get();
   chat.messages =
       response.docs.map((e) => MessageData.load(e.id, e.data())).toList();
   return chat;

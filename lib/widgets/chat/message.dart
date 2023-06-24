@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:hustle_stay/main.dart';
 
 import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/message.dart';
@@ -29,7 +29,6 @@ class Message extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     return Row(
       mainAxisAlignment:
           !msgAlignment ? MainAxisAlignment.start : MainAxisAlignment.end,
@@ -328,7 +327,6 @@ class Message extends StatelessWidget {
             no: true,
           );
           if (ans == "yes") {
-            final storage = FirebaseStorage.instance;
             String url = msg.txt.split('(').last;
             url = url.substring(0, url.length - 1);
             await storage.refFromURL(url).delete();

@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/models/chat/chat.dart';
-import 'package:hustle_stay/models/complaint.dart';
-import 'package:hustle_stay/models/message.dart';
-import 'package:hustle_stay/models/user.dart';
-import 'package:hustle_stay/screens/chat_screen.dart';
-import 'package:hustle_stay/tools.dart';
-import 'package:hustle_stay/widgets/complaints/complaint_form.dart';
 
-import '../widgets/complaints/complaints_list.dart';
+import 'package:hustle_stay/models/complaint.dart';
+import 'package:hustle_stay/screens/complaints/add_complaints_page.dart';
+import 'package:hustle_stay/widgets/complaints/complaint_list_item.dart';
+import 'package:hustle_stay/widgets/complaints/complaints_list.dart';
 
 class ComplaintsScreen extends StatefulWidget {
   const ComplaintsScreen({super.key});
@@ -17,26 +13,6 @@ class ComplaintsScreen extends StatefulWidget {
 }
 
 class _ComplaintsScreenState extends State<ComplaintsScreen> {
-  Future<ComplaintData?> showAddComplaintPage(BuildContext context) async {
-    return await Navigator.of(context).push<ComplaintData>(
-      MaterialPageRoute(
-        builder: (ctx) => Scaffold(
-          appBar: AppBar(
-            title: const Text('File a Complaint'),
-          ),
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: ComplaintForm(
-                onSubmit: addComplaint,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,38 +20,25 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
         key: UniqueKey(),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          ComplaintData? complaint = await showAddComplaintPage(context);
-          if (complaint != null) {
-            final chat = ChatData(
-              path: "complaints/${complaint.id}",
-              owner: UserData(email: complaint.from),
-              receivers: complaint.to.map((e) => UserData(email: e)).toList(),
-              title: complaint.title,
-              description: complaint.description,
-            );
-            setState(() {
-              complaints.insert(0, complaint);
-            });
-            if (context.mounted) {
-              navigatorPush(
-                context,
-                ChatScreen(
-                  chat: chat,
-                  initialMsg: MessageData(
-                    id: "_",
-                    txt:
-                        "Hi ${complaint.to}, \n\nI hope you're doing well. I wanted to bring to your attention a concerning issue regarding **${complaint.title}**. ${complaint.description ?? ""}\n\nI kindly request your immediate attention to this matter. Clear communication and updates throughout the process would be greatly appreciated.\n\nThank you for your understanding, and I look forward to a satisfactory resolution.\n\nBest regards, \n\n${currentUser.name ?? currentUser.email}\n\n---\n\n[Image]",
-                    from: currentUser.email!,
-                    createdAt: DateTime.now(),
-                  ),
-                ),
-              );
-            }
-          }
-        },
+        onPressed: _addComplaint,
         child: const Icon(Icons.add_rounded),
       ),
     );
+  }
+
+  _addComplaint() async {
+    ComplaintData? complaint = await Navigator.of(context).push<ComplaintData>(
+      MaterialPageRoute(
+        builder: (ctx) => const AddComplaintsPage(),
+      ),
+    );
+    if (complaint != null) {
+      setState(() {
+        complaints.insert(0, complaint);
+      });
+      if (context.mounted) {
+        showComplaintChat(context, complaint);
+      }
+    }
   }
 }

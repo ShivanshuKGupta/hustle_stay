@@ -58,7 +58,7 @@ class _EditProfileState extends State<EditProfile> {
                 ProfileImage(
                   url: widget.user.imgUrl,
                   onChanged: (value) {
-                    this.img = value;
+                    img = value;
                   },
                 ),
                 Text(

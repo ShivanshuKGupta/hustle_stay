@@ -1,11 +1,9 @@
-// import 'dart:async';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/edit_profile_screen.dart';
 
@@ -16,7 +14,6 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final auth = FirebaseAuth.instance;
     final settings = ref.read(settingsProvider);
     final settingsClass = ref.read(settingsProvider.notifier);
     final widgetList = [

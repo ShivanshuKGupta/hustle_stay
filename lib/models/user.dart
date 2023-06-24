@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hustle_stay/main.dart';
 
 class ReadOnly {
   bool isAdmin = false;
@@ -52,35 +53,36 @@ Future<UserData> fetchUserData(
   Source? src = Source.cache,
   bool keepUptoDate = false,
 }) async {
-  final store = FirebaseFirestore.instance;
   UserData userData = UserData();
   DocumentSnapshot<Map<String, dynamic>>? response;
   try {
     response =
-        await store.collection('users').doc("$email/editable/details").get(
+        await firestore.collection('users').doc("$email/editable/details").get(
               src == null ? null : GetOptions(source: src),
             );
     if (keepUptoDate) {
-      store.collection('users').doc("$email/editable/details").get();
+      firestore.collection('users').doc("$email/editable/details").get();
     }
   } catch (e) {
     if (src == Source.cache) {
-      response =
-          await store.collection('users').doc("$email/editable/details").get();
+      response = await firestore
+          .collection('users')
+          .doc("$email/editable/details")
+          .get();
     }
   }
   userData.email = email;
   userData.load(response?.data() ?? {});
   try {
-    response = await store.collection('users').doc(email).get(
+    response = await firestore.collection('users').doc(email).get(
           src == null ? null : GetOptions(source: src),
         );
     if (keepUptoDate) {
-      store.collection('users').doc(email).get();
+      firestore.collection('users').doc(email).get();
     }
   } catch (e) {
     if (src == Source.cache) {
-      response = await store.collection('users').doc(email).get();
+      response = await firestore.collection('users').doc(email).get();
     }
   }
   userData.readonly.load(response?.data() ?? {});
@@ -88,23 +90,20 @@ Future<UserData> fetchUserData(
 }
 
 Future<void> updateUserData(UserData userData) async {
-  final store = FirebaseFirestore.instance;
-
-  await store.runTransaction((transaction) async {
+  await firestore.runTransaction((transaction) async {
     // Updating Editable details
-    await store
+    await firestore
         .collection('users')
         .doc("${userData.email}/editable/details")
         .set(userData.encode());
     // Updating readonly details
     if (currentUser.readonly.isAdmin) {
-      await store
+      await firestore
           .collection('users')
           .doc(userData.email)
           .set(userData.readonly.encode());
     }
     // if account doesn't exists create one
-    final auth = FirebaseAuth.instance;
     try {
       await auth.createUserWithEmailAndPassword(
         email: userData.email!,
@@ -113,10 +112,18 @@ Future<void> updateUserData(UserData userData) async {
       );
     } on FirebaseAuthException catch (e) {
       if (e.code != 'email-already-in-use') {
-        throw e;
+        rethrow;
       }
     }
   });
+}
+
+/// This function is responsible for logging user in
+Future<void> login(String email, String password) async {
+  UserCredential userCredential;
+  userCredential =
+      await auth.signInWithEmailAndPassword(email: email, password: password);
+  currentUser = await fetchUserData(userCredential.user!.email!);
 }
 
 var currentUser = UserData();

@@ -1,11 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/models/chat/chat.dart';
-import 'package:hustle_stay/models/complaint.dart';
-import 'package:hustle_stay/models/user.dart';
-import 'package:hustle_stay/screens/chat_screen.dart';
-import 'package:hustle_stay/tools.dart';
 
+import 'package:hustle_stay/models/complaint.dart';
+import 'package:hustle_stay/tools.dart';
+import 'package:hustle_stay/widgets/complaints/complaint_list_item.dart';
+
+/// The widget contanining list of complaints
+/// shown on the complaints screen
 class ComplaintList extends StatefulWidget {
   const ComplaintList({super.key});
 
@@ -42,6 +43,7 @@ class _ComplaintListState extends State<ComplaintList> {
         });
   }
 
+  /// Just a list view with a placeholder when there is no item in the list
   Widget complaintsList() {
     return RefreshIndicator(
       onRefresh: () async {
@@ -63,33 +65,7 @@ class _ComplaintListState extends State<ComplaintList> {
           : ListView.builder(
               itemBuilder: (ctx, index) {
                 final complaint = complaints[index];
-                return ListTile(
-                  leading: Icon(
-                    Icons.info_rounded,
-                    size: 40,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  title: Text(complaint.title),
-                  subtitle: complaint.description == null
-                      ? null
-                      : Text(complaint.description!),
-                  onTap: () {
-                    navigatorPush(
-                      context,
-                      ChatScreen(
-                        chat: ChatData(
-                          path: "complaints/${complaint.id}",
-                          owner: UserData(email: complaint.from),
-                          receivers: complaint.to
-                              .map((e) => UserData(email: e))
-                              .toList(),
-                          title: complaint.title,
-                          description: complaint.description,
-                        ),
-                      ),
-                    );
-                  },
-                );
+                return ComplaintListItem(complaint: complaint);
               },
               itemCount: complaints.length,
             ),

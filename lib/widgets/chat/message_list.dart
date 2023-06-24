@@ -1,5 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/message.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/tools.dart';
@@ -19,10 +19,8 @@ class _MessageListState extends State<MessageList> {
   @override
   Widget build(BuildContext context) {
     // TODO: add more functionality like edit a message and send messages in reference to other messages
-    final store = FirebaseFirestore.instance;
-
     return StreamBuilder(
-      stream: store.collection("${widget.chat.path}/chat").snapshots(),
+      stream: firestore.collection("${widget.chat.path}/chat").snapshots(),
       builder: (ctx, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: circularProgressIndicator());
