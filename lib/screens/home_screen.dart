@@ -1,5 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/attendance_screen.dart';
 import 'package:hustle_stay/screens/complaints_screen.dart';
@@ -64,9 +66,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
-            icon: const CircleAvatar(
-              child: Icon(Icons.person_rounded),
+            onPressed: () {
+              showMsg(context, 'TODO: show profile page');
+            },
+            icon: CircleAvatar(
+              backgroundImage: currentUser.imgUrl == null
+                  ? null
+                  : CachedNetworkImageProvider(currentUser.imgUrl!),
+              child: currentUser.imgUrl != null
+                  ? null
+                  : const Icon(
+                      Icons.person_rounded,
+                      size: 50,
+                    ),
             ),
           )
         ],
