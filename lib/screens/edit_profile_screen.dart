@@ -32,7 +32,7 @@ class _EditProfileState extends State<EditProfile> {
     try {
       widget.user.imgUrl = img != null
           ? await uploadImage(
-              context, img, currentUser.email!, "profile-image.jpg")
+              context, img, widget.user.email!, "profile-image.jpg")
           : widget.user.imgUrl;
       await updateUserData(widget.user);
       Navigator.of(context).pop(true); // to show that a change was done

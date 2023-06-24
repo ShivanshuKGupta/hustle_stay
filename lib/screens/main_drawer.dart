@@ -37,27 +37,6 @@ class MainDrawer extends StatelessWidget {
             horizontal: 20,
           ),
           leading: const CircleAvatar(
-            child: Icon(Icons.person_rounded),
-          ),
-          title: Text(
-            currentUser.name ?? "Error",
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          subtitle: Text(
-            currentUser.email!,
-            style: TextStyle(color: Theme.of(context).colorScheme.primary),
-          ),
-          onTap: () {
-            // TODO: add a profile screen
-            showMsg(context, 'TODO: add a profile screen');
-          },
-        ),
-        ListTile(
-          contentPadding: const EdgeInsets.symmetric(
-            vertical: 20,
-            horizontal: 20,
-          ),
-          leading: const CircleAvatar(
             child: Icon(Icons.home_filled),
           ),
           title: Text(

@@ -77,7 +77,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ? null
                   : const Icon(
                       Icons.person_rounded,
-                      size: 50,
                     ),
             ),
           )
