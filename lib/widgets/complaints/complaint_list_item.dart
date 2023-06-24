@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/complaint.dart';
 import 'package:hustle_stay/models/user.dart';
-import 'package:hustle_stay/screens/chat_screen.dart';
+import 'package:hustle_stay/screens/chat/chat_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_bottom_bar.dart';
 

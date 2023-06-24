@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
-import 'package:hustle_stay/screens/complaints_screen.dart';
+import 'package:hustle_stay/screens/complaints/complaints_screen.dart';
 import 'package:hustle_stay/screens/settings_screen.dart';
 
 import 'package:hustle_stay/tools.dart';

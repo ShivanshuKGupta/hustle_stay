@@ -4,7 +4,7 @@ import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/widgets/chat/message_list.dart';
 import 'package:hustle_stay/widgets/chat/message_input_field.dart';
 
-import '../models/message.dart';
+import '../../models/message.dart';
 
 class ChatScreen extends StatelessWidget {
   final ChatData chat;
