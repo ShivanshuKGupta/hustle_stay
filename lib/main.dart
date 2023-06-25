@@ -8,8 +8,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/auth/auth_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'firebase_options.dart';
 
+import 'firebase_options.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/home_screen.dart';
 

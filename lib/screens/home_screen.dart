@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
@@ -22,24 +23,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final settings = ref.read(settingsProvider);
-    var bottomNavigationBarItems = const [
-      BottomNavigationBarItem(
+    const duration = Duration(milliseconds: 1000);
+    var bottomNavigationBarItems = [
+      const BottomNavigationBarItem(
         icon: Icon(Icons.co_present_rounded),
         label: 'Attendance',
         tooltip: "Attendance",
       ),
-      BottomNavigationBarItem(
+      const BottomNavigationBarItem(
         icon: Icon(Icons.report_rounded),
         label: 'Complaints',
         tooltip: "Complaints",
       ),
       BottomNavigationBarItem(
-        icon: Icon(Icons.airport_shuttle_rounded),
+        icon: const Icon(Icons.airport_shuttle_rounded)
+            .animate(target: settings.currentPage == 2 ? 1 : 0)
+            .shake(),
         label: 'Vehicle',
         tooltip: "Vehicle Request",
       ),
       BottomNavigationBarItem(
-        icon: Icon(Icons.settings_rounded),
+        icon: const Icon(Icons.settings_rounded)
+            .animate(target: settings.currentPage == 3 ? 1 : 0)
+            .rotate(
+              duration: duration,
+              curve: Curves.decelerate,
+            ),
         label: 'Settings',
         tooltip: "Settings",
       ),

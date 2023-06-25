@@ -193,9 +193,10 @@ navigatorPush<T>(context, newPage) async {
 /// A quick ready-made alertbox with yes/no/cancel etc. buttons
 /// This is used to ask user about some quick confirmations or
 /// to show him a message
-Future<String?> showMsgBox(
+Future<String?> askUser(
   context,
   String msg, {
+  String? description,
   bool yes = false,
   bool ok = false,
   bool no = false,
@@ -261,7 +262,9 @@ Future<String?> showMsgBox(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(msg),
+        content: description != null ? Text(description) : null,
         actions: buttons,
+        actionsAlignment: MainAxisAlignment.spaceAround,
       ),
     ),
   );

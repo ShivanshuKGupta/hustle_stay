@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:hustle_stay/main.dart';
@@ -124,7 +125,11 @@ class Message extends StatelessWidget {
             )
           ],
         ),
-      ),
+      ).animate().fade().slideX(
+            begin: msgAlignment ? 1 : -1,
+            end: 0,
+            curve: Curves.decelerate,
+          ),
     );
   }
 
@@ -299,7 +304,7 @@ class Message extends StatelessWidget {
   }
 
   void delMsg(context) async {
-    final String? res = await showMsgBox(
+    final String? res = await askUser(
       context,
       "Do you really wish to delete this msg?",
       yes: true,
@@ -320,7 +325,7 @@ class Message extends StatelessWidget {
       try {
         bool isImg = isImage(msg);
         if (isImg && context.mounted) {
-          String? ans = await showMsgBox(
+          String? ans = await askUser(
             context,
             "Do you want to delete the image from cloud as well?",
             yes: true,

@@ -32,31 +32,36 @@ class ChatScreen extends StatelessWidget {
             ),
     );
     return Scaffold(
-      appBar: AppBar(
-        titleSpacing: 0,
-        bottom: (bottomBar == null)
-            ? null
-            : PreferredSize(
-                preferredSize: const Size(100, 35),
-                child: bottomBar!,
-              ),
-        title: titleWidget,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: MessageList(chat: chat),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 5.0, left: 5, top: 5),
-            child: MessageInputField(
-              initialValue: initialMsg != null ? initialMsg!.txt : "",
-              onSubmit: (MessageData msg) async {
-                await addMessage(chat, msg);
-              },
+      body: Scaffold(
+        appBar: AppBar(
+          titleSpacing: 0,
+          bottom: (bottomBar == null)
+              ? null
+              : PreferredSize(
+                  preferredSize: const Size(double.infinity, 40),
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: bottomBar!,
+                  ),
+                ),
+          title: titleWidget,
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: MessageList(chat: chat),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.only(bottom: 5.0, left: 5, top: 5),
+              child: MessageInputField(
+                initialValue: initialMsg != null ? initialMsg!.txt : "",
+                onSubmit: (MessageData msg) async {
+                  await addMessage(chat, msg);
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
