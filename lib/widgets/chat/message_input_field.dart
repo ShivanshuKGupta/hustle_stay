@@ -84,9 +84,7 @@ class _MessageInputFieldState extends State<MessageInputField> {
                     )
                         .animate()
                         .scaleXY(begin: 1.5, end: 1, duration: duration * 4)
-                        .fade(duration: duration * 4)
-                        .then()
-                        .shake(),
+                        .fade(duration: duration * 4),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),

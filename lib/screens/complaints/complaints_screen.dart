@@ -1,36 +1,37 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:hustle_stay/models/complaint.dart';
 import 'package:hustle_stay/models/message.dart';
 import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/providers/complaint_list.dart';
 import 'package:hustle_stay/screens/complaints/edit_complaints_page.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/chat/complaint_template_message.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_list_item.dart';
 
-class ComplaintsScreen extends StatefulWidget {
+class ComplaintsScreen extends ConsumerStatefulWidget {
   const ComplaintsScreen({super.key});
 
   @override
-  State<ComplaintsScreen> createState() => _ComplaintsScreenState();
+  ConsumerState<ComplaintsScreen> createState() => _ComplaintsScreenState();
 }
 
-/// This contains fetched complaints which are mostly upto date
-List<ComplaintData> complaints = [];
-
-class _ComplaintsScreenState extends State<ComplaintsScreen> {
+class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
   bool _isLoading = false;
 
   bool _disposeWasCalled = false;
 
   Future<void> _updateComplaintsList() async {
+    final complaints = ref.read(complaintsList);
+    final complaintsNotifier = ref.read(complaintsList.notifier);
     List<ComplaintData> newComplaints = complaints;
     try {
       newComplaints = await fetchComplaints(src: Source.cache);
       if (!areComplaintsEqual(complaints, newComplaints)) {
-        complaints = newComplaints;
+        complaintsNotifier.updateList(newComplaints);
         if (!_disposeWasCalled) {
           setState(() {});
         }
@@ -44,7 +45,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
     }
     newComplaints = await fetchComplaints();
     if (!areComplaintsEqual(complaints, newComplaints)) {
-      complaints = newComplaints;
+      complaintsNotifier.updateList(newComplaints);
       if (!_disposeWasCalled) {
         setState(() {});
       }
@@ -67,6 +68,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final complaints = ref.watch(complaintsList);
     return Scaffold(
       body: _isLoading && complaints.isEmpty
           ? Center(child: circularProgressIndicator())
@@ -80,6 +82,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
 
   /// Just a list view with a placeholder when there is no item in the list
   Widget _complaintsList() {
+    final complaints = ref.watch(complaintsList);
     const duration = Duration(milliseconds: 400);
     int i = 0;
     return RefreshIndicator(
