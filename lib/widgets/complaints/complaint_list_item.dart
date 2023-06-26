@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,17 +26,14 @@ class ComplaintListItem extends ConsumerStatefulWidget {
 
 class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
   bool _animate = false;
-  AnimationController? animController;
+
+  final duration = const Duration(milliseconds: 800);
+
   @override
   Widget build(BuildContext context) {
-    const duration = Duration(milliseconds: 800);
     return ListTile(
-      key: ValueKey(widget.complaint.id),
-      leading: Icon(
-        Icons.info_rounded,
-        size: 40,
-        color: Theme.of(context).colorScheme.primary,
-      ),
+      onTap: () => showComplaintChat(context, widget.complaint),
+      onLongPress: () => _showInfo(),
       title: Text(widget.complaint.title),
       subtitle: widget.complaint.description == null
           ? null
@@ -44,36 +42,140 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
               overflow: TextOverflow.fade,
               maxLines: 4,
             ),
-      trailing: IconButton(
-          onPressed: () async {
-            final editedComplaint = await navigatorPush(
-              context,
-              EditComplaintsPage(id: widget.complaint.id),
-            );
-            if (editedComplaint != null) {
-              Future.delayed(duration, () {
-                if (editedComplaint == "deleted") {
-                  ref
-                      .read(complaintsList.notifier)
-                      .removeComplaint(widget.complaint);
-                } else {
-                  // Animating changes
-                  setState(() {
-                    _animate = !_animate;
-                  });
-                  setState(() {
-                    widget.complaint = editedComplaint;
-                    _animate = !_animate;
-                  });
-                }
-              });
-            }
-          },
-          icon: const Icon(Icons.edit_rounded)),
-      onTap: () => showComplaintChat(context, widget.complaint),
+      leading: widget.complaint.imgUrl == null
+          ? Icon(
+              Icons.info_rounded,
+              size: 40,
+              color: Theme.of(context).colorScheme.primary,
+            )
+          : CircleAvatar(
+              backgroundImage:
+                  CachedNetworkImageProvider(widget.complaint.imgUrl!),
+            ),
     )
         .animate(target: !_animate ? 1 : 0)
         .fade(begin: 0, end: 1, duration: duration);
+  }
+
+  void editMe() async {
+    final editedComplaint = await navigatorPush(
+      context,
+      EditComplaintsPage(
+        id: widget.complaint.id,
+        deleteMe: deleteMe,
+      ),
+    );
+    if (editedComplaint != null) {
+      if (editedComplaint == "deleted") {
+        ref.read(complaintsList.notifier).removeComplaint(widget.complaint);
+      } else {
+        setState(() {
+          _animate = !_animate;
+        });
+        Future.delayed(duration, () {
+          setState(() {
+            widget.complaint = editedComplaint;
+            _animate = !_animate;
+          });
+        });
+      }
+    }
+  }
+
+  Future<void> deleteMe() async {
+    final response = await askUser(
+      context,
+      'Do you really wish to delete this complaint?',
+      yes: true,
+      no: true,
+    );
+    if (response == 'yes') {
+      await deleteComplaint(complaint: widget.complaint);
+    }
+  }
+
+  void _showInfo() {
+    final createdAt =
+        DateTime.fromMillisecondsSinceEpoch(int.parse(widget.complaint.id));
+    Navigator.of(context).push(
+      DialogRoute(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            scrollable: true,
+            actionsPadding: const EdgeInsets.only(bottom: 15),
+            contentPadding: const EdgeInsets.only(top: 15, left: 20, right: 20),
+            actionsAlignment: MainAxisAlignment.spaceAround,
+            title: Text(widget.complaint.title),
+            actions: [
+              IconButton(
+                onPressed: () => showComplaintChat(context, widget.complaint),
+                icon: const Icon(Icons.chat_rounded),
+              ),
+              IconButton(
+                onPressed: editMe,
+                icon: const Icon(Icons.edit_rounded),
+              ),
+              IconButton(
+                onPressed: deleteMe,
+                icon: const Icon(Icons.delete_rounded),
+              ),
+            ],
+            content: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (widget.complaint.description != null &&
+                    widget.complaint.description!.isNotEmpty)
+                  Text(
+                    "Description: ",
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                  ),
+                if (widget.complaint.description != null &&
+                    widget.complaint.description!.isNotEmpty)
+                  Text(widget.complaint.description!),
+                Text(
+                  "Complainant: ",
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                ),
+                Text(
+                  widget.complaint.from,
+                  textAlign: TextAlign.right,
+                ),
+                Text(
+                  "Complainees: ",
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                ),
+                Text("${widget.complaint.to}"),
+                const Divider(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Created At: ",
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                    ),
+                    Text(
+                      "${createdAt.day}-${createdAt.month}-${createdAt.year}",
+                      textAlign: TextAlign.right,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 }
 

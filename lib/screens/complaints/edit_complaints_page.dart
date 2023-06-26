@@ -5,9 +5,11 @@ import 'package:hustle_stay/widgets/complaints/complaint_form.dart';
 
 class EditComplaintsPage extends StatelessWidget {
   final String? id;
+  final Future<void> Function()? deleteMe;
   const EditComplaintsPage({
     super.key,
     this.id,
+    this.deleteMe,
   });
 
   @override
@@ -16,21 +18,9 @@ class EditComplaintsPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(id == null ? 'File a Complaint' : "Edit Complaint"),
         actions: [
-          if (id != null)
+          if (id != null && deleteMe != null)
             IconButton(
-                onPressed: () async {
-                  final response = await askUser(
-                    context,
-                    'Do you really wish to delete this complaint?',
-                    yes: true,
-                    no: true,
-                  );
-                  if (response == 'yes') {
-                    await deleteComplaint(id: id);
-                    Navigator.of(context).pop("deleted");
-                  }
-                },
-                icon: const Icon(Icons.delete_rounded))
+                onPressed: deleteMe, icon: const Icon(Icons.delete_rounded))
         ],
       ),
       body: SingleChildScrollView(
