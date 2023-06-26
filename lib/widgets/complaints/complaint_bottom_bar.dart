@@ -39,7 +39,11 @@ class ComplaintBottomBar extends ConsumerWidget {
           if (response == 'yes') {
             complaint.resolved = !complaint.resolved;
             updateComplaint(complaint);
-            ref.read(complaintsList.notifier).removeComplaint(complaint);
+            if (complaint.resolved) {
+              ref.read(complaintsList.notifier).removeComplaint(complaint);
+            } else {
+              ref.read(complaintsList.notifier).addComplaint(complaint);
+            }
             if (context.mounted) {
               Navigator.of(context).pop();
             }

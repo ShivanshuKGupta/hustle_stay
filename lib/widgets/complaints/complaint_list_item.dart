@@ -83,7 +83,9 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
     if (editedComplaint != null) {
       if (editedComplaint == "deleted") {
         ref.read(complaintsList.notifier).removeComplaint(widget.complaint);
+        Navigator.of(context).pop();
       } else {
+        Navigator.of(context).pop();
         setState(() {
           _animate = !_animate;
         });
@@ -106,6 +108,7 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
     );
     if (response == 'yes') {
       await deleteComplaint(complaint: widget.complaint);
+      ref.read(complaintsList.notifier).removeComplaint(widget.complaint);
       return true;
     }
     return false;
@@ -130,7 +133,7 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
                 icon: const Icon(Icons.chat_rounded),
               ),
               IconButton(
-                onPressed: editMe,
+                onPressed: () => editMe(),
                 icon: const Icon(Icons.edit_rounded),
               ),
               IconButton(
