@@ -29,6 +29,11 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
     final complaintsNotifier = ref.read(complaintsList.notifier);
     List<ComplaintData> newComplaints = complaints;
     try {
+      if (!_disposeWasCalled) {
+        setState(() {
+          _isLoading = true;
+        });
+      }
       newComplaints = await fetchComplaints(src: Source.cache);
       if (!areComplaintsEqual(complaints, newComplaints)) {
         complaintsNotifier.updateList(newComplaints);
@@ -36,12 +41,13 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
           setState(() {});
         }
       }
-    } catch (e) {
       if (!_disposeWasCalled) {
         setState(() {
-          _isLoading = true;
+          _isLoading = false;
         });
       }
+    } catch (e) {
+      // Do nothing
     }
     newComplaints = await fetchComplaints();
     if (!areComplaintsEqual(complaints, newComplaints)) {
@@ -50,7 +56,11 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
         setState(() {});
       }
     }
-    _isLoading = false;
+    if (!_disposeWasCalled) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
