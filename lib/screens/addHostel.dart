@@ -18,7 +18,7 @@ class AddHostelForm extends StatefulWidget {
 class _AddHostelFormState extends State<AddHostelForm> {
   final _formKey = GlobalKey<FormState>();
   Future<void> uploadHostel(String hostelName, String hostelType, int capacity,
-      int numberOfRooms, int numberOfFloorsorBlocks) async {
+      int numberOfFloorsorBlocks) async {
     final store = FirebaseFirestore.instance;
     // print(store);
     final storageRef = FirebaseStorage.instance
@@ -31,7 +31,7 @@ class _AddHostelFormState extends State<AddHostelForm> {
     await store.collection('hostels').doc('$hostelName').set({
       "hostelName": hostelName,
       "hostelType": hostelType,
-      "numberOfRooms": numberOfRooms,
+      "numberOfRooms": 0,
       "numberOfFloorsorBlocks": numberOfFloorsorBlocks,
       "capacity": capacity,
       "imageUrl": imageUrl
@@ -45,7 +45,6 @@ class _AddHostelFormState extends State<AddHostelForm> {
   String hostelName = '';
   String hostelType = 'Boys';
   int capacity = 0;
-  int numberOfRooms = 0;
   int numberOfFloorsorBlocks = 0;
 
   void _submitForm() async {
@@ -56,8 +55,8 @@ class _AddHostelFormState extends State<AddHostelForm> {
       // print(capacity);
       // print(numberOfRooms);
       // print(numberOfFloorsorBlocks);
-      await uploadHostel(hostelName, hostelType, capacity, numberOfRooms,
-          numberOfFloorsorBlocks);
+      await uploadHostel(
+          hostelName, hostelType, capacity, numberOfFloorsorBlocks);
 
       Navigator.pop(context);
     }
@@ -155,23 +154,6 @@ class _AddHostelFormState extends State<AddHostelForm> {
                     },
                     onSaved: (value) {
                       capacity = int.parse(value!);
-                    },
-                  ),
-                  SizedBox(height: 10.0),
-                  TextFormField(
-                    decoration: InputDecoration(labelText: 'Number of Rooms'),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter the number of rooms.';
-                      }
-                      if (int.tryParse(value) == null) {
-                        return 'Please enter a valid number.';
-                      }
-                      return null;
-                    },
-                    onSaved: (value) {
-                      numberOfRooms = int.parse(value!);
                     },
                   ),
                   SizedBox(height: 10.0),

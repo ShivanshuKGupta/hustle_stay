@@ -4,14 +4,14 @@ import '../../../models/room.dart';
 import '../../../screens/profile_view_screen.dart';
 
 class RoommateDataWidget extends StatefulWidget {
-  RoommateDataWidget(
+  const RoommateDataWidget(
       {super.key,
       required this.roommateData,
       required this.hostelName,
       required this.roomName});
-  RoommateData roommateData;
-  String hostelName;
-  String roomName;
+  final RoommateData roommateData;
+  final String hostelName;
+  final String roomName;
 
   @override
   State<RoommateDataWidget> createState() => _RoommateDataWidgetState();
@@ -20,6 +20,7 @@ class RoommateDataWidget extends StatefulWidget {
 class _RoommateDataWidgetState extends State<RoommateDataWidget> {
   final presentIcon = Icon(Icons.check_circle_outline, color: Colors.green);
   final absentIcon = Icon(Icons.close_rounded, color: Colors.red);
+  bool isRunning = false;
 
   var currentIcon = Icon(Icons.close_rounded, color: Colors.red);
   @override

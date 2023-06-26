@@ -20,7 +20,7 @@ class HostelScreen extends StatefulWidget {
 
 class _HostelScreenState extends State<HostelScreen> {
   final store = FirebaseFirestore.instance;
-
+  bool isRunning = false;
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -69,15 +69,36 @@ class _HostelScreenState extends State<HostelScreen> {
               elevation: 6,
               child: Column(
                 children: [
-                  CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    placeholder: (context, url) =>
-                        Center(child: CircularProgressIndicator()),
-                    errorWidget: (context, url, error) => Icon(Icons.error),
-                    width: double.infinity,
-                    height: 200,
-                    fit: BoxFit.cover,
-                  ),
+                  Stack(children: [
+                    CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      placeholder: (context, url) =>
+                          Center(child: CircularProgressIndicator()),
+                      errorWidget: (context, url, error) => Icon(Icons.error),
+                      width: double.infinity,
+                      height: 200,
+                      fit: BoxFit.cover,
+                    ),
+                    if (!isRunning)
+                      IconButton(
+                          alignment: Alignment.topLeft,
+                          onPressed: () async {
+                            setState(() {
+                              isRunning = true;
+                            });
+                            bool resp = await deleteHostel(hostel.hostelName);
+
+                            ScaffoldMessenger.of(context).clearSnackBars();
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text(resp
+                                    ? "Deleted Successfully"
+                                    : "Deletion failed. Try again later.")));
+                          },
+                          icon: const Icon(
+                            Icons.delete,
+                            color: Colors.red,
+                          ))
+                  ]),
                   Container(
                     padding: EdgeInsets.all(16),
                     child: Row(

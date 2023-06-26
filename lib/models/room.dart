@@ -93,13 +93,20 @@ Future<bool> isRoomExists(String hostelName, String roomName) async {
 Future<bool> deleteRoom(String roomName, String hostelName) async {
   try {
     final storage = FirebaseFirestore.instance;
-    final storageRef = await storage
-      ..collection('hostels')
-          .doc(hostelName)
-          .collection('Rooms')
-          .doc(roomName)
-          .delete();
-    return true;
+    final result = await storage.runTransaction((transaction) async {
+      final storageRef = storage.collection('hostels').doc(hostelName);
+      transaction
+          .update(storageRef, {'numberOfRooms': FieldValue.increment(-1)});
+      transaction.delete(storageRef.collection('Rooms').doc(roomName));
+      // await storageRef.update({'numberOfRooms': FieldValue.increment(-1)});
+      // await storageRef.collection('Rooms').doc(roomName).delete();
+      return true;
+    });
+    if (result) {
+      return true;
+    } else {
+      return false;
+    }
   } catch (e) {
     return false;
   }

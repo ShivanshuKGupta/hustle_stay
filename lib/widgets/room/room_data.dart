@@ -14,6 +14,7 @@ class RoomDataWidget extends StatefulWidget {
 
 class _RoomDataWidgetState extends State<RoomDataWidget> {
   bool isOpen = false;
+  bool isRunning = false;
   @override
   Widget build(BuildContext context) {
     return Container(
