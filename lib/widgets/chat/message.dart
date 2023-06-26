@@ -10,6 +10,7 @@ import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/message.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/image.dart';
+import 'package:hustle_stay/screens/chat/image_preview.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -142,36 +143,11 @@ class Message extends StatelessWidget {
       url = url.substring(0, url.length - 1);
       navigatorPush(
         context,
-        Scaffold(
-          backgroundColor: Colors.black,
-          appBar: AppBar(
-            backgroundColor: Colors.black,
-            foregroundColor: Colors.white,
-            actions: [
-              if (msg.from == currentUser.email)
-                IconButton(
-                  onPressed: () => delMsg(context),
-                  icon: const Icon(Icons.delete_rounded),
-                ),
-              IconButton(
-                onPressed: () => copyMsg(context),
-                icon: const Icon(Icons.copy_rounded),
-              ),
-              IconButton(
-                onPressed: () => showInfo(context, msg),
-                icon: const Icon(Icons.info_outline_rounded),
-              ),
-            ],
-          ),
-          body: SizedBox(
-            height: size.height,
-            width: size.width,
-            child: InteractiveViewer(
-              maxScale: 5,
-              child: imageBuilder(Uri.parse(url), msg.id),
-            ),
-          ),
-        ),
+        ImagePreview(
+            image: imageBuilder(Uri.parse(url), msg.id),
+            delete: (msg.from == currentUser.email) ? delMsg : null,
+            copy: copyMsg,
+            info: (context) => showInfo(context, msg)),
       );
     }
   }
@@ -303,7 +279,7 @@ class Message extends StatelessWidget {
     );
   }
 
-  void delMsg(context) async {
+  Future<void> delMsg(BuildContext context) async {
     final String? res = await askUser(
       context,
       "Do you really wish to delete this msg?",

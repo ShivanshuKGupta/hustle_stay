@@ -8,6 +8,7 @@ import 'package:hustle_stay/models/message.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/complaint_list.dart';
 import 'package:hustle_stay/screens/chat/chat_screen.dart';
+import 'package:hustle_stay/screens/chat/image_preview.dart';
 import 'package:hustle_stay/screens/complaints/edit_complaints_page.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_bottom_bar.dart';
@@ -43,14 +44,28 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
               maxLines: 4,
             ),
       leading: widget.complaint.imgUrl == null
-          ? Icon(
-              Icons.info_rounded,
-              size: 40,
-              color: Theme.of(context).colorScheme.primary,
+          ? CircleAvatar(
+              child: Icon(
+                Icons.info_rounded,
+                size: 40,
+                color: Theme.of(context).colorScheme.primary,
+              ),
             )
-          : CircleAvatar(
-              backgroundImage:
-                  CachedNetworkImageProvider(widget.complaint.imgUrl!),
+          : IconButton(
+              padding: EdgeInsets.zero,
+              icon: CircleAvatar(
+                backgroundImage:
+                    CachedNetworkImageProvider(widget.complaint.imgUrl!),
+              ),
+              onPressed: () {
+                navigatorPush(
+                  context,
+                  ImagePreview(
+                    image:
+                        CachedNetworkImage(imageUrl: widget.complaint.imgUrl!),
+                  ),
+                );
+              },
             ),
     )
         .animate(target: !_animate ? 1 : 0)
@@ -82,7 +97,7 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
     }
   }
 
-  Future<void> deleteMe() async {
+  Future<bool> deleteMe() async {
     final response = await askUser(
       context,
       'Do you really wish to delete this complaint?',
@@ -91,7 +106,9 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
     );
     if (response == 'yes') {
       await deleteComplaint(complaint: widget.complaint);
+      return true;
     }
+    return false;
   }
 
   void _showInfo() {
@@ -117,7 +134,11 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
                 icon: const Icon(Icons.edit_rounded),
               ),
               IconButton(
-                onPressed: deleteMe,
+                onPressed: () async {
+                  if (await deleteMe() == true) {
+                    Navigator.of(context).pop();
+                  }
+                },
                 icon: const Icon(Icons.delete_rounded),
               ),
             ],
@@ -126,6 +147,16 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (widget.complaint.imgUrl != null)
+                  Align(
+                    alignment: Alignment.topCenter,
+                    child: CachedNetworkImage(
+                      imageUrl: widget.complaint.imgUrl!,
+                    ),
+                  ),
+                const SizedBox(
+                  height: 10,
+                ),
                 if (widget.complaint.description != null &&
                     widget.complaint.description!.isNotEmpty)
                   Text(
@@ -165,7 +196,7 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
                           ),
                     ),
                     Text(
-                      "${createdAt.day}-${createdAt.month}-${createdAt.year}",
+                      "${createdAt.day}-${createdAt.month}-${createdAt.year} ${createdAt.hour}:${createdAt.minute}:${createdAt.second}",
                       textAlign: TextAlign.right,
                     ),
                   ],
