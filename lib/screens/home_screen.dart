@@ -1,14 +1,16 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
-import 'package:hustle_stay/screens/attendance_screen.dart';
-import 'package:hustle_stay/screens/complaints_screen.dart';
-import 'package:hustle_stay/screens/settings_screen.dart';
+import 'package:hustle_stay/screens/complaints/complaints_screen.dart';
+import 'package:hustle_stay/screens/settings/settings_screen.dart';
 
 import 'package:hustle_stay/tools.dart';
 
 import 'hostel_screen.dart';
-import 'main_drawer.dart';
+import 'drawers/main_drawer.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   HomeScreen({super.key});
@@ -21,27 +23,52 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final settings = ref.read(settingsProvider);
-    var bottomNavigationBarItems = const [
-      BottomNavigationBarItem(
+    const duration = Duration(milliseconds: 1000);
+    List<BottomNavigationBarItem> bottomNavigationBarItems = [
+      const BottomNavigationBarItem(
         icon: Icon(Icons.co_present_rounded),
         label: 'Attendance',
         tooltip: "Attendance",
       ),
-      BottomNavigationBarItem(
+      const BottomNavigationBarItem(
         icon: Icon(Icons.report_rounded),
         label: 'Complaints',
         tooltip: "Complaints",
       ),
       BottomNavigationBarItem(
-        icon: Icon(Icons.airport_shuttle_rounded),
+        icon: const Icon(Icons.airport_shuttle_rounded)
+            .animate(target: settings.currentPage == 2 ? 1 : 0)
+            .shake(),
         label: 'Vehicle',
         tooltip: "Vehicle Request",
       ),
       BottomNavigationBarItem(
-        icon: Icon(Icons.settings_rounded),
+        icon: const Icon(Icons.settings_rounded)
+            .animate(target: settings.currentPage == 3 ? 1 : 0)
+            .rotate(
+              duration: duration,
+              curve: Curves.decelerate,
+            ),
         label: 'Settings',
         tooltip: "Settings",
       ),
+    ];
+    List<Widget> actions = [
+      IconButton(
+        onPressed: () {
+          showMsg(context, 'TODO: show profile page');
+        },
+        icon: CircleAvatar(
+          backgroundImage: currentUser.imgUrl == null
+              ? null
+              : CachedNetworkImageProvider(currentUser.imgUrl!),
+          child: currentUser.imgUrl != null
+              ? null
+              : const Icon(
+                  Icons.person_rounded,
+                ),
+        ),
+      )
     ];
     Widget body = Container();
     switch (settings.currentPage) {
@@ -49,7 +76,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         body = const HostelScreen();
         break;
       case 1:
-        body = const ComplaintsScreen();
+        body = ComplaintsScreen();
         break;
       case 3:
         body = const SettingsScreen();
@@ -62,14 +89,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           title: bottomNavigationBarItems[settings.currentPage].tooltip ??
               "Hustle Stay",
         ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const CircleAvatar(
-              child: Icon(Icons.person_rounded),
-            ),
-          )
-        ],
+        actions: actions,
       ),
       drawer: const Drawer(elevation: 5, child: MainDrawer()),
       bottomNavigationBar: BottomNavigationBar(

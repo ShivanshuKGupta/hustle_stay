@@ -1,14 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:hustle_stay/main.dart';
 
-import 'package:hustle_stay/models/chat.dart';
+import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/message.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/image.dart';
+import 'package:hustle_stay/screens/chat/image_preview.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -29,7 +31,6 @@ class Message extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     return Row(
       mainAxisAlignment:
           !msgAlignment ? MainAxisAlignment.start : MainAxisAlignment.end,
@@ -46,6 +47,7 @@ class Message extends StatelessWidget {
 
     return GestureDetector(
       onTap: () => showMsgInfo(context, msg),
+      onLongPress: () => showInfo(context, msg),
       child: Container(
         constraints: BoxConstraints(
           minWidth: 100,
@@ -124,7 +126,11 @@ class Message extends StatelessWidget {
             )
           ],
         ),
-      ),
+      ).animate().fade().slideX(
+            begin: msgAlignment ? 1 : -1,
+            end: 0,
+            curve: Curves.decelerate,
+          ),
     );
   }
 
@@ -137,36 +143,11 @@ class Message extends StatelessWidget {
       url = url.substring(0, url.length - 1);
       navigatorPush(
         context,
-        Scaffold(
-          backgroundColor: Colors.black,
-          appBar: AppBar(
-            backgroundColor: Colors.black,
-            foregroundColor: Colors.white,
-            actions: [
-              if (msg.from == currentUser.email)
-                IconButton(
-                  onPressed: () => delMsg(context),
-                  icon: const Icon(Icons.delete_rounded),
-                ),
-              IconButton(
-                onPressed: () => copyMsg(context),
-                icon: const Icon(Icons.copy_rounded),
-              ),
-              IconButton(
-                onPressed: () => showInfo(context, msg),
-                icon: const Icon(Icons.info_outline_rounded),
-              ),
-            ],
-          ),
-          body: SizedBox(
-            height: size.height,
-            width: size.width,
-            child: InteractiveViewer(
-              maxScale: 5,
-              child: imageBuilder(Uri.parse(url), msg.id),
-            ),
-          ),
-        ),
+        ImagePreview(
+            image: imageBuilder(Uri.parse(url), msg.id),
+            delete: (msg.from == currentUser.email) ? delMsg : null,
+            copy: copyMsg,
+            info: (context) => showInfo(context, msg)),
       );
     }
   }
@@ -295,37 +276,11 @@ class Message extends StatelessWidget {
           return const Icon(Icons.error_outline_rounded);
         },
       ),
-      // child: Image.network(
-      //   uri.toString(),
-      //   errorBuilder:
-      //       (BuildContext context, Object exception, StackTrace? stackTrace) {
-      //     return const Icon(Icons.error_outline_rounded);
-      //   },
-      //   loadingBuilder: (BuildContext context, Widget child,
-      //       ImageChunkEvent? loadingProgress) {
-      //     if (loadingProgress == null) return child;
-      //     return Center(
-      //       child: Padding(
-      //         padding: const EdgeInsets.all(20.0),
-      //         child: SizedBox(
-      //           height: 20,
-      //           width: 20,
-      //           child: CircularProgressIndicator(
-      //             value: loadingProgress.expectedTotalBytes != null
-      //                 ? loadingProgress.cumulativeBytesLoaded /
-      //                     loadingProgress.expectedTotalBytes!
-      //                 : null,
-      //           ),
-      //         ),
-      //       ),
-      //     );
-      //   },
-      // ),
     );
   }
 
-  void delMsg(context) async {
-    final String? res = await showMsgBox(
+  Future<void> delMsg(BuildContext context) async {
+    final String? res = await askUser(
       context,
       "Do you really wish to delete this msg?",
       yes: true,
@@ -346,14 +301,13 @@ class Message extends StatelessWidget {
       try {
         bool isImg = isImage(msg);
         if (isImg && context.mounted) {
-          String? ans = await showMsgBox(
+          String? ans = await askUser(
             context,
             "Do you want to delete the image from cloud as well?",
             yes: true,
             no: true,
           );
           if (ans == "yes") {
-            final storage = FirebaseStorage.instance;
             String url = msg.txt.split('(').last;
             url = url.substring(0, url.length - 1);
             await storage.refFromURL(url).delete();

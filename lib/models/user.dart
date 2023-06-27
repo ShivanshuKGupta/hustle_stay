@@ -1,10 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-enum Role {
-  student,
-  warden,
-  attender,
-}
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hustle_stay/main.dart';
 
 class ReadOnly {
   bool isAdmin = false;
@@ -25,12 +21,14 @@ class ReadOnly {
 
 class UserData {
   String? email, name, phoneNumber, address;
+  String? imgUrl;
   ReadOnly readonly = ReadOnly();
   UserData({
     this.email,
     this.name,
     this.phoneNumber,
     this.address,
+    this.imgUrl,
   });
 
   Map<String, dynamic> encode() {
@@ -38,6 +36,7 @@ class UserData {
       "name": name,
       "phoneNumber": phoneNumber,
       "address": address,
+      "imgUrl": imgUrl,
     };
   }
 
@@ -45,35 +44,45 @@ class UserData {
     name = userData['name'];
     phoneNumber = userData['phoneNumber'];
     address = userData['address'];
+    imgUrl = userData['imgUrl'];
   }
 }
 
-var currentUser = UserData();
-
-Future<UserData> fetchUserData(String email, {Source? src}) async {
-  final store = FirebaseFirestore.instance;
+Future<UserData> fetchUserData(
+  String email, {
+  Source? src = Source.cache,
+  bool keepUptoDate = false,
+}) async {
   UserData userData = UserData();
   DocumentSnapshot<Map<String, dynamic>>? response;
   try {
     response =
-        await store.collection('users').doc("$email/editable/details").get(
+        await firestore.collection('users').doc("$email/editable/details").get(
               src == null ? null : GetOptions(source: src),
             );
+    if (keepUptoDate) {
+      firestore.collection('users').doc("$email/editable/details").get();
+    }
   } catch (e) {
     if (src == Source.cache) {
-      response =
-          await store.collection('users').doc("$email/editable/details").get();
+      response = await firestore
+          .collection('users')
+          .doc("$email/editable/details")
+          .get();
     }
   }
   userData.email = email;
   userData.load(response?.data() ?? {});
   try {
-    response = await store.collection('users').doc(email).get(
+    response = await firestore.collection('users').doc(email).get(
           src == null ? null : GetOptions(source: src),
         );
+    if (keepUptoDate) {
+      firestore.collection('users').doc(email).get();
+    }
   } catch (e) {
     if (src == Source.cache) {
-      response = await store.collection('users').doc(email).get();
+      response = await firestore.collection('users').doc(email).get();
     }
   }
   userData.readonly.load(response?.data() ?? {});
@@ -81,15 +90,40 @@ Future<UserData> fetchUserData(String email, {Source? src}) async {
 }
 
 Future<void> updateUserData(UserData userData) async {
-  final store = FirebaseFirestore.instance;
-  await store
-      .collection('users')
-      .doc("${userData.email}/editable/details")
-      .set(userData.encode());
-  if (currentUser.readonly.isAdmin) {
-    await store
+  await firestore.runTransaction((transaction) async {
+    // Updating Editable details
+    await firestore
         .collection('users')
-        .doc(userData.email)
-        .set(userData.readonly.encode());
-  }
+        .doc("${userData.email}/editable/details")
+        .set(userData.encode());
+    // Updating readonly details
+    if (currentUser.readonly.isAdmin) {
+      await firestore
+          .collection('users')
+          .doc(userData.email)
+          .set(userData.readonly.encode());
+    }
+    // if account doesn't exists create one
+    try {
+      await auth.createUserWithEmailAndPassword(
+        email: userData.email!,
+        password: "123456",
+        // TODO: change the above pwd to a radomized pwd
+      );
+    } on FirebaseAuthException catch (e) {
+      if (e.code != 'email-already-in-use') {
+        rethrow;
+      }
+    }
+  });
 }
+
+/// This function is responsible for logging user in
+Future<void> login(String email, String password) async {
+  UserCredential userCredential;
+  userCredential =
+      await auth.signInWithEmailAndPassword(email: email, password: password);
+  currentUser = await fetchUserData(userCredential.user!.email!);
+}
+
+var currentUser = UserData();

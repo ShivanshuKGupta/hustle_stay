@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:hustle_stay/models/message.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/image.dart';
@@ -48,6 +49,9 @@ class _MessageInputFieldState extends State<MessageInputField> {
 
   @override
   Widget build(BuildContext context) {
+    int i = 0;
+    const duration = Duration(milliseconds: 200);
+
     return Form(
       key: _formKey,
       child: Column(
@@ -72,11 +76,15 @@ class _MessageInputFieldState extends State<MessageInputField> {
                                 "${DateTime.now().millisecondsSinceEpoch}.jpg");
                         if (url == null) return;
                         _msgTxtBox.text = "![image]($url)";
+                        // ignore: use_build_context_synchronously
                         submit(context);
                       },
-                      icon: const Icon(Icons.add_rounded),
+                      icon: const Icon(Icons.add_photo_alternate_outlined),
                       color: Theme.of(context).colorScheme.primary,
-                    ),
+                    )
+                        .animate()
+                        .scaleXY(begin: 1.5, end: 1, duration: duration * 4)
+                        .fade(duration: duration * 4),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
@@ -84,12 +92,16 @@ class _MessageInputFieldState extends State<MessageInputField> {
                     hintText: "Enter your message here",
                   ),
                   onSaved: (value) => txt = value!.trim(),
-                ),
+                ).animate().fade(duration: duration * 4).then(),
               ),
               IconButton(
                 onPressed: () => submit(context),
                 icon: const Icon(Icons.send_rounded),
-              )
+              ).animate(delay: duration * 4).fade().slideX(
+                    begin: -0.2,
+                    end: 0,
+                    duration: duration,
+                  )
             ],
           ),
           Container(
@@ -101,43 +113,123 @@ class _MessageInputFieldState extends State<MessageInputField> {
                 IconButton(
                   onPressed: bold,
                   iconSize: 25,
-                  icon: const Icon(Icons.format_bold_rounded),
+                  icon: const Icon(Icons.format_bold_rounded)
+                      .animate()
+                      .then(delay: duration * i++)
+                      .fade(duration: duration)
+                      .slideY(
+                          duration: duration,
+                          curve: Curves.decelerate,
+                          begin: -1,
+                          end: 0),
                 ),
                 IconButton(
                   onPressed: italic,
-                  icon: const Icon(Icons.format_italic_rounded),
+                  icon: const Icon(Icons.format_italic_rounded)
+                      .animate()
+                      .then(delay: duration * i++)
+                      .fade(duration: duration)
+                      .slideY(
+                          duration: duration,
+                          curve: Curves.decelerate,
+                          begin: -1,
+                          end: 0),
                 ),
                 IconButton(
                   onPressed: makeTitle,
-                  icon: const Icon(Icons.title_rounded),
+                  icon: const Icon(Icons.title_rounded)
+                      .animate()
+                      .then(delay: duration * i++)
+                      .fade(duration: duration)
+                      .slideY(
+                          duration: duration,
+                          curve: Curves.decelerate,
+                          begin: -1,
+                          end: 0),
                 ),
                 IconButton(
                   onPressed: quote,
-                  icon: const Icon(Icons.format_quote_rounded),
+                  icon: const Icon(Icons.format_quote_rounded)
+                      .animate()
+                      .then(delay: duration * i++)
+                      .fade(duration: duration)
+                      .slideY(
+                          duration: duration,
+                          curve: Curves.decelerate,
+                          begin: -1,
+                          end: 0),
                 ),
                 IconButton(
                   onPressed: codeBlock,
-                  icon: const Icon(Icons.code_rounded),
+                  icon: const Icon(Icons.code_rounded)
+                      .animate()
+                      .then(delay: duration * i++)
+                      .fade(duration: duration)
+                      .slideY(
+                          duration: duration,
+                          curve: Curves.decelerate,
+                          begin: -1,
+                          end: 0),
                 ),
                 IconButton(
                   onPressed: showLinkBox,
-                  icon: const Icon(Icons.link_rounded),
+                  icon: const Icon(Icons.link_rounded)
+                      .animate()
+                      .then(delay: duration * i++)
+                      .fade(duration: duration)
+                      .slideY(
+                          duration: duration,
+                          curve: Curves.decelerate,
+                          begin: -1,
+                          end: 0),
                 ),
                 IconButton(
                   onPressed: strikethrough,
-                  icon: const Icon(Icons.format_strikethrough_rounded),
+                  icon: const Icon(Icons.format_strikethrough_rounded)
+                      .animate()
+                      .then(delay: duration * i++)
+                      .fade(duration: duration)
+                      .slideY(
+                          duration: duration,
+                          curve: Curves.decelerate,
+                          begin: -1,
+                          end: 0),
                 ),
                 IconButton(
                   onPressed: addHrLine,
-                  icon: const Icon(Icons.horizontal_rule_rounded),
+                  icon: const Icon(Icons.horizontal_rule_rounded)
+                      .animate()
+                      .then(delay: duration * i++)
+                      .fade(duration: duration)
+                      .slideY(
+                          duration: duration,
+                          curve: Curves.decelerate,
+                          begin: -1,
+                          end: 0),
                 ),
                 IconButton(
                   onPressed: unorderedList,
-                  icon: const Icon(Icons.format_list_bulleted_outlined),
+                  icon: const Icon(Icons.format_list_bulleted_outlined)
+                      .animate()
+                      .then(delay: duration * i++)
+                      .fade(duration: duration)
+                      .slideY(
+                          duration: duration,
+                          curve: Curves.decelerate,
+                          begin: -1,
+                          end: 0),
                 ),
                 IconButton(
                   onPressed: orderedList,
-                  icon: const Icon(Icons.format_list_numbered_rounded),
+                  icon: const Icon(Icons.format_list_numbered_rounded)
+                      .animate()
+                      .then(delay: duration * i++)
+                      .fade(duration: duration)
+                      .slideY(
+                          duration: duration,
+                          curve: Curves.decelerate,
+                          begin: -1,
+                          end: 0),
                 ),
               ],
             ),

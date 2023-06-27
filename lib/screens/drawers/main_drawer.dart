@@ -1,8 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/addHostel.dart';
-import 'package:hustle_stay/screens/edit_profile_screen.dart';
+import 'package:hustle_stay/screens/auth/edit_profile_screen.dart';
+import 'package:hustle_stay/screens/complaints/complaints_screen.dart';
+import 'package:hustle_stay/screens/complaints/resolved_complaints_screen.dart';
 
 import 'package:hustle_stay/tools.dart';
 
@@ -28,30 +29,8 @@ class MainDrawer extends StatelessWidget {
   }
 
   Widget body(context) {
-    final auth = FirebaseAuth.instance;
     return Column(
       children: [
-        ListTile(
-          contentPadding: const EdgeInsets.symmetric(
-            vertical: 20,
-            horizontal: 20,
-          ),
-          leading: const CircleAvatar(
-            child: Icon(Icons.person_rounded),
-          ),
-          title: Text(
-            currentUser.name ?? "Error",
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          subtitle: Text(
-            currentUser.email!,
-            style: TextStyle(color: Theme.of(context).colorScheme.primary),
-          ),
-          onTap: () {
-            // TODO: add a profile screen
-            showMsg(context, 'TODO: add a profile screen');
-          },
-        ),
         ListTile(
           contentPadding: const EdgeInsets.symmetric(
             vertical: 20,
@@ -83,6 +62,18 @@ class MainDrawer extends StatelessWidget {
               );
             },
           ),
+        _drawerTile(
+          context,
+          title: "Resolved Complaints",
+          icon: Icons.person_add_rounded,
+          subtitle: "View resolved complaints",
+          onTap: () async {
+            navigatorPush(
+              context,
+              const ResolvedComplaintsScreen(),
+            );
+          },
+        ),
         // _drawerTile(
         //   context,
         //   title: "Complaint",

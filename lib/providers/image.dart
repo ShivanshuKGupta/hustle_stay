@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/message.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:image_picker/image_picker.dart';
@@ -10,7 +11,7 @@ import 'package:image_picker/image_picker.dart';
 /// uploads it on cloud and
 /// return the download URL
 Future<String?> getLocalImageOnCloud(context,
-    {String fileName = "image.jpg"}) async {
+    {required String fileName}) async {
   const int imageQuality = 50;
   const double maxWidth = double.infinity;
   const double maxHeight = double.infinity;
@@ -37,6 +38,7 @@ Future<String?> getLocalImageOnCloud(context,
               if (pickedImage == null) {
                 return;
               }
+              // ignore: use_build_context_synchronously
               Navigator.of(context).pop(File(pickedImage.path));
             },
             icon: const Icon(Icons.image_rounded),
@@ -54,6 +56,7 @@ Future<String?> getLocalImageOnCloud(context,
               if (pickedImage == null) {
                 return;
               }
+              // ignore: use_build_context_synchronously
               Navigator.of(context).pop(File(pickedImage.path));
             },
             icon: const Icon(Icons.camera_alt_rounded),
@@ -62,16 +65,23 @@ Future<String?> getLocalImageOnCloud(context,
       ),
     ),
   );
+  return uploadImage(context, imageFile, currentUser.email!, fileName);
+}
+
+bool isImage(MessageData msg) {
+  RegExp regex = RegExp(r"!\[.*\]\(.*\)");
+  return regex.hasMatch(msg.txt);
+}
+
+Future<String?> uploadImage(
+    context, File? imageFile, String path, String fileName) async {
   if (imageFile == null) return null;
   final downloadURL = await Navigator.of(context).push<String?>(
     DialogRoute(
         context: context,
         barrierDismissible: false,
         builder: (context) {
-          final ref = FirebaseStorage.instance
-              .ref()
-              .child(currentUser.email!)
-              .child(fileName);
+          final ref = storage.ref().child(path).child(fileName);
           final uploadTask = ref.putFile(imageFile);
           return AlertDialog(
             title: const Text('Uploading...'),
@@ -147,6 +157,7 @@ Future<String?> getLocalImageOnCloud(context,
                 style: TextButton.styleFrom(foregroundColor: Colors.red),
                 onPressed: () async {
                   await uploadTask.cancel();
+                  // ignore: use_build_context_synchronously
                   Navigator.of(context).pop(null);
                 },
                 icon: const Icon(Icons.close_rounded),
@@ -156,9 +167,4 @@ Future<String?> getLocalImageOnCloud(context,
         }),
   );
   return downloadURL;
-}
-
-bool isImage(MessageData msg) {
-  RegExp regex = RegExp(r"!\[.*\]\(.*\)");
-  return regex.hasMatch(msg.txt);
 }

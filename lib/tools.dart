@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+/// A widget which is primarily used to show a [CircularProgressIndicator]
+/// in a sizedbox
 SizedBox circularProgressIndicator({
   double? height = 16,
   double? width = 16,
@@ -183,14 +185,18 @@ class Validate {
 }
 
 /// Navigator.of(context).push(MaterialPageRoute(builder: (ctx)=>newPage));
-navigatorPush(context, newPage) async {
+navigatorPush<T>(context, newPage) async {
   return Navigator.of(context)
-      .push(MaterialPageRoute(builder: (ctx) => newPage));
+      .push<T>(MaterialPageRoute(builder: (ctx) => newPage));
 }
 
-Future<String?> showMsgBox(
+/// A quick ready-made alertbox with yes/no/cancel etc. buttons
+/// This is used to ask user about some quick confirmations or
+/// to show him a message
+Future<String?> askUser(
   context,
   String msg, {
+  String? description,
   bool yes = false,
   bool ok = false,
   bool no = false,
@@ -256,7 +262,9 @@ Future<String?> showMsgBox(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(msg),
+        content: description != null ? Text(description) : null,
         actions: buttons,
+        actionsAlignment: MainAxisAlignment.spaceAround,
       ),
     ),
   );

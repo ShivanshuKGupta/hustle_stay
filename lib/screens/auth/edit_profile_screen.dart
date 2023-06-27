@@ -1,6 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/providers/image.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/profile_image.dart';
 
@@ -18,6 +20,8 @@ class _EditProfileState extends State<EditProfile> {
   final _formKey = GlobalKey<FormState>();
   bool _loading = false;
 
+  File? img;
+
   Future<void> save(context) async {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
@@ -26,7 +30,12 @@ class _EditProfileState extends State<EditProfile> {
       _loading = true;
     });
     try {
+      widget.user.imgUrl = img != null
+          ? await uploadImage(
+              context, img, widget.user.email!, "profile-image.jpg")
+          : widget.user.imgUrl;
       await updateUserData(widget.user);
+      Navigator.of(context).pop(true); // to show that a change was done
     } catch (e) {
       showMsg(context, e.toString());
     }
@@ -37,7 +46,6 @@ class _EditProfileState extends State<EditProfile> {
 
   @override
   Widget build(BuildContext context) {
-    final auth = FirebaseAuth.instance;
     return Scaffold(
       appBar: AppBar(),
       body: Form(
@@ -47,7 +55,12 @@ class _EditProfileState extends State<EditProfile> {
             padding: const EdgeInsets.all(15.0),
             child: Column(
               children: [
-                ProfileImage(onChanged: (img) {}),
+                ProfileImage(
+                  url: widget.user.imgUrl,
+                  onChanged: (value) {
+                    img = value;
+                  },
+                ),
                 Text(
                   widget.user.email ?? "",
                   style: Theme.of(context).textTheme.bodyMedium!.copyWith(
@@ -114,36 +127,39 @@ class _EditProfileState extends State<EditProfile> {
                     widget.user.address = value!.trim();
                   },
                 ),
-                DropdownButtonFormField(
-                    key: UniqueKey(),
-                    decoration: const InputDecoration(label: Text('Type')),
-                    value: widget.user.readonly.type,
-                    items: ['attender', 'warden', 'student', 'other', "club"]
-                        .map(
-                          (e) => DropdownMenuItem(
-                            value: e,
-                            child: Text(e),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      widget.user.readonly.type = value ?? "student";
-                    }),
-                DropdownButtonFormField(
-                    key: UniqueKey(),
-                    decoration: const InputDecoration(label: Text('Admin')),
-                    value: widget.user.readonly.isAdmin,
-                    items: [true, false]
-                        .map(
-                          (e) => DropdownMenuItem(
-                            value: e,
-                            child: Text(e.toString()),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      widget.user.readonly.isAdmin = value ?? false;
-                    }),
+                if (currentUser.readonly.isAdmin)
+                  DropdownButtonFormField(
+                      key: UniqueKey(),
+                      decoration: const InputDecoration(label: Text('Type')),
+                      value: widget.user.readonly.type,
+                      items: ['attender', 'warden', 'student', 'other', "club"]
+                          .map(
+                            (e) => DropdownMenuItem(
+                              value: e,
+                              child: Text(e),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        widget.user.readonly.type = value ?? "student";
+                      }),
+                if (widget.user.email != currentUser.email &&
+                    currentUser.readonly.isAdmin)
+                  DropdownButtonFormField(
+                      key: UniqueKey(),
+                      decoration: const InputDecoration(label: Text('Admin')),
+                      value: widget.user.readonly.isAdmin,
+                      items: [true, false]
+                          .map(
+                            (e) => DropdownMenuItem(
+                              value: e,
+                              child: Text(e.toString()),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        widget.user.readonly.isAdmin = value ?? false;
+                      }),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
