@@ -33,7 +33,8 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      onTap: () => showComplaintChat(context, widget.complaint),
+      onTap: () =>
+          showComplaintChat(context, widget.complaint, showInfo: _showInfo),
       onLongPress: () => _showInfo(),
       title: Text(widget.complaint.title),
       subtitle: widget.complaint.description == null
@@ -43,21 +44,44 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
               overflow: TextOverflow.fade,
               maxLines: 4,
             ),
+
+      /// if no image is associated with the complaint
+      /// then I will show the user image who posted that complaint
+      /// if the user doesn't has an image then
+      /// just an info icon
       leading: widget.complaint.imgUrl == null
-          ? CircleAvatar(
-              child: Icon(
-                Icons.info_rounded,
-                size: 40,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            )
-          : IconButton(
-              padding: EdgeInsets.zero,
-              icon: CircleAvatar(
+          ? FutureBuilder(
+              future: fetchUserData(widget.complaint.from),
+              builder: (ctx, snapshot) {
+                if (!snapshot.hasData || snapshot.data!.imgUrl == null) {
+                  return const InkWell(
+                    child: CircleAvatar(
+                      child: Icon(Icons.info_rounded),
+                    ),
+                  );
+                }
+                return InkWell(
+                  child: CircleAvatar(
+                    backgroundImage:
+                        CachedNetworkImageProvider(snapshot.data!.imgUrl!),
+                  ),
+                  onTap: () {
+                    navigatorPush(
+                      context,
+                      ImagePreview(
+                        image: CachedNetworkImage(
+                            imageUrl: snapshot.data!.imgUrl!),
+                      ),
+                    );
+                  },
+                );
+              })
+          : InkWell(
+              child: CircleAvatar(
                 backgroundImage:
                     CachedNetworkImageProvider(widget.complaint.imgUrl!),
               ),
-              onPressed: () {
+              onTap: () {
                 navigatorPush(
                   context,
                   ImagePreview(
@@ -76,7 +100,7 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
     final editedComplaint = await navigatorPush(
       context,
       EditComplaintsPage(
-        id: widget.complaint.id,
+        complaint: widget.complaint,
         deleteMe: deleteMe,
       ),
     );
@@ -128,10 +152,14 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
             actionsAlignment: MainAxisAlignment.spaceAround,
             title: Text(widget.complaint.title),
             actions: [
-              IconButton(
-                onPressed: () => showComplaintChat(context, widget.complaint),
-                icon: const Icon(Icons.chat_rounded),
-              ),
+              // IconButton(
+              //   onPressed: () async {
+              //     await showComplaintChat(context, widget.complaint,
+              //         showInfo: _showInfo);
+              //     Navigator.of(context).pop();
+              //   },
+              //   icon: const Icon(Icons.chat_rounded),
+              // ),
               IconButton(
                 onPressed: () => editMe(),
                 icon: const Icon(Icons.edit_rounded),
@@ -215,7 +243,7 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
 
 /// Creates and Navigates you to the approriate Chat Screen based on the complaint
 Future<void> showComplaintChat(BuildContext context, ComplaintData complaint,
-    {MessageData? initialMsg}) {
+    {MessageData? initialMsg, void Function()? showInfo}) {
   return navigatorPush<void>(
     context,
     ChatScreen(
@@ -226,11 +254,12 @@ Future<void> showComplaintChat(BuildContext context, ComplaintData complaint,
       ),
       chat: ChatData(
         path: "complaints/${complaint.id}",
-        owner: UserData(email: complaint.from),
-        receivers: complaint.to.map((e) => UserData(email: e)).toList(),
+        owner: complaint.from,
+        receivers: complaint.to,
         title: complaint.title,
         description: complaint.description,
       ),
+      showInfo: showInfo,
     ),
   );
 }

@@ -6,14 +6,12 @@ import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/complaints/complaints_screen.dart';
 import 'package:hustle_stay/screens/settings/settings_screen.dart';
-
 import 'package:hustle_stay/tools.dart';
 
-import 'hostel/hostel_screen.dart';
 import 'drawers/main_drawer.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
-  HomeScreen({super.key});
+  const HomeScreen({super.key});
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
@@ -76,7 +74,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         body = const HostelScreen();
         break;
       case 1:
-        body = ComplaintsScreen();
+        body = const ComplaintsScreen();
         break;
       case 3:
         body = const SettingsScreen();

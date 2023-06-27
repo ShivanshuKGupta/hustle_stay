@@ -1,12 +1,11 @@
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/message.dart';
-import 'package:hustle_stay/models/user.dart';
 
 class ChatData {
   String title;
   String? description;
-  List<UserData> receivers;
-  UserData owner;
+  List<String> receivers;
+  String owner;
 
   /// the path where chat collection is present
   String path;

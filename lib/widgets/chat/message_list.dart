@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
+import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/message.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/chat/message.dart';
-
-import 'package:hustle_stay/models/chat/chat.dart';
 
 class MessageList extends StatefulWidget {
   ChatData chat;
@@ -46,6 +45,7 @@ class _MessageListState extends State<MessageList> {
           reverse: true,
           shrinkWrap: true,
           separatorBuilder: (ctx, index) {
+            if (index == widget.chat.messages.length - 1) return Container();
             final msg = widget.chat.messages[index];
             DateTime createdAt = msg.createdAt;
             final nextMsg = widget.chat.messages[index + 1];
@@ -62,6 +62,11 @@ class _MessageListState extends State<MessageList> {
             );
           },
           itemBuilder: (ctx, index) {
+            if (index == widget.chat.messages.length) {
+              final msg = widget.chat.messages[index - 1];
+              DateTime createdAt = msg.createdAt;
+              return _dateWidget(createdAt);
+            }
             final msg = widget.chat.messages[index];
             final nextMsg = index == widget.chat.messages.length - 1
                 ? null
@@ -80,7 +85,7 @@ class _MessageListState extends State<MessageList> {
               msgAlignment: msg.from == currentUser.email,
             );
           },
-          itemCount: widget.chat.messages.length,
+          itemCount: widget.chat.messages.length + 1,
         );
       },
     );

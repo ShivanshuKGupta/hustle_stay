@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:hustle_stay/tools.dart';
 
 /// It is Form made for Authenticating users using email and password
@@ -93,13 +92,7 @@ class _AuthFormState extends State<AuthForm> {
             icon: const Icon(
               Icons.login_rounded,
             ),
-            label: _loading
-                ? const SizedBox(
-                    height: 16,
-                    width: 16,
-                    child: CircularProgressIndicator(),
-                  )
-                : const Text('Login'),
+            label: _loading ? circularProgressIndicator() : const Text('Login'),
           ),
 
           /// The textbutton for reset

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/complaint.dart';
-import 'package:hustle_stay/screens/complaints/complaints_screen.dart';
 import 'package:hustle_stay/tools.dart';
+import 'package:hustle_stay/widgets/complaints/complaints_list_widget.dart';
 
 class ResolvedComplaintsScreen extends StatelessWidget {
   const ResolvedComplaintsScreen({super.key});
@@ -17,12 +17,7 @@ class ResolvedComplaintsScreen extends StatelessWidget {
               return Center(child: circularProgressIndicator());
             }
             final complaints = snapshot.data!;
-            return complaintsListWidget(
-              context,
-              complaints,
-              MediaQuery.of(context),
-              const Duration(milliseconds: 500),
-            );
+            return ComplaintsListWidget(complaints: complaints);
           }),
     );
   }

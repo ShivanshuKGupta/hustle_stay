@@ -1,11 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:hustle_stay/main.dart';
-
 import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/message.dart';
 import 'package:hustle_stay/models/user.dart';

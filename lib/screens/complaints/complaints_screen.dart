@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:hustle_stay/models/complaint.dart';
 import 'package:hustle_stay/models/message.dart';
 import 'package:hustle_stay/models/user.dart';
@@ -11,6 +9,7 @@ import 'package:hustle_stay/screens/complaints/edit_complaints_page.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/chat/complaint_template_message.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_list_item.dart';
+import 'package:hustle_stay/widgets/complaints/complaints_list_widget.dart';
 
 class ComplaintsScreen extends ConsumerStatefulWidget {
   const ComplaintsScreen({super.key});
@@ -29,38 +28,22 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
     final complaintsNotifier = ref.read(complaintsList.notifier);
     List<ComplaintData> newComplaints = complaints;
     try {
-      if (!_disposeWasCalled) {
-        setState(() {
-          _isLoading = true;
-        });
-      }
+      if (!_disposeWasCalled) setState(() => _isLoading = true);
       newComplaints = await fetchComplaints(src: Source.cache);
       if (!areComplaintsEqual(complaints, newComplaints)) {
         complaintsNotifier.updateList(newComplaints);
-        if (!_disposeWasCalled) {
-          setState(() {});
-        }
+        if (!_disposeWasCalled) setState(() {});
       }
-      if (!_disposeWasCalled) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (!_disposeWasCalled) setState(() => _isLoading = false);
     } catch (e) {
       // Do nothing
     }
     newComplaints = await fetchComplaints();
     if (!areComplaintsEqual(complaints, newComplaints)) {
       complaintsNotifier.updateList(newComplaints);
-      if (!_disposeWasCalled) {
-        setState(() {});
-      }
+      if (!_disposeWasCalled) setState(() {});
     }
-    if (!_disposeWasCalled) {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    if (!_disposeWasCalled) setState(() => _isLoading = false);
   }
 
   @override
@@ -84,7 +67,7 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
           ? Center(child: circularProgressIndicator())
           : _complaintsList(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _addComplaint(),
+        onPressed: _addComplaint,
         child: const Icon(Icons.add_rounded),
       ),
     );
@@ -93,18 +76,11 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
   /// Just a list view with a placeholder when there is no item in the list
   Widget _complaintsList() {
     final complaints = ref.watch(complaintsList);
-    const duration = Duration(milliseconds: 400);
-    final mediaQuery = MediaQuery.of(context);
     return RefreshIndicator(
       onRefresh: () async {
         await _updateComplaintsList();
       },
-      child: complaintsListWidget(
-        context,
-        complaints,
-        mediaQuery,
-        duration,
-      ),
+      child: ComplaintsListWidget(complaints: complaints),
     );
   }
 
@@ -124,50 +100,12 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
             id: DateTime.now().millisecondsSinceEpoch.toString(),
             from: currentUser.email!,
             createdAt: DateTime.now(),
-            txt: complaintTemplateMessage(complaint),
+            txt: templateMessage(complaint),
           ),
         );
       }
     }
   }
-}
-
-Widget complaintsListWidget(context, complaints, mediaQuery, duration) {
-  int i = 0;
-  return complaints.isEmpty
-      ? ListView(
-          children: [
-            SizedBox(
-              height: mediaQuery.size.height -
-                  mediaQuery.viewInsets.top -
-                  mediaQuery.padding.top -
-                  mediaQuery.padding.bottom -
-                  mediaQuery.viewInsets.bottom -
-                  150,
-              child: Center(
-                child: Text(
-                  'All clear✨',
-                  style: Theme.of(context).textTheme.titleLarge,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-          ],
-        )
-      : ListView.builder(
-          itemBuilder: (ctx, index) {
-            final complaint = complaints[index];
-            return ComplaintListItem(
-              complaint: complaint,
-            ).animate().then(delay: duration * i++).slideX(
-                  begin: -1,
-                  end: 0,
-                  curve: Curves.decelerate,
-                  duration: duration,
-                );
-          },
-          itemCount: complaints.length,
-        );
 }
 
 bool areComplaintsEqual(List<ComplaintData> A, List<ComplaintData> B) {

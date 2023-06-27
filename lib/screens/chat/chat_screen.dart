@@ -1,40 +1,45 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
-import 'package:hustle_stay/widgets/chat/message_list.dart';
+import 'package:hustle_stay/models/message.dart';
+import 'package:hustle_stay/widgets/chat/call_button.dart';
 import 'package:hustle_stay/widgets/chat/message_input_field.dart';
-
-import '../../models/message.dart';
+import 'package:hustle_stay/widgets/chat/message_list.dart';
 
 class ChatScreen extends StatelessWidget {
   final ChatData chat;
   final MessageData? initialMsg;
   final Widget? bottomBar;
+  final void Function()? showInfo;
 
   const ChatScreen({
     super.key,
     required this.chat,
     this.initialMsg,
     this.bottomBar,
+    this.showInfo,
   });
 
   @override
   Widget build(BuildContext context) {
-    Widget titleWidget = ListTile(
-      onTap: () {},
-      title: Text(chat.title),
-      subtitle: chat.description == null
-          ? null
-          : Text(
-              chat.description!,
-              overflow: TextOverflow.fade,
-              maxLines: 1,
-            ),
+    Widget titleWidget = InkWell(
+      onTap: showInfo,
+      child: Text(
+        chat.title,
+        overflow: TextOverflow.fade,
+        maxLines: 2,
+      ),
     );
+
     return Scaffold(
       body: Scaffold(
         appBar: AppBar(
           titleSpacing: 0,
+          actions: [
+            CallButton(emails: chat.receivers)
+                .animate()
+                .fade(duration: const Duration(seconds: 1)),
+          ],
           bottom: (bottomBar == null)
               ? null
               : PreferredSize(
