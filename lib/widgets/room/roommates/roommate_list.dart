@@ -4,8 +4,8 @@ import 'package:hustle_stay/widgets/room/roommates/roommate_data.dart';
 import '../../../models/hostel/rooms/room.dart';
 
 class RoommateWidget extends StatefulWidget {
-  RoommateWidget({super.key, required this.roomData});
-  Room roomData;
+  const RoommateWidget({super.key, required this.roomData});
+  final Room roomData;
 
   @override
   State<RoommateWidget> createState() => _RoommateWidgetState();

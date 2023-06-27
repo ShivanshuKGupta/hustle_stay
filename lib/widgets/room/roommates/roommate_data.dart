@@ -2,16 +2,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user.dart';
-
-import '../../../models/hostel/rooms/room.dart';
 import '../../../screens/hostel/rooms/profile_view_screen.dart';
 import '../../../tools.dart';
 
 class RoommateDataWidget extends StatefulWidget {
-  const RoommateDataWidget({
-    super.key,
-    required this.email,
-  });
+  const RoommateDataWidget({super.key, required this.email});
   final String email;
 
   @override
@@ -23,6 +18,14 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
   final presentIcon = Icon(Icons.check_circle_outline, color: Colors.green);
   final absentIcon = Icon(Icons.close_rounded, color: Colors.red);
   bool isRunning = false;
+  String email = "";
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      email = widget.email;
+    });
+  }
 
   var currentIcon = Icon(Icons.close_rounded, color: Colors.red);
   @override

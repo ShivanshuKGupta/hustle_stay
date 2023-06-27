@@ -2,13 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class RoommateData {
-  String name;
   String email;
-  String rollNumber;
   RoommateData({
-    required this.name,
     required this.email,
-    required this.rollNumber,
   });
 }
 
@@ -38,9 +34,6 @@ Future<List<Room>> fetchRooms(String hostelName, {Source? src}) async {
   final roomDocs = roomSnapshot.docs;
   print(roomDocs.length);
   for (int i = 0; i < roomSnapshot.docs.length; i++) {
-    print(roomDocs[i]);
-    print(roomDocs[i]['capacity']);
-    print(roomDocs[i]['roomName']);
     final roomRef = roomDocs[i].reference;
     final roommatesSnapshot = await roomRef
         .collection('Roommates')
@@ -50,9 +43,7 @@ Future<List<Room>> fetchRooms(String hostelName, {Source? src}) async {
       for (var roommateDoc in roommatesSnapshot.docs) {
         print(roommateDoc['email']);
         final roommateData = RoommateData(
-          name: roommateDoc['name'],
           email: roommateDoc['email'],
-          rollNumber: roommateDoc['rollNumber'],
         );
         roommatesData.add(roommateData);
       }
@@ -260,7 +251,7 @@ Future<List<DropdownMenuItem>> fetchRoommateNames(
       .get(src == null ? null : GetOptions(source: src));
   storageRef.docs.forEach((element) {
     list.add(DropdownMenuItem(
-      child: Text(element['name']),
+      child: Text(element['email']),
       value: element.id,
     ));
   });

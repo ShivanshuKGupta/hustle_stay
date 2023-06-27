@@ -34,9 +34,7 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
   }
 
   int currentRoommateNumber = 0;
-  String roommateName = "";
   String roommateEmail = "";
-  String roommateRollNum = "";
   bool isOverflow = false;
   var numOfRoommates = 0;
   bool isRunning = false;
@@ -142,7 +140,7 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
                   });
                 },
               ),
-              Divider();
+              Divider(),
 
               ListView.builder(
                 physics: NeverScrollableScrollPhysics(),
