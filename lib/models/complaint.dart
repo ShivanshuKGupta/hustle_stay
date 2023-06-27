@@ -77,12 +77,13 @@ Future<ComplaintData> fetchComplaint(String id) async {
 }
 
 /// fetches all complaints
-Future<List<ComplaintData>> fetchComplaints({Source? src}) async {
+Future<List<ComplaintData>> fetchComplaints(
+    {Source? src, bool resolved = false}) async {
   // Fetching all public complaints
   final publicComplaints = await firestore
       .collection('complaints')
       .where('scope', isEqualTo: 'public')
-      .where('resolved', isEqualTo: false)
+      .where('resolved', isEqualTo: resolved)
       .get(src != null ? GetOptions(source: src) : null);
   List<ComplaintData> ans = publicComplaints.docs
       .map((e) => ComplaintData.load(e.id, e.data()))
@@ -92,7 +93,7 @@ Future<List<ComplaintData>> fetchComplaints({Source? src}) async {
       .collection('complaints')
       .where('from', isEqualTo: currentUser.email)
       .where('scope', isEqualTo: 'private')
-      .where('resolved', isEqualTo: false)
+      .where('resolved', isEqualTo: resolved)
       .get(src != null ? GetOptions(source: src) : null);
   ans +=
       myComplaints.docs.map((e) => ComplaintData.load(e.id, e.data())).toList();
@@ -101,7 +102,7 @@ Future<List<ComplaintData>> fetchComplaints({Source? src}) async {
       .collection('complaints')
       .where('to', arrayContains: currentUser.email)
       .where('scope', isEqualTo: 'private')
-      .where('resolved', isEqualTo: false)
+      .where('resolved', isEqualTo: resolved)
       .get(src != null ? GetOptions(source: src) : null);
   ans += includedComplaints.docs
       .map((e) => ComplaintData.load(e.id, e.data()))

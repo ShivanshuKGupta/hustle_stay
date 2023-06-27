@@ -24,7 +24,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final settings = ref.read(settingsProvider);
     const duration = Duration(milliseconds: 1000);
-    var bottomNavigationBarItems = [
+    List<BottomNavigationBarItem> bottomNavigationBarItems = [
       const BottomNavigationBarItem(
         icon: Icon(Icons.co_present_rounded),
         label: 'Attendance',
@@ -53,13 +53,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         tooltip: "Settings",
       ),
     ];
+    List<Widget> actions = [
+      IconButton(
+        onPressed: () {
+          showMsg(context, 'TODO: show profile page');
+        },
+        icon: CircleAvatar(
+          backgroundImage: currentUser.imgUrl == null
+              ? null
+              : CachedNetworkImageProvider(currentUser.imgUrl!),
+          child: currentUser.imgUrl != null
+              ? null
+              : const Icon(
+                  Icons.person_rounded,
+                ),
+        ),
+      )
+    ];
     Widget body = Container();
     switch (settings.currentPage) {
       case 0:
         body = const HostelScreen();
         break;
       case 1:
-        body = const ComplaintsScreen();
+        body = ComplaintsScreen();
         break;
       case 3:
         body = const SettingsScreen();
@@ -72,23 +89,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           title: bottomNavigationBarItems[settings.currentPage].tooltip ??
               "Hustle Stay",
         ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              showMsg(context, 'TODO: show profile page');
-            },
-            icon: CircleAvatar(
-              backgroundImage: currentUser.imgUrl == null
-                  ? null
-                  : CachedNetworkImageProvider(currentUser.imgUrl!),
-              child: currentUser.imgUrl != null
-                  ? null
-                  : const Icon(
-                      Icons.person_rounded,
-                    ),
-            ),
-          )
-        ],
+        actions: actions,
       ),
       drawer: const Drawer(elevation: 5, child: MainDrawer()),
       bottomNavigationBar: BottomNavigationBar(

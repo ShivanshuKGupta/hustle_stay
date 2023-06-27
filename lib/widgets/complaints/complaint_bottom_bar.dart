@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/complaint.dart';
+import 'package:hustle_stay/providers/complaint_list.dart';
 import 'package:hustle_stay/tools.dart';
 
-class ComplaintBottomBar extends StatelessWidget {
+class ComplaintBottomBar extends ConsumerWidget {
   ComplaintData complaint;
   ComplaintBottomBar({
     super.key,
@@ -13,7 +15,7 @@ class ComplaintBottomBar extends StatelessWidget {
   final BuildContext context;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     List<Widget> buttons = [
       ElevatedButton(
         style: ElevatedButton.styleFrom(
@@ -27,21 +29,27 @@ class ComplaintBottomBar extends StatelessWidget {
         onPressed: () async {
           String? response = await askUser(
             context,
-            "Resolve the complaint?",
-            description:
-                "Do you confirm that the complaint has indeed been resolved from your perspective?",
+            "${complaint.resolved ? 'Unresolve' : 'Resolve'} the complaint?",
+            description: complaint.resolved
+                ? "Unresolving the complaint will activate this complaint again."
+                : "Do you confirm that the complaint has indeed been resolved from your perspective?",
             yes: true,
             no: true,
           );
           if (response == 'yes') {
-            complaint.resolved = true;
+            complaint.resolved = !complaint.resolved;
             updateComplaint(complaint);
+            if (complaint.resolved) {
+              ref.read(complaintsList.notifier).removeComplaint(complaint);
+            } else {
+              ref.read(complaintsList.notifier).addComplaint(complaint);
+            }
             if (context.mounted) {
               Navigator.of(context).pop();
             }
           }
         },
-        child: const Text('Resolve'),
+        child: Text(complaint.resolved ? 'Unresolve' : 'Resolve'),
       ),
       ElevatedButton(
         style: ElevatedButton.styleFrom(

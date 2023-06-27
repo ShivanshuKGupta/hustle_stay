@@ -7,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/auth/edit_profile_screen.dart';
+import 'package:hustle_stay/screens/chat/image_preview.dart';
+import 'package:hustle_stay/tools.dart';
 
 import '../../models/user.dart';
 
@@ -25,21 +27,36 @@ class SettingsScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(15.0),
           child: Row(
             children: [
-              CircleAvatar(
-                backgroundImage: currentUser.imgUrl == null
+              IconButton(
+                padding: EdgeInsets.zero,
+                onPressed: currentUser.imgUrl == null
                     ? null
-                    : CachedNetworkImageProvider(currentUser.imgUrl!),
-                radius: 50,
-                child: currentUser.imgUrl != null
-                    ? null
-                    : const Icon(
-                        Icons.person_rounded,
-                        size: 50,
-                      ),
-              )
-                  .animate()
-                  .fade()
-                  .slideX(begin: -1, end: 0, curve: Curves.decelerate),
+                    : () {
+                        navigatorPush(
+                          context,
+                          ImagePreview(
+                            image: CachedNetworkImage(
+                              imageUrl: currentUser.imgUrl!,
+                            ),
+                          ),
+                        );
+                      },
+                icon: CircleAvatar(
+                  backgroundImage: currentUser.imgUrl == null
+                      ? null
+                      : CachedNetworkImageProvider(currentUser.imgUrl!),
+                  radius: 50,
+                  child: currentUser.imgUrl != null
+                      ? null
+                      : const Icon(
+                          Icons.person_rounded,
+                          size: 50,
+                        ),
+                )
+                    .animate()
+                    .fade()
+                    .slideX(begin: -1, end: 0, curve: Curves.decelerate),
+              ),
               Expanded(
                 child: FutureBuilder(
                   future: fetchUserData(currentUser.email!),

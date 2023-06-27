@@ -82,6 +82,8 @@ class _ComplaintFormState extends State<ComplaintForm> {
           : complaint.imgUrl;
       if (widget.id == null) {
         complaint.id = DateTime.now().millisecondsSinceEpoch.toString();
+        debugPrint(
+            "creating new complaint with id: ${DateTime.now().millisecondsSinceEpoch}");
       }
       await widget.onSubmit(complaint);
       if (context.mounted) {

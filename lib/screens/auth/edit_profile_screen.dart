@@ -127,36 +127,39 @@ class _EditProfileState extends State<EditProfile> {
                     widget.user.address = value!.trim();
                   },
                 ),
-                DropdownButtonFormField(
-                    key: UniqueKey(),
-                    decoration: const InputDecoration(label: Text('Type')),
-                    value: widget.user.readonly.type,
-                    items: ['attender', 'warden', 'student', 'other', "club"]
-                        .map(
-                          (e) => DropdownMenuItem(
-                            value: e,
-                            child: Text(e),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      widget.user.readonly.type = value ?? "student";
-                    }),
-                DropdownButtonFormField(
-                    key: UniqueKey(),
-                    decoration: const InputDecoration(label: Text('Admin')),
-                    value: widget.user.readonly.isAdmin,
-                    items: [true, false]
-                        .map(
-                          (e) => DropdownMenuItem(
-                            value: e,
-                            child: Text(e.toString()),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      widget.user.readonly.isAdmin = value ?? false;
-                    }),
+                if (currentUser.readonly.isAdmin)
+                  DropdownButtonFormField(
+                      key: UniqueKey(),
+                      decoration: const InputDecoration(label: Text('Type')),
+                      value: widget.user.readonly.type,
+                      items: ['attender', 'warden', 'student', 'other', "club"]
+                          .map(
+                            (e) => DropdownMenuItem(
+                              value: e,
+                              child: Text(e),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        widget.user.readonly.type = value ?? "student";
+                      }),
+                if (widget.user.email != currentUser.email &&
+                    currentUser.readonly.isAdmin)
+                  DropdownButtonFormField(
+                      key: UniqueKey(),
+                      decoration: const InputDecoration(label: Text('Admin')),
+                      value: widget.user.readonly.isAdmin,
+                      items: [true, false]
+                          .map(
+                            (e) => DropdownMenuItem(
+                              value: e,
+                              child: Text(e.toString()),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        widget.user.readonly.isAdmin = value ?? false;
+                      }),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [

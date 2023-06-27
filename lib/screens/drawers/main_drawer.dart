@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/addHostel.dart';
 import 'package:hustle_stay/screens/auth/edit_profile_screen.dart';
+import 'package:hustle_stay/screens/complaints/complaints_screen.dart';
+import 'package:hustle_stay/screens/complaints/resolved_complaints_screen.dart';
 
 import 'package:hustle_stay/tools.dart';
 
@@ -60,6 +62,18 @@ class MainDrawer extends StatelessWidget {
               );
             },
           ),
+        _drawerTile(
+          context,
+          title: "Resolved Complaints",
+          icon: Icons.person_add_rounded,
+          subtitle: "View resolved complaints",
+          onTap: () async {
+            navigatorPush(
+              context,
+              const ResolvedComplaintsScreen(),
+            );
+          },
+        ),
         // _drawerTile(
         //   context,
         //   title: "Complaint",

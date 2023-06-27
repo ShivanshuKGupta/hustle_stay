@@ -29,6 +29,11 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
     final complaintsNotifier = ref.read(complaintsList.notifier);
     List<ComplaintData> newComplaints = complaints;
     try {
+      if (!_disposeWasCalled) {
+        setState(() {
+          _isLoading = true;
+        });
+      }
       newComplaints = await fetchComplaints(src: Source.cache);
       if (!areComplaintsEqual(complaints, newComplaints)) {
         complaintsNotifier.updateList(newComplaints);
@@ -36,12 +41,13 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
           setState(() {});
         }
       }
-    } catch (e) {
       if (!_disposeWasCalled) {
         setState(() {
-          _isLoading = true;
+          _isLoading = false;
         });
       }
+    } catch (e) {
+      // Do nothing
     }
     newComplaints = await fetchComplaints();
     if (!areComplaintsEqual(complaints, newComplaints)) {
@@ -50,7 +56,11 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
         setState(() {});
       }
     }
-    _isLoading = false;
+    if (!_disposeWasCalled) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -84,38 +94,17 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
   Widget _complaintsList() {
     final complaints = ref.watch(complaintsList);
     const duration = Duration(milliseconds: 400);
-    int i = 0;
+    final mediaQuery = MediaQuery.of(context);
     return RefreshIndicator(
       onRefresh: () async {
         await _updateComplaintsList();
       },
-      child: complaints.isEmpty
-          ? ListView(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  child: Text(
-                    'No Complaints ✨',
-                    style: Theme.of(context).textTheme.titleLarge,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
-            )
-          : ListView.builder(
-              itemBuilder: (ctx, index) {
-                final complaint = complaints[index];
-                return ComplaintListItem(
-                  complaint: complaint,
-                ).animate().then(delay: duration * i++).slideX(
-                      begin: -1,
-                      end: 0,
-                      curve: Curves.decelerate,
-                      duration: duration,
-                    );
-              },
-              itemCount: complaints.length,
-            ),
+      child: complaintsListWidget(
+        context,
+        complaints,
+        mediaQuery,
+        duration,
+      ),
     );
   }
 
@@ -141,6 +130,44 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
       }
     }
   }
+}
+
+Widget complaintsListWidget(context, complaints, mediaQuery, duration) {
+  int i = 0;
+  return complaints.isEmpty
+      ? ListView(
+          children: [
+            SizedBox(
+              height: mediaQuery.size.height -
+                  mediaQuery.viewInsets.top -
+                  mediaQuery.padding.top -
+                  mediaQuery.padding.bottom -
+                  mediaQuery.viewInsets.bottom -
+                  150,
+              child: Center(
+                child: Text(
+                  'All clear✨',
+                  style: Theme.of(context).textTheme.titleLarge,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ],
+        )
+      : ListView.builder(
+          itemBuilder: (ctx, index) {
+            final complaint = complaints[index];
+            return ComplaintListItem(
+              complaint: complaint,
+            ).animate().then(delay: duration * i++).slideX(
+                  begin: -1,
+                  end: 0,
+                  curve: Curves.decelerate,
+                  duration: duration,
+                );
+          },
+          itemCount: complaints.length,
+        );
 }
 
 bool areComplaintsEqual(List<ComplaintData> A, List<ComplaintData> B) {
