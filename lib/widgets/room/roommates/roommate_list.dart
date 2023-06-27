@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/widgets/room/roommates/roommate_data.dart';
 
-import '../../../models/room.dart';
+import '../../../models/hostel/rooms/room.dart';
 
 class RoommateWidget extends StatefulWidget {
-  RoommateWidget({super.key, required this.roomData, required this.hostelName});
+  RoommateWidget({super.key, required this.roomData});
   Room roomData;
-  String hostelName;
 
   @override
   State<RoommateWidget> createState() => _RoommateWidgetState();
@@ -22,10 +21,7 @@ class _RoommateWidgetState extends State<RoommateWidget> {
       itemBuilder: (context, roommateIndex) {
         final roommate = widget.roomData.roomMatesData![roommateIndex];
 
-        return RoommateDataWidget(
-            roomName: widget.roomData.roomName,
-            hostelName: widget.hostelName,
-            roommateData: roommate);
+        return RoommateDataWidget(email: roommate.email);
       },
     );
   }

@@ -137,6 +137,12 @@ Future<bool> changeRoom(String email, String hostelName, String roomName,
       await destLoc.doc(email).set(sourceData!);
       await sourceRoomRef.update({'numRoommates': FieldValue.increment(-1)});
       sourceRef.delete();
+      await storage.collection('users').doc("$email/editable/details").set(
+          {'hostelName': destHostelName, 'roomName': destRoomName},
+          SetOptions(merge: true)).catchError((error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Error occured in updation')));
+      });
     } else {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -189,6 +195,20 @@ Future<bool> swapRoom(
       transaction.delete(sourceRef);
       transaction.set(destLoc.doc(email), sourceData!);
       transaction.set(sourceLoc.doc(destRoommateEmail), destData!);
+      await storage.collection('users').doc("$email/editable/details").set(
+          {'hostelName': destHostelName, 'roomName': destRoomName},
+          SetOptions(merge: true)).catchError((error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Error occured in updation')));
+      });
+      await storage
+          .collection('users')
+          .doc("$destRoommateEmail/editable/details")
+          .set({'hostelName': hostelName, 'roomName': roomName},
+              SetOptions(merge: true)).catchError((error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Error occured in updation')));
+      });
 
       return true;
     });

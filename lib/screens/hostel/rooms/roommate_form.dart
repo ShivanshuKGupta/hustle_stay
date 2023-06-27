@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import "package:flutter_riverpod/flutter_riverpod.dart";
-import '../tools.dart';
+import '../../../tools.dart';
 
 class RoommateForm extends ConsumerStatefulWidget {
   RoommateForm(
@@ -44,6 +44,32 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
     if (_formKeyList[index].currentState!.validate()) {
       _formKeyList[index].currentState!.save();
       try {
+        final userCheck =
+            await storage.collection('users').doc(roommateEmail).get();
+        if (!userCheck.exists) {
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(
+                  'No user exists with this email. Create an account to add here.')));
+          setState(() {
+            isRunning = false;
+          });
+          return;
+        }
+        final userLoc = await storage
+            .collection('users')
+            .doc("$roommateEmail/editable/details")
+            .get();
+        if (userLoc.data()!.containsKey('hostelName')) {
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(
+                  'Hostel is already allocated to ${userLoc['name']}. Hostel: ${userLoc['hostelName']} and Room: ${userLoc['roomName']}')));
+          setState(() {
+            isRunning = false;
+          });
+          return;
+        }
         final loc = storage
             .collection('hostels')
             .doc(widget.hostelName)
@@ -51,19 +77,24 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
             .doc(widget.roomName);
 
         await loc.collection('Roommates').doc(roommateEmail).set({
-          'name': roommateName,
           'email': roommateEmail,
-          "rollNumber": roommateRollNum,
+        });
+        await storage
+            .collection('users')
+            .doc("$roommateEmail/editable/details")
+            .set({'hostelName': widget.hostelName, 'roomName': widget.roomName},
+                SetOptions(merge: true)).catchError((error) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Error occured in updation')));
         });
         await loc.update({'numRoommates': FieldValue.increment(1)});
         if (currentRoommateNumber < numOfRoommates - 1) {
           setState(() {
             currentRoommateNumber += 1;
-            roommateName = "";
             roommateEmail = "";
-            roommateRollNum = "";
             isRunning = false;
           });
+
           return;
         }
         Navigator.of(context).pop();
@@ -111,6 +142,7 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
                   });
                 },
               ),
+              Divider();
 
               ListView.builder(
                 physics: NeverScrollableScrollPhysics(),
@@ -129,21 +161,6 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
                         key: _formKeyList[index],
                         child: Column(children: [
                           TextFormField(
-                            enabled: index == currentRoommateNumber,
-                            decoration: InputDecoration(
-                              labelText: "Enter Roommate name",
-                            ),
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return "Name cannot be empty";
-                              }
-                              return null;
-                            },
-                            onChanged: (value) {
-                              roommateName = capitalizeEachWord(value);
-                            },
-                          ),
-                          TextFormField(
                             enabled: currentRoommateNumber == index,
                             decoration: InputDecoration(
                               labelText: "Email ID",
@@ -157,21 +174,6 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
                             },
                             onChanged: (value) {
                               roommateEmail = value.toLowerCase();
-                            },
-                          ),
-                          TextFormField(
-                            enabled: currentRoommateNumber == index,
-                            decoration: InputDecoration(
-                              labelText: "Roll No.",
-                            ),
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return "Roll Number cannot be empty";
-                              }
-                              return null;
-                            },
-                            onChanged: (value) {
-                              roommateRollNum = value.toUpperCase();
                             },
                           ),
                           if (currentRoommateNumber == index)

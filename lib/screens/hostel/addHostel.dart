@@ -4,8 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/screens/home_screen.dart';
 // import 'package:hustle_stay/models/hostels.dart';
-import '../tools.dart';
-import '../widgets/image_picker.dart';
+import '../../tools.dart';
+import '../../widgets/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 class AddHostelForm extends StatefulWidget {
