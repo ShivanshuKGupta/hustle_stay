@@ -1,13 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:hustle_stay/screens/rooms_screen.dart';
+import 'package:hustle_stay/screens/hostel/rooms/rooms_screen.dart';
 // import 'package:hustle_stay/models/hostels.dart';
 // import 'package:hustle_stay/screens/addHostel.dart';
 
-import '../models/hostels.dart';
+import '../models/hostel/hostels.dart';
 import '../tools.dart';
-import 'add_rooms.dart';
+import 'hostel/rooms/add_rooms.dart';
 // import 'package:hustle_stay/models/user.dart';
 
 final _firebase = FirebaseAuth.instance;

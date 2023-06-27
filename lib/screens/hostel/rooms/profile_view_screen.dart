@@ -1,20 +1,19 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/widgets/room/change_room/change_room.dart';
 
-import '../tools.dart';
+import '../../../tools.dart';
 
 class ProfileViewScreen extends StatefulWidget {
   ProfileViewScreen(
       {super.key,
-      required this.email,
       required this.hostelName,
       required this.roomName,
-      required this.userName});
+      required this.user});
   String hostelName;
-  String email;
   String roomName;
-  String userName;
+  UserData user;
 
   @override
   State<ProfileViewScreen> createState() => _ProfileViewScreenState();
@@ -41,7 +40,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
         appBar: AppBar(
             title: shaderText(
           context,
-          title: '${widget.userName}\'s Profile',
+          title: '${widget.user.name}\'s Profile',
         )),
         body: RefreshIndicator(
           onRefresh: () async {
@@ -52,51 +51,39 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
               padding: EdgeInsets.all(20.0),
               child: Column(
                 children: [
-                  FutureBuilder(
-                    future: fetchUserData(widget.email),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(
-                          child: circularProgressIndicator(
-                            height: null,
-                            width: null,
-                          ),
-                        );
-                      }
-                      if (!snapshot.hasData) {
-                        return Center(
-                          child: Text('No records exist'),
-                        );
-                      }
-                      return SingleChildScrollView(
-                        child: Padding(
-                          padding: const EdgeInsets.all(15.0),
-                          child: Column(
-                            children: [
-                              Center(
-                                child: CircleAvatar(
-                                  radius: 50,
-                                  backgroundImage: null,
-                                ),
-                              ),
-                              Text(
-                                widget.email,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium!
-                                    .copyWith(
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
+                  SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Column(
+                        children: [
+                          Center(
+                            child: CircleAvatar(
+                                radius: 50,
+                                child: ClipOval(
+                                  child: AspectRatio(
+                                    aspectRatio: 1.0,
+                                    child: CachedNetworkImage(
+                                      imageUrl: widget.user.imgUrl!,
+                                      fit: BoxFit.cover,
                                     ),
-                              ),
-                              const Divider(),
-                              Text("Name: ${snapshot.data!.name}"),
-                              Text("${snapshot.data!.phoneNumber}"),
-                            ],
+                                  ),
+                                )),
                           ),
-                        ),
-                      );
-                    },
+                          Text(
+                            widget.user.email!,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                          ),
+                          const Divider(),
+                          Text("Name: ${widget.user.name}"),
+                          Text("${widget.user.phoneNumber}"),
+                        ],
+                      ),
+                    ),
                   ),
                   Divider(),
                   Container(
@@ -137,14 +124,14 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                               dropdownVal == 'Change Hostel/Room')
                             ChangeRoomWidget(
                                 isSwap: false,
-                                email: widget.email,
+                                email: widget.user.email!,
                                 roomName: widget.roomName,
                                 hostelName: widget.hostelName),
                           if (dropdownVal != null &&
                               dropdownVal == "Swap Hostel/Room")
                             ChangeRoomWidget(
                                 isSwap: true,
-                                email: widget.email,
+                                email: widget.user.email!,
                                 roomName: widget.roomName,
                                 hostelName: widget.hostelName),
                         ],

@@ -9,7 +9,7 @@ import 'package:hustle_stay/screens/settings/settings_screen.dart';
 
 import 'package:hustle_stay/tools.dart';
 
-import 'hostel_screen.dart';
+import 'hostel/hostel_screen.dart';
 import 'drawers/main_drawer.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {

@@ -1,16 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import '../../models/room.dart';
-import '../../screens/roommate_form.dart';
+import '../../models/hostel/rooms/room.dart';
 import '../../tools.dart';
 import 'room_data.dart';
-import 'roommates/roommate_list.dart';
 
 class RoomList extends StatefulWidget {
-  RoomList({super.key, required this.hostelName, required this.numberOfRooms});
-  String hostelName;
-  int numberOfRooms;
+  const RoomList(
+      {super.key, required this.hostelName, required this.numberOfRooms});
+  final String hostelName;
+  final int numberOfRooms;
 
   @override
   State<RoomList> createState() => _RoomListState();

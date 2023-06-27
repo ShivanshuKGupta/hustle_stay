@@ -72,3 +72,15 @@ Future<List<DropdownMenuItem>> fetchHostelNames({Source? src}) async {
   });
   return list;
 }
+
+Future<bool> deleteHostel(String hostelName) async {
+  try {
+    await FirebaseFirestore.instance
+        .collection('hostels')
+        .doc(hostelName)
+        .delete();
+    return true;
+  } catch (e) {
+    return false;
+  }
+}

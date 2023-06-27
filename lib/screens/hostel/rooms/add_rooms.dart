@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../models/room.dart';
-import '../tools.dart';
-import '../widgets/form/addroom_form.dart';
+import '../../../models/hostel/rooms/room.dart';
+import '../../../tools.dart';
+import '../../../widgets/form/addroom_form.dart';
 
 class AddRoom extends StatelessWidget {
   AddRoom({super.key, required this.hostelName});

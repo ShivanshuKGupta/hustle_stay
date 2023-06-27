@@ -20,7 +20,7 @@ class ReadOnly {
 }
 
 class UserData {
-  String? email, name, phoneNumber, address;
+  String? email, name, phoneNumber, address, roomName, hostelName;
   String? imgUrl;
   ReadOnly readonly = ReadOnly();
   UserData({
@@ -29,6 +29,8 @@ class UserData {
     this.phoneNumber,
     this.address,
     this.imgUrl,
+    this.hostelName,
+    this.roomName,
   });
 
   Map<String, dynamic> encode() {
@@ -37,6 +39,8 @@ class UserData {
       "phoneNumber": phoneNumber,
       "address": address,
       "imgUrl": imgUrl,
+      "hostelName": hostelName,
+      "roomName": roomName,
     };
   }
 
@@ -45,6 +49,8 @@ class UserData {
     phoneNumber = userData['phoneNumber'];
     address = userData['address'];
     imgUrl = userData['imgUrl'];
+    roomName = userData['roomName'];
+    hostelName = userData['hostelName'];
   }
 }
 

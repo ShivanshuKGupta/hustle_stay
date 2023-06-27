@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../models/room.dart';
-import '../../screens/roommate_form.dart';
+import '../../models/hostel/rooms/room.dart';
+import '../../screens/hostel/rooms/roommate_form.dart';
 import 'roommates/roommate_list.dart';
 
 class RoomDataWidget extends StatefulWidget {
@@ -14,6 +14,7 @@ class RoomDataWidget extends StatefulWidget {
 
 class _RoomDataWidgetState extends State<RoomDataWidget> {
   bool isOpen = false;
+  bool isRunning = false;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -82,7 +83,6 @@ class _RoomDataWidgetState extends State<RoomDataWidget> {
                   widget.roomData.numberOfRoommates == 0
                       ? Center(child: Text("No roommates added yet"))
                       : RoommateWidget(
-                          hostelName: widget.hostelName,
                           roomData: widget.roomData,
                         ),
               ],
@@ -91,6 +91,5 @@ class _RoomDataWidgetState extends State<RoomDataWidget> {
         ),
       ),
     );
-    ;
   }
 }

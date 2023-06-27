@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import '../../../models/hostels.dart';
+import '../../../models/hostel/hostels.dart';
 import '../../../tools.dart';
 import 'fetch_rooms.dart';
 
