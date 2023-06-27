@@ -1,17 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/auth/auth_screen.dart';
+import 'package:hustle_stay/screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'firebase_options.dart';
-import 'package:hustle_stay/providers/settings.dart';
-import 'package:hustle_stay/screens/home_screen.dart';
 
 /// Shared Preferences Object
 /// Used for saving/loading settings
@@ -25,6 +25,30 @@ final storage = FirebaseStorage.instance;
 
 /// Main function
 void main() async {
+  // Just to show errors not so rudely
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    return Material(
+        child: Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          ':-( Something went wrong!',
+          style: TextStyle(fontSize: 20),
+          textAlign: TextAlign.center,
+        ),
+        Text(
+          '\n${details.exception}',
+          style: const TextStyle(color: Colors.red),
+          textAlign: TextAlign.center,
+        ),
+        const Text(
+          'Contact shivanshukgupta or sanidhayasharma141 on linkedin for support\n',
+          textAlign: TextAlign.center,
+        ),
+      ],
+    ));
+  };
   WidgetsFlutterBinding.ensureInitialized();
   // Initializing Firebase SDK
   await Firebase.initializeApp(
@@ -67,7 +91,7 @@ class HustleStayApp extends ConsumerWidget {
       home: StreamBuilder(
         stream: auth.authStateChanges(),
         builder: (ctx, user) {
-          return user.hasData ? HomeScreen() : AuthScreen();
+          return user.hasData ? const HomeScreen() : AuthScreen();
         },
       ),
     );

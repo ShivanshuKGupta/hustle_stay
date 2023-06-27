@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/complaint.dart';
 import 'package:hustle_stay/models/message.dart';
-import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/complaint_list.dart';
 import 'package:hustle_stay/screens/chat/chat_screen.dart';
 import 'package:hustle_stay/screens/chat/image_preview.dart';
@@ -33,7 +32,8 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      onTap: () => showComplaintChat(context, widget.complaint),
+      onTap: () =>
+          showComplaintChat(context, widget.complaint, showInfo: _showInfo),
       onLongPress: () => _showInfo(),
       title: Text(widget.complaint.title),
       subtitle: widget.complaint.description == null
@@ -76,7 +76,7 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
     final editedComplaint = await navigatorPush(
       context,
       EditComplaintsPage(
-        id: widget.complaint.id,
+        complaint: widget.complaint,
         deleteMe: deleteMe,
       ),
     );
@@ -128,10 +128,14 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
             actionsAlignment: MainAxisAlignment.spaceAround,
             title: Text(widget.complaint.title),
             actions: [
-              IconButton(
-                onPressed: () => showComplaintChat(context, widget.complaint),
-                icon: const Icon(Icons.chat_rounded),
-              ),
+              // IconButton(
+              //   onPressed: () async {
+              //     await showComplaintChat(context, widget.complaint,
+              //         showInfo: _showInfo);
+              //     Navigator.of(context).pop();
+              //   },
+              //   icon: const Icon(Icons.chat_rounded),
+              // ),
               IconButton(
                 onPressed: () => editMe(),
                 icon: const Icon(Icons.edit_rounded),
@@ -215,7 +219,7 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
 
 /// Creates and Navigates you to the approriate Chat Screen based on the complaint
 Future<void> showComplaintChat(BuildContext context, ComplaintData complaint,
-    {MessageData? initialMsg}) {
+    {MessageData? initialMsg, void Function()? showInfo}) {
   return navigatorPush<void>(
     context,
     ChatScreen(
@@ -226,11 +230,12 @@ Future<void> showComplaintChat(BuildContext context, ComplaintData complaint,
       ),
       chat: ChatData(
         path: "complaints/${complaint.id}",
-        owner: UserData(email: complaint.from),
-        receivers: complaint.to.map((e) => UserData(email: e)).toList(),
+        owner: complaint.from,
+        receivers: complaint.to,
         title: complaint.title,
         description: complaint.description,
       ),
+      showInfo: showInfo,
     ),
   );
 }

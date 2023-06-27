@@ -5,14 +5,14 @@ import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/complaint.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/image.dart';
-
 import 'package:hustle_stay/tools.dart';
+import 'package:hustle_stay/widgets/chat/choose_users.dart.dart';
 import 'package:hustle_stay/widgets/profile_image.dart';
 
 class ComplaintForm extends StatefulWidget {
-  String? id;
+  ComplaintData? complaint;
   final Future<void> Function(ComplaintData) onSubmit;
-  ComplaintForm({super.key, required this.onSubmit, this.id});
+  ComplaintForm({super.key, required this.onSubmit, this.complaint});
 
   @override
   State<ComplaintForm> createState() => _ComplaintFormState();
@@ -23,79 +23,84 @@ class _ComplaintFormState extends State<ComplaintForm> {
 
   bool _loading = false;
   bool _userFetchLoading = false;
-  late ComplaintData complaint;
-
-  List<UserData> recepients = [];
+  bool _disposed = false;
+  List<String> recepients = [];
 
   File? img;
 
   @override
+  void dispose() {
+    super.dispose();
+    _disposed = true;
+  }
+
+  @override
   void initState() {
     super.initState();
-    complaint = ComplaintData(
-      from: currentUser.email!,
-      id: widget.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-      title: "",
-      to: [],
-      resolved: false,
-    );
+    widget.complaint = widget.complaint ??
+        ComplaintData(
+          from: currentUser.email!,
+          id: "",
+          title: "",
+          to: [],
+          resolved: false,
+        );
     initialize();
   }
 
   Future<void> initialize() async {
-    setState(() {
-      _userFetchLoading = true;
-    });
-    if (widget.id != null) {
-      complaint = await fetchComplaint(widget.id!);
+    if (!_disposed) setState(() => _userFetchLoading = true);
+    if (widget.complaint != null && widget.complaint!.id.isNotEmpty) {
+      try {
+        widget.complaint = await fetchComplaint(widget.complaint!.id);
+      } catch (e) {
+        await askUser(context, e.toString());
+        if (!_disposed && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      }
     }
     final querySnapshot =
         await firestore.collection('users').where('type', whereIn: [
       'attender',
       'warden',
     ]).get();
-    recepients = querySnapshot.docs.map((e) {
-      UserData user = UserData();
-      user.email = e.id;
-      return user;
-    }).toList();
-    setState(() {
-      _userFetchLoading = false;
-    });
+    recepients = querySnapshot.docs.map((e) => e.id).toList();
+    if (!_disposed) setState(() => _userFetchLoading = false);
   }
 
-  void _save() async {
+  Future<void> _save() async {
     FocusScope.of(context).unfocus();
     if (!_formkey.currentState!.validate()) return;
+    if (widget.complaint!.to.isEmpty) {
+      showMsg(context, 'Add a receipeint');
+      return;
+    }
     _formkey.currentState!.save();
     setState(() {
       _loading = true;
     });
     try {
-      complaint.imgUrl = img != null
+      widget.complaint!.imgUrl = img != null
           ? await uploadImage(
               context,
               img,
-              "${complaint.from}/complaint-image",
-              complaint.id,
+              "${widget.complaint!.from}/complaint-image",
+              widget.complaint!.id,
             )
-          : complaint.imgUrl;
-      if (widget.id == null) {
-        complaint.id = DateTime.now().millisecondsSinceEpoch.toString();
-        debugPrint(
-            "creating new complaint with id: ${DateTime.now().millisecondsSinceEpoch}");
+          : widget.complaint!.imgUrl;
+      if (widget.complaint!.id.isEmpty) {
+        widget.complaint!.id = DateTime.now().millisecondsSinceEpoch.toString();
       }
-      await widget.onSubmit(complaint);
-      if (context.mounted) {
-        Navigator.of(context).pop(complaint);
+      await widget.onSubmit(widget.complaint!);
+      if (!_disposed && context.mounted) {
+        Navigator.of(context).pop(widget.complaint!);
       }
       return;
     } catch (e) {
       showMsg(context, e.toString());
     }
-    setState(() {
-      _loading = false;
-    });
+    if (!_disposed) setState(() => _loading = false);
   }
 
   @override
@@ -106,56 +111,42 @@ class _ComplaintFormState extends State<ComplaintForm> {
         mainAxisSize: MainAxisSize.min,
         children: [
           ProfileImage(
-            url: complaint.imgUrl,
+            url: widget.complaint!.imgUrl,
             onChanged: (value) {
               img = value;
             },
           ),
-          DropdownButtonFormField(
-            decoration: InputDecoration(
-              icon: _userFetchLoading
-                  ? circularProgressIndicator()
-                  : const Icon(Icons.person_add_rounded),
-              iconColor: Theme.of(context).colorScheme.onBackground,
-              label: const Text('Add a recepient'),
-            ),
-            value: (widget.id != null && !_userFetchLoading
-                ? complaint.to[0]
-                : null),
-            validator: (value) => value == null ? "Select a user" : null,
-            items: recepients
-                .map(
-                  (e) => DropdownMenuItem(
-                    value: e.email,
-                    child: Text(e.email!),
-                  ),
-                )
-                .toList(),
-            onChanged: ((value) => complaint.to = [value!.toString()]),
+          const SizedBox(
+            height: 20,
           ),
+          (_userFetchLoading)
+              ? circularProgressIndicator()
+              : ChooseUsers(
+                  allUsers: recepients,
+                  chosenUsers: widget.complaint!.to,
+                  onUpdate: (value) => widget.complaint!.to = value,
+                ),
           TextFormField(
             onChanged: (value) {
-              complaint.title = value;
+              widget.complaint!.title = value;
             },
-            key: UniqueKey(),
             keyboardType: TextInputType.text,
             decoration: InputDecoration(
               icon: const Icon(Icons.title_rounded),
               iconColor: Theme.of(context).colorScheme.onBackground,
               label: const Text('Title'),
             ),
-            initialValue: complaint.title,
+            initialValue: widget.complaint!.title,
             enabled: !_loading,
             validator: (value) => Validate.text(value),
             onSaved: (value) {
-              complaint.title = value!.trim();
+              widget.complaint!.title = value!.trim();
             },
           ),
           TextFormField(
             onChanged: (value) {
-              complaint.description = value;
+              widget.complaint!.description = value;
             },
-            key: UniqueKey(),
             keyboardType: TextInputType.multiline,
             minLines: 5,
             maxLines: null,
@@ -164,21 +155,20 @@ class _ComplaintFormState extends State<ComplaintForm> {
               iconColor: Theme.of(context).colorScheme.onBackground,
               label: const Text('Description'),
             ),
-            initialValue: complaint.description,
+            initialValue: widget.complaint!.description,
             enabled: !_loading,
             validator: (value) => Validate.text(value, required: false),
             onSaved: (value) {
-              complaint.description = value!.trim();
+              widget.complaint!.description = value!.trim();
             },
           ),
           DropdownButtonFormField(
-            key: UniqueKey(),
             decoration: InputDecoration(
               icon: const Icon(Icons.public_rounded),
               iconColor: Theme.of(context).colorScheme.onBackground,
               label: const Text('Scope'),
             ),
-            value: complaint.scope.index,
+            value: widget.complaint!.scope.index,
             validator: (value) => value == null ? "Select a scope" : null,
             items: Scope.values
                 .map(
@@ -188,7 +178,8 @@ class _ComplaintFormState extends State<ComplaintForm> {
                   ),
                 )
                 .toList(),
-            onChanged: ((value) => complaint.scope = Scope.values[value ?? 0]),
+            onChanged: ((value) =>
+                widget.complaint!.scope = Scope.values[value ?? 0]),
           ),
           const SizedBox(height: 10),
           Row(
