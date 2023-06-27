@@ -86,8 +86,9 @@ class HustleStayApp extends ConsumerWidget {
           displayColor: settings.darkMode ? Colors.white : Colors.black,
         ),
       ),
-      // The app switches from Auth Screen to HomeScreen
-      // according to auth state
+
+      /// The app switches from Auth Screen to HomeScreen
+      /// according to auth state
       home: StreamBuilder(
         stream: auth.authStateChanges(),
         builder: (ctx, user) {

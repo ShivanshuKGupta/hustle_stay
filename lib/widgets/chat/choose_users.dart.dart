@@ -18,35 +18,27 @@ class ChooseUsers extends StatefulWidget {
 }
 
 class _ChooseUsersState extends State<ChooseUsers> {
-  // final _controller = TextEditingController();
-
-  // @override
-  // void dispose() {
-  //   super.dispose();
-  //   _controller.dispose();
-  // }
-
+  int i = 0;
   @override
   Widget build(BuildContext context) {
-    // _controller.clear();
     final users = widget.allUsers
         .where((element) => !widget.chosenUsers.contains(element));
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         DropdownMenu(
-          key: UniqueKey(),
+          key: ValueKey("users_drop_down_menu_$i"),
           enabled: users.isNotEmpty,
-          // controller: _controller,
+          // width: MediaQuery.of(context).size.width * 3 / 4,
           dropdownMenuEntries:
               users.map((e) => DropdownMenuEntry(label: e, value: e)).toList(),
           label: const Text("Select a receipient"),
           hintText: 'attender@iiitr.ac.in',
           leadingIcon: const Icon(Icons.person_add_alt_1_rounded),
-          width: MediaQuery.of(context).size.width - 40,
           onSelected: (value) {
             setState(() {
               widget.chosenUsers.add(value!.toString());
+              i++;
             });
             widget.onUpdate(widget.chosenUsers);
           },
@@ -65,6 +57,7 @@ class _ChooseUsersState extends State<ChooseUsers> {
   void _remove(UserData user) {
     setState(() {
       widget.chosenUsers.remove(user.email);
+      i--;
     });
   }
 }

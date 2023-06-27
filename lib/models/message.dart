@@ -18,6 +18,9 @@ class MessageData {
   /// Modified At
   DateTime? modifiedAt;
 
+  /// TODO: add a special msg boolean value
+  /// These special messages can only be created but not deleted
+
   MessageData({
     required this.id,
     required this.txt,

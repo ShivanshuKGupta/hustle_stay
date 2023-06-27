@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// A widget which is primarily used to show a [CircularProgressIndicator]
@@ -7,10 +8,36 @@ SizedBox circularProgressIndicator({
   double? height = 16,
   double? width = 16,
 }) {
+  final widget = Animate(
+    onComplete: (controller) {
+      controller.repeat();
+    },
+  ).custom(
+      duration: const Duration(seconds: 2), // Adjust the duration as needed
+      curve: Curves.linear,
+      builder: (context, value, child) {
+        final colors = <Color>[
+          Colors.blue,
+          Colors.red,
+          Colors.orange,
+          Colors.yellow,
+          Colors.green,
+          Colors.cyan,
+          Colors.indigo,
+          Colors.purple,
+        ];
+
+        return CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(
+            colors[(value * colors.length).floor() % colors.length],
+          ),
+        );
+      });
+  widget.onComplete;
   return SizedBox(
     height: height,
     width: width,
-    child: const CircularProgressIndicator(),
+    child: widget,
   );
 }
 

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/complaint.dart';
+import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/complaint_list.dart';
 import 'package:hustle_stay/tools.dart';
+import 'package:hustle_stay/widgets/chat/choose_users.dart.dart';
 
 class ComplaintBottomBar extends ConsumerWidget {
   ComplaintData complaint;
@@ -60,7 +62,7 @@ class ComplaintBottomBar extends ConsumerWidget {
             borderRadius: BorderRadius.circular(15),
           ),
         ),
-        onPressed: () {},
+        onPressed: showIncludeBox,
         child: const Text('Include'),
       ),
       ElevatedButton(
@@ -83,5 +85,47 @@ class ComplaintBottomBar extends ConsumerWidget {
         children: buttons,
       ),
     );
+  }
+
+  Future<void> showIncludeBox() async {
+    final allUsers = await fetchComplainees();
+    List<String> chosenUsers = [];
+    allUsers.removeWhere((element) => complaint.to.contains(element));
+    if (context.mounted) {
+      final response = await Navigator.of(context).push<bool?>(DialogRoute(
+          context: context,
+          builder: (ctx) {
+            return AlertDialog(
+              scrollable: true,
+              insetPadding: EdgeInsets.zero,
+              contentPadding: const EdgeInsets.only(top: 20),
+              actionsAlignment: MainAxisAlignment.center,
+              content: ChooseUsers(
+                allUsers: allUsers,
+                chosenUsers: chosenUsers,
+                onUpdate: (newUsers) {
+                  chosenUsers = newUsers;
+                },
+              ),
+              actions: [
+                ElevatedButton.icon(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  icon: const Icon(Icons.person_add_alt_1_rounded),
+                  label: const Text('Add'),
+                )
+              ],
+            );
+          }));
+      if (response == true) {
+        if (chosenUsers.isEmpty) {
+          if (context.mounted) {
+            showMsg(context, "Choose atleast one recepient.");
+          }
+          return;
+        }
+        complaint.to.addAll(chosenUsers);
+        await updateComplaint(complaint);
+      }
+    }
   }
 }

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/complaint.dart';
 import 'package:hustle_stay/models/message.dart';
+import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/complaint_list.dart';
 import 'package:hustle_stay/screens/chat/chat_screen.dart';
 import 'package:hustle_stay/screens/chat/image_preview.dart';
@@ -43,21 +44,44 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
               overflow: TextOverflow.fade,
               maxLines: 4,
             ),
+
+      /// if no image is associated with the complaint
+      /// then I will show the user image who posted that complaint
+      /// if the user doesn't has an image then
+      /// just an info icon
       leading: widget.complaint.imgUrl == null
-          ? CircleAvatar(
-              child: Icon(
-                Icons.info_rounded,
-                size: 40,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            )
-          : IconButton(
-              padding: EdgeInsets.zero,
-              icon: CircleAvatar(
+          ? FutureBuilder(
+              future: fetchUserData(widget.complaint.from),
+              builder: (ctx, snapshot) {
+                if (!snapshot.hasData || snapshot.data!.imgUrl == null) {
+                  return const InkWell(
+                    child: CircleAvatar(
+                      child: Icon(Icons.info_rounded),
+                    ),
+                  );
+                }
+                return InkWell(
+                  child: CircleAvatar(
+                    backgroundImage:
+                        CachedNetworkImageProvider(snapshot.data!.imgUrl!),
+                  ),
+                  onTap: () {
+                    navigatorPush(
+                      context,
+                      ImagePreview(
+                        image: CachedNetworkImage(
+                            imageUrl: snapshot.data!.imgUrl!),
+                      ),
+                    );
+                  },
+                );
+              })
+          : InkWell(
+              child: CircleAvatar(
                 backgroundImage:
                     CachedNetworkImageProvider(widget.complaint.imgUrl!),
               ),
-              onPressed: () {
+              onTap: () {
                 navigatorPush(
                   context,
                   ImagePreview(

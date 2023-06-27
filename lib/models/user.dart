@@ -99,6 +99,15 @@ Future<List<UserData>> fetchUsers(List<String> emails, {Source? src}) async {
   return [for (final email in emails) await fetchUserData(email, src: src)];
 }
 
+Future<List<String>> fetchComplainees() async {
+  final querySnapshot =
+      await firestore.collection('users').where('type', whereIn: [
+    'attender',
+    'warden',
+  ]).get();
+  return querySnapshot.docs.map((e) => e.id).toList();
+}
+
 Future<void> updateUserData(UserData userData) async {
   await firestore.runTransaction((transaction) async {
     // Updating Editable details

@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/complaint.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/image.dart';
@@ -54,18 +53,14 @@ class _ComplaintFormState extends State<ComplaintForm> {
       try {
         widget.complaint = await fetchComplaint(widget.complaint!.id);
       } catch (e) {
-        await askUser(context, e.toString());
+        await askUser(context, "Can't fetch this complaint!",
+            description: e.toString());
         if (!_disposed && context.mounted) {
           Navigator.of(context).pop();
         }
       }
     }
-    final querySnapshot =
-        await firestore.collection('users').where('type', whereIn: [
-      'attender',
-      'warden',
-    ]).get();
-    recepients = querySnapshot.docs.map((e) => e.id).toList();
+    recepients = await fetchComplainees();
     if (!_disposed) setState(() => _userFetchLoading = false);
   }
 
