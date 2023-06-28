@@ -84,11 +84,10 @@ class _FetchRoomsState extends State<FetchRooms> {
     return Column(
       children: [
         Container(
-          width: MediaQuery.of(context).size.width,
           child: Row(
             children: [
               Text(
-                'Choose new Room',
+                'Select new Room',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               SizedBox(

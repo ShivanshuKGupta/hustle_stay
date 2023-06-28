@@ -83,7 +83,7 @@ class _SwapRoomState extends State<SwapRoom> {
           child: Row(
             children: [
               Text(
-                'Choose Roommate to Swap',
+                'Roommate to swap',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               SizedBox(

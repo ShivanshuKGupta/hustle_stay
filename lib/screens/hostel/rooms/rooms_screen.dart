@@ -47,7 +47,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
                   DateTime? date = await showDatePicker(
                       confirmText: "Are you sure?",
                       context: context,
-                      initialDate: DateTime.now(),
+                      initialDate: selectedDate,
                       firstDate: DateTime(2019),
                       lastDate: DateTime.now());
                   if (date != null && date != selectedDate) {
@@ -63,9 +63,11 @@ class _RoomsScreenState extends State<RoomsScreen> {
             ? Center(
                 child: Text("No rooms exist yet!"),
               )
-            : RoomList(
-                selectedDate: selectedDate,
-                hostelName: widget.hostelName,
-                numberOfRooms: numberOfRooms));
+            : Container(
+                child: RoomList(
+                    selectedDate: selectedDate,
+                    hostelName: widget.hostelName,
+                    numberOfRooms: numberOfRooms),
+              ));
   }
 }

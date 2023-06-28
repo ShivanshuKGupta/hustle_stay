@@ -229,8 +229,11 @@ Future<List<DropdownMenuItem>> fetchRoomNames(String hostelName,
   storageRef.docs.forEach((element) {
     if (roomname == null || element.id != roomname) {
       list.add(DropdownMenuItem(
-        child: Text(element.id),
         value: element.id,
+        child: Text(
+          element.id,
+          style: const TextStyle(fontSize: 10),
+        ),
       ));
     }
   });
@@ -251,7 +254,10 @@ Future<List<DropdownMenuItem>> fetchRoommateNames(
       .get(src == null ? null : GetOptions(source: src));
   storageRef.docs.forEach((element) {
     list.add(DropdownMenuItem(
-      child: Text(element['email']),
+      child: Text(
+        element['email'],
+        style: TextStyle(fontSize: 10),
+      ),
       value: element.id,
     ));
   });

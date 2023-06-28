@@ -26,16 +26,25 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
   String? dropdownVal;
   List<DropdownMenuItem> operation = [
     DropdownMenuItem(
-      value: 'Change Hostel/Room',
-      child: Text('Change Hostel/Room'),
+      value: 'Change Room',
+      child: Text(
+        'Change Room',
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(fontSize: 10),
+      ),
     ),
     DropdownMenuItem(
-      value: "Swap Hostel/Room",
-      child: Text("Swap Hostel/Room"),
+      value: "Swap Room",
+      child: Text(
+        "Swap Room",
+        style: TextStyle(fontSize: 10),
+        overflow: TextOverflow.ellipsis,
+      ),
     )
   ];
   @override
   Widget build(BuildContext context) {
+    double widthScreen = MediaQuery.of(context).size.width;
     return Scaffold(
         appBar: AppBar(
             title: shaderText(
@@ -48,96 +57,88 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
           },
           child: SingleChildScrollView(
             child: Container(
-              padding: EdgeInsets.all(20.0),
+              padding: EdgeInsets.all(widthScreen * 0.03),
               child: Column(
                 children: [
                   SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: Column(
-                        children: [
-                          Center(
-                            child: CircleAvatar(
-                                radius: 50,
-                                child: ClipOval(
-                                  child: AspectRatio(
-                                    aspectRatio: 1.0,
-                                    child: widget.user.imgUrl == null
-                                        ? null
-                                        : CachedNetworkImage(
-                                            imageUrl: widget.user.imgUrl!,
-                                            fit: BoxFit.cover,
-                                          ),
-                                  ),
-                                )),
-                          ),
-                          Text(
-                            widget.user.email!,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium!
-                                .copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
+                    child: Column(
+                      children: [
+                        Center(
+                          child: CircleAvatar(
+                              radius: 50,
+                              child: ClipOval(
+                                child: AspectRatio(
+                                  aspectRatio: 1.0,
+                                  child: widget.user.imgUrl == null
+                                      ? null
+                                      : CachedNetworkImage(
+                                          imageUrl: widget.user.imgUrl!,
+                                          fit: BoxFit.cover,
+                                        ),
                                 ),
-                          ),
-                          const Divider(),
-                          Text("Name: ${widget.user.name}"),
-                          Text("${widget.user.phoneNumber}"),
-                        ],
-                      ),
+                              )),
+                        ),
+                        Text(
+                          widget.user.email!,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium!
+                              .copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                        ),
+                        const Divider(),
+                        Text("Name: ${widget.user.name}"),
+                        Text("${widget.user.phoneNumber}"),
+                      ],
                     ),
                   ),
                   Divider(),
-                  Container(
-                      padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
-                      child: Column(
-                        children: [
-                          Center(
-                              child: Text(
-                            'Edit Hostel/Room',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          )),
-                          SizedBox(
-                            height: 15,
-                          ),
-                          Container(
-                            width: MediaQuery.of(context).size.width,
-                            child: Row(
-                              children: [
-                                Text(
-                                  'Choose your option',
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                                SizedBox(
-                                  width: 5,
-                                ),
-                                DropdownButton(
-                                    items: operation,
-                                    value: dropdownVal,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        dropdownVal = value;
-                                      });
-                                    }),
-                              ],
-                            ),
-                          ),
-                          if (dropdownVal != null &&
-                              dropdownVal == 'Change Hostel/Room')
-                            ChangeRoomWidget(
-                                isSwap: false,
-                                email: widget.user.email!,
-                                roomName: widget.roomName,
-                                hostelName: widget.hostelName),
-                          if (dropdownVal != null &&
-                              dropdownVal == "Swap Hostel/Room")
-                            ChangeRoomWidget(
-                                isSwap: true,
-                                email: widget.user.email!,
-                                roomName: widget.roomName,
-                                hostelName: widget.hostelName),
-                        ],
+                  Column(
+                    children: [
+                      Center(
+                          child: Text(
+                        'Edit Hostel/Room',
+                        style: Theme.of(context).textTheme.bodyMedium,
                       )),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      Container(
+                        child: Row(
+                          children: [
+                            Text(
+                              'Choose your option',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            SizedBox(
+                              width: widthScreen * 0.05,
+                            ),
+                            DropdownButton(
+                                items: operation,
+                                value: dropdownVal,
+                                onChanged: (value) {
+                                  setState(() {
+                                    dropdownVal = value;
+                                  });
+                                }),
+                          ],
+                        ),
+                      ),
+                      if (dropdownVal != null && dropdownVal == 'Change Room')
+                        ChangeRoomWidget(
+                            isSwap: false,
+                            email: widget.user.email!,
+                            roomName: widget.roomName,
+                            hostelName: widget.hostelName),
+                      if (dropdownVal != null && dropdownVal == "Swap Room")
+                        ChangeRoomWidget(
+                            isSwap: true,
+                            email: widget.user.email!,
+                            roomName: widget.roomName,
+                            hostelName: widget.hostelName),
+                    ],
+                  ),
                 ],
               ),
             ),

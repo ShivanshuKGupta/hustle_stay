@@ -66,7 +66,10 @@ Future<List<DropdownMenuItem>> fetchHostelNames({Source? src}) async {
       .get(src == null ? null : GetOptions(source: src));
   storageRef.docs.forEach((element) {
     list.add(DropdownMenuItem(
-      child: Text(element.id),
+      child: Text(
+        element.id,
+        style: TextStyle(fontSize: 10),
+      ),
       value: element.id,
     ));
   });

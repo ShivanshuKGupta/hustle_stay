@@ -22,8 +22,9 @@ class _RoomDataWidgetState extends State<RoomDataWidget> {
   bool isRunning = false;
   @override
   Widget build(BuildContext context) {
+    double widthScreen = MediaQuery.of(context).size.width;
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(widthScreen * 0.01),
       child: Expanded(
         child: Card(
           elevation: 3,
@@ -60,19 +61,21 @@ class _RoomDataWidgetState extends State<RoomDataWidget> {
                       ),
                     ),
                     SizedBox(height: 16),
-                    IconButton(
-                      onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (_) => RoommateForm(
-                                  capacity: widget.roomData.capacity,
-                                  hostelName: widget.hostelName,
-                                  roomName: widget.roomData.roomName,
-                                  numRoommates:
-                                      widget.roomData.numberOfRoommates,
-                                )));
-                      },
-                      icon: Icon(Icons.add),
-                    ),
+                    if (widget.roomData.capacity >
+                        widget.roomData.numberOfRoommates)
+                      IconButton(
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (_) => RoommateForm(
+                                    capacity: widget.roomData.capacity,
+                                    hostelName: widget.hostelName,
+                                    roomName: widget.roomData.roomName,
+                                    numRoommates:
+                                        widget.roomData.numberOfRoommates,
+                                  )));
+                        },
+                        icon: Icon(Icons.add),
+                      ),
                   ],
                 ),
                 IconButton(

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/attendance.dart';
 import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/widgets/room/roommates/attendance_icon.dart';
 import '../../../screens/hostel/rooms/profile_view_screen.dart';
 import '../../../tools.dart';
 
@@ -23,21 +24,28 @@ class RoommateDataWidget extends StatefulWidget {
 }
 
 class _RoommateDataWidgetState extends State<RoommateDataWidget> {
-  // attendanceRecord= FirebaseFirestore.instance.collection('hostels').doc(widget.hostelName).collection('Rooms').doc(widget.roomName).collection('Roommates').doc(widget.roommateData.email).collection('Attendance');
-  final presentIcon = Icon(Icons.check_circle_outline, color: Colors.green);
-  final absentIcon = Icon(Icons.close_rounded, color: Colors.red);
-  bool isRunning = false;
-  bool isPresent = false;
   @override
-  // void initState() async {
-  //   // TODO: implement initState
-  //   super.initState();
-  //   bool resp = await getAttendanceData(
-  //       widget.email, widget.hostelName, widget.roomName, widget.selectedDate);
-  //   setState(() {
-  //     isPresent = resp;
-  //   });
-  // }
+  void didUpdateWidget(covariant RoommateDataWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _getAttendanceData();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getAttendanceData();
+  }
+
+  bool isRunning = false;
+  bool? isPresent;
+  Future<void> _getAttendanceData() async {
+    bool resp = await getAttendanceData(
+        widget.email, widget.hostelName, widget.roomName, widget.selectedDate);
+    setState(() {
+      isPresent = resp;
+    });
+    return;
+  }
 
   var currentIcon = Icon(Icons.close_rounded, color: Colors.red);
   @override
@@ -69,6 +77,7 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
   }
 
   Widget RData(UserData user) {
+    double widthScreen = MediaQuery.of(context).size.width;
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(MaterialPageRoute(
@@ -96,27 +105,19 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
             user.name!,
             style: TextStyle(fontSize: 16),
           ),
+          contentPadding: EdgeInsets.all(widthScreen * 0.002),
           subtitle: Text(
-            'Roll No: ${user.email!.substring(0, 9).toUpperCase()}',
+            '${user.email!.substring(0, 9).toUpperCase()}',
             style: TextStyle(fontSize: 14),
           ),
-          trailing: IconButton(
-              onPressed: () {
-                // setAttendanceData(
-                //     widget.email,
-                //     widget.hostelName,
-                //     widget.roomName,
-                //     widget.selectedDate,
-                //     currentIcon == presentIcon);
-                setState(() {
-                  if (currentIcon == presentIcon) {
-                    currentIcon = absentIcon;
-                  } else {
-                    currentIcon = presentIcon;
-                  }
-                });
-              },
-              icon: isPresent ? presentIcon : absentIcon)),
+          trailing: isPresent == null
+              ? null
+              : AttendanceIcon(
+                  email: widget.email,
+                  selectedDate: widget.selectedDate,
+                  roomName: widget.roomName,
+                  hostelName: widget.hostelName,
+                  isPresent: isPresent!)),
     );
   }
 }
