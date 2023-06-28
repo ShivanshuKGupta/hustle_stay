@@ -37,7 +37,11 @@ class ComplaintsListWidget extends StatelessWidget {
               final complaint = complaints[index];
               return ComplaintListItem(
                 complaint: complaint,
-              ).animate().then(delay: duration * i++).slideX(
+              )
+                  .animate()
+                  .then(delay: duration * i++)
+                  .fade(begin: 0, end: 1, duration: duration)
+                  .slideX(
                     begin: -1,
                     end: 0,
                     curve: Curves.decelerate,

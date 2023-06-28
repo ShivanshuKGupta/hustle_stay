@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user.dart';
-import 'package:hustle_stay/screens/hostel/addHostel.dart';
 import 'package:hustle_stay/screens/auth/edit_profile_screen.dart';
-import 'package:hustle_stay/screens/complaints/complaints_screen.dart';
 import 'package:hustle_stay/screens/complaints/resolved_complaints_screen.dart';
-
+import 'package:hustle_stay/screens/hostel/addHostel.dart';
 import 'package:hustle_stay/tools.dart';
 
 class MainDrawer extends StatelessWidget {

@@ -17,7 +17,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.read(settingsProvider);
     final settingsClass = ref.read(settingsProvider.notifier);
-    const duration = Duration(milliseconds: 500);
+    const duration = Duration(milliseconds: 300);
     int i = 1;
     final widgetList = [
       if (currentUser.email != null)
@@ -78,7 +78,6 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
         ),
-      // TODO: add the profile avatar here and a pencil icon on top of it when clicked should move the user to view/edit profile page
       Column(
         children: [
           SwitchListTile(
@@ -153,7 +152,7 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView.separated(
         itemCount: widgetList.length,
         separatorBuilder: (ctx, _) => const Divider().animate().scaleX(
-            duration: duration, curve: Curves.decelerate, begin: 0, end: 1),
+            duration: duration * 2, curve: Curves.decelerate, begin: 0, end: 1),
         itemBuilder: (ctx, index) => widgetList[index],
       ),
     );

@@ -7,7 +7,7 @@ import 'package:hustle_stay/tools.dart';
 
 class MessageInputField extends StatefulWidget {
   final String initialValue;
-  MessageInputField(
+  const MessageInputField(
       {super.key, required this.onSubmit, required this.initialValue});
 
   final Future<void> Function(MessageData msg) onSubmit;

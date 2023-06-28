@@ -18,22 +18,27 @@ class MessageData {
   /// Modified At
   DateTime? modifiedAt;
 
-  /// TODO: add a special msg boolean value
-  /// These special messages can only be created but not deleted
+  /// These indicative messages are used to indicate
+  /// that something has happened in the chat
+  /// like the inclusion of someone in the chat
+  /// can only be created but not deleted
+  late bool indicative;
 
   MessageData({
     required this.id,
     required this.txt,
     required this.from,
     required this.createdAt,
-    // TODO: add another field readBy
+    this.indicative = false,
     this.modifiedAt,
+    // TODO: add another field readBy
   });
 
   Map<String, dynamic> encode() {
     return {
       "txt": txt,
       "from": from,
+      "indicative": indicative,
       "createdAt": createdAt.millisecondsSinceEpoch,
       if (modifiedAt != null) "modifiedAt": modifiedAt!.millisecondsSinceEpoch,
     };
@@ -43,6 +48,7 @@ class MessageData {
     txt = data["txt"];
     from = data["from"];
     createdAt = DateTime.fromMillisecondsSinceEpoch(data["createdAt"]);
+    indicative = data["indicative"] ?? false;
     modifiedAt = data["modifiedAt"] == null
         ? null
         : DateTime.fromMillisecondsSinceEpoch(data["modifiedAt"]);

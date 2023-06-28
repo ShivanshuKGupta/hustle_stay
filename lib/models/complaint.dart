@@ -41,6 +41,17 @@ class ComplaintData {
     };
   }
 
+  @override
+  String toString() {
+    return "Title: $title\nDescription: $description\nComplainees: $to\nScope: ${scope.name}}";
+  }
+
+  String operator -(ComplaintData oldComplaint) {
+    String ans = "";
+    // TODO: add 'and' in the string
+    return "${oldComplaint.title != title ? '\nTitle to $title' : ''}${oldComplaint.description != description ? '\nDescription to $description' : ''}${!equalList(oldComplaint.to, to) ? '\nComplainees to $to' : ''}${oldComplaint.scope != scope ? '\nScope to ${scope.name}' : ''}${oldComplaint.imgUrl != imgUrl ? '\nImage to $imgUrl' : ''}";
+  }
+
   /// Converts a Map<String, dynamic> to a Complaint Object
   ComplaintData.load(this.id, Map<String, dynamic> complaintData) {
     description = complaintData["description"];
@@ -54,6 +65,14 @@ class ComplaintData {
         .map((e) => e.toString())
         .toList();
   }
+}
+
+bool equalList(List<String> a, List<String> b) {
+  if (a.length != b.length) return false;
+  for (int i = a.length; i-- > 0;) {
+    if (a[i] != b[i]) return false;
+  }
+  return true;
 }
 
 /// updates an exisiting complaint or will create if complaint does not exists

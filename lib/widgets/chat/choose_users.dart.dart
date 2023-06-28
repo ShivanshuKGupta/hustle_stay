@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/widgets/chat/user_tile.dart';
 
+// ignore: must_be_immutable
 class ChooseUsers extends StatefulWidget {
   final List<String> allUsers;
   List<String> chosenUsers;

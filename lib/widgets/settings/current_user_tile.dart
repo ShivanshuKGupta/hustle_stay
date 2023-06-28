@@ -17,21 +17,19 @@ class CurrentUserTile extends ConsumerWidget {
         currentUser.email!,
         style: TextStyle(color: Theme.of(context).colorScheme.primary),
       ),
-      trailing: IconButton(
-          color: Theme.of(context).colorScheme.primary,
-          onPressed: () async {
-            if (await Navigator.of(context).push<bool?>(
-                  MaterialPageRoute(
-                    builder: (ctx) => EditProfile(
-                      user: currentUser,
-                    ),
-                  ),
-                ) ==
-                true) {
-              settingsClass.notifyListeners();
-            }
-          },
-          icon: const Icon(Icons.edit_rounded)),
+      onTap: () async {
+        // ignore: use_build_context_synchronously
+        if (await Navigator.of(context).push<bool?>(
+              MaterialPageRoute(
+                builder: (ctx) => EditProfile(
+                  user: currentUser,
+                ),
+              ),
+            ) ==
+            true) {
+          settingsClass.notifyListeners();
+        }
+      },
     ).animate().fade().slideX(begin: 1, end: 0, curve: Curves.decelerate);
   }
 }

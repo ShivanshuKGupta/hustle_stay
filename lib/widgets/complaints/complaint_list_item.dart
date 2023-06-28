@@ -13,6 +13,7 @@ import 'package:hustle_stay/screens/complaints/edit_complaints_page.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_bottom_bar.dart';
 
+// ignore: must_be_immutable
 class ComplaintListItem extends ConsumerStatefulWidget {
   ComplaintListItem({
     super.key,
@@ -107,8 +108,10 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
     if (editedComplaint != null) {
       if (editedComplaint == "deleted") {
         ref.read(complaintsList.notifier).removeComplaint(widget.complaint);
+        // ignore: use_build_context_synchronously
         Navigator.of(context).pop();
       } else {
+        // ignore: use_build_context_synchronously
         Navigator.of(context).pop();
         setState(() {
           _animate = !_animate;
@@ -152,14 +155,6 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
             actionsAlignment: MainAxisAlignment.spaceAround,
             title: Text(widget.complaint.title),
             actions: [
-              // IconButton(
-              //   onPressed: () async {
-              //     await showComplaintChat(context, widget.complaint,
-              //         showInfo: _showInfo);
-              //     Navigator.of(context).pop();
-              //   },
-              //   icon: const Icon(Icons.chat_rounded),
-              // ),
               IconButton(
                 onPressed: () => editMe(),
                 icon: const Icon(Icons.edit_rounded),
@@ -167,6 +162,7 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
               IconButton(
                 onPressed: () async {
                   if (await deleteMe() == true) {
+                    // ignore: use_build_context_synchronously
                     Navigator.of(context).pop();
                   }
                 },

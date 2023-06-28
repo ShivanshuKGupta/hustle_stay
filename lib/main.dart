@@ -92,7 +92,7 @@ class HustleStayApp extends ConsumerWidget {
       home: StreamBuilder(
         stream: auth.authStateChanges(),
         builder: (ctx, user) {
-          return user.hasData ? const HomeScreen() : AuthScreen();
+          return user.hasData ? const HomeScreen() : const AuthScreen();
         },
       ),
     );

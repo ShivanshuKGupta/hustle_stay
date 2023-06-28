@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/complaint.dart';
+import 'package:hustle_stay/models/message.dart';
+import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_form.dart';
 
 class EditComplaintsPage extends StatelessWidget {
@@ -29,6 +32,25 @@ class EditComplaintsPage extends StatelessWidget {
             complaint: complaint,
             onSubmit: (complaint) async {
               await updateComplaint(complaint);
+              if (this.complaint != null) {
+                await addMessage(
+                  ChatData(
+                    path: "complaints/${complaint.id}",
+                    owner: complaint.from,
+                    receivers: complaint.to,
+                    title: complaint.title,
+                    description: complaint.description,
+                  ),
+                  MessageData(
+                    id: DateTime.now().microsecondsSinceEpoch.toString(),
+                    txt:
+                        "${currentUser.name ?? currentUser.email} changed the${complaint - this.complaint!}",
+                    from: currentUser.email!,
+                    createdAt: DateTime.now(),
+                    indicative: true,
+                  ),
+                );
+              }
             },
           ),
         ),

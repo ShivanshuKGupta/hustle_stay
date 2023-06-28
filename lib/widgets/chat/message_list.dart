@@ -4,8 +4,10 @@ import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/message.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/tools.dart';
+import 'package:hustle_stay/widgets/chat/indicative_message.dart';
 import 'package:hustle_stay/widgets/chat/message.dart';
 
+// ignore: must_be_immutable
 class MessageList extends StatefulWidget {
   ChatData chat;
   MessageList({super.key, required this.chat});
@@ -96,23 +98,7 @@ class _MessageListState extends State<MessageList> {
   }
 
   Widget _dateWidget(DateTime createdAt) {
-    return Align(
-      heightFactor: 1.25,
-      child: Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-          color: Theme.of(context).colorScheme.primary,
-          elevation: 0,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              "${createdAt.day}-${createdAt.month}-${createdAt.year}",
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                    color: Theme.of(context).colorScheme.onPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-          )),
-    );
+    return IndicativeMessage(
+        txt: "${createdAt.day}-${createdAt.month}-${createdAt.year}");
   }
 }

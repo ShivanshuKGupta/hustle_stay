@@ -11,6 +11,7 @@ import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/image.dart';
 import 'package:hustle_stay/screens/chat/image_preview.dart';
 import 'package:hustle_stay/tools.dart';
+import 'package:hustle_stay/widgets/chat/indicative_message.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Message extends StatelessWidget {
@@ -30,14 +31,18 @@ class Message extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment:
-          !msgAlignment ? MainAxisAlignment.start : MainAxisAlignment.end,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        chatBubble(context),
-      ],
-    );
+    return msg.indicative
+        ? IndicativeMessage(
+            txt: msg.txt,
+          )
+        : Row(
+            mainAxisAlignment:
+                !msgAlignment ? MainAxisAlignment.start : MainAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              chatBubble(context),
+            ],
+          );
   }
 
   Widget chatBubble(BuildContext context) {
@@ -137,7 +142,6 @@ class Message extends StatelessWidget {
     if (!isImage(msg)) {
       showInfo(context, msg);
     } else {
-      final size = MediaQuery.of(context).size;
       String url = msg.txt.split('(').last;
       url = url.substring(0, url.length - 1);
       navigatorPush(

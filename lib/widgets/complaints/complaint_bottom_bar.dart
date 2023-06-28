@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/complaint.dart';
+import 'package:hustle_stay/models/message.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/complaint_list.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/chat/choose_users.dart.dart';
 
+// ignore: must_be_immutable
 class ComplaintBottomBar extends ConsumerWidget {
   ComplaintData complaint;
   ComplaintBottomBar({
@@ -28,29 +31,7 @@ class ComplaintBottomBar extends ConsumerWidget {
             borderRadius: BorderRadius.circular(15),
           ),
         ),
-        onPressed: () async {
-          String? response = await askUser(
-            context,
-            "${complaint.resolved ? 'Unresolve' : 'Resolve'} the complaint?",
-            description: complaint.resolved
-                ? "Unresolving the complaint will activate this complaint again."
-                : "Do you confirm that the complaint has indeed been resolved from your perspective?",
-            yes: true,
-            no: true,
-          );
-          if (response == 'yes') {
-            complaint.resolved = !complaint.resolved;
-            updateComplaint(complaint);
-            if (complaint.resolved) {
-              ref.read(complaintsList.notifier).removeComplaint(complaint);
-            } else {
-              ref.read(complaintsList.notifier).addComplaint(complaint);
-            }
-            if (context.mounted) {
-              Navigator.of(context).pop();
-            }
-          }
-        },
+        onPressed: () => resolveComplaint(ref.read(complaintsList.notifier)),
         child: Text(complaint.resolved ? 'Unresolve' : 'Resolve'),
       ),
       ElevatedButton(
@@ -125,6 +106,64 @@ class ComplaintBottomBar extends ConsumerWidget {
         }
         complaint.to.addAll(chosenUsers);
         await updateComplaint(complaint);
+        await addMessage(
+          ChatData(
+            path: "complaints/${complaint.id}",
+            owner: complaint.from,
+            receivers: complaint.to,
+            title: complaint.title,
+            description: complaint.description,
+          ),
+          MessageData(
+            id: DateTime.now().microsecondsSinceEpoch.toString(),
+            txt:
+                "${currentUser.name ?? currentUser.email} included $chosenUsers in the complaint",
+            from: currentUser.email!,
+            createdAt: DateTime.now(),
+            indicative: true,
+          ),
+        );
+      }
+    }
+  }
+
+  void resolveComplaint(complaintListNotifier) async {
+    String? response = await askUser(
+      context,
+      "${complaint.resolved ? 'Unresolve' : 'Resolve'} the complaint?",
+      description: complaint.resolved
+          ? "Unresolving the complaint will activate this complaint again."
+          : "Do you confirm that the complaint has indeed been resolved from your perspective?",
+      yes: true,
+      no: true,
+    );
+    if (response == 'yes') {
+      complaint.resolved = !complaint.resolved;
+      updateComplaint(complaint);
+      await addMessage(
+        ChatData(
+          path: "complaints/${complaint.id}",
+          owner: complaint.from,
+          receivers: complaint.to,
+          title: complaint.title,
+          description: complaint.description,
+        ),
+        MessageData(
+          id: DateTime.now().microsecondsSinceEpoch.toString(),
+          txt:
+              "${currentUser.name ?? currentUser.email} ${complaint.resolved ? 'resolved' : 'unresolved'} the complaint",
+          from: currentUser.email!,
+          createdAt: DateTime.now(),
+          indicative: true,
+        ),
+      );
+      if (complaint.resolved) {
+        complaintListNotifier.removeComplaint(complaint);
+      } else {
+        complaintListNotifier.addComplaint(complaint);
+      }
+      if (context.mounted) {
+        Navigator.of(context).pop();
       }
     }
   }
