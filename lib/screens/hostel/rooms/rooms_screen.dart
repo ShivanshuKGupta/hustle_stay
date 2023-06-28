@@ -26,7 +26,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
     });
   }
 
-  DateTime? selectedDate = DateTime.now();
+  DateTime selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -41,6 +41,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
         appBar: AppBar(
           title: shaderText(context, title: "Rooms"),
           actions: [
+            IconButton(onPressed: () {}, icon: Icon(Icons.filter_alt_rounded)),
             IconButton(
                 onPressed: () async {
                   DateTime? date = await showDatePicker(
@@ -63,6 +64,8 @@ class _RoomsScreenState extends State<RoomsScreen> {
                 child: Text("No rooms exist yet!"),
               )
             : RoomList(
-                hostelName: widget.hostelName, numberOfRooms: numberOfRooms));
+                selectedDate: selectedDate,
+                hostelName: widget.hostelName,
+                numberOfRooms: numberOfRooms));
   }
 }
