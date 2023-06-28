@@ -62,10 +62,12 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                                 child: ClipOval(
                                   child: AspectRatio(
                                     aspectRatio: 1.0,
-                                    child: CachedNetworkImage(
-                                      imageUrl: widget.user.imgUrl!,
-                                      fit: BoxFit.cover,
-                                    ),
+                                    child: widget.user.imgUrl == null
+                                        ? null
+                                        : CachedNetworkImage(
+                                            imageUrl: widget.user.imgUrl!,
+                                            fit: BoxFit.cover,
+                                          ),
                                   ),
                                 )),
                           ),

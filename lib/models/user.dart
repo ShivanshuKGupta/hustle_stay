@@ -39,8 +39,6 @@ class UserData {
       "phoneNumber": phoneNumber,
       "address": address,
       "imgUrl": imgUrl,
-      "hostelName": hostelName,
-      "roomName": roomName,
     };
   }
 

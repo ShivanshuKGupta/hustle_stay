@@ -7,9 +7,13 @@ import 'room_data.dart';
 
 class RoomList extends StatefulWidget {
   const RoomList(
-      {super.key, required this.hostelName, required this.numberOfRooms});
+      {super.key,
+      required this.hostelName,
+      required this.numberOfRooms,
+      required this.selectedDate});
   final String hostelName;
   final int numberOfRooms;
+  final DateTime selectedDate;
 
   @override
   State<RoomList> createState() => _RoomListState();
@@ -59,6 +63,7 @@ class _RoomListState extends State<RoomList> {
           return RoomDataWidget(
             hostelName: hostelName,
             roomData: roomData,
+            selectedDate: widget.selectedDate,
           );
         },
       ),

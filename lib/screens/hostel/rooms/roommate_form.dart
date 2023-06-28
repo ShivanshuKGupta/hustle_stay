@@ -22,16 +22,6 @@ class RoommateForm extends ConsumerStatefulWidget {
 class _RoommateFormState extends ConsumerState<RoommateForm> {
   List<GlobalKey<FormState>> _formKeyList = [];
   final storage = FirebaseFirestore.instance;
-  String capitalizeEachWord(String value) {
-    List<String> subValue = value.split(' ');
-    for (int i = 0; i < subValue.length; i++) {
-      String word = subValue[i];
-      if (word.isNotEmpty) {
-        subValue[i] = word[0].toUpperCase() + word.substring(1);
-      }
-    }
-    return subValue.join(' ');
-  }
 
   int currentRoommateNumber = 0;
   String roommateEmail = "";
@@ -58,7 +48,8 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
             .collection('users')
             .doc("$roommateEmail/editable/details")
             .get();
-        if (userLoc.data()!.containsKey('hostelName')) {
+        if (userLoc.data()!.containsKey('hostelName') &&
+            userLoc.data()!['hostelName'] != null) {
           ScaffoldMessenger.of(context).clearSnackBars();
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Text(

@@ -5,9 +5,14 @@ import '../../screens/hostel/rooms/roommate_form.dart';
 import 'roommates/roommate_list.dart';
 
 class RoomDataWidget extends StatefulWidget {
-  RoomDataWidget({super.key, required this.roomData, required this.hostelName});
+  RoomDataWidget(
+      {super.key,
+      required this.roomData,
+      required this.hostelName,
+      required this.selectedDate});
   Room roomData;
   String hostelName;
+  final DateTime selectedDate;
   @override
   State<RoomDataWidget> createState() => _RoomDataWidgetState();
 }
@@ -84,6 +89,8 @@ class _RoomDataWidgetState extends State<RoomDataWidget> {
                       ? Center(child: Text("No roommates added yet"))
                       : RoommateWidget(
                           roomData: widget.roomData,
+                          selectedDate: widget.selectedDate,
+                          hostelName: widget.hostelName,
                         ),
               ],
             ),
