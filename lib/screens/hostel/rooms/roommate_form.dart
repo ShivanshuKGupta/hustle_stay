@@ -44,16 +44,14 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
           });
           return;
         }
-        final userLoc = await storage
-            .collection('users')
-            .doc("$roommateEmail/editable/details")
-            .get();
+        final userLoc =
+            await storage.collection('users').doc(roommateEmail).get();
         if (userLoc.data()!.containsKey('hostelName') &&
             userLoc.data()!['hostelName'] != null) {
           ScaffoldMessenger.of(context).clearSnackBars();
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Text(
-                  'Hostel is already allocated to ${userLoc['name']}. Hostel: ${userLoc['hostelName']} and Room: ${userLoc['roomName']}')));
+                  'Hostel is already allocated to $roommateEmail. \n Hostel: ${userLoc['hostelName']} and Room: ${userLoc['roomName']}')));
           setState(() {
             isRunning = false;
           });
@@ -68,11 +66,9 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
         await loc.collection('Roommates').doc(roommateEmail).set({
           'email': roommateEmail,
         });
-        await storage
-            .collection('users')
-            .doc("$roommateEmail/editable/details")
-            .set({'hostelName': widget.hostelName, 'roomName': widget.roomName},
-                SetOptions(merge: true)).catchError((error) {
+        await storage.collection('users').doc(roommateEmail).set(
+            {'hostelName': widget.hostelName, 'roomName': widget.roomName},
+            SetOptions(merge: true)).catchError((error) {
           ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Error occured in updation')));
         });
@@ -115,7 +111,7 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
                 keyboardType: TextInputType.number,
                 onChanged: (value) {
                   setState(() {
-                    numOfRoommates = int.parse(value);
+                    numOfRoommates = value == "" ? 0 : int.parse(value);
 
                     if (!(widget.capacity >=
                         int.parse(value) + widget.numRoommates)) {

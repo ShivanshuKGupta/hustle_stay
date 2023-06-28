@@ -49,8 +49,11 @@ Future<bool> setAttendanceData(String email, String hostelName, String roomName,
 
     return true;
   } catch (e) {
-    // Handle the error, log or display an error message if needed
     print('Error while setting attendance data: $e');
     return false;
   }
+}
+
+Future<bool> filterAttendanceByRoommate(String email) async {
+  return true;
 }
