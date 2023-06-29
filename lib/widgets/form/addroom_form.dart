@@ -54,9 +54,7 @@ class _AddRoomWidState extends ConsumerState<AddRoomWid> {
           return;
         }
         Navigator.of(context).pop();
-      } catch (e) {
-        print(e);
-      }
+      } catch (e) {}
     }
     setState(() {
       isRunning = false;

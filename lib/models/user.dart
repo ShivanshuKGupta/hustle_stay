@@ -5,10 +5,13 @@ import 'package:hustle_stay/main.dart';
 class ReadOnly {
   bool isAdmin = false;
   String type = "student";
-
+  String? hostelName;
+  String? roomName;
   void load(Map<String, dynamic> data) {
     isAdmin = data['isAdmin'] ?? false;
     type = data['type'] ?? "student";
+    hostelName = data['hostelName'];
+    roomName = data['roomName'];
   }
 
   Map<String, dynamic> encode() {
@@ -20,7 +23,7 @@ class ReadOnly {
 }
 
 class UserData {
-  String? email, name, phoneNumber, address, roomName, hostelName;
+  String? email, name, phoneNumber, address;
   String? imgUrl;
   ReadOnly readonly = ReadOnly();
   UserData({
@@ -29,8 +32,6 @@ class UserData {
     this.phoneNumber,
     this.address,
     this.imgUrl,
-    this.hostelName,
-    this.roomName,
   });
 
   Map<String, dynamic> encode() {
@@ -47,8 +48,6 @@ class UserData {
     phoneNumber = userData['phoneNumber'];
     address = userData['address'];
     imgUrl = userData['imgUrl'];
-    roomName = userData['roomName'];
-    hostelName = userData['hostelName'];
   }
 }
 

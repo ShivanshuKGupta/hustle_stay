@@ -15,7 +15,6 @@ class _RoomsScreenState extends State<RoomsScreen> {
   final store = FirebaseFirestore.instance;
   int numberOfRooms = 0;
   void getnumRooms() async {
-    print(widget.hostelName);
     await store.collection('hostels').doc(widget.hostelName).get().then((doc) {
       if (doc.exists) {
         final data = doc.data();

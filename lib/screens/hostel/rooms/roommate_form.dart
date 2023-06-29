@@ -83,9 +83,7 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
           return;
         }
         Navigator.of(context).pop();
-      } catch (e) {
-        print(e);
-      }
+      } catch (e) {}
     }
     setState(() {
       isRunning = false;

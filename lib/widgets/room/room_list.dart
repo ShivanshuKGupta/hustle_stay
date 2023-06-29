@@ -43,8 +43,6 @@ class _RoomListState extends State<RoomList> {
             },
           );
         }
-        print(snapshot.data);
-        print(snapshot.data![0]);
         return RoomListWidget(
             snapshot.data!, widget.hostelName, widget.numberOfRooms);
       },

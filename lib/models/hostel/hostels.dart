@@ -48,7 +48,6 @@ Future<List<Hostels>> fetchHostels({Source? src}) async {
 
 Future<void> uploadHostel(Hostels hostel) async {
   final store = FirebaseFirestore.instance;
-  print(store);
   await store.doc('hostels/${hostel.hostelName}').set({
     "hostelName": hostel.hostelName,
     "hostelType": hostel.hostelType,

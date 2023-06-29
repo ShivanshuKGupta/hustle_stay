@@ -44,7 +44,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               child: Text('No Hostel added yet!'),
             );
           }
-          print(snapshot.data);
 
           return ListView.builder(
             itemBuilder: (context, index) {

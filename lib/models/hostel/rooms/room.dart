@@ -32,7 +32,6 @@ Future<List<Room>> fetchRooms(String hostelName, {Source? src}) async {
       .collection('Rooms')
       .get(src != null ? GetOptions(source: src) : null);
   final roomDocs = roomSnapshot.docs;
-  print(roomDocs.length);
   for (int i = 0; i < roomSnapshot.docs.length; i++) {
     final roomRef = roomDocs[i].reference;
     final roommatesSnapshot = await roomRef
@@ -41,7 +40,6 @@ Future<List<Room>> fetchRooms(String hostelName, {Source? src}) async {
     if (roommatesSnapshot.docs.isNotEmpty) {
       final List<RoommateData> roommatesData = [];
       for (var roommateDoc in roommatesSnapshot.docs) {
-        print(roommateDoc['email']);
         final roommateData = RoommateData(
           email: roommateDoc['email'],
         );
@@ -55,7 +53,6 @@ Future<List<Room>> fetchRooms(String hostelName, {Source? src}) async {
         roomMatesData: roommatesData,
       );
       roomDataList.add(roomData);
-      print(roomDataList);
     } else {
       final roomData = Room(
         capacity: roomDocs[i]['capacity'],
@@ -66,7 +63,6 @@ Future<List<Room>> fetchRooms(String hostelName, {Source? src}) async {
       roomDataList.add(roomData);
     }
   }
-  print(roomDataList);
   return roomDataList;
 }
 

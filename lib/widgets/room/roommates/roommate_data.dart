@@ -83,8 +83,8 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
         Navigator.of(context).push(MaterialPageRoute(
             builder: (_) => ProfileViewScreen(
                   user: user,
-                  hostelName: user.hostelName!,
-                  roomName: user.roomName!,
+                  hostelName: widget.hostelName,
+                  roomName: widget.roomName,
                 )));
       },
       child: ListTile(
