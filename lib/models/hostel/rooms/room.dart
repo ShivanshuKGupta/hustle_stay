@@ -99,6 +99,56 @@ Future<bool> deleteRoom(String roomName, String hostelName) async {
   }
 }
 
+Future<void> copyRoommateAttendance(String email, String hostelName,
+    String roomName, String destHostelName, String destRoomName) async {
+  // print('hi');
+  try {
+    final storage = FirebaseFirestore.instance;
+    final collectionRef = storage
+        .collection('hostels')
+        .doc(hostelName)
+        .collection('Rooms')
+        .doc(roomName)
+        .collection('Roommates')
+        .doc(email);
+
+    final destRef = storage
+        .collection('hostels')
+        .doc(destHostelName)
+        .collection('Rooms')
+        .doc(destRoomName)
+        .collection('Roommates')
+        .doc(email);
+    final attendanceRef = collectionRef.collection('Attendance');
+
+    final attendanceSnapshot = await attendanceRef.get();
+    final attendanceDocuments = attendanceSnapshot.docs;
+    if (attendanceDocuments.isNotEmpty) {
+      print('entered here)');
+      final batch = storage.batch();
+      print('entered here)');
+      for (final doc in attendanceDocuments) {
+        print(doc.id);
+        batch.set(destRef.collection('Attendance').doc(doc.id), doc.data(),
+            SetOptions(merge: true));
+      }
+      await batch.commit();
+
+      final deleteBatch = storage.batch();
+      for (final doc in attendanceDocuments) {
+        deleteBatch.delete(doc.reference);
+      }
+      await deleteBatch.commit();
+    }
+
+    await collectionRef.delete();
+    return;
+  } catch (e) {
+    print(e);
+  }
+  return;
+}
+
 Future<bool> changeRoom(String email, String hostelName, String roomName,
     String destHostelName, String destRoomName, BuildContext context) async {
   try {
@@ -123,8 +173,9 @@ Future<bool> changeRoom(String email, String hostelName, String roomName,
       await destRoomLoc.update({'numRoommates': FieldValue.increment(1)});
       await destLoc.doc(email).set(sourceData!);
       await sourceRoomRef.update({'numRoommates': FieldValue.increment(-1)});
-      sourceRef.delete();
-      await storage.collection('users').doc("$email/editable/details").set(
+      await copyRoommateAttendance(
+          email, hostelName, roomName, destHostelName, destRoomName);
+      await storage.collection('users').doc(email).set(
           {'hostelName': destHostelName, 'roomName': destRoomName},
           SetOptions(merge: true)).catchError((error) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -178,21 +229,21 @@ Future<bool> swapRoom(
       final sourceData = sData.data();
       final destData = dData.data();
 
-      transaction.delete(destRef);
-      transaction.delete(sourceRef);
       transaction.set(destLoc.doc(email), sourceData!);
       transaction.set(sourceLoc.doc(destRoommateEmail), destData!);
-      await storage.collection('users').doc("$email/editable/details").set(
+      copyRoommateAttendance(
+          email, hostelName, roomName, destHostelName, destRoomName);
+      copyRoommateAttendance(destRoommateEmail, destHostelName, destRoomName,
+          hostelName, roomName);
+      await storage.collection('users').doc(email).set(
           {'hostelName': destHostelName, 'roomName': destRoomName},
           SetOptions(merge: true)).catchError((error) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Error occured in updation')));
       });
-      await storage
-          .collection('users')
-          .doc("$destRoommateEmail/editable/details")
-          .set({'hostelName': hostelName, 'roomName': roomName},
-              SetOptions(merge: true)).catchError((error) {
+      await storage.collection('users').doc(destRoommateEmail).set(
+          {'hostelName': hostelName, 'roomName': roomName},
+          SetOptions(merge: true)).catchError((error) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Error occured in updation')));
       });
