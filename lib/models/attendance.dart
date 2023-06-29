@@ -53,7 +53,3 @@ Future<bool> setAttendanceData(String email, String hostelName, String roomName,
     return false;
   }
 }
-
-Future<bool> filterAttendanceByRoommate(String email) async {
-  return true;
-}

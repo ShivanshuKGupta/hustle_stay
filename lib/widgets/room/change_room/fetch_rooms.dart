@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/screens/hostel/rooms/rooms_screen.dart';
+import 'package:hustle_stay/widgets/room/change_room/fetch_roommates.dart';
 
 import '../../../models/hostel/rooms/room.dart';
 import '../../../tools.dart';
@@ -42,7 +44,9 @@ class _FetchRoomsState extends State<FetchRooms> {
       });
       return;
     }
-    Navigator.of(context).pop();
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+      builder: (context) => RoomsScreen(hostelName: widget.hostelName),
+    ));
   }
 
   @override
@@ -54,25 +58,14 @@ class _FetchRoomsState extends State<FetchRooms> {
               : null),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return FutureBuilder(
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting ||
-                  !snapshot.hasData ||
-                  snapshot.error != null) {
-                return Center(
-                  child: circularProgressIndicator(
-                    height: null,
-                    width: null,
-                  ),
-                );
-              }
-              return RoomDropdownWithSubmit(snapshot.data!);
-            },
-            future: fetchRoomNames(widget.destHostelName,
-                src: Source.cache,
-                roomname: widget.destHostelName == widget.hostelName
-                    ? widget.roomName
-                    : null),
+          return Container();
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: circularProgressIndicator(
+              height: 2,
+              width: 2,
+            ),
           );
         }
         return RoomDropdownWithSubmit(snapshot.data!);
@@ -119,7 +112,7 @@ class _FetchRoomsState extends State<FetchRooms> {
                           icon: Icon(Icons.update_rounded),
                           label: Text('Update Record')),
                     )
-              : SwapRoom(
+              : FetchRoommates(
                   destRoomName: destRoomName!,
                   isSwap: widget.isSwap,
                   destHostelName: widget.destHostelName,

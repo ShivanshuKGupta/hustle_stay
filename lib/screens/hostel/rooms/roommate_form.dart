@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import 'package:hustle_stay/screens/hostel/rooms/rooms_screen.dart';
 import '../../../tools.dart';
 
 class RoommateForm extends ConsumerStatefulWidget {
@@ -82,7 +83,9 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
 
           return;
         }
-        Navigator.of(context).pop();
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => RoomsScreen(hostelName: widget.hostelName),
+        ));
       } catch (e) {}
     }
     setState(() {

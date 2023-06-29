@@ -21,6 +21,13 @@ class RoomList extends StatefulWidget {
 
 class _RoomListState extends State<RoomList> {
   @override
+  void didUpdateWidget(covariant RoomList oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
+    setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder(
       future: fetchRooms(widget.hostelName),

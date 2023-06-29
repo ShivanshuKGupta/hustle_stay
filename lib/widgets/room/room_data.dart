@@ -20,6 +20,14 @@ class RoomDataWidget extends StatefulWidget {
 class _RoomDataWidgetState extends State<RoomDataWidget> {
   bool isOpen = false;
   bool isRunning = false;
+
+  @override
+  void didUpdateWidget(covariant RoomDataWidget oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     double widthScreen = MediaQuery.of(context).size.width;
@@ -64,15 +72,19 @@ class _RoomDataWidgetState extends State<RoomDataWidget> {
                     if (widget.roomData.capacity >
                         widget.roomData.numberOfRoommates)
                       IconButton(
-                        onPressed: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (_) => RoommateForm(
-                                    capacity: widget.roomData.capacity,
-                                    hostelName: widget.hostelName,
-                                    roomName: widget.roomData.roomName,
-                                    numRoommates:
-                                        widget.roomData.numberOfRoommates,
-                                  )));
+                        onPressed: () async {
+                          await Navigator.of(context)
+                              .pushReplacement(MaterialPageRoute(
+                                  builder: (_) => RoommateForm(
+                                        capacity: widget.roomData.capacity,
+                                        hostelName: widget.hostelName,
+                                        roomName: widget.roomData.roomName,
+                                        numRoommates:
+                                            widget.roomData.numberOfRoommates,
+                                      )))
+                              .then((value) {
+                            setState(() {});
+                          });
                         },
                         icon: Icon(Icons.add),
                       ),

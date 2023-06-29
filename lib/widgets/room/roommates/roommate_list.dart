@@ -19,6 +19,13 @@ class RoommateWidget extends StatefulWidget {
 
 class _RoommateWidgetState extends State<RoommateWidget> {
   @override
+  void didUpdateWidget(covariant RoommateWidget oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
+    setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ListView.builder(
       shrinkWrap: true,
