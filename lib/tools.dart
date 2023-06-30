@@ -296,3 +296,11 @@ Future<String?> askUser(
     ),
   );
 }
+
+String ddmmyyyy(DateTime dateTime) {
+  return "${dateTime.day}-${dateTime.month}-${dateTime.year}";
+}
+
+String timeFrom(DateTime dateTime) {
+  return "${dateTime.hour > 12 ? dateTime.hour - 12 : dateTime.hour}:${dateTime.minute} ${dateTime.hour < 12 ? 'am' : 'pm'}";
+}

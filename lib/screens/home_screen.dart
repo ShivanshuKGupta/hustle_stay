@@ -46,6 +46,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             .rotate(
               duration: duration,
               curve: Curves.decelerate,
+              begin: 1,
+              end: 0,
             ),
         label: 'Settings',
         tooltip: "Settings",

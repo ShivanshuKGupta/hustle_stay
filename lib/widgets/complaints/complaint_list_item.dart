@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -52,7 +53,7 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
       /// just an info icon
       leading: widget.complaint.imgUrl == null
           ? FutureBuilder(
-              future: fetchUserData(widget.complaint.from),
+              future: fetchUserData(widget.complaint.from, src: Source.cache),
               builder: (ctx, snapshot) {
                 final userData = snapshot.data;
                 if (!snapshot.hasData || userData!.imgUrl == null) {
@@ -223,7 +224,7 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
                           ),
                     ),
                     Text(
-                      "${createdAt.day}-${createdAt.month}-${createdAt.year} ${createdAt.hour}:${createdAt.minute}:${createdAt.second}",
+                      "${ddmmyyyy(createdAt)} ${timeFrom(createdAt)}",
                       textAlign: TextAlign.right,
                     ),
                   ],

@@ -50,6 +50,7 @@ class Message extends StatelessWidget {
     final size = MediaQuery.of(context).size;
 
     return GestureDetector(
+      key: ValueKey(msg.id),
       onTap: () => showMsgInfo(context, msg),
       onLongPress: () => showInfo(context, msg),
       child: Container(
@@ -121,7 +122,7 @@ class Message extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.only(right: 5.0, bottom: 2),
                 child: Text(
-                  "${msg.createdAt.hour > 12 ? msg.createdAt.hour - 12 : msg.createdAt.hour}:${msg.createdAt.minute} ${msg.createdAt.hour < 12 ? 'am' : 'pm'}",
+                  timeFrom(msg.createdAt),
                   style: Theme.of(context).textTheme.labelSmall!.copyWith(
                         color: Theme.of(context).colorScheme.primary,
                       ),
@@ -199,7 +200,7 @@ class Message extends StatelessWidget {
                         ),
                   ),
                   Text(
-                    "${msg.createdAt.year}-${msg.createdAt.month}-${msg.createdAt.day} | ${msg.createdAt.hour}hr:${msg.createdAt.minute}min:${msg.createdAt.second}sec",
+                    "${ddmmyyyy(msg.createdAt)} | ${timeFrom(msg.createdAt)}",
                     style: Theme.of(context).textTheme.bodySmall!.copyWith(
                           color: Theme.of(context).colorScheme.primary,
                         ),
@@ -217,7 +218,7 @@ class Message extends StatelessWidget {
                           ),
                     ),
                     Text(
-                      "${msg.modifiedAt!.year}-${msg.modifiedAt!.month}-${msg.modifiedAt!.day} | ${msg.modifiedAt!.hour}hr:${msg.modifiedAt!.minute}min:${msg.modifiedAt!.second}sec",
+                      "${ddmmyyyy(msg.modifiedAt!)} | ${timeFrom(msg.modifiedAt!)}",
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
                             color: Theme.of(context).colorScheme.primary,
                           ),

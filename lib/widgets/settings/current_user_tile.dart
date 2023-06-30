@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
@@ -12,7 +11,7 @@ class CurrentUserTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settingsClass = ref.read(settingsProvider.notifier);
     return ListTile(
-      title: Text(currentUser.name ?? "Error"),
+      title: Text(currentUser.name ?? currentUser.email!),
       subtitle: Text(
         currentUser.email!,
         style: TextStyle(color: Theme.of(context).colorScheme.primary),
@@ -30,6 +29,6 @@ class CurrentUserTile extends ConsumerWidget {
           settingsClass.notifyListeners();
         }
       },
-    ).animate().fade().slideX(begin: 1, end: 0, curve: Curves.decelerate);
+    );
   }
 }

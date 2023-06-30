@@ -98,7 +98,6 @@ class _MessageListState extends State<MessageList> {
   }
 
   Widget _dateWidget(DateTime createdAt) {
-    return IndicativeMessage(
-        txt: "${createdAt.day}-${createdAt.month}-${createdAt.year}");
+    return IndicativeMessage(txt: ddmmyyyy(createdAt));
   }
 }

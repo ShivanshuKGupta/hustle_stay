@@ -22,9 +22,10 @@ class ComplaintBottomBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     List<Widget> buttons = [
-      ElevatedButton(
+      ElevatedButton.icon(
+        icon: const Icon(Icons.check_rounded),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Theme.of(context).colorScheme.primary,
+          backgroundColor: Colors.green,
           foregroundColor: Theme.of(context).colorScheme.onPrimary,
           textStyle: Theme.of(context).textTheme.bodyMedium,
           shape: RoundedRectangleBorder(
@@ -32,9 +33,13 @@ class ComplaintBottomBar extends ConsumerWidget {
           ),
         ),
         onPressed: () => resolveComplaint(ref.read(complaintsList.notifier)),
-        child: Text(complaint.resolved ? 'Unresolve' : 'Resolve'),
+        label: Text(
+          (complaint.from != currentUser.email ? ' Request to ' : '') +
+              (complaint.resolved ? 'Unresolve' : 'Resolve'),
+        ),
       ),
-      ElevatedButton(
+      ElevatedButton.icon(
+        icon: const Icon(Icons.person_add_rounded),
         style: ElevatedButton.styleFrom(
           backgroundColor: Theme.of(context).colorScheme.primary,
           foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -44,26 +49,24 @@ class ComplaintBottomBar extends ConsumerWidget {
           ),
         ),
         onPressed: showIncludeBox,
-        child: const Text('Include'),
-      ),
-      ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          foregroundColor: Theme.of(context).colorScheme.onPrimary,
-          textStyle: Theme.of(context).textTheme.bodyMedium,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-        ),
-        onPressed: () {},
-        child: const Text('Elevate'),
+        label: Text(
+            '${complaint.from != currentUser.email ? ' Request to ' : ''}Include'),
       ),
     ];
     return SizedBox(
-      height: 30,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: buttons,
+      height: 40,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: ListView.separated(
+          separatorBuilder: (ctx, index) => const VerticalDivider(),
+          scrollDirection: Axis.horizontal,
+          itemBuilder: (ctx, index) => Flexible(
+            flex: 1,
+            fit: FlexFit.tight,
+            child: buttons[index],
+          ),
+          itemCount: buttons.length,
+        ),
       ),
     );
   }
@@ -104,6 +107,26 @@ class ComplaintBottomBar extends ConsumerWidget {
           }
           return;
         }
+        if (complaint.from != currentUser.email) {
+          await addMessage(
+            ChatData(
+              path: "complaints/${complaint.id}",
+              owner: complaint.from,
+              receivers: complaint.to,
+              title: complaint.title,
+              description: complaint.description,
+            ),
+            MessageData(
+              id: DateTime.now().microsecondsSinceEpoch.toString(),
+              txt:
+                  "${currentUser.name ?? currentUser.email} requested to include $chosenUsers in the complaint.",
+              from: currentUser.email!,
+              createdAt: DateTime.now(),
+              indicative: true,
+            ),
+          );
+          return;
+        }
         complaint.to.addAll(chosenUsers);
         await updateComplaint(complaint);
         await addMessage(
@@ -128,6 +151,26 @@ class ComplaintBottomBar extends ConsumerWidget {
   }
 
   void resolveComplaint(complaintListNotifier) async {
+    if (complaint.from != currentUser.email) {
+      await addMessage(
+        ChatData(
+          path: "complaints/${complaint.id}",
+          owner: complaint.from,
+          receivers: complaint.to,
+          title: complaint.title,
+          description: complaint.description,
+        ),
+        MessageData(
+          id: DateTime.now().microsecondsSinceEpoch.toString(),
+          txt:
+              "${currentUser.name ?? currentUser.email} requested to ${complaint.resolved ? 'unresolve' : 'resolve'} the complaint at\n${ddmmyyyy(DateTime.now())} ${timeFrom(DateTime.now())}",
+          from: currentUser.email!,
+          createdAt: DateTime.now(),
+          indicative: true,
+        ),
+      );
+      return;
+    }
     String? response = await askUser(
       context,
       "${complaint.resolved ? 'Unresolve' : 'Resolve'} the complaint?",
@@ -151,7 +194,7 @@ class ComplaintBottomBar extends ConsumerWidget {
         MessageData(
           id: DateTime.now().microsecondsSinceEpoch.toString(),
           txt:
-              "${currentUser.name ?? currentUser.email} ${complaint.resolved ? 'resolved' : 'unresolved'} the complaint",
+              "${currentUser.name ?? currentUser.email} ${complaint.resolved ? 'resolved' : 'unresolved'} the complaint at\n${ddmmyyyy(DateTime.now())} ${timeFrom(DateTime.now())}",
           from: currentUser.email!,
           createdAt: DateTime.now(),
           indicative: true,
