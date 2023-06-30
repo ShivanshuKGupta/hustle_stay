@@ -11,7 +11,7 @@ class ComplaintsListWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     int i = 0;
     final mediaQuery = MediaQuery.of(context);
-    const duration = Duration(milliseconds: 400);
+    const duration = Duration(milliseconds: 200);
     return complaints.isEmpty
         ? ListView(
             children: [
@@ -37,16 +37,14 @@ class ComplaintsListWidget extends StatelessWidget {
               final complaint = complaints[index];
               return ComplaintListItem(
                 complaint: complaint,
-              )
-                  .animate()
-                  .then(delay: duration * i++)
-                  .fade(begin: 0, end: 1, duration: duration)
-                  .slideX(
-                    begin: -1,
-                    end: 0,
-                    curve: Curves.decelerate,
-                    duration: duration,
-                  );
+              ).animate().then().fade(begin: 0, end: 1, duration: duration)
+                  // .slideX(
+                  //   begin: -1,
+                  //   end: 0,
+                  //   curve: Curves.decelerate,
+                  //   duration: duration,
+                  // )
+                  ;
             },
             itemCount: complaints.length,
           );
