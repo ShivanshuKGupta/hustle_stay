@@ -4,43 +4,60 @@ import 'package:flutter/material.dart';
 import '../../models/hostel/rooms/room.dart';
 import '../../tools.dart';
 import 'room_data.dart';
+import 'package:connectivity/connectivity.dart';
 
 class RoomList extends StatefulWidget {
   const RoomList(
-      {super.key, required this.hostelName, required this.numberOfRooms});
+      {super.key,
+      required this.hostelName,
+      required this.numberOfRooms,
+      required this.selectedDate});
   final String hostelName;
   final int numberOfRooms;
+  final ValueNotifier<DateTime> selectedDate;
 
   @override
   State<RoomList> createState() => _RoomListState();
 }
 
 class _RoomListState extends State<RoomList> {
+  bool isConnected = true;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    checkConnectivity();
+  }
+
+  Future<void> checkConnectivity() async {
+    final connResult = await Connectivity().checkConnectivity();
+
+    setState(() {
+      isConnected = !(ConnectivityResult.none == connResult);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: fetchRooms(widget.hostelName),
+      future:
+          fetchRooms(widget.hostelName, src: isConnected ? null : Source.cache),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return FutureBuilder(
-            future: fetchRooms(widget.hostelName, src: Source.cache),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting ||
-                  snapshot.hasData && snapshot.error != null) {
-                return Center(
-                  child: circularProgressIndicator(
-                    height: null,
-                    width: null,
-                  ),
-                );
-              }
-              return RoomListWidget(
-                  snapshot.data!, widget.hostelName, widget.numberOfRooms);
-            },
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: circularProgressIndicator(
+              height: null,
+              width: null,
+            ),
           );
         }
-        print(snapshot.data);
-        print(snapshot.data![0]);
+        if (!snapshot.hasData) {
+          return Center(
+            child: ErrorWidget(const Text(
+                'Unable to fetch data. The data could be empty or you might not have the permission to access the data. Contact the developers for more info.')),
+          );
+        }
         return RoomListWidget(
             snapshot.data!, widget.hostelName, widget.numberOfRooms);
       },
@@ -59,6 +76,7 @@ class _RoomListState extends State<RoomList> {
           return RoomDataWidget(
             hostelName: hostelName,
             roomData: roomData,
+            selectedDate: widget.selectedDate,
           );
         },
       ),

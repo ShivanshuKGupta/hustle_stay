@@ -54,9 +54,7 @@ class _AddRoomWidState extends ConsumerState<AddRoomWid> {
           return;
         }
         Navigator.of(context).pop();
-      } catch (e) {
-        print(e);
-      }
+      } catch (e) {}
     }
     setState(() {
       isRunning = false;
@@ -78,7 +76,7 @@ class _AddRoomWidState extends ConsumerState<AddRoomWid> {
               keyboardType: TextInputType.number,
               onChanged: (value) {
                 setState(() {
-                  numOfRooms = int.parse(value);
+                  numOfRooms = value == "" ? 0 : int.parse(value);
                   for (int i = 0; i < numOfRooms; i++) {
                     _formKeyList.add(GlobalKey<FormState>());
                   }

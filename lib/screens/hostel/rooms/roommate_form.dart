@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import 'package:hustle_stay/screens/hostel/rooms/rooms_screen.dart';
 import '../../../tools.dart';
 
 class RoommateForm extends ConsumerStatefulWidget {
@@ -22,16 +23,6 @@ class RoommateForm extends ConsumerStatefulWidget {
 class _RoommateFormState extends ConsumerState<RoommateForm> {
   List<GlobalKey<FormState>> _formKeyList = [];
   final storage = FirebaseFirestore.instance;
-  String capitalizeEachWord(String value) {
-    List<String> subValue = value.split(' ');
-    for (int i = 0; i < subValue.length; i++) {
-      String word = subValue[i];
-      if (word.isNotEmpty) {
-        subValue[i] = word[0].toUpperCase() + word.substring(1);
-      }
-    }
-    return subValue.join(' ');
-  }
 
   int currentRoommateNumber = 0;
   String roommateEmail = "";
@@ -54,15 +45,14 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
           });
           return;
         }
-        final userLoc = await storage
-            .collection('users')
-            .doc("$roommateEmail/editable/details")
-            .get();
-        if (userLoc.data()!.containsKey('hostelName')) {
+        final userLoc =
+            await storage.collection('users').doc(roommateEmail).get();
+        if (userLoc.data()!.containsKey('hostelName') &&
+            userLoc.data()!['hostelName'] != null) {
           ScaffoldMessenger.of(context).clearSnackBars();
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Text(
-                  'Hostel is already allocated to ${userLoc['name']}. Hostel: ${userLoc['hostelName']} and Room: ${userLoc['roomName']}')));
+                  'Hostel is already allocated to $roommateEmail. \n Hostel: ${userLoc['hostelName']} and Room: ${userLoc['roomName']}')));
           setState(() {
             isRunning = false;
           });
@@ -77,11 +67,9 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
         await loc.collection('Roommates').doc(roommateEmail).set({
           'email': roommateEmail,
         });
-        await storage
-            .collection('users')
-            .doc("$roommateEmail/editable/details")
-            .set({'hostelName': widget.hostelName, 'roomName': widget.roomName},
-                SetOptions(merge: true)).catchError((error) {
+        await storage.collection('users').doc(roommateEmail).set(
+            {'hostelName': widget.hostelName, 'roomName': widget.roomName},
+            SetOptions(merge: true)).catchError((error) {
           ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Error occured in updation')));
         });
@@ -95,10 +83,10 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
 
           return;
         }
-        Navigator.of(context).pop();
-      } catch (e) {
-        print(e);
-      }
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => RoomsScreen(hostelName: widget.hostelName),
+        ));
+      } catch (e) {}
     }
     setState(() {
       isRunning = false;
@@ -124,7 +112,7 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
                 keyboardType: TextInputType.number,
                 onChanged: (value) {
                   setState(() {
-                    numOfRoommates = int.parse(value);
+                    numOfRoommates = value == "" ? 0 : int.parse(value);
 
                     if (!(widget.capacity >=
                         int.parse(value) + widget.numRoommates)) {

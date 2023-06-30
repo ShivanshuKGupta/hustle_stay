@@ -4,8 +4,14 @@ import 'package:hustle_stay/widgets/room/roommates/roommate_data.dart';
 import '../../../models/hostel/rooms/room.dart';
 
 class RoommateWidget extends StatefulWidget {
-  const RoommateWidget({super.key, required this.roomData});
+  const RoommateWidget(
+      {super.key,
+      required this.roomData,
+      required this.selectedDate,
+      required this.hostelName});
   final Room roomData;
+  final ValueNotifier<DateTime> selectedDate;
+  final String hostelName;
 
   @override
   State<RoommateWidget> createState() => _RoommateWidgetState();
@@ -21,7 +27,16 @@ class _RoommateWidgetState extends State<RoommateWidget> {
       itemBuilder: (context, roommateIndex) {
         final roommate = widget.roomData.roomMatesData![roommateIndex];
 
-        return RoommateDataWidget(email: roommate.email);
+        return ValueListenableBuilder(
+            valueListenable: widget.selectedDate,
+            builder: (context, value, child) {
+              return RoommateDataWidget(
+                roomName: widget.roomData.roomName,
+                hostelName: widget.hostelName,
+                email: roommate.email,
+                selectedDate: widget.selectedDate.value,
+              );
+            });
       },
     );
   }

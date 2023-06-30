@@ -55,11 +55,10 @@ class _FetchHostelNamesState extends State<FetchHostelNames> {
     return Column(
       children: [
         Container(
-          width: MediaQuery.of(context).size.width,
           child: Row(
             children: [
               Text(
-                !widget.isSwap ? 'Choose new Hostel' : 'Choose Hostel to Swap',
+                !widget.isSwap ? 'Select new Hostel' : 'Hostel to Swap',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               SizedBox(

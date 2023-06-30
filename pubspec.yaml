@@ -46,6 +46,10 @@ dependencies:
   firebase_storage: ^11.2.3
   cached_network_image: ^3.2.3
   flutter_animate: ^4.2.0
+  intl: ^0.18.1
+  connectivity: ^3.0.6
+  foundation: ^0.0.5
+  animated_icon: ^0.0.5
 
 dev_dependencies:
   flutter_test:

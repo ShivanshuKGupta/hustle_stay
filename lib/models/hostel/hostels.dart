@@ -48,7 +48,6 @@ Future<List<Hostels>> fetchHostels({Source? src}) async {
 
 Future<void> uploadHostel(Hostels hostel) async {
   final store = FirebaseFirestore.instance;
-  print(store);
   await store.doc('hostels/${hostel.hostelName}').set({
     "hostelName": hostel.hostelName,
     "hostelType": hostel.hostelType,
@@ -66,7 +65,10 @@ Future<List<DropdownMenuItem>> fetchHostelNames({Source? src}) async {
       .get(src == null ? null : GetOptions(source: src));
   storageRef.docs.forEach((element) {
     list.add(DropdownMenuItem(
-      child: Text(element.id),
+      child: Text(
+        element.id,
+        style: TextStyle(fontSize: 10),
+      ),
       value: element.id,
     ));
   });

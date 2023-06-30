@@ -5,9 +5,14 @@ import '../../screens/hostel/rooms/roommate_form.dart';
 import 'roommates/roommate_list.dart';
 
 class RoomDataWidget extends StatefulWidget {
-  RoomDataWidget({super.key, required this.roomData, required this.hostelName});
+  RoomDataWidget(
+      {super.key,
+      required this.roomData,
+      required this.hostelName,
+      required this.selectedDate});
   Room roomData;
   String hostelName;
+  ValueNotifier<DateTime> selectedDate;
   @override
   State<RoomDataWidget> createState() => _RoomDataWidgetState();
 }
@@ -15,10 +20,12 @@ class RoomDataWidget extends StatefulWidget {
 class _RoomDataWidgetState extends State<RoomDataWidget> {
   bool isOpen = false;
   bool isRunning = false;
+
   @override
   Widget build(BuildContext context) {
+    double widthScreen = MediaQuery.of(context).size.width;
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(widthScreen * 0.01),
       child: Expanded(
         child: Card(
           elevation: 3,
@@ -55,19 +62,25 @@ class _RoomDataWidgetState extends State<RoomDataWidget> {
                       ),
                     ),
                     SizedBox(height: 16),
-                    IconButton(
-                      onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (_) => RoommateForm(
-                                  capacity: widget.roomData.capacity,
-                                  hostelName: widget.hostelName,
-                                  roomName: widget.roomData.roomName,
-                                  numRoommates:
-                                      widget.roomData.numberOfRoommates,
-                                )));
-                      },
-                      icon: Icon(Icons.add),
-                    ),
+                    if (widget.roomData.capacity >
+                        widget.roomData.numberOfRoommates)
+                      IconButton(
+                        onPressed: () async {
+                          await Navigator.of(context)
+                              .pushReplacement(MaterialPageRoute(
+                                  builder: (_) => RoommateForm(
+                                        capacity: widget.roomData.capacity,
+                                        hostelName: widget.hostelName,
+                                        roomName: widget.roomData.roomName,
+                                        numRoommates:
+                                            widget.roomData.numberOfRoommates,
+                                      )))
+                              .then((value) {
+                            setState(() {});
+                          });
+                        },
+                        icon: Icon(Icons.add),
+                      ),
                   ],
                 ),
                 IconButton(
@@ -84,6 +97,8 @@ class _RoomDataWidgetState extends State<RoomDataWidget> {
                       ? Center(child: Text("No roommates added yet"))
                       : RoommateWidget(
                           roomData: widget.roomData,
+                          selectedDate: widget.selectedDate,
+                          hostelName: widget.hostelName,
                         ),
               ],
             ),
