@@ -43,14 +43,14 @@ class _FilteredRecordsState extends State<FilteredRecords> {
         ? ListView.builder(
             itemBuilder: (context, index) {
               return ListTile(
-                title: Text(list![index].date),
-                trailing: Icon(list![index].isPresent
+                title: Text(list[index].date),
+                trailing: Icon(list[index].isPresent
                     ? Icons.check_box_rounded
                     : Icons.close),
               );
             },
             itemCount: list.length,
           )
-        : Center(child: Text(isEmpty ? 'No records exist...' : 'loading...'));
+        : const Center(child: Text('loading...'));
   }
 }

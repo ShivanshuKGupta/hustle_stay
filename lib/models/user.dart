@@ -53,7 +53,7 @@ class UserData {
 
 Future<UserData> fetchUserData(
   String email, {
-  Source? src = Source.cache,
+  Source? src,
   bool keepUptoDate = false,
 }) async {
   UserData userData = UserData();

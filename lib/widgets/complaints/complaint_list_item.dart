@@ -54,7 +54,8 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
           ? FutureBuilder(
               future: fetchUserData(widget.complaint.from),
               builder: (ctx, snapshot) {
-                if (!snapshot.hasData || snapshot.data!.imgUrl == null) {
+                final userData = snapshot.data;
+                if (!snapshot.hasData || userData!.imgUrl == null) {
                   return const InkWell(
                     child: CircleAvatar(
                       child: Icon(Icons.info_rounded),
@@ -64,14 +65,13 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
                 return InkWell(
                   child: CircleAvatar(
                     backgroundImage:
-                        CachedNetworkImageProvider(snapshot.data!.imgUrl!),
+                        CachedNetworkImageProvider(userData.imgUrl!),
                   ),
                   onTap: () {
                     navigatorPush(
                       context,
                       ImagePreview(
-                        image: CachedNetworkImage(
-                            imageUrl: snapshot.data!.imgUrl!),
+                        image: CachedNetworkImage(imageUrl: userData.imgUrl!),
                       ),
                     );
                   },
