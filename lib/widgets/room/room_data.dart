@@ -12,7 +12,7 @@ class RoomDataWidget extends StatefulWidget {
       required this.selectedDate});
   Room roomData;
   String hostelName;
-  final DateTime selectedDate;
+  ValueNotifier<DateTime> selectedDate;
   @override
   State<RoomDataWidget> createState() => _RoomDataWidgetState();
 }
@@ -20,13 +20,6 @@ class RoomDataWidget extends StatefulWidget {
 class _RoomDataWidgetState extends State<RoomDataWidget> {
   bool isOpen = false;
   bool isRunning = false;
-
-  @override
-  void didUpdateWidget(covariant RoomDataWidget oldWidget) {
-    // TODO: implement didUpdateWidget
-    super.didUpdateWidget(oldWidget);
-    setState(() {});
-  }
 
   @override
   Widget build(BuildContext context) {

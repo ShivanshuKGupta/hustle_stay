@@ -4,6 +4,7 @@ import 'package:hustle_stay/widgets/room/room_list.dart';
 
 import '../../../tools.dart';
 import '../../../widgets/room/filtered_attendance.dart';
+import 'package:flutter/foundation.dart';
 
 class RoomsScreen extends StatefulWidget {
   RoomsScreen({super.key, required this.hostelName});
@@ -31,7 +32,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
 
   bool isOpen = false;
 
-  DateTime selectedDate = DateTime.now();
+  ValueNotifier<DateTime> selectedDate = ValueNotifier(DateTime.now());
 
   @override
   void initState() {
@@ -66,15 +67,12 @@ class _RoomsScreenState extends State<RoomsScreen> {
           IconButton(
               onPressed: () async {
                 DateTime? date = await showDatePicker(
-                    confirmText: "Are you sure?",
                     context: context,
-                    initialDate: selectedDate,
+                    initialDate: selectedDate.value,
                     firstDate: DateTime(2019),
                     lastDate: DateTime.now());
                 if (date != null && date != selectedDate) {
-                  setState(() {
-                    selectedDate = date;
-                  });
+                  selectedDate.value = date;
                 }
               },
               icon: const Icon(Icons.calendar_month_outlined))
@@ -109,7 +107,10 @@ class _RoomsScreenState extends State<RoomsScreen> {
           : Container(
               child: numberOfRooms == 0
                   ? Center(
-                      child: Text("No rooms exist yet!"),
+                      child: circularProgressIndicator(
+                        height: null,
+                        width: null,
+                      ),
                     )
                   : Container(
                       child: RoomList(

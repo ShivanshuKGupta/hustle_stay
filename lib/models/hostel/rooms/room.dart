@@ -28,8 +28,9 @@ class Room {
   });
 }
 
+final storage = FirebaseFirestore.instance;
+
 Future<List<Room>> fetchRooms(String hostelName, {Source? src}) async {
-  final storage = FirebaseFirestore.instance;
   final roomsCollectionRef =
       storage.collection('hostels').doc(hostelName).collection('Rooms');
 
@@ -74,7 +75,6 @@ Future<List<Room>> fetchRooms(String hostelName, {Source? src}) async {
 }
 
 Future<bool> isRoomExists(String hostelName, String roomName) async {
-  final storage = FirebaseFirestore.instance;
   final storageRef = await storage
       .collection('hostels')
       .doc(hostelName)
@@ -86,7 +86,6 @@ Future<bool> isRoomExists(String hostelName, String roomName) async {
 
 Future<bool> deleteRoom(String roomName, String hostelName) async {
   try {
-    final storage = FirebaseFirestore.instance;
     final result = await storage.runTransaction((transaction) async {
       final storageRef = storage.collection('hostels').doc(hostelName);
       transaction
@@ -110,7 +109,6 @@ Future<void> copyRoommateAttendance(String email, String hostelName,
     String roomName, String destHostelName, String destRoomName) async {
   // print('hi');
   try {
-    final storage = FirebaseFirestore.instance;
     final collectionRef = storage
         .collection('hostels')
         .doc(hostelName)
@@ -155,7 +153,6 @@ Future<void> copyRoommateAttendance(String email, String hostelName,
 Future<bool> changeRoom(String email, String hostelName, String roomName,
     String destHostelName, String destRoomName, BuildContext context) async {
   try {
-    final storage = FirebaseFirestore.instance;
     final sourceRoomRef = storage
         .collection('hostels')
         .doc(hostelName)
@@ -220,8 +217,6 @@ Future<bool> swapRoom(
     String destRoomName,
     BuildContext context) async {
   try {
-    final storage = FirebaseFirestore.instance;
-
     await storage.runTransaction((transaction) async {
       final sourceLoc = storage
           .collection('hostels')
@@ -282,7 +277,7 @@ Future<bool> swapRoom(
 Future<List<DropdownMenuItem>> fetchRoomNames(String hostelName,
     {String? roomname, Source? src}) async {
   List<DropdownMenuItem> list = [];
-  final storage = FirebaseFirestore.instance;
+
   final storageRef = await storage
       .collection('hostels')
       .doc(hostelName)
@@ -306,7 +301,7 @@ Future<List<DropdownMenuItem>> fetchRoommateNames(
     String hostelName, String roomName,
     {Source? src}) async {
   List<DropdownMenuItem> list = [];
-  final storage = FirebaseFirestore.instance;
+
   final storageRef = await storage
       .collection('hostels')
       .doc(hostelName)
@@ -329,7 +324,6 @@ Future<List<DropdownMenuItem>> fetchRoommateNames(
 Future<List<AttendanceRecord>> fetchAttendanceByStudent(String email) async {
   List<AttendanceRecord> list = [];
 
-  final storage = FirebaseFirestore.instance;
   final infoRef = await storage.collection('users').doc(email).get();
   final hostelName = infoRef.data()!['hostelName'];
   final roomName = infoRef.data()!['roomName'];
@@ -348,4 +342,51 @@ Future<List<AttendanceRecord>> fetchAttendanceByStudent(String email) async {
         AttendanceRecord(isPresent: doc.data()['isPresent'], date: doc.id));
   }
   return list;
+}
+
+Future<bool> deleteRoommate(String email,
+    {String? hostelName, String? roomName}) async {
+  final user = storage.collection('users').doc(email);
+  if (hostelName == null || roomName == null) {
+    await user.get().then(
+      (value) {
+        hostelName = value.data()!['hostelName'];
+        roomName = value.data()!['roomName'];
+      },
+    );
+  }
+  try {
+    final collectionRef = storage
+        .collection('hostels')
+        .doc(hostelName)
+        .collection('Rooms')
+        .doc(roomName)
+        .collection('Roommates')
+        .doc(email);
+
+    final attendanceRef = collectionRef.collection('Attendance');
+    final batch = storage.batch();
+    final attendanceSnapshot = await attendanceRef.get();
+    final attendanceDocuments = attendanceSnapshot.docs;
+    if (attendanceDocuments.isNotEmpty) {
+      batch.update(user, {'hostelName': null, 'roomName': null});
+      for (final doc in attendanceDocuments) {
+        batch.delete(doc.reference);
+      }
+    }
+    batch.update(
+        storage
+            .collection('hostels')
+            .doc(hostelName)
+            .collection('Rooms')
+            .doc(roomName),
+        {'numRoommates': FieldValue.increment(-1)});
+    batch.delete(collectionRef);
+
+    await batch.commit();
+    return true;
+  } catch (e) {
+    print(e);
+    return false;
+  }
 }

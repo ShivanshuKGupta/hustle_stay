@@ -10,7 +10,7 @@ class RoommateWidget extends StatefulWidget {
       required this.selectedDate,
       required this.hostelName});
   final Room roomData;
-  final DateTime selectedDate;
+  final ValueNotifier<DateTime> selectedDate;
   final String hostelName;
 
   @override
@@ -18,13 +18,6 @@ class RoommateWidget extends StatefulWidget {
 }
 
 class _RoommateWidgetState extends State<RoommateWidget> {
-  @override
-  void didUpdateWidget(covariant RoommateWidget oldWidget) {
-    // TODO: implement didUpdateWidget
-    super.didUpdateWidget(oldWidget);
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -34,12 +27,16 @@ class _RoommateWidgetState extends State<RoommateWidget> {
       itemBuilder: (context, roommateIndex) {
         final roommate = widget.roomData.roomMatesData![roommateIndex];
 
-        return RoommateDataWidget(
-          roomName: widget.roomData.roomName,
-          hostelName: widget.hostelName,
-          email: roommate.email,
-          selectedDate: widget.selectedDate,
-        );
+        return ValueListenableBuilder(
+            valueListenable: widget.selectedDate,
+            builder: (context, value, child) {
+              return RoommateDataWidget(
+                roomName: widget.roomData.roomName,
+                hostelName: widget.hostelName,
+                email: roommate.email,
+                selectedDate: widget.selectedDate.value,
+              );
+            });
       },
     );
   }
