@@ -65,8 +65,8 @@ class _RoomDataWidgetState extends State<RoomDataWidget> {
                     if (widget.roomData.capacity >
                         widget.roomData.numberOfRoommates)
                       IconButton(
-                        onPressed: () async {
-                          await Navigator.of(context)
+                        onPressed: () {
+                          Navigator.of(context)
                               .pushReplacement(MaterialPageRoute(
                                   builder: (_) => RoommateForm(
                                         capacity: widget.roomData.capacity,
@@ -74,10 +74,7 @@ class _RoomDataWidgetState extends State<RoomDataWidget> {
                                         roomName: widget.roomData.roomName,
                                         numRoommates:
                                             widget.roomData.numberOfRoommates,
-                                      )))
-                              .then((value) {
-                            setState(() {});
-                          });
+                                      )));
                         },
                         icon: Icon(Icons.add),
                       ),

@@ -10,6 +10,7 @@ class FilteredRecords extends StatefulWidget {
 }
 
 class _FilteredRecordsState extends State<FilteredRecords> {
+  bool isEmpty = false;
   List<AttendanceRecord> list = [];
   @override
   void initState() {
@@ -21,13 +22,18 @@ class _FilteredRecordsState extends State<FilteredRecords> {
   void didUpdateWidget(covariant FilteredRecords oldWidget) {
     super.didUpdateWidget(oldWidget);
     list = [];
+    isEmpty = false;
     filterAttendance();
   }
 
   Future<void> filterAttendance() async {
     final listData = await fetchAttendanceByStudent(widget.email);
     setState(() {
-      list = listData;
+      if (listData.isEmpty) {
+        isEmpty = true;
+      } else {
+        list = listData;
+      }
     });
   }
 
@@ -45,6 +51,6 @@ class _FilteredRecordsState extends State<FilteredRecords> {
             },
             itemCount: list.length,
           )
-        : Center(child: Text('loading...'));
+        : Center(child: Text(isEmpty ? 'No records exist...' : 'loading...'));
   }
 }

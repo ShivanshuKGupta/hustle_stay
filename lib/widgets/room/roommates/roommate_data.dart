@@ -79,17 +79,13 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
   Widget RData(UserData user) {
     double widthScreen = MediaQuery.of(context).size.width;
     return GestureDetector(
-      onTap: () async {
-        await Navigator.of(context)
-            .pushReplacement(MaterialPageRoute(
-                builder: (_) => ProfileViewScreen(
-                      user: user,
-                      hostelName: widget.hostelName,
-                      roomName: widget.roomName,
-                    )))
-            .then((value) {
-          setState(() {});
-        });
+      onTap: () {
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (_) => ProfileViewScreen(
+                  user: user,
+                  hostelName: widget.hostelName,
+                  roomName: widget.roomName,
+                )));
       },
       child: ListTile(
           leading: CircleAvatar(
@@ -106,7 +102,7 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
                 ),
               )),
           title: Text(
-            user.name!,
+            user.name ?? widget.email,
             style: TextStyle(fontSize: 16),
           ),
           contentPadding: EdgeInsets.all(widthScreen * 0.002),

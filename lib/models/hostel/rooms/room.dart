@@ -325,21 +325,25 @@ Future<List<AttendanceRecord>> fetchAttendanceByStudent(String email) async {
   List<AttendanceRecord> list = [];
 
   final infoRef = await storage.collection('users').doc(email).get();
-  final hostelName = infoRef.data()!['hostelName'];
-  final roomName = infoRef.data()!['roomName'];
-  final attendanceDataRef = await storage
-      .collection('hostels')
-      .doc(hostelName)
-      .collection('Rooms')
-      .doc(roomName)
-      .collection('Roommates')
-      .doc(email)
-      .collection('Attendance')
-      .get();
-  final attendanceData = attendanceDataRef.docs;
-  for (final doc in attendanceData) {
-    list.add(
-        AttendanceRecord(isPresent: doc.data()['isPresent'], date: doc.id));
+  if (infoRef.exists) {
+    final hostelName = infoRef.data()!['hostelName'];
+    final roomName = infoRef.data()!['roomName'];
+    if (hostelName != null && roomName != null) {
+      final attendanceDataRef = await storage
+          .collection('hostels')
+          .doc(hostelName)
+          .collection('Rooms')
+          .doc(roomName)
+          .collection('Roommates')
+          .doc(email)
+          .collection('Attendance')
+          .get();
+      final attendanceData = attendanceDataRef.docs;
+      for (final doc in attendanceData) {
+        list.add(
+            AttendanceRecord(isPresent: doc.data()['isPresent'], date: doc.id));
+      }
+    }
   }
   return list;
 }

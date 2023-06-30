@@ -53,7 +53,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
         appBar: AppBar(
           title: shaderText(
             context,
-            title: '${widget.user.name}\'s Profile',
+            title: '${widget.user.name ?? widget.user.email}\'s Profile',
           ),
           actions: [
             if (!isDeleting)
@@ -75,7 +75,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                       ScaffoldMessenger.of(context).clearSnackBars();
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           content: Text(
-                              "Error deleting ${widget.user.name}. Try again later.")));
+                              "Error deleting ${widget.user.name ?? widget.user.email}. Try again later.")));
                     }
                   },
                   icon: Icon(Icons.delete))
@@ -138,7 +138,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                                     ),
                               ),
                               const Divider(),
-                              Text("Name: ${widget.user.name}"),
+                              Text("Name: ${widget.user.name ?? ''}"),
                               Text("${widget.user.phoneNumber}"),
                             ],
                           ),
