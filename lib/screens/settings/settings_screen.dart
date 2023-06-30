@@ -67,11 +67,15 @@ class SettingsScreen extends ConsumerWidget {
                             if (snapshot.hasData) {
                               currentUser = snapshot.data!;
                             }
-                            return const CurrentUserTile();
+                            return const CurrentUserTile(
+                              key: ValueKey('user-tile'),
+                            );
                           });
                     }
                     currentUser = snapshot.data!;
-                    return const CurrentUserTile();
+                    return const CurrentUserTile(
+                      key: ValueKey('user-tile'),
+                    );
                   },
                 ),
               ),
