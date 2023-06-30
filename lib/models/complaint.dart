@@ -48,8 +48,28 @@ class ComplaintData {
 
   String operator -(ComplaintData oldComplaint) {
     String ans = "";
-    // TODO: add 'and' in the string
-    return "${oldComplaint.title != title ? '\nTitle to $title' : ''}${oldComplaint.description != description ? '\nDescription to $description' : ''}${!equalList(oldComplaint.to, to) ? '\nComplainees to $to' : ''}${oldComplaint.scope != scope ? '\nScope to ${scope.name}' : ''}${oldComplaint.imgUrl != imgUrl ? '\nImage to $imgUrl' : ''}";
+    bool addAnd = false;
+    if (oldComplaint.title != title) {
+      ans += '\nTitle to \'$title\'';
+      addAnd = true;
+    }
+    if (oldComplaint.description != description) {
+      ans += (addAnd ? " and " : '');
+      ans += '\nDescription to \'$description\'';
+    }
+    if (!equalList(oldComplaint.to, to)) {
+      ans += (addAnd ? " and " : '');
+      ans += '\nComplainees to $to';
+    }
+    if (oldComplaint.scope != scope) {
+      ans += (addAnd ? " and " : '');
+      ans += '\nScope to ${scope.name}';
+    }
+    if (oldComplaint.imgUrl != imgUrl) {
+      ans += (addAnd ? " and " : '');
+      ans += '\nImageUrl to $imgUrl';
+    }
+    return ans;
   }
 
   /// Converts a Map<String, dynamic> to a Complaint Object
