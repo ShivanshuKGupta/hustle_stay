@@ -10,7 +10,7 @@ class FilteredRecords extends StatefulWidget {
 }
 
 class _FilteredRecordsState extends State<FilteredRecords> {
-  List<AttendanceRecord>? list;
+  List<AttendanceRecord> list = [];
   @override
   void initState() {
     super.initState();
@@ -20,6 +20,7 @@ class _FilteredRecordsState extends State<FilteredRecords> {
   @override
   void didUpdateWidget(covariant FilteredRecords oldWidget) {
     super.didUpdateWidget(oldWidget);
+    list = [];
     filterAttendance();
   }
 
@@ -32,22 +33,18 @@ class _FilteredRecordsState extends State<FilteredRecords> {
 
   @override
   Widget build(BuildContext context) {
-    return list == null
-        ? Container()
-        : Container(
-            width: double.infinity,
-            child: ListView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(list![index].date),
-                  trailing: Icon(list![index].isPresent
-                      ? Icons.check_box_rounded
-                      : Icons.close),
-                );
-              },
-              itemCount: list!.length,
-            ),
-          );
+    return list.isNotEmpty
+        ? ListView.builder(
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: Text(list![index].date),
+                trailing: Icon(list![index].isPresent
+                    ? Icons.check_box_rounded
+                    : Icons.close),
+              );
+            },
+            itemCount: list.length,
+          )
+        : Center(child: Text('loading...'));
   }
 }

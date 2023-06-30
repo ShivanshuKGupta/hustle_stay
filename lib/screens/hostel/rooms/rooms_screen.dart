@@ -79,30 +79,29 @@ class _RoomsScreenState extends State<RoomsScreen> {
         ],
       ),
       body: filterRecord
-          ? SingleChildScrollView(
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                              hintText: "Enter email to filter"),
-                          controller: emailController,
-                        ),
+          ? Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        decoration:
+                            InputDecoration(hintText: "Enter email to filter"),
+                        controller: emailController,
                       ),
-                      IconButton(
-                          onPressed: () {
-                            setState(() {
-                              isOpen = true;
-                            });
-                          },
-                          icon: const Icon(Icons.search_sharp)),
-                    ],
-                  ),
-                  if (isOpen) FilteredRecords(email: emailController.text),
-                ],
-              ),
+                    ),
+                    IconButton(
+                        onPressed: () {
+                          setState(() {
+                            isOpen = true;
+                          });
+                        },
+                        icon: const Icon(Icons.search_sharp)),
+                  ],
+                ),
+                if (isOpen)
+                  Expanded(child: FilteredRecords(email: emailController.text)),
+              ],
             )
           : Container(
               child: numberOfRooms == 0
