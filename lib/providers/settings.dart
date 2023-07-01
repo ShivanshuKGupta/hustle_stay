@@ -10,11 +10,15 @@ class _Settings {
   /// the last visited page
   int currentPage = 0;
 
+  /// Introduction screen visisted
+  bool introductionScreenVisited = false;
+
   /// converts setting parameters into a string
   String encode() {
     return json.encode({
       "darkMode": darkMode,
       "currentPage": currentPage,
+      "introductionScreenVisited": introductionScreenVisited,
     });
   }
 
@@ -22,6 +26,7 @@ class _Settings {
   void load(String str) {
     final settings = json.decode(str);
     darkMode = settings["darkMode"] ?? false;
+    introductionScreenVisited = settings["introductionScreenVisited"] ?? false;
     currentPage = settings["currentPage"] ?? 0;
   }
 }

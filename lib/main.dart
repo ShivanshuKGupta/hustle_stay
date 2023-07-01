@@ -9,6 +9,7 @@ import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/auth/auth_screen.dart';
 import 'package:hustle_stay/screens/home_screen.dart';
+import 'package:hustle_stay/screens/intro/intro_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'firebase_options.dart';
@@ -89,12 +90,19 @@ class HustleStayApp extends ConsumerWidget {
 
       /// The app switches from Auth Screen to HomeScreen
       /// according to auth state
-      home: StreamBuilder(
-        stream: auth.authStateChanges(),
-        builder: (ctx, user) {
-          return user.hasData ? const HomeScreen() : const AuthScreen();
-        },
-      ),
+      home: settings.introductionScreenVisited
+          ? StreamBuilder(
+              stream: auth.authStateChanges(),
+              builder: (ctx, user) {
+                return user.hasData ? const HomeScreen() : const AuthScreen();
+              },
+            )
+          : IntroScreen(
+              done: () {
+                settings.introductionScreenVisited = true;
+                ref.read(settingsProvider.notifier).notifyListeners();
+              },
+            ),
     );
   }
 }
