@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/attendance.dart';
+import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/widgets/room/roommates/attendance_icon.dart';
 import '../../../screens/hostel/rooms/profile_view_screen.dart';
@@ -10,11 +11,11 @@ import '../../../tools.dart';
 class RoommateDataWidget extends StatefulWidget {
   const RoommateDataWidget(
       {super.key,
-      required this.email,
+      required this.roommateData,
       required this.selectedDate,
       required this.roomName,
       required this.hostelName});
-  final String email;
+  final RoommateData roommateData;
   final DateTime selectedDate;
   final String hostelName;
   final String roomName;
@@ -39,8 +40,8 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
   bool isRunning = false;
   bool? isPresent;
   Future<void> _getAttendanceData() async {
-    bool resp = await getAttendanceData(
-        widget.email, widget.hostelName, widget.roomName, widget.selectedDate);
+    bool resp = await getAttendanceData(widget.roommateData.email,
+        widget.hostelName, widget.roomName, widget.selectedDate);
     setState(() {
       isPresent = resp;
     });
@@ -51,7 +52,7 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: fetchUserData(widget.email),
+      future: fetchUserData(widget.roommateData.email),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return FutureBuilder(
@@ -68,7 +69,7 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
               }
               return RData(snapshot.data!);
             },
-            future: fetchUserData(widget.email, src: Source.cache),
+            future: fetchUserData(widget.roommateData.email, src: Source.cache),
           );
         }
         return RData(snapshot.data!);
@@ -82,10 +83,10 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
       onTap: () {
         Navigator.of(context).pushReplacement(MaterialPageRoute(
             builder: (_) => ProfileViewScreen(
-                  user: user,
-                  hostelName: widget.hostelName,
-                  roomName: widget.roomName,
-                )));
+                user: user,
+                hostelName: widget.hostelName,
+                roomName: widget.roomName,
+                roommateData: widget.roommateData)));
       },
       child: ListTile(
           leading: CircleAvatar(
@@ -102,7 +103,7 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
                 ),
               )),
           title: Text(
-            user.name ?? widget.email,
+            user.name ?? widget.roommateData.email,
             style: TextStyle(fontSize: 16),
           ),
           contentPadding: EdgeInsets.all(widthScreen * 0.002),
@@ -113,7 +114,7 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
           trailing: isPresent == null
               ? null
               : AttendanceIcon(
-                  email: widget.email,
+                  email: widget.roommateData.email,
                   selectedDate: widget.selectedDate,
                   roomName: widget.roomName,
                   hostelName: widget.hostelName,

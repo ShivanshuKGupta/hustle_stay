@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 // enum String {
 //   boys,
@@ -81,6 +82,26 @@ Future<bool> deleteHostel(String hostelName) async {
         .collection('hostels')
         .doc(hostelName)
         .delete();
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+Future<bool> setLeave(String email, String hostelName, String roomName,
+    {bool? status, DateTimeRange? leaveDates}) async {
+  try {
+    await FirebaseFirestore.instance
+        .collection('hostels')
+        .doc(hostelName)
+        .collection('Rooms')
+        .doc(roomName)
+        .collection('Roommates')
+        .doc(email)
+        .set({
+      'onLeave': status == null || !status ? true : false,
+      'leaveDates': leaveDates
+    }, SetOptions(merge: true));
     return true;
   } catch (e) {
     return false;

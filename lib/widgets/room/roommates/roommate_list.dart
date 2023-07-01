@@ -33,7 +33,7 @@ class _RoommateWidgetState extends State<RoommateWidget> {
               return RoommateDataWidget(
                 roomName: widget.roomData.roomName,
                 hostelName: widget.hostelName,
-                email: roommate.email,
+                roommateData: roommate,
                 selectedDate: widget.selectedDate.value,
               );
             });

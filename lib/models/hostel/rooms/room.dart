@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 
 class RoommateData {
   String email;
-  RoommateData({
-    required this.email,
-  });
+  bool? onLeave;
+  DateTimeRange? leaveDates;
+  RoommateData({required this.email, this.leaveDates, this.onLeave});
 }
 
 class AttendanceRecord {
@@ -56,11 +56,16 @@ Future<List<Room>> fetchRooms(String hostelName, {Source? src}) async {
     final roomDoc = roomDocs[i];
     final roommatesSnapshot = roommatesDataSnapshots[i];
 
-    final List<RoommateData> roommatesData = roommatesSnapshot.docs.isNotEmpty
-        ? roommatesSnapshot.docs
-            .map((roommateDoc) => RoommateData(email: roommateDoc['email']))
-            .toList()
-        : [];
+    final List<RoommateData> roommatesData =
+        roommatesSnapshot.docs.map((roommateDoc) {
+      final data =
+          roommateDoc.data() as Map<String, dynamic>; // Explicit type casting
+      return RoommateData(
+        email: data['email'] ?? '',
+        onLeave: data.containsKey('onLeave') ? data['onLeave'] : false,
+        leaveDates: data.containsKey('leaveDates') ? data['leaveDates'] : null,
+      );
+    }).toList();
 
     final roomData = Room(
       capacity: roomDoc['capacity'],

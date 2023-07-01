@@ -27,7 +27,7 @@ class _RoomListState extends State<RoomList> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    // checkConnectivity();
+    checkConnectivity();
   }
 
   Future<void> checkConnectivity() async {
@@ -41,7 +41,8 @@ class _RoomListState extends State<RoomList> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: fetchRooms(widget.hostelName, src: Source.serverAndCache),
+      future:
+          fetchRooms(widget.hostelName, src: isConnected ? null : Source.cache),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(
