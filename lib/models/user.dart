@@ -130,7 +130,6 @@ Future<void> updateUserData(UserData userData) async {
       await auth.createUserWithEmailAndPassword(
         email: userData.email!,
         password: "123456",
-        // TODO: change the above pwd to a radomized pwd
       );
     } on FirebaseAuthException catch (e) {
       if (e.code != 'email-already-in-use') {

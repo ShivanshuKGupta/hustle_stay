@@ -156,7 +156,6 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                               Text("${widget.user.phoneNumber}"),
                               Row(
                                 children: [
-                                  Text(pickedRange.toString()),
                                   if (!onLeave)
                                     TextButton.icon(
                                       onPressed: () async {
@@ -185,13 +184,20 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                                     ),
                                   ElevatedButton.icon(
                                       onPressed: () async {
+                                        print('clicked)');
                                         bool resp = await setLeave(
                                             widget.user.email!,
                                             widget.hostelName,
                                             widget.roomName,
-                                            status: onLeave,
-                                            leaveDates:
-                                                onLeave ? null : pickedRange);
+                                            onLeave,
+                                            leaveStartDate:
+                                                onLeave && pickedRange == null
+                                                    ? null
+                                                    : pickedRange!.start,
+                                            leaveEndDate:
+                                                onLeave && pickedRange == null
+                                                    ? null
+                                                    : pickedRange!.end);
                                         if (resp) {
                                           setState(() {
                                             onLeave = !onLeave;

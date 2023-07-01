@@ -4,8 +4,13 @@ import 'package:flutter/material.dart';
 class RoommateData {
   String email;
   bool? onLeave;
-  DateTimeRange? leaveDates;
-  RoommateData({required this.email, this.leaveDates, this.onLeave});
+  DateTime? leaveStartDate;
+  DateTime? leaveEndDate;
+  RoommateData(
+      {required this.email,
+      this.leaveStartDate,
+      this.leaveEndDate,
+      this.onLeave});
 }
 
 class AttendanceRecord {
@@ -63,7 +68,10 @@ Future<List<Room>> fetchRooms(String hostelName, {Source? src}) async {
       return RoommateData(
         email: data['email'] ?? '',
         onLeave: data.containsKey('onLeave') ? data['onLeave'] : false,
-        leaveDates: data.containsKey('leaveDates') ? data['leaveDates'] : null,
+        leaveStartDate:
+            data.containsKey('leaveStartDate') ? data['leaveStartDate'] : null,
+        leaveEndDate:
+            data.containsKey('leaveEndDate') ? data['leaveEndDate'] : null,
       );
     }).toList();
 
