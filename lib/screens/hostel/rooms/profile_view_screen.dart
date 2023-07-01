@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/models/hostel/hostels.dart';
 import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/hostel/rooms/rooms_screen.dart';
@@ -13,10 +14,12 @@ class ProfileViewScreen extends StatefulWidget {
       {super.key,
       required this.hostelName,
       required this.roomName,
-      required this.user});
+      required this.user,
+      required this.roommateData});
   String hostelName;
   String roomName;
   UserData user;
+  RoommateData roommateData;
 
   @override
   State<ProfileViewScreen> createState() => _ProfileViewScreenState();
@@ -46,9 +49,20 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
       ),
     )
   ];
+  bool onLeave = false;
+
+  @override
+  void initState() {
+    super.initState();
+    onLeave = widget.roommateData.onLeave ?? false;
+  }
+
+  DateTimeRange? pickedRange;
+
   @override
   Widget build(BuildContext context) {
     double widthScreen = MediaQuery.of(context).size.width;
+
     return Scaffold(
         appBar: AppBar(
           title: shaderText(
@@ -140,6 +154,60 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                               const Divider(),
                               Text("Name: ${widget.user.name ?? ''}"),
                               Text("${widget.user.phoneNumber}"),
+                              Row(
+                                children: [
+                                  Text(pickedRange.toString()),
+                                  if (!onLeave)
+                                    TextButton.icon(
+                                      onPressed: () async {
+                                        final picked =
+                                            await showDateRangePicker(
+                                                context: context,
+                                                firstDate: DateTime.now(),
+                                                lastDate: DateTime(
+                                                    DateTime.now().year + 1),
+                                                initialDateRange: DateTimeRange(
+                                                    start: DateTime.now(),
+                                                    end: DateTime.now().add(
+                                                        Duration(days: 1))));
+
+                                        if (picked != null) {
+                                          setState(() {
+                                            pickedRange = picked;
+                                          });
+                                        }
+                                      },
+                                      icon: AnimateIcon(
+                                          onTap: () {},
+                                          iconType: IconType.animatedOnHover,
+                                          animateIcon: AnimateIcons.calendar),
+                                      label: const Text('Select Leave Dates'),
+                                    ),
+                                  ElevatedButton.icon(
+                                      onPressed: () async {
+                                        bool resp = await setLeave(
+                                            widget.user.email!,
+                                            widget.hostelName,
+                                            widget.roomName,
+                                            status: onLeave,
+                                            leaveDates:
+                                                onLeave ? null : pickedRange);
+                                        if (resp) {
+                                          setState(() {
+                                            onLeave = !onLeave;
+                                          });
+                                        }
+                                      },
+                                      icon: AnimateIcon(
+                                        animateIcon: AnimateIcons.checkbox,
+                                        onTap: () {},
+                                        iconType: IconType.continueAnimation,
+                                      ),
+                                      label: Text(!onLeave
+                                          ? 'Start Leave'
+                                          : 'End Leave'))
+                                ],
+                              )
                             ],
                           ),
                         ),
