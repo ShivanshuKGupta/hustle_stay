@@ -112,31 +112,32 @@ Future<List<String>> fetchComplainees() async {
 }
 
 Future<void> updateUserData(UserData userData) async {
-  await firestore.runTransaction((transaction) async {
-    // Updating Editable details
-    await firestore
-        .collection('users')
-        .doc("${userData.email}/editable/details")
-        .set(userData.encode());
-    // Updating readonly details
-    if (currentUser.readonly.isAdmin) {
-      await firestore
-          .collection('users')
-          .doc(userData.email)
-          .set(userData.readonly.encode());
+  final batch = firestore.batch();
+  // Updating Editable details
+  batch.set(
+    firestore.collection('users').doc("${userData.email}/editable/details"),
+    userData.encode(),
+  );
+  // Updating readonly details
+  if (currentUser.readonly.isAdmin) {
+    batch.set(
+      firestore.collection('users').doc(userData.email),
+      userData.readonly.encode(),
+    );
+  }
+  // commiting
+  await batch.commit();
+  // if account doesn't exists create one
+  try {
+    await auth.createUserWithEmailAndPassword(
+      email: userData.email!,
+      password: "123456",
+    );
+  } on FirebaseAuthException catch (e) {
+    if (e.code != 'email-already-in-use') {
+      rethrow;
     }
-    // if account doesn't exists create one
-    try {
-      await auth.createUserWithEmailAndPassword(
-        email: userData.email!,
-        password: "123456",
-      );
-    } on FirebaseAuthException catch (e) {
-      if (e.code != 'email-already-in-use') {
-        rethrow;
-      }
-    }
-  });
+  }
 }
 
 /// This function is responsible for logging user in
