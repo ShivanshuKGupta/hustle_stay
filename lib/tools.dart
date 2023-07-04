@@ -180,6 +180,18 @@ class Validate {
     return null;
   }
 
+  static String? integer(String? number, {bool required = true}) {
+    if (number == null || number.isEmpty) {
+      return required ? "This is required" : null;
+    }
+    for (final ch in number.characters) {
+      if (!(ch.compareTo('0') >= 0 && ch.compareTo('9') <= 0)) {
+        return "Enter a valid integer";
+      }
+    }
+    return null;
+  }
+
   static String? password(String? pwd, {bool required = true}) {
     if (pwd == null || pwd.isEmpty) {
       return required ? "Password is required" : null;
