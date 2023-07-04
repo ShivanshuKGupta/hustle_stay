@@ -4,24 +4,27 @@ import 'package:hustle_stay/screens/auth/edit_profile_screen.dart';
 import 'package:hustle_stay/screens/complaints/resolved_complaints_screen.dart';
 import 'package:hustle_stay/screens/hostel/addHostel.dart';
 import 'package:hustle_stay/tools.dart';
+import 'package:hustle_stay/widgets/settings/current_user_tile.dart';
 
 class MainDrawer extends StatelessWidget {
   const MainDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: body(context),
+    return Drawer(
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: body(context),
+              ),
             ),
-          ),
-          footer(context),
-        ],
+            footer(context),
+          ],
+        ),
       ),
     );
   }
@@ -29,24 +32,19 @@ class MainDrawer extends StatelessWidget {
   Widget body(context) {
     return Column(
       children: [
-        ListTile(
-          contentPadding: const EdgeInsets.symmetric(
-            vertical: 20,
-            horizontal: 20,
-          ),
-          leading: const CircleAvatar(
-            child: Icon(Icons.home_filled),
-          ),
-          title: Text(
-            "Add new Hostel",
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          onTap: () {
-            Navigator.of(context)
-                .push(MaterialPageRoute(builder: (_) => AddHostelForm()));
-          },
-        ),
+        const CurrentUserTile(),
         const Divider(),
+        if (currentUser.readonly.isAdmin)
+          _drawerTile(
+            context,
+            title: "Add new Hostel",
+            subtitle: "Add a new hostel",
+            icon: Icons.add_home,
+            onTap: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (_) => AddHostelForm()));
+            },
+          ),
         if (currentUser.readonly.isAdmin)
           _drawerTile(
             context,

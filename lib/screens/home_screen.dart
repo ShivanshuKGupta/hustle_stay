@@ -1,14 +1,11 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hustle_stay/models/user.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/complaints/complaints_screen.dart';
 import 'package:hustle_stay/screens/drawers/main_drawer.dart';
 import 'package:hustle_stay/screens/hostel/hostel_screen.dart';
 import 'package:hustle_stay/screens/settings/settings_screen.dart';
-import 'package:hustle_stay/tools.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -18,92 +15,99 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  late PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController =
+        PageController(initialPage: ref.read(settingsProvider).currentPage);
+  }
+
   @override
   Widget build(BuildContext context) {
     final settings = ref.read(settingsProvider);
-    const duration = Duration(milliseconds: 1000);
-    List<BottomNavigationBarItem> bottomNavigationBarItems = [
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.co_present_rounded),
-        label: 'Attendance',
-        tooltip: "Attendance",
+    final settingsClass = ref.read(settingsProvider.notifier);
+    final colorScheme = Theme.of(context).colorScheme;
+    int i = 0;
+    List<Widget> bodyList = [
+      const HostelScreen(),
+      const ComplaintsScreen(),
+      const Center(
+        child: Text('Home Screen'),
       ),
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.report_rounded),
-        label: 'Complaints',
-        tooltip: "Complaints",
+      const Center(
+        child: Text('Request Screen'),
       ),
-      BottomNavigationBarItem(
-        icon: const Icon(Icons.airport_shuttle_rounded)
-            .animate(target: settings.currentPage == 2 ? 1 : 0)
-            .shake(),
-        label: 'Vehicle',
-        tooltip: "Vehicle Request",
-      ),
-      BottomNavigationBarItem(
-        icon: const Icon(Icons.settings_rounded)
-            .animate(target: settings.currentPage == 3 ? 1 : 0)
-            .rotate(
-              duration: duration,
-              curve: Curves.decelerate,
-              begin: 1,
-              end: 0,
-            ),
-        label: 'Settings',
-        tooltip: "Settings",
-      ),
+      const SettingsScreen(),
     ];
-    List<Widget> actions = [
-      IconButton(
-        onPressed: () {
-          showMsg(context, 'TODO: show profile page');
-        },
-        icon: CircleAvatar(
-          backgroundImage: currentUser.imgUrl == null
-              ? null
-              : CachedNetworkImageProvider(currentUser.imgUrl!),
-          child: currentUser.imgUrl != null
-              ? null
-              : const Icon(
-                  Icons.person_rounded,
-                ),
-        ),
-      )
-    ];
-    Widget body = Container();
-    switch (settings.currentPage) {
-      case 0:
-        body = const HostelScreen();
-        break;
-      case 1:
-        body = const ComplaintsScreen();
-        break;
-      case 3:
-        body = const SettingsScreen();
-        break;
-    }
     return Scaffold(
-      appBar: AppBar(
-        title: shaderText(
-          context,
-          title: bottomNavigationBarItems[settings.currentPage].tooltip ??
-              "Hustle Stay",
+        extendBody: true,
+        drawer: const Drawer(elevation: 5, child: MainDrawer()),
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.only(left: 5, right: 5, bottom: 20, top: 2),
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(50),
+              color: colorScheme.inversePrimary.withOpacity(0.9),
+            ),
+            child: GNav(
+              selectedIndex: settings.currentPage,
+              onTabChange: (value) => _pageController.jumpToPage(value),
+              gap: 8,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 10,
+              ),
+              tabBackgroundColor: colorScheme.primary,
+              activeColor: colorScheme.onPrimary,
+              color: colorScheme.primary,
+              tabs: [
+                GButton(
+                  icon: settings.currentPage == i++
+                      ? Icons.calendar_month_rounded
+                      : Icons.calendar_month_outlined,
+                  text: 'Attendance',
+                ),
+                GButton(
+                  icon: settings.currentPage == i++
+                      ? Icons.info_rounded
+                      : Icons.info_outline_rounded,
+                  text: 'Complaints',
+                ),
+                GButton(
+                  icon: settings.currentPage == i++
+                      ? Icons.home_rounded
+                      : Icons.home_outlined,
+                  text: 'Home',
+                ),
+                GButton(
+                  icon: settings.currentPage == i++
+                      ? Icons.airport_shuttle_rounded
+                      : Icons.airport_shuttle_outlined,
+                  text: 'Requests',
+                ),
+                GButton(
+                  icon: settings.currentPage == i++
+                      ? Icons.settings_rounded
+                      : Icons.settings_outlined,
+                  text: 'Settings',
+                ),
+              ],
+            ),
+          ),
         ),
-        actions: actions,
-      ),
-      drawer: const Drawer(elevation: 5, child: MainDrawer()),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        items: bottomNavigationBarItems,
-        currentIndex: settings.currentPage,
-        onTap: (index) {
-          setState(() {
-            settings.currentPage = index;
-          });
-          ref.read(settingsProvider.notifier).saveSettings();
-        },
-      ),
-      body: body,
-    );
+        body: PageView(
+          pageSnapping: true,
+          controller: _pageController,
+          onPageChanged: (value) {
+            setState(() => settings.currentPage = value);
+            settingsClass.saveSettings();
+          },
+          children: bodyList,
+        )
+        // bodyList[settings.currentPage],
+        );
   }
 }

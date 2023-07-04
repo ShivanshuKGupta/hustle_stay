@@ -50,6 +50,7 @@ dependencies:
   connectivity: ^3.0.6
   foundation: ^0.0.5
   animated_icon: ^0.0.5
+  google_nav_bar: ^5.0.6
 
 dev_dependencies:
   flutter_test:

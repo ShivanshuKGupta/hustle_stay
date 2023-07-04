@@ -6,6 +6,7 @@ import 'package:hustle_stay/models/message.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/complaint_list.dart';
 import 'package:hustle_stay/screens/complaints/edit_complaints_page.dart';
+import 'package:hustle_stay/screens/drawers/main_drawer.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/chat/complaint_template_message.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_list_item.dart';
@@ -63,13 +64,23 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
   Widget build(BuildContext context) {
     final complaints = ref.watch(complaintsList);
     return Scaffold(
+      appBar: AppBar(
+        title: shaderText(
+          context,
+          title: "Complaints",
+        ),
+        actions: [
+          IconButton(
+            onPressed: _addComplaint,
+            icon: const Icon(Icons.add_rounded),
+          ),
+        ],
+      ),
+      drawer: const MainDrawer(),
       body: _isLoading && complaints.isEmpty
           ? Center(child: circularProgressIndicator())
           : _complaintsList(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addComplaint,
-        child: const Icon(Icons.add_rounded),
-      ),
+      bottomNavigationBar: null,
     );
   }
 

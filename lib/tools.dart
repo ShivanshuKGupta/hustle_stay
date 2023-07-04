@@ -297,10 +297,15 @@ Future<String?> askUser(
   );
 }
 
+/// A function to show date in this format
+/// Can have also used intl, but prefered this
 String ddmmyyyy(DateTime dateTime) {
   return "${dateTime.day}-${dateTime.month}-${dateTime.year}";
 }
 
+/// A function to show time in a certain format
 String timeFrom(DateTime dateTime) {
   return "${dateTime.hour > 12 ? dateTime.hour - 12 : dateTime.hour}:${dateTime.minute} ${dateTime.hour < 12 ? 'am' : 'pm'}";
 }
+
+/// TODO: add a glass widget here
