@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/complaint.dart';
@@ -93,9 +92,7 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
                 );
               },
             ),
-    )
-        .animate(target: !_animate ? 1 : 0)
-        .fade(begin: 0, end: 1, duration: duration);
+    );
   }
 
   void editMe() async {

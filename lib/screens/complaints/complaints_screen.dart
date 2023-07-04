@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/complaint.dart';
 import 'package:hustle_stay/models/message.dart';
@@ -77,25 +78,29 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
         ],
       ),
       drawer: const MainDrawer(),
-      body: Stack(
-        children: [
-          Image.asset('assets/image2.jpg'),
-          _isLoading && complaints.isEmpty
-              ? Center(child: circularProgressIndicator())
-              : GlassWidget(child: _complaintsList()),
-        ],
-      ),
+      body: _isLoading && complaints.isEmpty
+          ? Center(child: circularProgressIndicator())
+          : _complaintsList(),
     );
   }
 
   /// Just a list view with a placeholder when there is no item in the list
   Widget _complaintsList() {
     final complaints = ref.watch(complaintsList);
+    const duration = Duration(milliseconds: 1000);
     return RefreshIndicator(
       onRefresh: () async {
         await _updateComplaintsList();
       },
-      child: ComplaintsListWidget(complaints: complaints),
+      child: ComplaintsListWidget(complaints: complaints)
+          .animate()
+          .fade(begin: 0, end: 1, duration: duration)
+          .slideY(
+            begin: -1,
+            end: 0,
+            curve: Curves.decelerate,
+            duration: duration,
+          ),
     );
   }
 

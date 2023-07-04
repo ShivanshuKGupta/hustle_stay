@@ -6,6 +6,7 @@ import 'package:hustle_stay/screens/complaints/complaints_screen.dart';
 import 'package:hustle_stay/screens/drawers/main_drawer.dart';
 import 'package:hustle_stay/screens/hostel/hostel_screen.dart';
 import 'package:hustle_stay/screens/settings/settings_screen.dart';
+import 'package:hustle_stay/tools.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -46,65 +47,68 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         drawer: const Drawer(elevation: 5, child: MainDrawer()),
         bottomNavigationBar: Padding(
           padding: const EdgeInsets.only(left: 5, right: 5, bottom: 20, top: 2),
-          child: Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(50),
-              color: colorScheme.inversePrimary.withOpacity(0.9),
-            ),
-            child: GNav(
-              selectedIndex: settings.currentPage,
-              onTabChange: (value) {
-                if ((settings.currentPage - value).abs() > 1) {
-                  _pageController.jumpToPage(value);
-                } else {
-                  _pageController.animateToPage(
-                    value,
-                    curve: Curves.decelerate,
-                    duration: const Duration(milliseconds: 500),
-                  );
-                }
-              },
-              gap: 8,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 10,
+          child: GlassWidget(
+            radius: 50,
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(50),
+                // color: colorScheme.onBackground.withOpacity(0.8),
               ),
-              tabBackgroundColor: colorScheme.primary,
-              activeColor: colorScheme.onPrimary,
-              color: colorScheme.primary,
-              tabs: [
-                GButton(
-                  icon: settings.currentPage == i++
-                      ? Icons.calendar_month_rounded
-                      : Icons.calendar_month_outlined,
-                  text: 'Attendance',
+              child: GNav(
+                selectedIndex: settings.currentPage,
+                onTabChange: (value) {
+                  if ((settings.currentPage - value).abs() > 1) {
+                    _pageController.jumpToPage(value);
+                  } else {
+                    _pageController.animateToPage(
+                      value,
+                      curve: Curves.decelerate,
+                      duration: const Duration(milliseconds: 500),
+                    );
+                  }
+                },
+                gap: 8,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 10,
                 ),
-                GButton(
-                  icon: settings.currentPage == i++
-                      ? Icons.info_rounded
-                      : Icons.info_outline_rounded,
-                  text: 'Complaints',
-                ),
-                GButton(
-                  icon: settings.currentPage == i++
-                      ? Icons.home_rounded
-                      : Icons.home_outlined,
-                  text: 'Home',
-                ),
-                GButton(
-                  icon: settings.currentPage == i++
-                      ? Icons.airport_shuttle_rounded
-                      : Icons.airport_shuttle_outlined,
-                  text: 'Requests',
-                ),
-                GButton(
-                  icon: settings.currentPage == i++
-                      ? Icons.settings_rounded
-                      : Icons.settings_outlined,
-                  text: 'Settings',
-                ),
-              ],
+                tabBackgroundColor: colorScheme.onBackground.withOpacity(0.2),
+                activeColor: colorScheme.onBackground,
+                color: colorScheme.onBackground,
+                tabs: [
+                  GButton(
+                    icon: settings.currentPage == i++
+                        ? Icons.calendar_month_rounded
+                        : Icons.calendar_month_outlined,
+                    text: 'Attendance',
+                  ),
+                  GButton(
+                    icon: settings.currentPage == i++
+                        ? Icons.info_rounded
+                        : Icons.info_outline_rounded,
+                    text: 'Complaints',
+                  ),
+                  GButton(
+                    icon: settings.currentPage == i++
+                        ? Icons.home_rounded
+                        : Icons.home_outlined,
+                    text: 'Home',
+                  ),
+                  GButton(
+                    icon: settings.currentPage == i++
+                        ? Icons.airport_shuttle_rounded
+                        : Icons.airport_shuttle_outlined,
+                    text: 'Requests',
+                  ),
+                  GButton(
+                    icon: settings.currentPage == i++
+                        ? Icons.settings_rounded
+                        : Icons.settings_outlined,
+                    text: 'Settings',
+                  ),
+                ],
+              ),
             ),
           ),
         ),

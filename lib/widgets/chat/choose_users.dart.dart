@@ -24,34 +24,41 @@ class _ChooseUsersState extends State<ChooseUsers> {
   Widget build(BuildContext context) {
     final users = widget.allUsers
         .where((element) => !widget.chosenUsers.contains(element));
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        DropdownMenu(
-          key: ValueKey("users_drop_down_menu_$i"),
-          enabled: users.isNotEmpty,
-          // width: MediaQuery.of(context).size.width * 3 / 4,
-          dropdownMenuEntries:
-              users.map((e) => DropdownMenuEntry(label: e, value: e)).toList(),
-          label: const Text("Select a receipient"),
-          hintText: 'attender@iiitr.ac.in',
-          leadingIcon: const Icon(Icons.person_add_alt_1_rounded),
-          onSelected: (value) {
-            setState(() {
-              widget.chosenUsers.add(value!.toString());
-              i++;
-            });
-            widget.onUpdate(widget.chosenUsers);
-          },
-          initialSelection: null,
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Complainees'),
+            DropdownMenu(
+              key: ValueKey("users_drop_down_menu_$i"),
+              enabled: users.isNotEmpty,
+              // width: MediaQuery.of(context).size.width * 3 / 4,
+              dropdownMenuEntries: users
+                  .map((e) => DropdownMenuEntry(label: e, value: e))
+                  .toList(),
+              label: const Text("Select a receipient"),
+              hintText: 'attender@iiitr.ac.in',
+              leadingIcon: const Icon(Icons.person_add_alt_1_rounded),
+              onSelected: (value) {
+                setState(() {
+                  widget.chosenUsers.add(value!.toString());
+                  i++;
+                });
+                widget.onUpdate(widget.chosenUsers);
+              },
+              initialSelection: null,
+            ),
+            Wrap(
+              children: widget.chosenUsers
+                  .map((e) =>
+                      UserTile(key: ValueKey(e), email: e, removeUser: _remove))
+                  .toList(),
+            ),
+          ],
         ),
-        Wrap(
-          children: widget.chosenUsers
-              .map((e) =>
-                  UserTile(key: ValueKey(e), email: e, removeUser: _remove))
-              .toList(),
-        ),
-      ],
+      ),
     );
   }
 
