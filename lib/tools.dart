@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -308,4 +310,22 @@ String timeFrom(DateTime dateTime) {
   return "${dateTime.hour > 12 ? dateTime.hour - 12 : dateTime.hour}:${dateTime.minute} ${dateTime.hour < 12 ? 'am' : 'pm'}";
 }
 
-/// TODO: add a glass widget here
+/// Glass Widget
+class GlassWidget extends StatelessWidget {
+  final double radius;
+  final Widget child;
+  final double blur;
+  const GlassWidget(
+      {super.key, this.radius = 0, required this.child, this.blur = 15});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+        child: child,
+      ),
+    );
+  }
+}

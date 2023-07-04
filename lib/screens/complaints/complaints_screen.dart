@@ -77,10 +77,14 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
         ],
       ),
       drawer: const MainDrawer(),
-      body: _isLoading && complaints.isEmpty
-          ? Center(child: circularProgressIndicator())
-          : _complaintsList(),
-      bottomNavigationBar: null,
+      body: Stack(
+        children: [
+          Image.asset('assets/image2.jpg'),
+          _isLoading && complaints.isEmpty
+              ? Center(child: circularProgressIndicator())
+              : GlassWidget(child: _complaintsList()),
+        ],
+      ),
     );
   }
 

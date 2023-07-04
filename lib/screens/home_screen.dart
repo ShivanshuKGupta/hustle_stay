@@ -54,7 +54,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             child: GNav(
               selectedIndex: settings.currentPage,
-              onTabChange: (value) => _pageController.jumpToPage(value),
+              onTabChange: (value) {
+                if ((settings.currentPage - value).abs() > 1) {
+                  _pageController.jumpToPage(value);
+                } else {
+                  _pageController.animateToPage(
+                    value,
+                    curve: Curves.decelerate,
+                    duration: const Duration(milliseconds: 500),
+                  );
+                }
+              },
               gap: 8,
               padding: const EdgeInsets.symmetric(
                 horizontal: 10,
