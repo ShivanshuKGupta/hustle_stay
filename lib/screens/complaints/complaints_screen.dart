@@ -101,7 +101,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
                                 const Text("in the last 30 days"),
                               ],
                             );
-                          } else if (index == complaints.length) {
+                          } else if (index == complaints.length + 1) {
                             return SizedBox(
                               height: mediaQuery.padding.bottom,
                             );
@@ -113,7 +113,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
                             complaint: complaint,
                           );
                         },
-                        childCount: complaints.length + 1,
+                        childCount: complaints.length + 2,
                       ),
               ),
             ],
