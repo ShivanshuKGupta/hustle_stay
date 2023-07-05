@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
 
 class ReadOnly {
@@ -241,3 +242,51 @@ Future<void> login(String email, String password) async {
 }
 
 var currentUser = UserData();
+
+/// A widget used to display widget using UserData
+/// This will change according to the userData
+class UserBuilder extends StatelessWidget {
+  final String email;
+  final Widget Function(BuildContext ctx, UserData userData) builder;
+  final Source? src;
+  final Widget? loadingWidget;
+  UserBuilder({
+    super.key,
+    required this.email,
+    required this.builder,
+    this.loadingWidget,
+    this.src,
+  });
+
+  UserData userData = UserData();
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: fetchUserData(email, src: src),
+      builder: (ctx, snapshot) {
+        if (!snapshot.hasData) {
+          userData = UserData(email: email, name: email);
+          if (src == Source.cache) {
+            return loadingWidget ?? builder(ctx, userData);
+          }
+          return FutureBuilder(
+            future: fetchUserData(email, src: Source.cache),
+            builder: (ctx, snapshot) {
+              if (!snapshot.hasData) {
+                // Returning this Widget when nothing has arrived
+                return loadingWidget ?? builder(ctx, userData);
+              }
+              // Returning this widget from cache while data arrives from server
+              userData = snapshot.data!;
+              return builder(ctx, userData);
+            },
+          );
+        }
+        // Returning this widget when data arrives from server
+        userData = snapshot.data!;
+        return builder(ctx, userData);
+      },
+    );
+  }
+}

@@ -6,7 +6,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
-import 'package:hustle_stay/models/message.dart';
+import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/image.dart';
 import 'package:hustle_stay/screens/chat/image_preview.dart';
@@ -82,15 +82,12 @@ class Message extends StatelessWidget {
                 if (first && msg.from != currentUser.email)
                   Padding(
                     padding: const EdgeInsets.only(right: 5.0, left: 1, top: 2),
-                    child: FutureBuilder(
-                      future: fetchUserData(msg.from, src: Source.cache),
-                      builder: (context, snapshot) {
+                    child: UserBuilder(
+                      email: msg.from,
+                      src: Source.cache,
+                      builder: (context, userData) {
                         return Text(
-                          (!snapshot.hasData)
-                              ? msg.from
-                              : (snapshot.data!.name == null
-                                  ? msg.from
-                                  : snapshot.data!.name!),
+                          userData.name ?? userData.email!,
                           style: Theme.of(context)
                               .textTheme
                               .bodySmall!

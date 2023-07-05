@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:hustle_stay/models/complaint.dart';
+import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_list_item.dart';
 
 class ComplaintsListWidget extends StatelessWidget {

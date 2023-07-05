@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -50,27 +49,14 @@ class CurrentUserTile extends ConsumerWidget {
                 .slideX(begin: -1, end: 0, curve: Curves.decelerate),
           ),
           Expanded(
-            child: FutureBuilder(
-              future: fetchUserData(currentUser.email!),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return FutureBuilder(
-                      future:
-                          fetchUserData(currentUser.email!, src: Source.cache),
-                      builder: (ctx, snapshot) {
-                        if (snapshot.hasData) {
-                          currentUser = snapshot.data!;
-                        }
-                        return _detailWidget(context, settingsClass)
-                            .animate()
-                            .fade()
-                            .slideX(begin: 1, end: 0, curve: Curves.decelerate);
-                      });
-                }
-                currentUser = snapshot.data!;
-                return _detailWidget(context, settingsClass);
-              },
-            ),
+            child: UserBuilder(
+              email: currentUser.email!,
+              builder: (context, userData) =>
+                  _detailWidget(context, settingsClass),
+            )
+                .animate()
+                .fade()
+                .slideX(begin: 1, end: 0, curve: Curves.decelerate),
           ),
         ],
       ),

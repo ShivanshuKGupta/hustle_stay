@@ -3,8 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
-import 'package:hustle_stay/models/complaint.dart';
-import 'package:hustle_stay/models/message.dart';
+import 'package:hustle_stay/models/chat/message.dart';
+import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/complaint_list.dart';
 import 'package:hustle_stay/screens/chat/chat_screen.dart';
@@ -51,11 +51,11 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
       /// if the user doesn't has an image then
       /// just an info icon
       leading: widget.complaint.imgUrl == null
-          ? FutureBuilder(
-              future: fetchUserData(widget.complaint.from, src: Source.cache),
-              builder: (ctx, snapshot) {
-                final userData = snapshot.data;
-                if (!snapshot.hasData || userData!.imgUrl == null) {
+          ? UserBuilder(
+              email: widget.complaint.from,
+              src: Source.cache,
+              builder: (ctx, userData) {
+                if (userData.imgUrl == null) {
                   return const InkWell(
                     child: CircleAvatar(
                       child: Icon(Icons.info_rounded),

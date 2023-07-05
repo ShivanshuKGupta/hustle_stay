@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:hustle_stay/models/message.dart';
+import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/image.dart';
 import 'package:hustle_stay/tools.dart';

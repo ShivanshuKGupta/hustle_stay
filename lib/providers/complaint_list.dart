@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hustle_stay/models/complaint.dart';
+import 'package:hustle_stay/models/complaint/complaint.dart';
 
 class _ComplaintListProvider extends StateNotifier<List<ComplaintData>> {
   _ComplaintListProvider() : super(const []);

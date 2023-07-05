@@ -1,6 +1,6 @@
 import 'package:hustle_stay/main.dart';
 
-import 'chat/chat.dart';
+import 'chat.dart';
 
 class MessageData {
   /// The datetime object representing the

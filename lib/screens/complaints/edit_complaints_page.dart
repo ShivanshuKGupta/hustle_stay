@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
-import 'package:hustle_stay/models/complaint.dart';
-import 'package:hustle_stay/models/message.dart';
+import 'package:hustle_stay/models/chat/message.dart';
+import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_form.dart';
 

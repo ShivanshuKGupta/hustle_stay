@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user.dart';
 
@@ -24,28 +23,10 @@ class UserTile extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            FutureBuilder(
-              future: fetchUserData(email, src: null),
-              builder: (ctx, snapshot) {
-                if (!snapshot.hasData) {
-                  return FutureBuilder(
-                    future: fetchUserData(email, src: Source.cache),
-                    builder: (ctx, snapshot) {
-                      if (!snapshot.hasData) {
-                        return Text(
-                          email,
-                          style: style,
-                        );
-                      }
-                      user = snapshot.data!;
-                      return Text(
-                        user.name ?? email,
-                        style: style,
-                      );
-                    },
-                  );
-                }
-                user = snapshot.data!;
+            UserBuilder(
+              email: email,
+              builder: (ctx, userData) {
+                user = userData;
                 return Text(
                   user.name ?? email,
                   style: style,

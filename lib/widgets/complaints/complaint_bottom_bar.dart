@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
-import 'package:hustle_stay/models/complaint.dart';
-import 'package:hustle_stay/models/message.dart';
+import 'package:hustle_stay/models/chat/message.dart';
+import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/complaint_list.dart';
 import 'package:hustle_stay/tools.dart';
@@ -60,11 +60,7 @@ class ComplaintBottomBar extends ConsumerWidget {
         child: ListView.separated(
           separatorBuilder: (ctx, index) => const VerticalDivider(),
           scrollDirection: Axis.horizontal,
-          itemBuilder: (ctx, index) => Flexible(
-            flex: 1,
-            fit: FlexFit.tight,
-            child: buttons[index],
-          ),
+          itemBuilder: (ctx, index) => buttons[index],
           itemCount: buttons.length,
         ),
       ),

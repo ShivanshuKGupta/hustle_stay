@@ -1,5 +1,5 @@
 import 'package:hustle_stay/main.dart';
-import 'package:hustle_stay/models/message.dart';
+import 'package:hustle_stay/models/chat/message.dart';
 
 class ChatData {
   String title;

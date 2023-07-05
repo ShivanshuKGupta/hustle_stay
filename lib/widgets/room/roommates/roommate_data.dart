@@ -1,11 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/attendance.dart';
 import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/widgets/room/roommates/attendance_icon.dart';
+
 import '../../../screens/hostel/rooms/profile_view_screen.dart';
 import '../../../tools.dart';
 
@@ -49,64 +48,60 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
     return;
   }
 
-  var currentIcon = Icon(Icons.close_rounded, color: Colors.red);
+  var currentIcon = const Icon(Icons.close_rounded, color: Colors.red);
   @override
   Widget build(BuildContext context) {
     double widthScreen = MediaQuery.of(context).size.width;
-    return FutureBuilder(
-      future: fetchUserData(widget.roommateData.email),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          UserData user = snapshot.data!;
-          return GestureDetector(
-            onTap: () {
-              Navigator.of(context).pushReplacement(MaterialPageRoute(
-                  builder: (_) => ProfileViewScreen(
-                      user: user,
-                      hostelName: widget.hostelName,
+    return UserBuilder(
+      email: widget.roommateData.email,
+      loadingWidget: Padding(
+        padding: const EdgeInsets.all(1),
+        child: Center(
+          child: circularProgressIndicator(),
+        ),
+      ),
+      builder: (context, user) {
+        return GestureDetector(
+          onTap: () {
+            Navigator.of(context).pushReplacement(MaterialPageRoute(
+                builder: (_) => ProfileViewScreen(
+                    user: user,
+                    hostelName: widget.hostelName,
+                    roomName: widget.roomName,
+                    roommateData: widget.roommateData)));
+          },
+          child: ListTile(
+              leading: CircleAvatar(
+                  radius: 50,
+                  child: ClipOval(
+                    child: AspectRatio(
+                      aspectRatio: 1.0,
+                      child: user.imgUrl == null
+                          ? null
+                          : CachedNetworkImage(
+                              imageUrl: user.imgUrl!,
+                              fit: BoxFit.cover,
+                            ),
+                    ),
+                  )),
+              title: Text(
+                user.name ?? widget.roommateData.email,
+                style: const TextStyle(fontSize: 16),
+              ),
+              contentPadding: EdgeInsets.all(widthScreen * 0.002),
+              subtitle: Text(
+                user.email!.substring(0, 9).toUpperCase(),
+                style: const TextStyle(fontSize: 14),
+              ),
+              trailing: isPresent == null
+                  ? null
+                  : AttendanceIcon(
+                      email: widget.roommateData.email,
+                      selectedDate: widget.selectedDate,
                       roomName: widget.roomName,
-                      roommateData: widget.roommateData)));
-            },
-            child: ListTile(
-                leading: CircleAvatar(
-                    radius: 50,
-                    child: ClipOval(
-                      child: AspectRatio(
-                        aspectRatio: 1.0,
-                        child: user.imgUrl == null
-                            ? null
-                            : CachedNetworkImage(
-                                imageUrl: user.imgUrl!,
-                                fit: BoxFit.cover,
-                              ),
-                      ),
-                    )),
-                title: Text(
-                  user.name ?? widget.roommateData.email,
-                  style: TextStyle(fontSize: 16),
-                ),
-                contentPadding: EdgeInsets.all(widthScreen * 0.002),
-                subtitle: Text(
-                  '${user.email!.substring(0, 9).toUpperCase()}',
-                  style: TextStyle(fontSize: 14),
-                ),
-                trailing: isPresent == null
-                    ? null
-                    : AttendanceIcon(
-                        email: widget.roommateData.email,
-                        selectedDate: widget.selectedDate,
-                        roomName: widget.roomName,
-                        hostelName: widget.hostelName,
-                        isPresent: isPresent!)),
-          );
-        } else {
-          return Padding(
-            padding: const EdgeInsets.all(1),
-            child: Center(
-              child: circularProgressIndicator(),
-            ),
-          );
-        }
+                      hostelName: widget.hostelName,
+                      isPresent: isPresent!)),
+        );
       },
     );
   }

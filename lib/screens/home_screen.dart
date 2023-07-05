@@ -73,8 +73,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   horizontal: 10,
                   vertical: 10,
                 ),
-                tabBackgroundColor: colorScheme.onBackground.withOpacity(0.2),
-                activeColor: colorScheme.onBackground,
+                tabBackgroundColor: colorScheme.onBackground.withOpacity(0.8),
+                activeColor: colorScheme.inversePrimary,
                 color: colorScheme.onBackground,
                 tabs: [
                   GButton(

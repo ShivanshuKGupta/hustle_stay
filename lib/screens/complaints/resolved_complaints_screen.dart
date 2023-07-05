@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/models/complaint.dart';
+import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/complaints/complaints_list_widget.dart';
 
