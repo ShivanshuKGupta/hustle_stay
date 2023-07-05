@@ -1,12 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user.dart';
-import 'package:hustle_stay/providers/complaint_list.dart';
+import 'package:hustle_stay/providers/state_switch.dart';
 import 'package:hustle_stay/screens/chat/chat_screen.dart';
 import 'package:hustle_stay/screens/chat/image_preview.dart';
 import 'package:hustle_stay/screens/complaints/edit_complaints_page.dart';
@@ -26,72 +27,76 @@ class ComplaintListItem extends ConsumerStatefulWidget {
   ConsumerState<ComplaintListItem> createState() => _ComplaintListItemState();
 }
 
-class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
-  bool _animate = false;
+class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
+    with TickerProviderStateMixin {
+  final bool _animate = false;
 
   final duration = const Duration(milliseconds: 800);
 
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      onTap: () =>
-          showComplaintChat(context, widget.complaint, showInfo: _showInfo),
-      onLongPress: () => _showInfo(),
-      title: Text(widget.complaint.title),
-      subtitle: widget.complaint.description == null
-          ? null
-          : Text(
-              widget.complaint.description!,
-              overflow: TextOverflow.fade,
-              maxLines: 4,
-            ),
+    return Animate(
+      controller: _controller,
+      autoPlay: false,
+      effects: const [FadeEffect(begin: 1, end: 0)],
+      child: ListTile(
+        onTap: () =>
+            showComplaintChat(context, widget.complaint, showInfo: _showInfo),
+        onLongPress: () => _showInfo(),
+        title: Text(widget.complaint.title),
+        subtitle: widget.complaint.description == null
+            ? null
+            : Text(
+                widget.complaint.description!,
+                overflow: TextOverflow.fade,
+                maxLines: 4,
+              ),
 
-      /// if no image is associated with the complaint
-      /// then I will show the user image who posted that complaint
-      /// if the user doesn't has an image then
-      /// just an info icon
-      leading: widget.complaint.imgUrl == null
-          ? UserBuilder(
-              email: widget.complaint.from,
-              src: Source.cache,
-              builder: (ctx, userData) {
-                if (userData.imgUrl == null) {
+        /// if no image is associated with the complaint
+        /// then I will show the user image who posted that complaint
+        /// if the user doesn't has an image then
+        /// just an info icon
+        leading: widget.complaint.imgUrl == null
+            ? UserBuilder(
+                email: widget.complaint.from,
+                src: Source.cache,
+                builder: (ctx, userData) {
                   return const InkWell(
                     child: CircleAvatar(
                       child: Icon(Icons.info_rounded),
                     ),
                   );
-                }
-                return InkWell(
-                  child: CircleAvatar(
-                    backgroundImage:
-                        CachedNetworkImageProvider(userData.imgUrl!),
-                  ),
-                  onTap: () {
-                    navigatorPush(
-                      context,
-                      ImagePreview(
-                        image: CachedNetworkImage(imageUrl: userData.imgUrl!),
-                      ),
-                    );
-                  },
-                );
-              })
-          : InkWell(
-              child: CircleAvatar(
-                backgroundImage:
-                    CachedNetworkImageProvider(widget.complaint.imgUrl!),
+                })
+            : InkWell(
+                child: CircleAvatar(
+                  backgroundImage:
+                      CachedNetworkImageProvider(widget.complaint.imgUrl!),
+                ),
+                onTap: () {
+                  navigatorPush(
+                    context,
+                    ImagePreview(
+                      image: CachedNetworkImage(
+                          imageUrl: widget.complaint.imgUrl!),
+                    ),
+                  );
+                },
               ),
-              onTap: () {
-                navigatorPush(
-                  context,
-                  ImagePreview(
-                    image:
-                        CachedNetworkImage(imageUrl: widget.complaint.imgUrl!),
-                  ),
-                );
-              },
-            ),
+      ),
     );
   }
 
@@ -105,19 +110,26 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
     );
     if (editedComplaint != null) {
       if (editedComplaint == "deleted") {
-        ref.read(complaintsList.notifier).removeComplaint(widget.complaint);
+        toggleSwitch(ref, complaintBuilderSwitch);
         // ignore: use_build_context_synchronously
         Navigator.of(context).pop();
       } else {
         // ignore: use_build_context_synchronously
         Navigator.of(context).pop();
-        setState(() {
-          _animate = !_animate;
-        });
+        _controller.animateTo(1);
         Future.delayed(duration, () {
           setState(() {
             widget.complaint = editedComplaint;
-            _animate = !_animate;
+          });
+          _controller.animateTo(0);
+          Future.delayed(duration, () {
+            for (int i = ComplaintsBuilder.complaints.length; i-- > 0;) {
+              if (ComplaintsBuilder.complaints[i].id == widget.complaint.id) {
+                ComplaintsBuilder.complaints[i] = widget.complaint;
+                break;
+              }
+            }
+            toggleSwitch(ref, complaintBuilderSwitch);
           });
         });
       }
@@ -133,7 +145,15 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem> {
     );
     if (response == 'yes') {
       await deleteComplaint(complaint: widget.complaint);
-      ref.read(complaintsList.notifier).removeComplaint(widget.complaint);
+      _controller.animateTo(1);
+      Future.delayed(duration, () {
+        Future.delayed(duration, () {
+          ComplaintsBuilder.complaints
+              .removeWhere((element) => element.id == widget.complaint.id);
+          toggleSwitch(ref, complaintBuilderSwitch);
+          _controller.reset();
+        });
+      });
       return true;
     }
     return false;

@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/providers/state_switch.dart';
 
 enum Scope {
   public,
@@ -149,3 +152,54 @@ Future<List<ComplaintData>> fetchComplaints(
   ans.sort((a, b) => (int.parse(a.id) < int.parse(b.id)) ? 1 : 0);
   return ans;
 }
+
+/// A widget used to display a child widget using a list of Complaints
+class ComplaintsBuilder extends ConsumerWidget {
+  final Widget Function(BuildContext ctx, List<ComplaintData> complaints)
+      builder;
+  final Source? src;
+  final Widget? loadingWidget;
+  const ComplaintsBuilder({
+    super.key,
+    required this.builder,
+    this.loadingWidget,
+    this.src,
+  });
+
+  /// Use this to store data
+  static List<ComplaintData> complaints = const [];
+
+  @override
+  Widget build(BuildContext context, ref) {
+    ref.watch(complaintBuilderSwitch);
+    return FutureBuilder(
+      future: fetchComplaints(src: src),
+      builder: (ctx, snapshot) {
+        if (!snapshot.hasData) {
+          if (src == Source.cache) {
+            return loadingWidget ?? builder(ctx, complaints);
+          }
+          return FutureBuilder(
+            future: fetchComplaints(src: Source.cache),
+            builder: (ctx, snapshot) {
+              if (!snapshot.hasData) {
+                // Returning this Widget when nothing has arrived
+                return complaints.isEmpty && loadingWidget != null
+                    ? loadingWidget!
+                    : builder(ctx, complaints);
+              }
+              // Returning this widget from cache while data arrives from server
+              ComplaintsBuilder.complaints = snapshot.data!;
+              return builder(ctx, complaints);
+            },
+          );
+        }
+        // Returning this widget when data arrives from server
+        ComplaintsBuilder.complaints = snapshot.data!;
+        return builder(ctx, complaints);
+      },
+    );
+  }
+}
+
+final complaintBuilderSwitch = createSwitch();

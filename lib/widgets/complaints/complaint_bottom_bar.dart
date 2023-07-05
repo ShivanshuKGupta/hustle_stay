@@ -4,7 +4,7 @@ import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user.dart';
-import 'package:hustle_stay/providers/complaint_list.dart';
+import 'package:hustle_stay/providers/state_switch.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/chat/choose_users.dart.dart';
 
@@ -32,7 +32,7 @@ class ComplaintBottomBar extends ConsumerWidget {
             borderRadius: BorderRadius.circular(15),
           ),
         ),
-        onPressed: () => resolveComplaint(ref.read(complaintsList.notifier)),
+        onPressed: () => resolveComplaint(ref),
         label: Text(
           (complaint.from != currentUser.email ? ' Request to ' : '') +
               (complaint.resolved ? 'Unresolve' : 'Resolve'),
@@ -146,7 +146,7 @@ class ComplaintBottomBar extends ConsumerWidget {
     }
   }
 
-  void resolveComplaint(complaintListNotifier) async {
+  void resolveComplaint(ref) async {
     if (complaint.from != currentUser.email) {
       await addMessage(
         ChatData(
@@ -196,11 +196,9 @@ class ComplaintBottomBar extends ConsumerWidget {
           indicative: true,
         ),
       );
-      if (complaint.resolved) {
-        complaintListNotifier.removeComplaint(complaint);
-      } else {
-        complaintListNotifier.addComplaint(complaint);
-      }
+      ComplaintsBuilder.complaints
+          .removeWhere((element) => element.id == complaint.id);
+      toggleSwitch(ref, complaintBuilderSwitch);
       if (context.mounted) {
         Navigator.of(context).pop();
       }

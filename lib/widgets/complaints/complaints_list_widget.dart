@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_list_item.dart';
 
@@ -9,7 +8,6 @@ class ComplaintsListWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int i = 0;
     final mediaQuery = MediaQuery.of(context);
     const duration = Duration(milliseconds: 400);
     return complaints.isEmpty
@@ -37,9 +35,7 @@ class ComplaintsListWidget extends StatelessWidget {
               final complaint = complaints[index];
               return ComplaintListItem(
                 complaint: complaint,
-              ).animate(onComplete: (controller) {
-                i--;
-              });
+              );
             },
             itemCount: complaints.length,
           );
