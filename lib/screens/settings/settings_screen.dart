@@ -66,20 +66,25 @@ class SettingsScreen extends ConsumerWidget {
         title: shaderText(context, title: 'Settings'),
       ),
       drawer: const MainDrawer(),
-      body: Column(
-        children: [
-          if (currentUser.email != null) const CurrentUserTile(),
-          const Divider().animate().scaleX(
-              duration: duration * 2,
-              curve: Curves.decelerate,
-              begin: 0,
-              end: 1),
-          Section(
-            title: "App Settings",
-            children: widgetList.animate().fade(duration: duration).slideX(
-                curve: Curves.decelerate, begin: 1, end: 0, duration: duration),
-          ),
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            if (currentUser.email != null) const CurrentUserTile(),
+            const Divider().animate().scaleX(
+                duration: duration * 2,
+                curve: Curves.decelerate,
+                begin: 0,
+                end: 1),
+            Section(
+              title: "App Settings",
+              children: widgetList.animate().fade(duration: duration).slideX(
+                  curve: Curves.decelerate,
+                  begin: 1,
+                  end: 0,
+                  duration: duration),
+            ),
+          ],
+        ),
       ),
     );
   }

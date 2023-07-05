@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/tools.dart';
-import 'package:hustle_stay/widgets/complaints/complaints_list_widget.dart';
+import 'package:hustle_stay/widgets/complaints/complaint_list_item.dart';
 
 class ResolvedComplaintsScreen extends StatelessWidget {
   const ResolvedComplaintsScreen({super.key});
@@ -11,14 +11,31 @@ class ResolvedComplaintsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Resolved Complaints')),
       body: FutureBuilder(
-          future: fetchComplaints(resolved: true),
-          builder: (ctx, snapshot) {
-            if (!snapshot.hasData) {
-              return Center(child: circularProgressIndicator());
-            }
-            final complaints = snapshot.data!;
-            return ComplaintsListWidget(complaints: complaints);
-          }),
+        future: fetchComplaints(resolved: true),
+        builder: (ctx, snapshot) {
+          if (!snapshot.hasData) {
+            return Center(child: circularProgressIndicator());
+          }
+          final complaints = snapshot.data!;
+          return complaints.isEmpty
+              ? Center(
+                  child: Text(
+                    'All clear✨',
+                    style: Theme.of(context).textTheme.titleLarge,
+                    textAlign: TextAlign.center,
+                  ),
+                )
+              : ListView.builder(
+                  itemBuilder: (ctx, index) {
+                    final complaint = complaints[index];
+                    return ComplaintListItem(
+                      complaint: complaint,
+                    );
+                  },
+                  itemCount: complaints.length,
+                );
+        },
+      ),
     );
   }
 }
