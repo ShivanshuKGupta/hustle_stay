@@ -43,13 +43,14 @@ Future<List<Room>> fetchRooms(String hostelName, {Source? src}) async {
       .get(src != null ? GetOptions(source: src) : null);
   final roomDocs = roomSnapshot.docs;
 
-  final List<Future<QuerySnapshot>> roommatesDataFutures = [];
+  final List<Future<List<QueryDocumentSnapshot>>> roommatesDataFutures = [];
 
   for (final roomDoc in roomDocs) {
     final roomRef = roomDoc.reference;
     final roommatesCollectionRef = roomRef.collection('Roommates');
     final roommatesDataFuture = roommatesCollectionRef
-        .get(src != null ? GetOptions(source: src) : null);
+        .get(src != null ? GetOptions(source: src) : null)
+        .then((roommatesSnapshot) => roommatesSnapshot.docs);
     roommatesDataFutures.add(roommatesDataFuture);
   }
 
@@ -59,19 +60,20 @@ Future<List<Room>> fetchRooms(String hostelName, {Source? src}) async {
 
   for (int i = 0; i < roomDocs.length; i++) {
     final roomDoc = roomDocs[i];
-    final roommatesSnapshot = roommatesDataSnapshots[i];
+    final roommatesDocs = roommatesDataSnapshots[i];
 
-    final List<RoommateData> roommatesData =
-        roommatesSnapshot.docs.map((roommateDoc) {
+    final List<RoommateData> roommatesData = roommatesDocs.map((roommateDoc) {
       final data =
           roommateDoc.data() as Map<String, dynamic>; // Explicit type casting
+      final onLeave = data['onLeave'] ?? false;
+      final leaveStartDate = data['leaveStartDate'] as Timestamp?;
+      final leaveEndDate = data['leaveEndDate'] as Timestamp?;
+
       return RoommateData(
         email: data['email'] ?? '',
-        onLeave: data.containsKey('onLeave') ? data['onLeave'] : false,
-        leaveStartDate:
-            data.containsKey('leaveStartDate') ? data['leaveStartDate'] : null,
-        leaveEndDate:
-            data.containsKey('leaveEndDate') ? data['leaveEndDate'] : null,
+        onLeave: onLeave,
+        leaveStartDate: leaveStartDate?.toDate(),
+        leaveEndDate: leaveEndDate?.toDate(),
       );
     }).toList();
 
