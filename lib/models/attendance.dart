@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
-Future<bool> getAttendanceData(
-    String email, String hostelName, String roomName, DateTime date) async {
+import 'hostel/rooms/room.dart';
+
+Future<bool> getAttendanceData(RoommateData roommateData, String hostelName,
+    String roomName, DateTime date) async {
   final storage = FirebaseFirestore.instance;
   final documentRef = storage
       .collection('hostels')
@@ -10,12 +12,21 @@ Future<bool> getAttendanceData(
       .collection('Rooms')
       .doc(roomName)
       .collection('Roommates')
-      .doc(email)
+      .doc(roommateData.email)
       .collection('Attendance')
       .doc(DateFormat('dd-MM-yyyy').format(date));
 
-  final documentSnapshot = await documentRef.get();
+  if (roommateData.onLeave != null &&
+      roommateData.onLeave! &&
+      roommateData.leaveStartDate != null &&
+      (roommateData.leaveStartDate!.isBefore(date)) &&
+      roommateData.leaveEndDate != null &&
+      (roommateData.leaveEndDate!.isAfter(date))) {
+    await documentRef.set({'onLeave': true}, SetOptions(merge: false));
+    return false;
+  }
 
+  final documentSnapshot = await documentRef.get();
   if (documentSnapshot.exists) {
     return documentSnapshot['isPresent'];
   } else {

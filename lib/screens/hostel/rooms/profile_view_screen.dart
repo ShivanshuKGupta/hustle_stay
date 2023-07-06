@@ -184,7 +184,6 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                                     ),
                                   ElevatedButton.icon(
                                       onPressed: () async {
-                                        print('clicked)');
                                         bool resp = await setLeave(
                                             widget.user.email!,
                                             widget.hostelName,
@@ -199,9 +198,11 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                                                     ? null
                                                     : pickedRange!.end);
                                         if (resp) {
-                                          setState(() {
-                                            onLeave = !onLeave;
-                                          });
+                                          Navigator.of(context).pushReplacement(
+                                              MaterialPageRoute(
+                                                  builder: (_) => RoomsScreen(
+                                                      hostelName:
+                                                          widget.hostelName)));
                                         }
                                       },
                                       icon: AnimateIcon(

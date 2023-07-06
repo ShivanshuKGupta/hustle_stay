@@ -2,18 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/tools.dart';
 
 import '../../../models/attendance.dart';
+import '../../../models/hostel/rooms/room.dart';
 
 class AttendanceIcon extends StatefulWidget {
   const AttendanceIcon({
     Key? key,
-    required this.email,
+    required this.roommateData,
     required this.selectedDate,
     required this.roomName,
     required this.hostelName,
     required this.isPresent,
   }) : super(key: key);
 
-  final String email;
+  final RoommateData roommateData;
   final DateTime selectedDate;
   final String hostelName;
   final String roomName;
@@ -39,7 +40,7 @@ class _AttendanceIconState extends State<AttendanceIcon> {
 
   Future<void> _getAttendanceData() async {
     bool resp = await getAttendanceData(
-      widget.email,
+      widget.roommateData,
       widget.hostelName,
       widget.roomName,
       widget.selectedDate,
@@ -66,6 +67,22 @@ class _AttendanceIconState extends State<AttendanceIcon> {
 
   @override
   Widget build(BuildContext context) {
+    return widget.roommateData.onLeave != null &&
+            widget.roommateData.onLeave! &&
+            widget.roommateData.leaveStartDate != null &&
+            (widget.roommateData.leaveStartDate!
+                .isBefore(widget.selectedDate)) &&
+            widget.roommateData.leaveEndDate != null &&
+            (widget.roommateData.leaveEndDate!.isAfter(widget.selectedDate))
+        ? Text(
+            'On Leave',
+            style: TextStyle(
+                backgroundColor: Colors.yellow, fontWeight: FontWeight.bold),
+          )
+        : AttendanceWid();
+  }
+
+  Widget AttendanceWid() {
     return isRunning
         ? circularProgressIndicator()
         : IconButton(
@@ -74,7 +91,7 @@ class _AttendanceIconState extends State<AttendanceIcon> {
                 isRunning = true;
               });
               await setAttendanceData(
-                widget.email,
+                widget.roommateData.email,
                 widget.hostelName,
                 widget.roomName,
                 widget.selectedDate,

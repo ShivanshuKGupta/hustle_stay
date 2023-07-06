@@ -40,8 +40,8 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
   bool isRunning = false;
   bool? isPresent;
   Future<void> _getAttendanceData() async {
-    bool resp = await getAttendanceData(widget.roommateData.email,
-        widget.hostelName, widget.roomName, widget.selectedDate);
+    bool resp = await getAttendanceData(widget.roommateData, widget.hostelName,
+        widget.roomName, widget.selectedDate);
     setState(() {
       isPresent = resp;
     });
@@ -96,7 +96,7 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
               trailing: isPresent == null
                   ? null
                   : AttendanceIcon(
-                      email: widget.roommateData.email,
+                      roommateData: widget.roommateData,
                       selectedDate: widget.selectedDate,
                       roomName: widget.roomName,
                       hostelName: widget.hostelName,
