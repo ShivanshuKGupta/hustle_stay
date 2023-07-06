@@ -23,29 +23,34 @@ class _HostelScreenState extends State<HostelScreen> {
   bool isRunning = false;
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: fetchHostels(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return FutureBuilder(
-            future: fetchHostels(src: Source.cache),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting ||
-                  !snapshot.hasData ||
-                  snapshot.error != null) {
-                return Center(
-                  child: circularProgressIndicator(
-                    height: null,
-                    width: null,
-                  ),
-                );
-              }
-              return HostelList(snapshot.data!);
-            },
-          );
-        }
-        return HostelList(snapshot.data!);
-      },
+    return Scaffold(
+      appBar: AppBar(
+        title: shaderText(context, title: "Select Hostel"),
+      ),
+      body: FutureBuilder(
+        future: fetchHostels(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return FutureBuilder(
+              future: fetchHostels(src: Source.cache),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting ||
+                    !snapshot.hasData ||
+                    snapshot.error != null) {
+                  return Center(
+                    child: circularProgressIndicator(
+                      height: null,
+                      width: null,
+                    ),
+                  );
+                }
+                return HostelList(snapshot.data!);
+              },
+            );
+          }
+          return HostelList(snapshot.data!);
+        },
+      ),
     );
   }
 

@@ -11,14 +11,14 @@ class AttendanceIcon extends StatefulWidget {
     required this.selectedDate,
     required this.roomName,
     required this.hostelName,
-    required this.isPresent,
+    required this.status,
   }) : super(key: key);
 
   final RoommateData roommateData;
   final DateTime selectedDate;
   final String hostelName;
   final String roomName;
-  final bool isPresent;
+  final String status;
 
   @override
   _AttendanceIconState createState() => _AttendanceIconState();
@@ -27,15 +27,15 @@ class AttendanceIcon extends StatefulWidget {
 class _AttendanceIconState extends State<AttendanceIcon> {
   final presentIcon = Icon(Icons.check_circle_outline, color: Colors.green);
   final absentIcon = Icon(Icons.close_rounded, color: Colors.red);
-  bool? isPresent;
+  String? status;
   Icon currentIcon = Icon(Icons.close_rounded, color: Colors.red);
   bool isRunning = false;
 
   @override
   void initState() {
     super.initState();
-    isPresent = widget.isPresent;
-    currentIcon = isPresent! ? presentIcon : absentIcon;
+    status = widget.status;
+    currentIcon = status == 'present' ? presentIcon : absentIcon;
   }
 
   Future<void> _getAttendanceData() async {

@@ -38,13 +38,13 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
   }
 
   bool isRunning = false;
-  bool? isPresent;
+  String? status;
   Future<void> _getAttendanceData() async {
     String resp = await getAttendanceData(widget.roommateData,
         widget.hostelName, widget.roomName, widget.selectedDate);
     if (mounted) {
       setState(() {
-        isPresent = resp == 'present';
+        status = resp;
       });
     }
     return;
@@ -95,14 +95,14 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
                 user.email!.substring(0, 9).toUpperCase(),
                 style: const TextStyle(fontSize: 14),
               ),
-              trailing: isPresent == null
+              trailing: status == null
                   ? null
                   : AttendanceIcon(
                       roommateData: widget.roommateData,
                       selectedDate: widget.selectedDate,
                       roomName: widget.roomName,
                       hostelName: widget.hostelName,
-                      isPresent: isPresent!)),
+                      status: status!)),
         );
       },
     );
