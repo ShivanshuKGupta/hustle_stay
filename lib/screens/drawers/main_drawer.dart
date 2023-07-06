@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/auth/edit_profile_screen.dart';
+import 'package:hustle_stay/screens/category/edit_category_screen.dart';
 import 'package:hustle_stay/screens/complaints/resolved_complaints_screen.dart';
 import 'package:hustle_stay/screens/hostel/addHostel.dart';
 import 'package:hustle_stay/tools.dart';
@@ -67,6 +68,18 @@ class MainDrawer extends StatelessWidget {
             navigatorPush(
               context,
               const ResolvedComplaintsScreen(),
+            );
+          },
+        ),
+        _drawerTile(
+          context,
+          title: "Add a new category",
+          icon: Icons.person_add_rounded,
+          subtitle: "Categories are used in complaints and requests",
+          onTap: () async {
+            navigatorPush(
+              context,
+              const EditCategoryScreen(),
             );
           },
         ),

@@ -7,12 +7,16 @@ class ChooseUsers extends StatefulWidget {
   final List<String> allUsers;
   List<String> chosenUsers;
   final void Function(List<String> newEmails) onUpdate;
+  final String label;
   ChooseUsers({
     super.key,
     required this.allUsers,
     this.chosenUsers = const [],
     required this.onUpdate,
-  });
+    this.label = "Complainees",
+  }) {
+    if (chosenUsers.isEmpty) chosenUsers = [];
+  }
 
   @override
   State<ChooseUsers> createState() => _ChooseUsersState();
@@ -30,7 +34,7 @@ class _ChooseUsersState extends State<ChooseUsers> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Complainees'),
+            Text(widget.label),
             DropdownMenu(
               key: ValueKey("users_drop_down_menu_$i"),
               enabled: users.isNotEmpty,

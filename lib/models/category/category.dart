@@ -4,8 +4,8 @@ import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/tools.dart';
 
 class Category {
-  final String id;
-  String? defaultReceipient;
+  String id;
+  List<String> defaultReceipient;
   List<String> allReceipients;
   // Higher the number higer is the priority
   int defaultPriority;
@@ -18,7 +18,7 @@ class Category {
 
   Category(
     this.id, {
-    this.defaultReceipient,
+    this.defaultReceipient = const [],
     this.allReceipients = const [],
     this.cooldown = const Duration(seconds: 0),
     this.color = Colors.blue,
@@ -38,11 +38,15 @@ class Category {
   }
 
   void load(Map<String, dynamic> data) {
-    defaultReceipient = data['defaultReceipient'];
-    allReceipients = data['allReceipients'];
-    defaultPriority = data['defaultPriority'];
-    cooldown = Duration(seconds: data['cooldown']);
-    color = Color(data['color']);
+    defaultReceipient = (data["defaultReceipient"] as List<dynamic>)
+        .map((e) => e.toString())
+        .toList();
+    allReceipients = (data["allReceipients"] as List<dynamic>)
+        .map((e) => e.toString())
+        .toList();
+    defaultPriority = data['defaultPriority'] ?? 0;
+    cooldown = Duration(seconds: data['cooldown'] ?? 0);
+    color = Color(data['color'] ?? 0);
     logoUrl = data['logoUrl'];
   }
 }
@@ -64,7 +68,7 @@ Future<Category> fetchCategory(
       response = await firestore.collection('categories').doc(id).get();
     }
   }
-  category.load(response?.data() ?? {});
+  category.load(response!.data() ?? {});
   return category;
 }
 
@@ -72,11 +76,61 @@ Future<List<Category>> fetchCategories(List<String> ids, {Source? src}) async {
   return [for (final id in ids) await fetchCategory(id, src: src)];
 }
 
+Future<List<Category>> fetchAllCategories({Source? src}) async {
+  List<String> ids = [];
+  final response = await firestore
+      .collection('categories')
+      .get(src == null ? null : GetOptions(source: src));
+  return response.docs
+      .map((doc) => Category(doc.id)..load(doc.data()))
+      .toList();
+}
+
 Future<void> updateCategory(Category category) async {
   await firestore
       .collection('categories')
       .doc(category.id)
       .set(category.encode());
+}
+
+// /// A widget used to display widget using category data
+class CategoriesBuilder extends StatelessWidget {
+  final Widget Function(BuildContext ctx, List<Category> categories) builder;
+  final Widget? loadingWidget;
+  final Source? src;
+  const CategoriesBuilder({
+    super.key,
+    required this.builder,
+    this.loadingWidget,
+    this.src,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: fetchAllCategories(src: src),
+      builder: (ctx, snapshot) {
+        if (!snapshot.hasData) {
+          if (src == Source.cache) {
+            return loadingWidget ?? circularProgressIndicator();
+          }
+          return FutureBuilder(
+            future: fetchAllCategories(src: src),
+            builder: (ctx, snapshot) {
+              if (!snapshot.hasData) {
+                // Returning this Widget when nothing has arrived
+                return loadingWidget ?? circularProgressIndicator();
+              }
+              // Returning this widget from cache while data arrives from server
+              return builder(ctx, snapshot.data!);
+            },
+          );
+        }
+        // Returning this widget when data arrives from server
+        return builder(ctx, snapshot.data!);
+      },
+    );
+  }
 }
 
 /// A widget used to display widget using category data

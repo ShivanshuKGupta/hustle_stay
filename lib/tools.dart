@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// A widget which is primarily used to show a [CircularProgressIndicator]
@@ -340,4 +341,49 @@ class GlassWidget extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<Color> showColorPicker(BuildContext context, Color defaultColor) async {
+  Color chosenColor = defaultColor;
+  await showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Pick a color!'),
+      content: SingleChildScrollView(
+        child: ColorPicker(
+          pickerColor: defaultColor,
+          onColorChanged: (color) => chosenColor = color,
+        ),
+        // Use Material color picker:
+        //
+        // child: MaterialPicker(
+        //   pickerColor: pickerColor,
+        //   onColorChanged: changeColor,
+        //   showLabel: true, // only on portrait mode
+        // ),
+        //
+        // Use Block color picker:
+        //
+        // child: BlockPicker(
+        //   pickerColor: currentColor,
+        //   onColorChanged: changeColor,
+        // ),
+        //
+        // child: MultipleChoiceBlockPicker(
+        //   pickerColors: currentColors,
+        //   onColorsChanged: changeColors,
+        // ),
+      ),
+      actions: <Widget>[
+        ElevatedButton.icon(
+          icon: const Icon(Icons.done_rounded),
+          label: const Text('Done'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    ),
+  );
+  return chosenColor;
 }

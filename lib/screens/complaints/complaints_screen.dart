@@ -7,6 +7,7 @@ import 'package:hustle_stay/screens/complaints/resolved_complaints_screen.dart';
 import 'package:hustle_stay/screens/drawers/main_drawer.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/chat/complaint_template_message.dart';
+import 'package:hustle_stay/widgets/complaints/complaint_category_widget.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_list_item.dart';
 
 class ComplaintsScreen extends StatefulWidget {
@@ -45,80 +46,98 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
       drawer: const MainDrawer(),
       body: ComplaintsBuilder(
         loadingWidget: Center(child: circularProgressIndicator()),
-        builder: (ctx, complaints) => RefreshIndicator(
-          edgeOffset: appBar.collapsedHeight ?? 0,
-          onRefresh: () async {
-            await fetchComplaints();
-            setState(() {});
-          },
-          child: CustomScrollView(
-            slivers: [
-              appBar,
-              SliverList(
-                delegate: complaints.isEmpty
-                    ? SliverChildListDelegate(
-                        [
-                          SizedBox(
-                            height: mediaQuery.size.height -
-                                mediaQuery.viewInsets.top -
-                                mediaQuery.padding.top -
-                                mediaQuery.padding.bottom -
-                                mediaQuery.viewInsets.bottom -
-                                150,
-                            child: Center(
-                              child: Text(
-                                'All clear✨',
-                                style: Theme.of(context).textTheme.titleLarge,
-                                textAlign: TextAlign.center,
+        builder: (ctx, complaints) {
+          Map<String, List<ComplaintData>> categories = {};
+          for (var element in complaints) {
+            final String category = element.category ?? "Other";
+            if (categories.containsKey(category)) {
+              categories[category]!.add(element);
+            } else {
+              categories[category] = [element];
+            }
+          }
+          int n = categories.length;
+          return RefreshIndicator(
+            edgeOffset: appBar.collapsedHeight ?? 0,
+            onRefresh: () async {
+              await fetchComplaints();
+              setState(() {});
+            },
+            child: CustomScrollView(
+              slivers: [
+                appBar,
+                SliverList(
+                  delegate: complaints.isEmpty
+                      ? SliverChildListDelegate(
+                          [
+                            SizedBox(
+                              height: mediaQuery.size.height -
+                                  mediaQuery.viewInsets.top -
+                                  mediaQuery.padding.top -
+                                  mediaQuery.padding.bottom -
+                                  mediaQuery.viewInsets.bottom -
+                                  150,
+                              child: Center(
+                                child: Text(
+                                  'All clear✨',
+                                  style: Theme.of(context).textTheme.titleLarge,
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      )
-                    : SliverChildBuilderDelegate(
-                        (ctx, index) {
-                          if (index == 0) {
-                            return Wrap(
-                              alignment: WrapAlignment.center,
-                              children: [
-                                Text("${complaints.length} pending and"),
-                                InkWell(
-                                  onTap: () {
-                                    navigatorPush(context,
-                                        const ResolvedComplaintsScreen());
-                                  },
-                                  child: Text(
-                                    " 23 resolved ",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium!
-                                        .copyWith(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary),
+                          ],
+                        )
+                      : SliverChildBuilderDelegate(
+                          (ctx, index) {
+                            if (index == 0) {
+                              return Wrap(
+                                alignment: WrapAlignment.center,
+                                children: [
+                                  Text("${complaints.length} pending and"),
+                                  InkWell(
+                                    onTap: () {
+                                      navigatorPush(context,
+                                          const ResolvedComplaintsScreen());
+                                    },
+                                    child: Text(
+                                      " 23 resolved ",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium!
+                                          .copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary),
+                                    ),
                                   ),
-                                ),
-                                const Text("in the last 30 days"),
-                              ],
+                                  const Text("in the last 30 days"),
+                                ],
+                              );
+                            } else if (index == n + 1) {
+                              return SizedBox(
+                                height: mediaQuery.padding.bottom,
+                              );
+                            } else {
+                              index--;
+                            }
+                            // final complaint = complaints[index];
+                            final child = ComplaintCategory(
+                              id: categories.keys.first,
+                              complaints: categories[categories.keys.first]!,
                             );
-                          } else if (index == complaints.length + 1) {
-                            return SizedBox(
-                              height: mediaQuery.padding.bottom,
+                            categories.remove(categories.keys.first);
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: child,
                             );
-                          } else {
-                            index--;
-                          }
-                          final complaint = complaints[index];
-                          return ComplaintListItem(
-                            complaint: complaint,
-                          );
-                        },
-                        childCount: complaints.length + 2,
-                      ),
-              ),
-            ],
-          ),
-        ),
+                          },
+                          childCount: n + 2,
+                        ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
