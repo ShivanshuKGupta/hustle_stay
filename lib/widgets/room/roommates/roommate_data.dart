@@ -42,9 +42,11 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
   Future<void> _getAttendanceData() async {
     bool resp = await getAttendanceData(widget.roommateData, widget.hostelName,
         widget.roomName, widget.selectedDate);
-    setState(() {
-      isPresent = resp;
-    });
+    if (mounted) {
+      setState(() {
+        isPresent = resp;
+      });
+    }
     return;
   }
 
