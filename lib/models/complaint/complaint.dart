@@ -20,6 +20,7 @@ class ComplaintData {
   late List<String> to;
   late bool resolved;
   String? imgUrl;
+  String? category;
 
   ComplaintData({
     this.description = "",
@@ -30,6 +31,7 @@ class ComplaintData {
     required this.to,
     required this.resolved,
     this.imgUrl,
+    this.category,
   });
 
   Map<String, dynamic> encode() {
@@ -41,12 +43,13 @@ class ComplaintData {
       "to": to,
       "resolved": resolved,
       "imgUrl": imgUrl,
+      "category": category,
     };
   }
 
   @override
   String toString() {
-    return "Title: $title\nDescription: $description\nComplainees: $to\nScope: ${scope.name}}";
+    return "Title: $title\nDescription: $description\nComplainees: $to\nScope: ${scope.name}}\nCategory: $category";
   }
 
   String operator -(ComplaintData oldComplaint) {
@@ -72,6 +75,10 @@ class ComplaintData {
       ans += (addAnd ? " and " : '');
       ans += '\nImageUrl to $imgUrl';
     }
+    if (oldComplaint.category != category) {
+      ans += (addAnd ? " and " : '');
+      ans += '\nCategory to $category';
+    }
     return ans;
   }
 
@@ -84,6 +91,7 @@ class ComplaintData {
     title = complaintData["title"];
     resolved = complaintData["resolved"] ?? false;
     imgUrl = complaintData["imgUrl"];
+    category = complaintData["category"];
     to = (complaintData["to"] as List<dynamic>)
         .map((e) => e.toString())
         .toList();

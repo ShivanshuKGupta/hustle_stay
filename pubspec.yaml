@@ -51,6 +51,7 @@ dependencies:
   foundation: ^0.0.5
   animated_icon: ^0.0.5
   google_nav_bar: ^5.0.6
+  flutter_colorpicker: ^1.0.3
 
 dev_dependencies:
   flutter_test:

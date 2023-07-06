@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
+import 'package:hustle_stay/tools.dart';
 
 class ReadOnly {
   bool isAdmin = false;
@@ -286,6 +287,35 @@ class UserBuilder extends StatelessWidget {
         // Returning this widget when data arrives from server
         userData = snapshot.data!;
         return builder(ctx, userData);
+      },
+    );
+  }
+}
+
+/// A widget used to display widget using UserData
+/// This will change according to the userData
+class ComplaineeBuilder extends StatelessWidget {
+  final Widget Function(BuildContext ctx, List<String> complainees) builder;
+  final Widget? loadingWidget;
+  ComplaineeBuilder({
+    super.key,
+    required this.builder,
+    this.loadingWidget,
+  });
+
+  UserData userData = UserData();
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: fetchComplainees(),
+      builder: (ctx, snapshot) {
+        if (!snapshot.hasData) {
+          // Returning this Widget when nothing has arrived
+          return loadingWidget ?? circularProgressIndicator();
+        }
+        // Returning this widget when data arrives from server
+        return builder(ctx, snapshot.data!);
       },
     );
   }

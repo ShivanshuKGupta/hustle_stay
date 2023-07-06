@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/models/category/category.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/image.dart';
@@ -176,6 +177,29 @@ class _ComplaintFormState extends State<ComplaintForm> {
                 .toList(),
             onChanged: ((value) =>
                 widget.complaint!.scope = Scope.values[value ?? 0]),
+          ),
+          // TODO: add a categories builder
+          CategoriesBuilder(
+            builder: (ctx, categories) => DropdownButtonFormField(
+              decoration: InputDecoration(
+                icon: const Icon(Icons.category_rounded),
+                iconColor: Theme.of(context).colorScheme.onBackground,
+                label: const Text('Category'),
+              ),
+              value: widget.complaint!.category,
+              validator: (value) => value == null ? "Select a category" : null,
+              items: categories
+                  .map(
+                    (e) => DropdownMenuItem(
+                      value: e.id,
+                      child: Text(e.id),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (value) =>
+                  widget.complaint!.category = value ?? "Other",
+              onSaved: (value) => widget.complaint!.category = value ?? "Other",
+            ),
           ),
           const SizedBox(height: 10),
           Row(
