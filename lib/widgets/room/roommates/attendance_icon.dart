@@ -39,7 +39,7 @@ class _AttendanceIconState extends State<AttendanceIcon> {
   }
 
   Future<void> _getAttendanceData() async {
-    bool resp = await getAttendanceData(
+    String resp = await getAttendanceData(
       widget.roommateData,
       widget.hostelName,
       widget.roomName,
@@ -47,7 +47,7 @@ class _AttendanceIconState extends State<AttendanceIcon> {
     );
     if (mounted) {
       setState(() {
-        currentIcon = resp ? presentIcon : absentIcon;
+        currentIcon = resp == 'present' ? presentIcon : absentIcon;
         isRunning = false;
       });
     }

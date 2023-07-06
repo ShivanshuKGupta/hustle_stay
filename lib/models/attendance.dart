@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 
 import 'hostel/rooms/room.dart';
 
-Future<bool> getAttendanceData(RoommateData roommateData, String hostelName,
+Future<String> getAttendanceData(RoommateData roommateData, String hostelName,
     String roomName, DateTime date) async {
   final storage = FirebaseFirestore.instance;
   final documentRef = storage
@@ -14,7 +14,7 @@ Future<bool> getAttendanceData(RoommateData roommateData, String hostelName,
       .collection('Roommates')
       .doc(roommateData.email)
       .collection('Attendance')
-      .doc(DateFormat('dd-MM-yyyy').format(date));
+      .doc(DateFormat('yyyy-MM-dd').format(date));
 
   if (roommateData.onLeave != null &&
       roommateData.onLeave! &&
@@ -22,16 +22,18 @@ Future<bool> getAttendanceData(RoommateData roommateData, String hostelName,
       (roommateData.leaveStartDate!.isBefore(date)) &&
       roommateData.leaveEndDate != null &&
       (roommateData.leaveEndDate!.isAfter(date))) {
-    await documentRef.set({'onLeave': true}, SetOptions(merge: false));
-    return false;
+    await documentRef.set({'status': 'onLeave'}, SetOptions(merge: false));
+    return 'onLeave';
   }
 
   final documentSnapshot = await documentRef.get();
-  if (documentSnapshot.exists) {
-    return documentSnapshot['isPresent'];
+  if (documentSnapshot.exists &&
+      documentSnapshot['status'] != 'onLeave' &&
+      documentSnapshot['status'] != 'internship') {
+    return documentSnapshot['status'];
   } else {
-    await documentRef.set({'isPresent': false});
-    return false;
+    await documentRef.set({'status': 'absent'});
+    return 'absent';
   }
 }
 
@@ -47,14 +49,14 @@ Future<bool> setAttendanceData(String email, String hostelName, String roomName,
         .collection('Roommates')
         .doc(email)
         .collection('Attendance')
-        .doc(DateFormat('dd-MM-yyyy').format(date));
+        .doc(DateFormat('yyyy-MM-dd').format(date));
 
     await storage.runTransaction((transaction) async {
       final snapshot = await transaction.get(docRef);
       if (!snapshot.exists) {
-        transaction.set(docRef, {'isPresent': !status});
+        transaction.set(docRef, {'status': status ? 'absent' : 'present'});
       } else {
-        transaction.update(docRef, {'isPresent': !status});
+        transaction.update(docRef, {'status': status ? 'absent' : 'present'});
       }
     });
 
@@ -68,6 +70,7 @@ Future<bool> setAttendanceData(String email, String hostelName, String roomName,
 Future<bool> markAllAttendance(
     String hostelName, bool status, DateTime selectedDate) async {
   try {
+    String statusVal = status ? 'present' : 'absent';
     final storage = FirebaseFirestore.instance;
     final docsRoomsRef = await storage
         .collection('hostels')
@@ -81,10 +84,10 @@ Future<bool> markAllAttendance(
       for (final roommateDoc in roommateDocs.docs) {
         final attendanceRef = roommateDoc.reference
             .collection('Attendance')
-            .doc(DateFormat('dd-MM-yyyy').format(selectedDate));
+            .doc(DateFormat('yyyy-MM-dd').format(selectedDate));
         batch.set(
           attendanceRef,
-          {'isPresent': status},
+          {'status': statusVal},
           SetOptions(merge: true),
         );
       }
@@ -99,6 +102,7 @@ Future<bool> markAllAttendance(
 Future<bool> markAllRoommateAttendance(String hostelName, String roomName,
     bool status, DateTime selectedDate) async {
   try {
+    String statusVal = status ? 'present' : 'absent';
     final storage = FirebaseFirestore.instance;
     final docsRoommatesRef = await storage
         .collection('hostels')
@@ -111,10 +115,10 @@ Future<bool> markAllRoommateAttendance(String hostelName, String roomName,
     for (final roommateDoc in docsRoommatesRef.docs) {
       final attendanceRef = roommateDoc.reference
           .collection('Attendance')
-          .doc(DateFormat('dd-MM-yyyy').format(selectedDate));
+          .doc(DateFormat('yyyy-MM-dd').format(selectedDate));
       batch.set(
         attendanceRef,
-        {'isPresent': status},
+        {'status': statusVal},
         SetOptions(merge: true),
       );
     }
