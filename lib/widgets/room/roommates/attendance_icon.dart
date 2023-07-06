@@ -44,10 +44,18 @@ class _AttendanceIconState extends State<AttendanceIcon> {
       widget.roomName,
       widget.selectedDate,
     );
-    setState(() {
-      currentIcon = resp ? presentIcon : absentIcon;
-      isRunning = false;
-    });
+    if (mounted) {
+      setState(() {
+        currentIcon = resp ? presentIcon : absentIcon;
+        isRunning = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
   }
 
   @override

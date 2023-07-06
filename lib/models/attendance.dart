@@ -53,3 +53,63 @@ Future<bool> setAttendanceData(String email, String hostelName, String roomName,
     return false;
   }
 }
+
+Future<bool> markAllAttendance(
+    String hostelName, bool status, DateTime selectedDate) async {
+  try {
+    final storage = FirebaseFirestore.instance;
+    final docsRoomsRef = await storage
+        .collection('hostels')
+        .doc(hostelName)
+        .collection('Rooms')
+        .get();
+    final batch = storage.batch();
+    for (final roomDoc in docsRoomsRef.docs) {
+      final roommateDocs =
+          await roomDoc.reference.collection('Roommates').get();
+      for (final roommateDoc in roommateDocs.docs) {
+        final attendanceRef = roommateDoc.reference
+            .collection('Attendance')
+            .doc(DateFormat('dd-MM-yyyy').format(selectedDate));
+        batch.set(
+          attendanceRef,
+          {'isPresent': status},
+          SetOptions(merge: true),
+        );
+      }
+    }
+    await batch.commit();
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+Future<bool> markAllRoommateAttendance(String hostelName, String roomName,
+    bool status, DateTime selectedDate) async {
+  try {
+    final storage = FirebaseFirestore.instance;
+    final docsRoommatesRef = await storage
+        .collection('hostels')
+        .doc(hostelName)
+        .collection('Rooms')
+        .doc(roomName)
+        .collection('Roommates')
+        .get();
+    final batch = storage.batch();
+    for (final roommateDoc in docsRoommatesRef.docs) {
+      final attendanceRef = roommateDoc.reference
+          .collection('Attendance')
+          .doc(DateFormat('dd-MM-yyyy').format(selectedDate));
+      batch.set(
+        attendanceRef,
+        {'isPresent': status},
+        SetOptions(merge: true),
+      );
+    }
+    await batch.commit();
+    return true;
+  } catch (e) {
+    return false;
+  }
+}

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../models/attendance.dart';
 import '../../models/hostel/rooms/room.dart';
 import '../../screens/hostel/rooms/roommate_form.dart';
+import '../../tools.dart';
 import 'roommates/roommate_list.dart';
 
 class RoomDataWidget extends StatefulWidget {
@@ -20,7 +22,8 @@ class RoomDataWidget extends StatefulWidget {
 class _RoomDataWidgetState extends State<RoomDataWidget> {
   bool isOpen = false;
   bool isRunning = false;
-
+  bool allPresent = false;
+  bool isDisabled = false;
   @override
   Widget build(BuildContext context) {
     double widthScreen = MediaQuery.of(context).size.width;
@@ -60,7 +63,40 @@ class _RoomDataWidgetState extends State<RoomDataWidget> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  if (!isDisabled && widget.roomData.numberOfRoommates > 0)
+                    IconButton(
+                      onPressed: isDisabled
+                          ? null
+                          : () async {
+                              final response = await askUser(
+                                context,
+                                'Are you sure to mark everyone ${allPresent ? 'absent' : 'present'} ?',
+                                yes: true,
+                                no: true,
+                              );
+                              if (response == 'yes') {
+                                setState(() {
+                                  isDisabled = true;
+                                });
+                                final resp = await markAllRoommateAttendance(
+                                    widget.hostelName,
+                                    widget.roomData.roomName,
+                                    allPresent ? false : true,
+                                    widget.selectedDate.value);
+                                if (resp && mounted) {
+                                  setState(() {
+                                    allPresent = !allPresent;
+                                    isDisabled = false;
+                                  });
+                                } else if (!resp) {
+                                  showMsg(
+                                      context, 'Unable to perform. Try again');
+                                }
+                              }
+                            },
+                      icon:
+                          Icon(allPresent ? Icons.cancel : Icons.check_circle),
+                    ),
                   if (widget.roomData.capacity >
                       widget.roomData.numberOfRoommates)
                     IconButton(
