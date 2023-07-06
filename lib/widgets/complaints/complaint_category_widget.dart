@@ -18,9 +18,9 @@ class ComplaintCategory extends StatelessWidget {
     return CategoryBuilder(
       id: id,
       builder: (ctx, category) => GlassWidget(
-        radius: 15,
+        radius: 20,
         child: Container(
-          color: category.color.withOpacity(0.1),
+          color: category.color.withOpacity(0.2),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             Padding(
               padding: const EdgeInsets.symmetric(
