@@ -12,7 +12,7 @@ class AddRoomWid extends ConsumerStatefulWidget {
 }
 
 class _AddRoomWidState extends ConsumerState<AddRoomWid> {
-  List<GlobalKey<FormState>> _formKeyList = [];
+  final List<GlobalKey<FormState>> _formKeyList = [];
   final storage = FirebaseFirestore.instance;
   // final _formKeyList[index] = GlobalKey<FormState>();
   int currentRoomNumber = 0;
@@ -70,12 +70,15 @@ class _AddRoomWidState extends ConsumerState<AddRoomWid> {
           children: [
             // Text("hi"),
             TextField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 label: Text("Enter number of rooms to be added"),
               ),
               keyboardType: TextInputType.number,
               onChanged: (value) {
                 setState(() {
+                  if (value == "") {
+                    value = "0";
+                  }
                   numOfRooms = value == "" ? 0 : int.parse(value);
                   for (int i = 0; i < numOfRooms; i++) {
                     _formKeyList.add(GlobalKey<FormState>());
@@ -84,7 +87,7 @@ class _AddRoomWidState extends ConsumerState<AddRoomWid> {
               },
             ),
             ListView.builder(
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               itemBuilder: (context, index) {
                 return Card(
                     child: Column(
@@ -93,7 +96,7 @@ class _AddRoomWidState extends ConsumerState<AddRoomWid> {
                       "Room ${index + 1}",
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 5,
                     ),
                     Form(
@@ -101,7 +104,7 @@ class _AddRoomWidState extends ConsumerState<AddRoomWid> {
                       child: Column(children: [
                         TextFormField(
                           enabled: index == currentRoomNumber,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: "Enter Room name",
                           ),
                           validator: (value) {
@@ -116,7 +119,7 @@ class _AddRoomWidState extends ConsumerState<AddRoomWid> {
                         ),
                         TextFormField(
                           enabled: currentRoomNumber == index,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: "Capacity",
                           ),
                           validator: (value) {
@@ -131,7 +134,7 @@ class _AddRoomWidState extends ConsumerState<AddRoomWid> {
                         ),
                         if (currentRoomNumber == index)
                           isRunning
-                              ? CircularProgressIndicator()
+                              ? const CircularProgressIndicator()
                               : TextButton.icon(
                                   onPressed: () {
                                     setState(() {
@@ -139,8 +142,8 @@ class _AddRoomWidState extends ConsumerState<AddRoomWid> {
                                     });
                                     addRoom(index);
                                   },
-                                  icon: Icon(Icons.add_circle_outline),
-                                  label: Text("Add Room"))
+                                  icon: const Icon(Icons.add_circle_outline),
+                                  label: const Text("Add Room"))
                       ]),
                     )
                   ],

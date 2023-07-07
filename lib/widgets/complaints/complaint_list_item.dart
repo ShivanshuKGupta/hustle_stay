@@ -29,8 +29,6 @@ class ComplaintListItem extends ConsumerStatefulWidget {
 
 class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
     with TickerProviderStateMixin {
-  final bool _animate = false;
-
   final duration = const Duration(milliseconds: 800);
 
   late AnimationController _controller;

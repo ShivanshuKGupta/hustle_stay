@@ -72,7 +72,7 @@ class _FetchRoomsState extends State<FetchRooms> {
     return Column(
       children: [
         Container(
-          child: Row(
+          child: Wrap(
             children: [
               Text(
                 'Select new Room',

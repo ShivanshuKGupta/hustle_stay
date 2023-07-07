@@ -49,15 +49,15 @@ class _FetchRoommatesState extends State<FetchRoommates> {
   Widget NamesDropDown(List<DropdownMenuItem> list) {
     return Column(
       children: [
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width,
-          child: Row(
+          child: Wrap(
             children: [
               Text(
                 'Roommate to swap',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
-              SizedBox(
+              const SizedBox(
                 width: 5,
               ),
               DropdownButton(

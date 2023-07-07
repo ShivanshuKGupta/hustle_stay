@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import 'package:hustle_stay/screens/hostel/rooms/rooms_screen.dart';
+
 import '../../../tools.dart';
 
 class RoommateForm extends ConsumerStatefulWidget {
@@ -21,7 +22,7 @@ class RoommateForm extends ConsumerStatefulWidget {
 }
 
 class _RoommateFormState extends ConsumerState<RoommateForm> {
-  List<GlobalKey<FormState>> _formKeyList = [];
+  final List<GlobalKey<FormState>> _formKeyList = [];
   final storage = FirebaseFirestore.instance;
 
   int currentRoommateNumber = 0;
@@ -37,7 +38,7 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
             await storage.collection('users').doc(roommateEmail).get();
         if (!userCheck.exists) {
           ScaffoldMessenger.of(context).clearSnackBars();
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text(
                   'No user exists with this email. Create an account to add here.')));
           setState(() {
@@ -106,11 +107,14 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
             children: [
               // Text("hi"),
               TextField(
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   label: Text("Number of Roommates to be added"),
                 ),
                 keyboardType: TextInputType.number,
                 onChanged: (value) {
+                  if (value == "") {
+                    value = '0';
+                  }
                   setState(() {
                     numOfRoommates = value == "" ? 0 : int.parse(value);
 
@@ -128,10 +132,10 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
                   });
                 },
               ),
-              Divider(),
+              const Divider(),
 
               ListView.builder(
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (context, index) {
                   return Card(
                       child: Column(
@@ -140,7 +144,7 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
                         "Roommate ${index + 1}",
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 5,
                       ),
                       Form(
@@ -148,7 +152,7 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
                         child: Column(children: [
                           TextFormField(
                             enabled: currentRoommateNumber == index,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               labelText: "Email ID",
                             ),
                             keyboardType: TextInputType.emailAddress,
@@ -164,7 +168,7 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
                           ),
                           if (currentRoommateNumber == index)
                             isRunning
-                                ? CircularProgressIndicator()
+                                ? const CircularProgressIndicator()
                                 : TextButton.icon(
                                     onPressed: () {
                                       setState(() {
@@ -172,8 +176,8 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
                                       });
                                       addRoommate(index);
                                     },
-                                    icon: Icon(Icons.add_circle_outline),
-                                    label: Text("Add Roommate"))
+                                    icon: const Icon(Icons.add_circle_outline),
+                                    label: const Text("Add Roommate"))
                         ]),
                       )
                     ],
