@@ -38,6 +38,7 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
     _getAttendanceData();
   }
 
+  bool isOnScreen = true;
   bool isRunning = false;
   String? status;
   Future<void> _getAttendanceData() async {
@@ -51,69 +52,85 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
     return;
   }
 
+  void pushAgain() {
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+      builder: (_) => RoomsScreen(hostelName: widget.hostelName),
+    ));
+  }
+
+  void onChangeScreen(UserData user, BuildContext ctx) async {
+    final value = await Navigator.of(ctx).push(MaterialPageRoute(
+        builder: (_) => CompleteDetails(
+            user: user,
+            hostelName: widget.hostelName,
+            roomName: widget.roomName,
+            roommateData: widget.roommateData)));
+    if (value == null) {
+      return;
+    }
+
+    if (value == true) {
+      if (mounted) {
+        setState(() {
+          isOnScreen = false;
+        });
+      }
+      pushAgain();
+    }
+  }
+
   var currentIcon = const Icon(Icons.close_rounded, color: Colors.red);
   @override
   Widget build(BuildContext context) {
     double widthScreen = MediaQuery.of(context).size.width;
-    return UserBuilder(
-      email: widget.roommateData.email,
-      loadingWidget: Padding(
-        padding: const EdgeInsets.all(1),
-        child: Center(
-          child: circularProgressIndicator(),
-        ),
-      ),
-      builder: (context, user) {
-        return GestureDetector(
-          onTap: () async {
-            final value = await Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => CompleteDetails(
-                    user: user,
-                    hostelName: widget.hostelName,
-                    roomName: widget.roomName,
-                    roommateData: widget.roommateData)));
-            if (value == null) {
-              return;
-            }
-            if (value == true) {
-              Navigator.of(context).pushReplacement(MaterialPageRoute(
-                builder: (_) => RoomsScreen(hostelName: widget.hostelName),
-              ));
-            }
-          },
-          child: ListTile(
-              leading: CircleAvatar(
-                  radius: 50,
-                  child: ClipOval(
-                    child: AspectRatio(
-                      aspectRatio: 1.0,
-                      child: user.imgUrl == null
-                          ? null
-                          : CachedNetworkImage(
-                              imageUrl: user.imgUrl!,
-                              fit: BoxFit.cover,
-                            ),
+    return isOnScreen
+        ? UserBuilder(
+            email: widget.roommateData.email,
+            loadingWidget: Padding(
+              padding: const EdgeInsets.all(1),
+              child: Center(
+                child: circularProgressIndicator(),
+              ),
+            ),
+            builder: (context, user) {
+              return GestureDetector(
+                onTap: () {
+                  onChangeScreen(user, context);
+                },
+                child: ListTile(
+                    leading: CircleAvatar(
+                        radius: 50,
+                        child: ClipOval(
+                          child: AspectRatio(
+                            aspectRatio: 1.0,
+                            child: user.imgUrl == null
+                                ? null
+                                : CachedNetworkImage(
+                                    imageUrl: user.imgUrl!,
+                                    fit: BoxFit.cover,
+                                  ),
+                          ),
+                        )),
+                    title: Text(
+                      user.name ?? widget.roommateData.email,
+                      style: const TextStyle(fontSize: 16),
                     ),
-                  )),
-              title: Text(
-                user.name ?? widget.roommateData.email,
-                style: const TextStyle(fontSize: 16),
-              ),
-              contentPadding: EdgeInsets.all(widthScreen * 0.002),
-              subtitle: Text(
-                user.email!.substring(0, 9).toUpperCase(),
-                style: const TextStyle(fontSize: 14),
-              ),
-              trailing: status == null
-                  ? null
-                  : AttendanceIcon(
-                      roommateData: widget.roommateData,
-                      selectedDate: widget.selectedDate,
-                      roomName: widget.roomName,
-                      hostelName: widget.hostelName,
-                      status: status!)),
-        );
-      },
-    );
+                    contentPadding: EdgeInsets.all(widthScreen * 0.002),
+                    subtitle: Text(
+                      user.email!.substring(0, 9).toUpperCase(),
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    trailing: status == null
+                        ? null
+                        : AttendanceIcon(
+                            roommateData: widget.roommateData,
+                            selectedDate: widget.selectedDate,
+                            roomName: widget.roomName,
+                            hostelName: widget.hostelName,
+                            status: status!)),
+              );
+            },
+          )
+        : Container();
   }
 }
