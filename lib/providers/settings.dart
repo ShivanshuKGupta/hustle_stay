@@ -13,12 +13,17 @@ class _Settings {
   /// Introduction screen visisted
   bool introductionScreenVisited = false;
 
+  /// Complaints Screen Sorting Parameters
+  /// used for showing complaints in groups and in a certain order
+  String complaintsGrouping = "category";
+
   /// converts setting parameters into a string
   String encode() {
     return json.encode({
       "darkMode": darkMode,
       "currentPage": currentPage,
       "introductionScreenVisited": introductionScreenVisited,
+      "complaintsGrouping": complaintsGrouping,
     });
   }
 
@@ -28,6 +33,7 @@ class _Settings {
     darkMode = settings["darkMode"] ?? false;
     introductionScreenVisited = settings["introductionScreenVisited"] ?? false;
     currentPage = settings["currentPage"] ?? 0;
+    complaintsGrouping = (settings["complaintsGrouping"] ?? "category");
   }
 }
 

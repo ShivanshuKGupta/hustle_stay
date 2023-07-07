@@ -46,7 +46,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         extendBody: true,
         drawer: const Drawer(elevation: 5, child: MainDrawer()),
         bottomNavigationBar: Padding(
-          padding: const EdgeInsets.only(left: 5, right: 5, bottom: 20, top: 2),
+          padding: const EdgeInsets.only(left: 0, right: 0, bottom: 0, top: 2),
           child: GlassWidget(
             radius: 50,
             child: Container(
