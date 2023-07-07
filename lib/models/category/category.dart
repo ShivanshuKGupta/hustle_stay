@@ -38,10 +38,10 @@ class Category {
   }
 
   void load(Map<String, dynamic> data) {
-    defaultReceipient = (data["defaultReceipient"] as List<dynamic>)
+    defaultReceipient = ((data["defaultReceipient"] ?? []) as List<dynamic>)
         .map((e) => e.toString())
         .toList();
-    allReceipients = (data["allReceipients"] as List<dynamic>)
+    allReceipients = ((data["allReceipients"] ?? []) as List<dynamic>)
         .map((e) => e.toString())
         .toList();
     defaultPriority = data['defaultPriority'] ?? 0;
