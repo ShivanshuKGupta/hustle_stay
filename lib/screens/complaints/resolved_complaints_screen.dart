@@ -13,6 +13,10 @@ class ResolvedComplaintsScreen extends StatelessWidget {
       body: FutureBuilder(
         future: fetchComplaints(resolved: true),
         builder: (ctx, snapshot) {
+          if (snapshot.hasError) {
+            showMsg(context, snapshot.error.toString());
+            return Text(snapshot.error.toString());
+          }
           if (!snapshot.hasData) {
             return Center(child: circularProgressIndicator());
           }

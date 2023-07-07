@@ -13,12 +13,15 @@ enum Scope {
 class ComplaintData {
   String? description;
   late String from;
+
+  /// createdAt dateTime object converted into a string or integer
   late String id;
-  // createdAt dateTime object converted into a string or integer
+
+  /// resolvedAt dateTime object converted into a string or integer
+  String? resolvedAt;
   late Scope scope;
   late String title;
   late List<String> to;
-  late bool resolved;
   String? imgUrl;
   String? category;
 
@@ -29,7 +32,7 @@ class ComplaintData {
     this.scope = Scope.public,
     required this.title,
     required this.to,
-    required this.resolved,
+    this.resolvedAt,
     this.imgUrl,
     this.category,
   });
@@ -41,7 +44,7 @@ class ComplaintData {
       "scope": scope.name,
       "title": title,
       "to": to,
-      "resolved": resolved,
+      "resolved": resolvedAt,
       "imgUrl": imgUrl,
       "category": category,
     };
@@ -89,7 +92,7 @@ class ComplaintData {
     scope = Scope.values
         .firstWhere((element) => element.name == complaintData["scope"]);
     title = complaintData["title"];
-    resolved = complaintData["resolved"] ?? false;
+    resolvedAt = complaintData["resolved"];
     imgUrl = complaintData["imgUrl"];
     category = complaintData["category"];
     to = (complaintData["to"] as List<dynamic>)
@@ -133,7 +136,7 @@ Future<List<ComplaintData>> fetchComplaints(
   final publicComplaints = await firestore
       .collection('complaints')
       .where('scope', isEqualTo: 'public')
-      .where('resolved', isEqualTo: resolved)
+      .where('resolvedAt', isNull: !resolved)
       .get(src != null ? GetOptions(source: src) : null);
   List<ComplaintData> ans = publicComplaints.docs
       .map((e) => ComplaintData.load(e.id, e.data()))
@@ -143,7 +146,7 @@ Future<List<ComplaintData>> fetchComplaints(
       .collection('complaints')
       .where('from', isEqualTo: currentUser.email)
       .where('scope', isEqualTo: 'private')
-      .where('resolved', isEqualTo: resolved)
+      .where('resolvedAt', isNull: !resolved)
       .get(src != null ? GetOptions(source: src) : null);
   ans +=
       myComplaints.docs.map((e) => ComplaintData.load(e.id, e.data())).toList();
@@ -152,7 +155,7 @@ Future<List<ComplaintData>> fetchComplaints(
       .collection('complaints')
       .where('to', arrayContains: currentUser.email)
       .where('scope', isEqualTo: 'private')
-      .where('resolved', isEqualTo: resolved)
+      .where('resolvedAt', isNull: !resolved)
       .get(src != null ? GetOptions(source: src) : null);
   ans += includedComplaints.docs
       .map((e) => ComplaintData.load(e.id, e.data()))

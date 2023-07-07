@@ -44,7 +44,6 @@ class _ComplaintFormState extends State<ComplaintForm> {
           id: "",
           title: "",
           to: [],
-          resolved: false,
         );
     initialize();
   }
