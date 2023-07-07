@@ -44,9 +44,14 @@ class _FilteredRecordsState extends State<FilteredRecords> {
             itemBuilder: (context, index) {
               return ListTile(
                 title: Text(list[index].date),
-                trailing: Icon(list[index].isPresent
-                    ? Icons.check_box_rounded
-                    : Icons.close),
+                trailing: list[index].status == 'onLeave'
+                    ? Text(
+                        'on leave',
+                        style: TextStyle(backgroundColor: Colors.yellow[400]),
+                      )
+                    : Icon(list[index].status == 'present'
+                        ? Icons.check_box_rounded
+                        : Icons.close),
               );
             },
             itemCount: list.length,

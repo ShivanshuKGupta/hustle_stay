@@ -14,9 +14,9 @@ class RoommateData {
 }
 
 class AttendanceRecord {
-  bool isPresent;
+  String status;
   String date;
-  AttendanceRecord({required this.isPresent, required this.date});
+  AttendanceRecord({required this.status, required this.date});
 }
 
 class Room {
@@ -298,7 +298,7 @@ Future<List<DropdownMenuItem>> fetchRoomNames(String hostelName,
       .doc(hostelName)
       .collection('Rooms')
       .get(src == null ? null : GetOptions(source: src));
-  storageRef.docs.forEach((element) {
+  for (var element in storageRef.docs) {
     if (roomname == null || element.id != roomname) {
       list.add(DropdownMenuItem(
         value: element.id,
@@ -308,7 +308,7 @@ Future<List<DropdownMenuItem>> fetchRoomNames(String hostelName,
         ),
       ));
     }
-  });
+  }
   return list;
 }
 
@@ -324,15 +324,15 @@ Future<List<DropdownMenuItem>> fetchRoommateNames(
       .doc(roomName)
       .collection('Roommates')
       .get(src == null ? null : GetOptions(source: src));
-  storageRef.docs.forEach((element) {
+  for (var element in storageRef.docs) {
     list.add(DropdownMenuItem(
+      value: element.id,
       child: Text(
         element['email'],
-        style: TextStyle(fontSize: 10),
+        style: const TextStyle(fontSize: 10),
       ),
-      value: element.id,
     ));
-  });
+  }
   return list;
 }
 
@@ -355,8 +355,7 @@ Future<List<AttendanceRecord>> fetchAttendanceByStudent(String email) async {
           .get();
       final attendanceData = attendanceDataRef.docs;
       for (final doc in attendanceData) {
-        list.add(
-            AttendanceRecord(isPresent: doc.data()['isPresent'], date: doc.id));
+        list.add(AttendanceRecord(status: doc.data()['status'], date: doc.id));
       }
     }
   }

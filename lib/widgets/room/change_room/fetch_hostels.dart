@@ -55,13 +55,13 @@ class _FetchHostelNamesState extends State<FetchHostelNames> {
     return Column(
       children: [
         Container(
-          child: Row(
+          child: Wrap(
             children: [
               Text(
                 !widget.isSwap ? 'Select new Hostel' : 'Hostel to Swap',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
-              SizedBox(
+              const SizedBox(
                 width: 5,
               ),
               DropdownButton(

@@ -97,7 +97,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                     const Divider(),
                     Text("Name: ${widget.user.name ?? ''}"),
                     Text("${widget.user.phoneNumber}"),
-                    Row(
+                    Wrap(
                       children: [
                         if (!onLeave)
                           TextButton.icon(
@@ -166,7 +166,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                   const SizedBox(
                     height: 15,
                   ),
-                  Row(
+                  Wrap(
                     children: [
                       Text(
                         'Choose your option',
