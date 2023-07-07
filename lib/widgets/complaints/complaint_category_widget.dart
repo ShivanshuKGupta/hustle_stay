@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:hustle_stay/models/category/category.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/tools.dart';
@@ -41,6 +42,6 @@ class ComplaintCategory extends StatelessWidget {
           ]),
         ),
       ),
-    );
+    ).animate().fade();
   }
 }

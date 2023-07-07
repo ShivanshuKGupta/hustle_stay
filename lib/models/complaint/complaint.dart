@@ -185,7 +185,9 @@ class ComplaintsBuilder extends ConsumerWidget {
       builder: (ctx, snapshot) {
         if (!snapshot.hasData) {
           if (src == Source.cache) {
-            return loadingWidget ?? builder(ctx, complaints);
+            return complaints.isEmpty && loadingWidget != null
+                ? loadingWidget!
+                : builder(context, complaints);
           }
           return FutureBuilder(
             future: fetchComplaints(src: Source.cache),
@@ -194,7 +196,7 @@ class ComplaintsBuilder extends ConsumerWidget {
                 // Returning this Widget when nothing has arrived
                 return complaints.isEmpty && loadingWidget != null
                     ? loadingWidget!
-                    : builder(ctx, complaints);
+                    : builder(context, complaints);
               }
               // Returning this widget from cache while data arrives from server
               ComplaintsBuilder.complaints = snapshot.data!;

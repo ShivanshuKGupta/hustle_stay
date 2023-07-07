@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/chat/message.dart';
@@ -21,6 +22,8 @@ class ComplaintsScreen extends ConsumerStatefulWidget {
 }
 
 class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
+  static Source src = Source.serverAndCache;
+
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(settingsProvider);
@@ -61,15 +64,20 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
     return Scaffold(
       drawer: const MainDrawer(),
       body: ComplaintsBuilder(
+        src: src,
         loadingWidget: Center(child: circularProgressIndicator()),
         builder: (ctx, complaints) {
+          src = Source.cache;
           List<Widget> children =
               calculateUI(settings.complaintsGrouping, complaints);
           return RefreshIndicator(
             edgeOffset: appBar.collapsedHeight ?? 0,
             onRefresh: () async {
               await fetchComplaints();
-              setState(() {});
+              src = Source.serverAndCache;
+              if (context.mounted) {
+                setState(() {});
+              }
             },
             child: CustomScrollView(
               slivers: [
