@@ -230,6 +230,13 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
                       ),
                 ),
                 Text("${widget.complaint.to}"),
+                Text(
+                  "Category: ",
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                ),
+                Text(widget.complaint.category ?? 'other'),
                 const Divider(),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -69,7 +69,13 @@ class _ComplaintFormState extends State<ComplaintForm> {
   Future<void> _save() async {
     FocusScope.of(context).unfocus();
     if (!_formkey.currentState!.validate()) return;
+    if (widget.complaint!.category != null &&
+        widget.complaint!.category != "Other") {
+      widget.complaint!.to =
+          (await fetchCategory(widget.complaint!.category!)).defaultReceipient;
+    }
     if (widget.complaint!.to.isEmpty) {
+      // ignore: use_build_context_synchronously
       showMsg(context, 'Add a receipeint');
       return;
     }
@@ -79,6 +85,7 @@ class _ComplaintFormState extends State<ComplaintForm> {
     });
     try {
       widget.complaint!.imgUrl = img != null
+          // ignore: use_build_context_synchronously
           ? await uploadImage(
               context,
               img,
@@ -116,13 +123,7 @@ class _ComplaintFormState extends State<ComplaintForm> {
           const SizedBox(
             height: 20,
           ),
-          (_userFetchLoading)
-              ? circularProgressIndicator()
-              : ChooseUsers(
-                  allUsers: recepients,
-                  chosenUsers: widget.complaint!.to,
-                  onUpdate: (value) => widget.complaint!.to = value,
-                ),
+
           TextFormField(
             onChanged: (value) {
               widget.complaint!.title = value;
@@ -196,11 +197,23 @@ class _ComplaintFormState extends State<ComplaintForm> {
                     ),
                   )
                   .toList(),
-              onChanged: (value) =>
-                  widget.complaint!.category = value ?? "Other",
+              onChanged: (value) {
+                setState(() {
+                  widget.complaint!.category = value ?? "Other";
+                });
+              },
               onSaved: (value) => widget.complaint!.category = value ?? "Other",
             ),
           ),
+          if (widget.complaint!.category == null ||
+              widget.complaint!.category == 'Other')
+            (_userFetchLoading)
+                ? circularProgressIndicator()
+                : ChooseUsers(
+                    allUsers: recepients,
+                    chosenUsers: widget.complaint!.to,
+                    onUpdate: (value) => widget.complaint!.to = value,
+                  ),
           const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
