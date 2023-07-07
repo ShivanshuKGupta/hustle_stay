@@ -11,12 +11,16 @@ class ChatData {
   String path;
   List<MessageData> messages = [];
 
+  /// Whether the chat is locked
+  bool locked = false;
+
   ChatData({
     required this.owner,
     required this.receivers,
     this.description,
     required this.title,
     required this.path,
+    this.locked = false,
   });
 }
 

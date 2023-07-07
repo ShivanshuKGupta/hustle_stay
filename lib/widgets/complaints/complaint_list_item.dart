@@ -274,6 +274,7 @@ Future<void> showComplaintChat(BuildContext context, ComplaintData complaint,
         complaint: complaint,
       ),
       chat: ChatData(
+        locked: complaint.resolvedAt != null,
         path: "complaints/${complaint.id}",
         owner: complaint.from,
         receivers: complaint.to,

@@ -24,43 +24,35 @@ class ComplaintsScreen extends ConsumerStatefulWidget {
 class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
   static Source src = Source.serverAndCache;
 
+  SliverAppBar get sliverAppBar => SliverAppBar(
+        elevation: 10,
+        floating: true,
+        pinned: true,
+        expandedHeight: 150,
+        stretch: true,
+        flexibleSpace: FlexibleSpaceBar(
+          title: shaderText(
+            context,
+            title: "Complaints",
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+        ),
+        actions: [
+          IconButton(
+            onPressed: _addComplaint,
+            icon: const Icon(Icons.add_rounded),
+          ),
+          IconButton(
+              onPressed: _showSortDialog, icon: const Icon(Icons.sort_rounded))
+        ],
+      );
+
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(settingsProvider);
-    final settingsClass = ref.read(settingsProvider.notifier);
     const duration = Duration(milliseconds: 1000);
     final mediaQuery = MediaQuery.of(context);
-    final appBar = SliverAppBar(
-      elevation: 10,
-      floating: true,
-      pinned: true,
-      expandedHeight: 150,
-      stretch: true,
-      flexibleSpace: FlexibleSpaceBar(
-        title: shaderText(
-          context,
-          title: "Complaints",
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-      ),
-      actions: [
-        IconButton(
-          onPressed: _addComplaint,
-          icon: const Icon(Icons.add_rounded),
-        ),
-        IconButton(
-          onPressed: () async {
-            settings.complaintsGrouping = await _showSortDialog(
-                  context,
-                  settings.complaintsGrouping,
-                ) ??
-                settings.complaintsGrouping;
-            settingsClass.notifyListeners();
-          },
-          icon: const Icon(Icons.sort_rounded),
-        ),
-      ],
-    );
+    final appBar = sliverAppBar;
     return Scaffold(
       drawer: const MainDrawer(),
       body: ComplaintsBuilder(
@@ -71,9 +63,13 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
           List<Widget> children =
               calculateUI(settings.complaintsGrouping, complaints);
           return RefreshIndicator(
-            edgeOffset: appBar.collapsedHeight ?? 0,
+            edgeOffset: (appBar.expandedHeight ?? 0) + appBar.toolbarHeight,
             onRefresh: () async {
-              await fetchComplaints();
+              try {
+                await fetchComplaints();
+              } catch (e) {
+                showMsg(context, e.toString());
+              }
               src = Source.serverAndCache;
               if (context.mounted) {
                 setState(() {});
@@ -228,11 +224,15 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
     }
   }
 
-  Future<String?> _showSortDialog(BuildContext context, String groupBy) async {
-    return await showDialog<String?>(
-      context: context,
-      builder: (ctx) => SortDialogBox(groupBy: groupBy),
-    );
+  Future<void> _showSortDialog() async {
+    final settings = ref.watch(settingsProvider);
+    final settingsClass = ref.read(settingsProvider.notifier);
+    settings.complaintsGrouping = await showDialog<String?>(
+          context: context,
+          builder: (ctx) => SortDialogBox(groupBy: settings.complaintsGrouping),
+        ) ??
+        settings.complaintsGrouping;
+    settingsClass.notifyListeners();
   }
 }
 

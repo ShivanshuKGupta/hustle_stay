@@ -56,15 +56,16 @@ class ChatScreen extends StatelessWidget {
             Expanded(
               child: MessageList(chat: chat),
             ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 5.0, left: 5, top: 5),
-              child: MessageInputField(
-                initialValue: initialMsg != null ? initialMsg!.txt : "",
-                onSubmit: (MessageData msg) async {
-                  await addMessage(chat, msg);
-                },
+            if (!chat.locked)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 5.0, left: 5, top: 5),
+                child: MessageInputField(
+                  initialValue: initialMsg != null ? initialMsg!.txt : "",
+                  onSubmit: (MessageData msg) async {
+                    await addMessage(chat, msg);
+                  },
+                ),
               ),
-            ),
           ],
         ),
       ),

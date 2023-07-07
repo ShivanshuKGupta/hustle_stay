@@ -35,7 +35,7 @@ class ComplaintBottomBar extends ConsumerWidget {
         onPressed: () => resolveComplaint(ref),
         label: Text(
           (complaint.from != currentUser.email ? ' Request to ' : '') +
-              (complaint.resolved ? 'Unresolve' : 'Resolve'),
+              (complaint.resolvedAt != null ? 'Unresolve' : 'Resolve'),
         ),
       ),
       ElevatedButton.icon(
@@ -68,7 +68,12 @@ class ComplaintBottomBar extends ConsumerWidget {
   }
 
   Future<void> showIncludeBox() async {
-    final allUsers = await fetchComplainees();
+    List<String> allUsers = [];
+    try {
+      allUsers = await fetchComplainees();
+    } catch (e) {
+      showMsg(context, e.toString());
+    }
     List<String> chosenUsers = [];
     allUsers.removeWhere((element) => complaint.to.contains(element));
     if (context.mounted) {
@@ -159,7 +164,7 @@ class ComplaintBottomBar extends ConsumerWidget {
         MessageData(
           id: DateTime.now().microsecondsSinceEpoch.toString(),
           txt:
-              "${currentUser.name ?? currentUser.email} requested to ${complaint.resolved ? 'unresolve' : 'resolve'} the complaint at\n${ddmmyyyy(DateTime.now())} ${timeFrom(DateTime.now())}",
+              "${currentUser.name ?? currentUser.email} requested to ${complaint.resolvedAt != null ? 'unresolve' : 'resolve'} the complaint at\n${ddmmyyyy(DateTime.now())} ${timeFrom(DateTime.now())}",
           from: currentUser.email!,
           createdAt: DateTime.now(),
           indicative: true,
@@ -169,15 +174,15 @@ class ComplaintBottomBar extends ConsumerWidget {
     }
     String? response = await askUser(
       context,
-      "${complaint.resolved ? 'Unresolve' : 'Resolve'} the complaint?",
-      description: complaint.resolved
+      "${complaint.resolvedAt != null ? 'Unresolve' : 'Resolve'} the complaint?",
+      description: complaint.resolvedAt != null
           ? "Unresolving the complaint will activate this complaint again."
           : "Do you confirm that the complaint has indeed been resolved from your perspective?",
       yes: true,
       no: true,
     );
     if (response == 'yes') {
-      complaint.resolved = !complaint.resolved;
+      complaint.resolvedAt = DateTime.now().millisecondsSinceEpoch.toString();
       updateComplaint(complaint);
       await addMessage(
         ChatData(
@@ -190,7 +195,7 @@ class ComplaintBottomBar extends ConsumerWidget {
         MessageData(
           id: DateTime.now().microsecondsSinceEpoch.toString(),
           txt:
-              "${currentUser.name ?? currentUser.email} ${complaint.resolved ? 'resolved' : 'unresolved'} the complaint at\n${ddmmyyyy(DateTime.now())} ${timeFrom(DateTime.now())}",
+              "${currentUser.name ?? currentUser.email} ${complaint.resolvedAt != null ? 'resolved' : 'unresolved'} the complaint at\n${ddmmyyyy(DateTime.now())} ${timeFrom(DateTime.now())}",
           from: currentUser.email!,
           createdAt: DateTime.now(),
           indicative: true,
