@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/attendance.dart';
 import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/screens/hostel/rooms/rooms_screen.dart';
 import 'package:hustle_stay/widgets/room/roommates/attendance_icon.dart';
 
-import '../../../screens/hostel/rooms/profile_view_screen.dart';
+import '../../../screens/hostel/rooms/complete_details_screen.dart';
 import '../../../tools.dart';
 
 class RoommateDataWidget extends StatefulWidget {
@@ -64,13 +65,21 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
       ),
       builder: (context, user) {
         return GestureDetector(
-          onTap: () {
-            Navigator.of(context).pushReplacement(MaterialPageRoute(
-                builder: (_) => ProfileViewScreen(
+          onTap: () async {
+            final value = await Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => CompleteDetails(
                     user: user,
                     hostelName: widget.hostelName,
                     roomName: widget.roomName,
                     roommateData: widget.roommateData)));
+            if (value == null) {
+              return;
+            }
+            if (value == true) {
+              Navigator.of(context).pushReplacement(MaterialPageRoute(
+                builder: (_) => RoomsScreen(hostelName: widget.hostelName),
+              ));
+            }
           },
           child: ListTile(
               leading: CircleAvatar(

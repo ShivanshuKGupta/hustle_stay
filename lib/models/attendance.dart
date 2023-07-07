@@ -1,7 +1,17 @@
+import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'hostel/rooms/room.dart';
+
+class ChartData {
+  final String category;
+  final double value;
+  final charts.Color color;
+
+  ChartData(this.category, this.value, this.color);
+}
 
 Future<String> getAttendanceData(RoommateData roommateData, String hostelName,
     String roomName, DateTime date) async {
@@ -15,9 +25,6 @@ Future<String> getAttendanceData(RoommateData roommateData, String hostelName,
       .doc(roommateData.email)
       .collection('Attendance')
       .doc(DateFormat('yyyy-MM-dd').format(date));
-  print('Selected Date: $date');
-  print('Start Date: ${roommateData.leaveStartDate}');
-  print('End Date: ${roommateData.leaveEndDate}');
   if (roommateData.onLeave != null &&
       roommateData.onLeave! &&
       roommateData.leaveStartDate != null &&
@@ -127,4 +134,57 @@ Future<bool> markAllRoommateAttendance(String hostelName, String roomName,
   } catch (e) {
     return false;
   }
+}
+
+Future<Map<String, double>> getAttendanceStatistics(
+    String email, String hostelName, String roomName,
+    {DateTimeRange? range}) async {
+  double presentData = 0;
+  double absentData = 0;
+  double leaveData = 0;
+  double internshipData = 0;
+
+  final storage = FirebaseFirestore.instance;
+  final docsAttendanceRef = await storage
+      .collection('hostels')
+      .doc(hostelName)
+      .collection('Rooms')
+      .doc(roomName)
+      .collection('Roommates')
+      .doc(email)
+      .collection('Attendance')
+      .get();
+  for (final docs in docsAttendanceRef.docs) {
+    if (range == null ||
+        (DateFormat('yyyy-MM-dd')
+                    .format(range.start)
+                    .compareTo(docs.id.toString()) <=
+                0 &&
+            DateFormat('yyyy-MM-dd')
+                    .format(range.end)
+                    .compareTo(docs.id.toString()) >=
+                0)) {
+      switch (docs['status']) {
+        case 'present':
+          presentData += 1;
+          break;
+        case 'absent':
+          absentData += 1;
+          break;
+        case 'onLeave':
+          leaveData += 1;
+          break;
+        default:
+          internshipData += 1;
+      }
+    }
+  }
+  Map<String, double> attendanceStats = {
+    'present': presentData,
+    'absent': absentData,
+    'leave': leaveData,
+    'internship': internshipData
+  };
+
+  return attendanceStats;
 }

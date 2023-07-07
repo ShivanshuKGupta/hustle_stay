@@ -1,8 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/hostel/rooms/room.dart';
 
-import '../../../screens/hostel/rooms/rooms_screen.dart';
 import '../../../tools.dart';
 
 class SwapRoom extends StatefulWidget {
@@ -43,9 +41,7 @@ class _SwapRoomState extends State<SwapRoom> {
       });
       return;
     }
-    Navigator.of(context).pushReplacement(MaterialPageRoute(
-      builder: (context) => RoomsScreen(hostelName: widget.hostelName),
-    ));
+    Navigator.of(context).pop(true);
   }
 
   bool isRunning = false;
@@ -61,8 +57,8 @@ class _SwapRoomState extends State<SwapRoom> {
                   });
                   _submitForm();
                 },
-                icon: Icon(Icons.update_rounded),
-                label: Text('Swap Record')),
+                icon: const Icon(Icons.update_rounded),
+                label: const Text('Swap Record')),
           );
   }
 }

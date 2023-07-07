@@ -1,11 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/screens/hostel/rooms/rooms_screen.dart';
 import 'package:hustle_stay/widgets/room/change_room/fetch_roommates.dart';
 
 import '../../../models/hostel/rooms/room.dart';
 import '../../../tools.dart';
-import 'swap_room.dart';
 
 class FetchRooms extends StatefulWidget {
   FetchRooms(
@@ -44,9 +41,7 @@ class _FetchRoomsState extends State<FetchRooms> {
       });
       return;
     }
-    Navigator.of(context).pushReplacement(MaterialPageRoute(
-      builder: (context) => RoomsScreen(hostelName: widget.hostelName),
-    ));
+    Navigator.of(context).pop(true);
   }
 
   @override
@@ -83,7 +78,7 @@ class _FetchRoomsState extends State<FetchRooms> {
                 'Select new Room',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
-              SizedBox(
+              const SizedBox(
                 width: 5,
               ),
               DropdownButton(
@@ -100,7 +95,7 @@ class _FetchRoomsState extends State<FetchRooms> {
         if (destRoomName != null && destRoomName != "")
           !widget.isSwap
               ? isRunning
-                  ? CircularProgressIndicator()
+                  ? const CircularProgressIndicator()
                   : Center(
                       child: TextButton.icon(
                           onPressed: () {
@@ -109,8 +104,8 @@ class _FetchRoomsState extends State<FetchRooms> {
                             });
                             _submitForm();
                           },
-                          icon: Icon(Icons.update_rounded),
-                          label: Text('Update Record')),
+                          icon: const Icon(Icons.update_rounded),
+                          label: const Text('Update Record')),
                     )
               : FetchRoommates(
                   destRoomName: destRoomName!,
