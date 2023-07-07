@@ -25,10 +25,11 @@ class AttendanceIcon extends StatefulWidget {
 }
 
 class _AttendanceIconState extends State<AttendanceIcon> {
-  final presentIcon = Icon(Icons.check_circle_outline, color: Colors.green);
-  final absentIcon = Icon(Icons.close_rounded, color: Colors.red);
+  final presentIcon =
+      const Icon(Icons.check_circle_outline, color: Colors.green);
+  final absentIcon = const Icon(Icons.close_rounded, color: Colors.red);
   String? status;
-  Icon currentIcon = Icon(Icons.close_rounded, color: Colors.red);
+  Icon currentIcon = const Icon(Icons.close_rounded, color: Colors.red);
   bool isRunning = false;
 
   @override
@@ -62,19 +63,14 @@ class _AttendanceIconState extends State<AttendanceIcon> {
   @override
   void didUpdateWidget(covariant AttendanceIcon oldWidget) {
     super.didUpdateWidget(oldWidget);
+    status = widget.status;
     _getAttendanceData();
   }
 
   @override
   Widget build(BuildContext context) {
-    return widget.roommateData.onLeave != null &&
-            widget.roommateData.onLeave! &&
-            widget.roommateData.leaveStartDate != null &&
-            (widget.roommateData.leaveStartDate!
-                .isBefore(widget.selectedDate)) &&
-            widget.roommateData.leaveEndDate != null &&
-            (widget.roommateData.leaveEndDate!.isAfter(widget.selectedDate))
-        ? Text(
+    return status == 'onLeave'
+        ? const Text(
             'On Leave',
             style: TextStyle(
                 backgroundColor: Colors.yellow, fontWeight: FontWeight.bold),

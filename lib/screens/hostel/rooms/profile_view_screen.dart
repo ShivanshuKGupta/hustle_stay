@@ -1,3 +1,4 @@
+import 'package:animated_icon/animated_icon.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/hostel/hostels.dart';
@@ -5,7 +6,6 @@ import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/hostel/rooms/rooms_screen.dart';
 import 'package:hustle_stay/widgets/room/change_room/change_room.dart';
-import 'package:animated_icon/animated_icon.dart';
 
 import '../../../tools.dart';
 
@@ -32,7 +32,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
   bool isDeleting = false;
   String? dropdownVal;
   List<DropdownMenuItem> operation = [
-    DropdownMenuItem(
+    const DropdownMenuItem(
       value: 'Change Room',
       child: Text(
         'Change Room',
@@ -40,7 +40,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
         style: TextStyle(fontSize: 10),
       ),
     ),
-    DropdownMenuItem(
+    const DropdownMenuItem(
       value: "Swap Room",
       child: Text(
         "Swap Room",
@@ -57,7 +57,8 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
     onLeave = widget.roommateData.onLeave ?? false;
   }
 
-  DateTimeRange? pickedRange;
+  DateTime? pickedRangeStart;
+  DateTime? pickedRangeEnd;
 
   @override
   Widget build(BuildContext context) {
@@ -92,12 +93,12 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                               "Error deleting ${widget.user.name ?? widget.user.email}. Try again later.")));
                     }
                   },
-                  icon: Icon(Icons.delete))
+                  icon: const Icon(Icons.delete))
           ],
         ),
         body: isDeleting
             ? Center(
-                child: Container(
+                child: SizedBox(
                   width: double.infinity,
                   height: double.infinity,
                   child: Column(
@@ -109,7 +110,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                         iconType: IconType.continueAnimation,
                         animateIcon: AnimateIcons.trashBin,
                       ),
-                      Text('Deletion in progress!')
+                      const Text('Deletion in progress!')
                     ],
                   ),
                 ),
@@ -168,11 +169,18 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                                                 initialDateRange: DateTimeRange(
                                                     start: DateTime.now(),
                                                     end: DateTime.now().add(
-                                                        Duration(days: 1))));
+                                                        const Duration(
+                                                            days: 1))));
 
                                         if (picked != null) {
                                           setState(() {
-                                            pickedRange = picked;
+                                            pickedRangeStart = picked.start
+                                                .subtract(const Duration(
+                                                    microseconds: 1));
+                                            pickedRangeEnd = picked.end
+                                                .add(const Duration(days: 1))
+                                                .subtract(const Duration(
+                                                    microseconds: 1));
                                           });
                                         }
                                       },
@@ -189,14 +197,14 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                                             widget.hostelName,
                                             widget.roomName,
                                             onLeave,
-                                            leaveStartDate:
-                                                onLeave && pickedRange == null
-                                                    ? null
-                                                    : pickedRange!.start,
-                                            leaveEndDate:
-                                                onLeave && pickedRange == null
-                                                    ? null
-                                                    : pickedRange!.end);
+                                            leaveStartDate: onLeave &&
+                                                    pickedRangeStart == null
+                                                ? null
+                                                : pickedRangeStart,
+                                            leaveEndDate: onLeave &&
+                                                    pickedRangeEnd == null
+                                                ? null
+                                                : pickedRangeEnd);
                                         if (resp) {
                                           Navigator.of(context).pushReplacement(
                                               MaterialPageRoute(
@@ -218,7 +226,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                             ],
                           ),
                         ),
-                        Divider(),
+                        const Divider(),
                         Column(
                           children: [
                             Center(
@@ -226,7 +234,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                               'Edit Hostel/Room',
                               style: Theme.of(context).textTheme.bodyMedium,
                             )),
-                            SizedBox(
+                            const SizedBox(
                               height: 15,
                             ),
                             Container(

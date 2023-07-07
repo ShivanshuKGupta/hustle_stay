@@ -15,7 +15,9 @@ Future<String> getAttendanceData(RoommateData roommateData, String hostelName,
       .doc(roommateData.email)
       .collection('Attendance')
       .doc(DateFormat('yyyy-MM-dd').format(date));
-
+  print('Selected Date: $date');
+  print('Start Date: ${roommateData.leaveStartDate}');
+  print('End Date: ${roommateData.leaveEndDate}');
   if (roommateData.onLeave != null &&
       roommateData.onLeave! &&
       roommateData.leaveStartDate != null &&
@@ -27,9 +29,7 @@ Future<String> getAttendanceData(RoommateData roommateData, String hostelName,
   }
 
   final documentSnapshot = await documentRef.get();
-  if (documentSnapshot.exists &&
-      documentSnapshot['status'] != 'onLeave' &&
-      documentSnapshot['status'] != 'internship') {
+  if (documentSnapshot.exists) {
     return documentSnapshot['status'];
   } else {
     await documentRef.set({'status': 'absent'});
