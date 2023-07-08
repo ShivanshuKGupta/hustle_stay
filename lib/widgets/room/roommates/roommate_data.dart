@@ -39,7 +39,7 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
   @override
   void initState() {
     super.initState();
-    if (widget.isNeeded != null && widget.isNeeded == true) {
+    if (widget.isNeeded == null || widget.isNeeded == true) {
       _getAttendanceData();
     } else {
       status = widget.status;
