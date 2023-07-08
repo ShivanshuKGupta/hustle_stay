@@ -12,6 +12,16 @@ class ChartData {
   ChartData(this.category, this.value, this.color);
 }
 
+class RoommateInfo {
+  final RoommateData roommateData;
+  final String roomName;
+
+  RoommateInfo({
+    required this.roomName,
+    required this.roommateData,
+  });
+}
+
 Future<String> getAttendanceData(RoommateData roommateData, String hostelName,
     String roomName, DateTime date) async {
   final storage = FirebaseFirestore.instance;
@@ -255,4 +265,46 @@ Future<Map<String, double>> getHostelAttendanceStatistics(
     'internship': internship,
   };
   return attendanceStats;
+}
+
+Future<List<RoommateInfo>> getFilteredStudents(
+    String statusVal, DateTime date, String hostelName,
+    {Source? source}) async {
+  List<RoommateInfo> list = [];
+  final storage = FirebaseFirestore.instance;
+
+  final roomsQuery = await storage
+      .collection('hostels')
+      .doc(hostelName)
+      .collection('Rooms')
+      .get(source == null ? null : GetOptions(source: source));
+
+  for (final roomDoc in roomsQuery.docs) {
+    final roommateDocs = await roomDoc.reference
+        .collection('Roommates')
+        .get(source == null ? null : GetOptions(source: source));
+    for (final roommateDoc in roommateDocs.docs) {
+      final attendanceRef = await roommateDoc.reference
+          .collection('Attendance')
+          .doc(DateFormat('yyyy-MM-dd').format(date))
+          .get(source == null ? null : GetOptions(source: source));
+      if (attendanceRef.exists &&
+          attendanceRef.data()!['status'] == statusVal) {
+        final data = roommateDoc.data(); //
+        final onLeave = data['onLeave'] ?? false;
+        final leaveStartDate = data['leaveStartDate'] as Timestamp?;
+        final leaveEndDate = data['leaveEndDate'] as Timestamp?;
+        list.add(RoommateInfo(
+            roomName: roomDoc.id,
+            roommateData: RoommateData(
+              email: data['email'] ?? '',
+              onLeave: onLeave,
+              leaveStartDate: leaveStartDate?.toDate(),
+              leaveEndDate: leaveEndDate?.toDate(),
+            )));
+      }
+    }
+  }
+
+  return list;
 }

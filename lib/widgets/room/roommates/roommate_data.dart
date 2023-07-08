@@ -15,11 +15,15 @@ class RoommateDataWidget extends StatefulWidget {
       required this.roommateData,
       required this.selectedDate,
       required this.roomName,
-      required this.hostelName});
+      required this.hostelName,
+      this.isNeeded,
+      this.status});
   final RoommateData roommateData;
   final DateTime selectedDate;
   final String hostelName;
   final String roomName;
+  final bool? isNeeded;
+  final String? status;
 
   @override
   State<RoommateDataWidget> createState() => _RoommateDataWidgetState();
@@ -35,7 +39,11 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
   @override
   void initState() {
     super.initState();
-    _getAttendanceData();
+    if (widget.isNeeded == null || widget.isNeeded == true) {
+      _getAttendanceData();
+    } else {
+      status = widget.status;
+    }
   }
 
   bool isOnScreen = true;

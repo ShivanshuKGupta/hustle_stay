@@ -2,6 +2,7 @@ import 'package:animated_icon/animated_icon.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/attendance.dart';
+import 'package:hustle_stay/screens/hostel/rooms/filter_status_data.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class AttendancePieChart extends StatefulWidget {
@@ -24,7 +25,18 @@ class AttendancePieChart extends StatefulWidget {
 
 class _AttendancePieChartState extends State<AttendancePieChart> {
   void onClickNavigation(String category) {
-    debugPrint(category);
+    if (widget.email == null && widget.selectedDate != null) {
+      if (category == 'Leave') {
+        category = 'onLeave';
+      } else {
+        category = category.toLowerCase();
+      }
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => FilterStudents(
+              status: category,
+              hostelName: widget.hostelName,
+              date: widget.selectedDate!.value)));
+    }
   }
 
   bool isRunning = false;
@@ -174,7 +186,7 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
                   isVisible: true,
                 ),
                 selectionBehavior: SelectionBehavior(enable: true),
-                onPointTap: (pointInteractionDetails) {
+                onPointLongPress: (pointInteractionDetails) {
                   onClickNavigation(
                       chartdata[pointInteractionDetails.pointIndex!].category);
                 },
