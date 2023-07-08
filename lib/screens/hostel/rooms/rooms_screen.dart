@@ -65,6 +65,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
                 onPressed: () {
                   setState(() {
                     showStats = !showStats;
+                    filterRecord = false;
                   });
                 },
                 icon: showStats
@@ -100,6 +101,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
                 onPressed: () {
                   setState(() {
                     filterRecord = !filterRecord;
+                    showStats = false;
                   });
                 },
                 icon: filterRecord
