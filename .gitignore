@@ -41,5 +41,6 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+update.bat
 
 todo.txt
