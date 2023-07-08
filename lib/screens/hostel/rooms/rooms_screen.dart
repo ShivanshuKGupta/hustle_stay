@@ -3,10 +3,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/attendance.dart';
 import 'package:hustle_stay/widgets/room/room_list.dart';
+import 'package:hustle_stay/widgets/room/roommates/pie_chart_attendance.dart';
 
 import '../../../tools.dart';
 import '../../../widgets/room/filtered_attendance.dart';
-import 'package:flutter/foundation.dart';
 
 class RoomsScreen extends StatefulWidget {
   RoomsScreen({super.key, required this.hostelName});
@@ -33,6 +33,8 @@ class _RoomsScreenState extends State<RoomsScreen> {
     });
   }
 
+  bool showStats = false;
+
   bool isOpen = false;
 
   ValueNotifier<DateTime> selectedDate = ValueNotifier(DateTime.now());
@@ -58,6 +60,16 @@ class _RoomsScreenState extends State<RoomsScreen> {
       appBar: AppBar(
         title: shaderText(context, title: "Rooms"),
         actions: [
+          if (!isUpdating)
+            IconButton(
+                onPressed: () {
+                  setState(() {
+                    showStats = !showStats;
+                  });
+                },
+                icon: showStats
+                    ? const Icon(Icons.list)
+                    : const Icon(Icons.bar_chart_rounded)),
           if (!isUpdating)
             IconButton(
               onPressed: () async {
@@ -91,8 +103,8 @@ class _RoomsScreenState extends State<RoomsScreen> {
                   });
                 },
                 icon: filterRecord
-                    ? Icon(Icons.person_remove)
-                    : Icon(Icons.filter_alt_rounded)),
+                    ? const Icon(Icons.person_remove)
+                    : const Icon(Icons.filter_alt_rounded)),
           if (!isUpdating)
             IconButton(
                 onPressed: () async {
@@ -101,7 +113,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
                       initialDate: selectedDate.value,
                       firstDate: DateTime(2019),
                       lastDate: DateTime.now());
-                  if (date != null && date != selectedDate) {
+                  if (date != null && date != selectedDate.value) {
                     selectedDate.value = date;
                   }
                 },
@@ -110,7 +122,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
       ),
       body: isUpdating
           ? Center(
-              child: Container(
+              child: SizedBox(
                 width: double.infinity,
                 height: double.infinity,
                 child: Column(
@@ -122,7 +134,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
                       iconType: IconType.continueAnimation,
                       animateIcon: AnimateIcons.refresh,
                     ),
-                    Text('Updation in progress!')
+                    const Text('Updation in progress!')
                   ],
                 ),
               ),
@@ -132,45 +144,49 @@ class _RoomsScreenState extends State<RoomsScreen> {
   }
 
   Widget bodyWidget() {
-    return filterRecord
-        ? Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      decoration: const InputDecoration(
-                          hintText: "Enter email to filter"),
-                      controller: emailController,
-                    ),
-                  ),
-                  IconButton(
-                      onPressed: () {
-                        setState(() {
-                          isOpen = true;
-                        });
-                      },
-                      icon: const Icon(Icons.search_sharp)),
-                ],
-              ),
-              if (isOpen)
-                Expanded(child: FilteredRecords(email: emailController.text)),
-            ],
+    return showStats
+        ? AttendancePieChart(
+            hostelName: widget.hostelName,
+            selectedDate: selectedDate,
           )
-        : Container(
-            child: numberOfRooms == 0
-                ? Center(
-                    child: circularProgressIndicator(
-                      height: null,
-                      width: null,
-                    ),
-                  )
-                : Container(
-                    child: RoomList(
+        : filterRecord
+            ? Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          decoration: const InputDecoration(
+                              hintText: "Enter email to filter"),
+                          controller: emailController,
+                        ),
+                      ),
+                      IconButton(
+                          onPressed: () {
+                            setState(() {
+                              isOpen = true;
+                            });
+                          },
+                          icon: const Icon(Icons.search_sharp)),
+                    ],
+                  ),
+                  if (isOpen)
+                    Expanded(
+                        child: FilteredRecords(email: emailController.text)),
+                ],
+              )
+            : Container(
+                child: numberOfRooms == 0
+                    ? Center(
+                        child: circularProgressIndicator(
+                          height: null,
+                          width: null,
+                        ),
+                      )
+                    : RoomList(
                         selectedDate: selectedDate,
                         hostelName: widget.hostelName,
                         numberOfRooms: numberOfRooms),
-                  ),
-          );
+              );
   }
 }

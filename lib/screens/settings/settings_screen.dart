@@ -17,7 +17,6 @@ class SettingsScreen extends ConsumerWidget {
     final settings = ref.read(settingsProvider);
     final settingsClass = ref.read(settingsProvider.notifier);
     const duration = Duration(milliseconds: 300);
-    int i = 1;
     final widgetList = [
       Column(
         children: [
