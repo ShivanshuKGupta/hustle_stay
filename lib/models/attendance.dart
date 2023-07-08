@@ -1,4 +1,3 @@
-import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -8,7 +7,7 @@ import 'hostel/rooms/room.dart';
 class ChartData {
   final String category;
   final double value;
-  final charts.Color color;
+  final Color color;
 
   ChartData(this.category, this.value, this.color);
 }
@@ -179,6 +178,54 @@ Future<Map<String, double>> getAttendanceStatistics(
       }
     }
   }
+  Map<String, double> attendanceStats = {
+    'present': presentData,
+    'absent': absentData,
+    'leave': leaveData,
+    'internship': internshipData
+  };
+
+  return attendanceStats;
+}
+
+Future<Map<String, double>> getHostelAttendanceStatistics(
+    String hostelName, DateTime date) async {
+  double presentData = 0;
+  double absentData = 0;
+  double leaveData = 0;
+  double internshipData = 0;
+
+  final storage = FirebaseFirestore.instance;
+  final docsRoomsRef = await storage
+      .collection('hostels')
+      .doc(hostelName)
+      .collection('Rooms')
+      .get();
+  for (final roomDoc in docsRoomsRef.docs) {
+    final roommateDocs = await roomDoc.reference.collection('Roommates').get();
+    for (final roommateDoc in roommateDocs.docs) {
+      final attendance = await roommateDoc.reference
+          .collection('Attendance')
+          .doc(DateFormat('yyyy-MM-dd').format(date))
+          .get();
+      if (attendance.exists) {
+        switch (attendance['status']) {
+          case 'present':
+            presentData += 1;
+            break;
+          case 'absent':
+            absentData += 1;
+            break;
+          case 'onLeave':
+            leaveData += 1;
+            break;
+          default:
+            internshipData += 1;
+        }
+      }
+    }
+  }
+
   Map<String, double> attendanceStats = {
     'present': presentData,
     'absent': absentData,

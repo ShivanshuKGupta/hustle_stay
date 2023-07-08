@@ -46,13 +46,13 @@ dependencies:
   firebase_storage: ^11.2.3
   cached_network_image: ^3.2.3
   flutter_animate: ^4.2.0
-  intl: ^0.17.0
+  intl: ^0.18.1
   connectivity: ^3.0.6
   foundation: ^0.0.5
   animated_icon: ^0.0.5
   google_nav_bar: ^5.0.6
   flutter_colorpicker: ^1.0.3
-  charts_flutter: ^0.12.0
+  syncfusion_flutter_charts: ^22.1.37
 
 dev_dependencies:
   flutter_test:
