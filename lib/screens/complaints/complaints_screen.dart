@@ -8,6 +8,7 @@ import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/complaints/edit_complaints_page.dart';
 import 'package:hustle_stay/screens/complaints/resolved_complaints_screen.dart';
 import 'package:hustle_stay/screens/drawers/main_drawer.dart';
+import 'package:hustle_stay/screens/filter_screen/filter_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/chat/complaint_template_message.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_category_widget.dart';
@@ -39,11 +40,17 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
         ),
         actions: [
           IconButton(
+            onPressed: () => navigatorPush(context, const FilterScreen()),
+            icon: const Icon(Icons.filter_alt_rounded),
+          ),
+          IconButton(
+            onPressed: _showSortDialog,
+            icon: const Icon(Icons.sort_rounded),
+          ),
+          IconButton(
             onPressed: _addComplaint,
             icon: const Icon(Icons.add_rounded),
           ),
-          IconButton(
-              onPressed: _showSortDialog, icon: const Icon(Icons.sort_rounded))
         ],
       );
 
@@ -53,6 +60,7 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
     final mediaQuery = MediaQuery.of(context);
     final appBar = sliverAppBar;
     return Scaffold(
+      backgroundColor: Colors.transparent,
       drawer: const MainDrawer(),
       body: ComplaintsBuilder(
         src: src,
