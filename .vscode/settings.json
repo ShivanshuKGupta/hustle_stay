@@ -13,7 +13,7 @@
         ".metadata": true,
         "analysis_options.yaml": true,
         "hustle_stay.iml": true,
-        "pubspec.lock": true,
+        // "pubspec.lock": true,
     },
     "explorer.fileNesting.enabled": true,
     "explorer.fileNesting.expand": false,
