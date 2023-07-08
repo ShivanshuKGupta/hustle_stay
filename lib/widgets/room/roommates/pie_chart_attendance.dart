@@ -1,4 +1,5 @@
 import 'package:animated_icon/animated_icon.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/attendance.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -22,89 +23,150 @@ class AttendancePieChart extends StatefulWidget {
 }
 
 class _AttendancePieChartState extends State<AttendancePieChart> {
-  List<ChartData>? chartdata;
-
   void onClickNavigation(String category) {
     debugPrint(category);
   }
 
-  Map<String, double> data = {};
+  bool isRunning = false;
   int total = 0;
-  int selectedCategory = -1;
-
-  @override
-  void initState() {
-    super.initState();
-    attendanceData();
-  }
 
   @override
   void didUpdateWidget(covariant AttendancePieChart oldWidget) {
     super.didUpdateWidget(oldWidget);
-    attendanceData();
+    setState(() {});
   }
 
-  Future<void> attendanceData() async {
-    Map<String, double> adata = {};
-    if (widget.email != null) {
-      adata = await getAttendanceStatistics(
-          widget.email!, widget.hostelName, widget.roomName!);
-    } else {
-      adata = await getHostelAttendanceStatistics(
-          widget.hostelName, widget.selectedDate!.value);
-    }
+  List<ChartData> attendanceData(Map<String, double> adata) {
     double sum = adata['present']! +
         adata['absent']! +
         adata['internship']! +
         adata['leave']!;
 
-    setState(() {
-      data = adata;
-      total = sum.toInt();
-      double present = adata['present']! / sum * 100;
-      double leave = adata['leave']! / sum * 100;
-      double internship = adata['internship']! / sum * 100;
-      double absent = adata['absent']! / sum * 100;
+    double present = adata['present']! / sum * 100;
+    double leave = adata['leave']! / sum * 100;
+    double internship = adata['internship']! / sum * 100;
+    double absent = adata['absent']! / sum * 100;
 
-      chartdata = [
-        ChartData('Present', present, Colors.green),
-        ChartData('Absent', absent, Colors.red),
-        ChartData('Leave', leave, Colors.yellow),
-        ChartData('Internship', internship, Colors.cyan),
-      ];
-    });
+    List<ChartData> chartdata = [
+      ChartData(
+          'Present', double.parse(present.toStringAsFixed(2)), Colors.green),
+      ChartData('Absent', double.parse(absent.toStringAsFixed(2)), Colors.red),
+      ChartData('Leave', double.parse(leave.toStringAsFixed(2)), Colors.yellow),
+      ChartData('Internship', double.parse(internship.toStringAsFixed(2)),
+          Colors.cyan),
+    ];
+
+    return chartdata;
   }
 
   @override
   Widget build(BuildContext context) {
-    if (chartdata == null) {
-      return Center(
-        child: SizedBox(
-          width: double.infinity,
-          height: double.infinity,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              AnimateIcon(
-                onTap: () {},
-                iconType: IconType.continueAnimation,
-                animateIcon: AnimateIcons.loading1,
-              ),
-              const Text('Loading...')
-            ],
-          ),
-        ),
-      );
-    }
+    return widget.email == null
+        ? ValueListenableBuilder(
+            valueListenable: widget.selectedDate!,
+            builder: (context, value, child) =>
+                futureBuilderWidget(value: value),
+          )
+        : futureBuilderWidget();
+  }
 
+  Widget futureBuilderWidget({DateTime? value}) {
+    return FutureBuilder(
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return FutureBuilder(
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: double.infinity,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          AnimateIcon(
+                            onTap: () {},
+                            iconType: IconType.continueAnimation,
+                            animateIcon: AnimateIcons.loading1,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                          const Text('Loading...')
+                        ],
+                      ),
+                    ),
+                  );
+                }
+                if (!snapshot.hasData && snapshot.error != null) {
+                  return Center(
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: double.infinity,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          AnimateIcon(
+                            onTap: () {},
+                            iconType: IconType.continueAnimation,
+                            animateIcon: AnimateIcons.error,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                          const Text('No data available')
+                        ],
+                      ),
+                    ),
+                  );
+                }
+                List<ChartData> chartData = attendanceData(snapshot.data!);
+                return pieChartWidget(snapshot.data!, chartData);
+              },
+              future: widget.email == null && value != null
+                  ? getHostelAttendanceStatistics(widget.hostelName, value)
+                  : getAttendanceStatistics(
+                      widget.email!, widget.hostelName, widget.roomName!));
+        }
+        if (!snapshot.hasData && snapshot.error != null) {
+          return Center(
+            child: SizedBox(
+              width: double.infinity,
+              height: double.infinity,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  AnimateIcon(
+                    onTap: () {},
+                    iconType: IconType.continueAnimation,
+                    animateIcon: AnimateIcons.error,
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                  const Text('No data available')
+                ],
+              ),
+            ),
+          );
+        }
+        List<ChartData> chartData = attendanceData(snapshot.data!);
+        return pieChartWidget(snapshot.data!, chartData);
+      },
+      future: widget.email == null && value != null
+          ? getHostelAttendanceStatistics(widget.hostelName, value,
+              source: Source.cache)
+          : getAttendanceStatistics(
+              widget.email!, widget.hostelName, widget.roomName!,
+              source: Source.cache),
+    );
+  }
+
+  Widget pieChartWidget(Map<String, double> data, List<ChartData> chartdata) {
     return Column(
       children: [
         Expanded(
           child: SfCircularChart(
             series: <CircularSeries>[
               PieSeries<ChartData, String>(
-                dataSource: chartdata!,
+                dataSource: chartdata,
                 pointColorMapper: (ChartData data, _) => data.color,
                 xValueMapper: (ChartData data, _) => data.category,
                 yValueMapper: (ChartData data, _) => data.value,
@@ -114,7 +176,7 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
                 selectionBehavior: SelectionBehavior(enable: true),
                 onPointTap: (pointInteractionDetails) {
                   onClickNavigation(
-                      chartdata![pointInteractionDetails.pointIndex!].category);
+                      chartdata[pointInteractionDetails.pointIndex!].category);
                 },
               ),
             ],
@@ -146,7 +208,7 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
           title: const Text('Present'),
           leading: const Icon(Icons.check_circle_outline),
           trailing: Text(
-            data['present']!.toInt().toString(),
+            data['present']!.toStringAsFixed(0),
             style: Theme.of(context).textTheme.bodyLarge,
           ),
         ),
@@ -154,7 +216,7 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
           title: const Text('Absent'),
           leading: const Icon(Icons.cancel_outlined),
           trailing: Text(
-            data['absent']!.toInt().toString(),
+            data['absent']!.toStringAsFixed(0),
             style: Theme.of(context).textTheme.bodyLarge,
           ),
         ),
@@ -162,7 +224,7 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
           title: const Text('Leave'),
           leading: const Icon(Icons.trip_origin_sharp),
           trailing: Text(
-            data['leave']!.toInt().toString(),
+            data['leave']!.toStringAsFixed(0),
             style: Theme.of(context).textTheme.bodyLarge,
           ),
         ),
@@ -170,7 +232,7 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
           title: const Text('Internship'),
           leading: const Icon(Icons.work_history),
           trailing: Text(
-            data['internship']!.toInt().toString(),
+            data['internship']!.toStringAsFixed(0),
             style: Theme.of(context).textTheme.bodyLarge,
           ),
         ),
@@ -178,7 +240,11 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
           title: const Text('Total'),
           leading: const Icon(Icons.all_inbox),
           trailing: Text(
-            total.toString(),
+            (data['present']! +
+                    data['absent']! +
+                    data['internship']! +
+                    data['leave']!)
+                .toStringAsFixed(0),
             style: Theme.of(context).textTheme.bodyLarge,
           ),
         )
