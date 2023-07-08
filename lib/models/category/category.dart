@@ -77,7 +77,6 @@ Future<List<Category>> fetchCategories(List<String> ids, {Source? src}) async {
 }
 
 Future<List<Category>> fetchAllCategories({Source? src}) async {
-  List<String> ids = [];
   final response = await firestore
       .collection('categories')
       .get(src == null ? null : GetOptions(source: src));
