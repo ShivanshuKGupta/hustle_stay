@@ -122,7 +122,6 @@ Future<bool> deleteRoom(String roomName, String hostelName) async {
 
 Future<void> copyRoommateAttendance(String email, String hostelName,
     String roomName, String destHostelName, String destRoomName) async {
-  // print('hi');
   try {
     final collectionRef = storage
         .collection('hostels')
@@ -253,15 +252,11 @@ Future<bool> swapRoom(
 
       final sourceData = sData.data();
       final destData = dData.data();
-      print('data getting printed');
-      print('sourceData: $sourceData');
-      print('destData: $destData');
 
       transaction.set(destLoc.doc(email), sourceData!, SetOptions(merge: true));
       transaction.set(
           sourceLoc.doc(destRoommateEmail), destData!, SetOptions(merge: true));
 
-      print('here');
       await copyRoommateAttendance(
           email, hostelName, roomName, destHostelName, destRoomName);
       await copyRoommateAttendance(destRoommateEmail, destHostelName,

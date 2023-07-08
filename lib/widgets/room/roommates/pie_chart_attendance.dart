@@ -31,11 +31,17 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
       } else {
         category = category.toLowerCase();
       }
-      Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => FilterStudents(
-              status: category,
-              hostelName: widget.hostelName,
-              date: widget.selectedDate!.value)));
+      Navigator.of(context)
+          .push(MaterialPageRoute(
+              builder: (_) => FilterStudents(
+                  status: category,
+                  hostelName: widget.hostelName,
+                  date: widget.selectedDate!.value)))
+          .then((value) {
+        if (mounted) {
+          setState(() {});
+        }
+      });
     }
   }
 

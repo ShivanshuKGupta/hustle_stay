@@ -101,6 +101,22 @@ class _FilterStudentsState extends State<FilterStudents> {
               ),
             );
           }
+          if (list!.value.length == snapshot.data!.length) {
+            for (int i = 0; i < list!.value.length; i++) {
+              if (list!.value[i].roommateData.email ==
+                      snapshot.data![i].roommateData.email &&
+                  list!.value[i].roomName == snapshot.data![i].roomName) {
+                continue;
+              } else {
+                list!.value = snapshot.data!;
+                return listStudents();
+              }
+            }
+            return listStudents();
+          }
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(context)
+              .showSnackBar(const SnackBar(content: Text('Refreshed!')));
           list!.value = snapshot.data!;
           return listStudents();
         },

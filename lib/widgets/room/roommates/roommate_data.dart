@@ -82,8 +82,8 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
         setState(() {
           isOnScreen = false;
         });
+        pushAgain();
       }
-      pushAgain();
     }
   }
 

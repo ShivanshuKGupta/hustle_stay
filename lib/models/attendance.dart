@@ -78,7 +78,7 @@ Future<bool> setAttendanceData(String email, String hostelName, String roomName,
 
     return true;
   } catch (e) {
-    print('Error while setting attendance data: $e');
+    debugPrint('Error while setting attendance data: $e');
     return false;
   }
 }
@@ -270,7 +270,6 @@ Future<Map<String, double>> getHostelAttendanceStatistics(
 Future<List<RoommateInfo>> getFilteredStudents(
     String statusVal, DateTime date, String hostelName,
     {Source? source}) async {
-  List<RoommateInfo> list = [];
   final storage = FirebaseFirestore.instance;
 
   final roomsQuery = await storage
@@ -279,29 +278,48 @@ Future<List<RoommateInfo>> getFilteredStudents(
       .collection('Rooms')
       .get(source == null ? null : GetOptions(source: source));
 
-  for (final roomDoc in roomsQuery.docs) {
-    final roommateDocs = await roomDoc.reference
+  final roomDocs = roomsQuery.docs;
+
+  final attendanceDocs = await Future.wait(
+    roomDocs.map((roomDoc) => roomDoc.reference
+        .collection('Roommates')
+        .get(source == null ? null : GetOptions(source: source))
+        .then((roommateDocsSnapshot) => Future.wait(roommateDocsSnapshot.docs
+            .map((roommateDoc) => roommateDoc.reference
+                .collection('Attendance')
+                .doc(DateFormat('yyyy-MM-dd').format(date))
+                .get(source == null ? null : GetOptions(source: source)))
+            .toList()))),
+  );
+
+  final list = <RoommateInfo>[];
+
+  for (var i = 0; i < roomDocs.length; i++) {
+    final roomDoc = roomDocs[i];
+    final roommateDocsSnapshot = await roomDoc.reference
         .collection('Roommates')
         .get(source == null ? null : GetOptions(source: source));
-    for (final roommateDoc in roommateDocs.docs) {
-      final attendanceRef = await roommateDoc.reference
-          .collection('Attendance')
-          .doc(DateFormat('yyyy-MM-dd').format(date))
-          .get(source == null ? null : GetOptions(source: source));
+    final roommateDocs = roommateDocsSnapshot.docs;
+
+    for (var j = 0; j < roommateDocs.length; j++) {
+      final roommateDoc = roommateDocs[j];
+      final attendanceRef = attendanceDocs[i][j];
+
       if (attendanceRef.exists &&
           attendanceRef.data()!['status'] == statusVal) {
-        final data = roommateDoc.data(); //
+        final data = roommateDoc.data();
         final onLeave = data['onLeave'] ?? false;
         final leaveStartDate = data['leaveStartDate'] as Timestamp?;
         final leaveEndDate = data['leaveEndDate'] as Timestamp?;
         list.add(RoommateInfo(
-            roomName: roomDoc.id,
-            roommateData: RoommateData(
-              email: data['email'] ?? '',
-              onLeave: onLeave,
-              leaveStartDate: leaveStartDate?.toDate(),
-              leaveEndDate: leaveEndDate?.toDate(),
-            )));
+          roomName: roomDoc.id,
+          roommateData: RoommateData(
+            email: data['email'] ?? '',
+            onLeave: onLeave,
+            leaveStartDate: leaveStartDate?.toDate(),
+            leaveEndDate: leaveEndDate?.toDate(),
+          ),
+        ));
       }
     }
   }
