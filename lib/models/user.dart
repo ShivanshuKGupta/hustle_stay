@@ -246,6 +246,7 @@ var currentUser = UserData();
 
 /// A widget used to display widget using UserData
 /// This will change according to the userData
+// ignore: must_be_immutable
 class UserBuilder extends StatelessWidget {
   final String email;
   final Widget Function(BuildContext ctx, UserData userData) builder;
@@ -294,6 +295,7 @@ class UserBuilder extends StatelessWidget {
 
 /// A widget used to display widget using UserData
 /// This will change according to the userData
+// ignore: must_be_immutable
 class ComplaineeBuilder extends StatelessWidget {
   final Widget Function(BuildContext ctx, List<String> complainees) builder;
   final Widget? loadingWidget;

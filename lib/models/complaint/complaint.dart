@@ -44,7 +44,7 @@ class ComplaintData {
       "scope": scope.name,
       "title": title,
       "to": to,
-      "resolved": resolvedAt,
+      "resolvedAt": resolvedAt,
       "imgUrl": imgUrl,
       "category": category,
     };

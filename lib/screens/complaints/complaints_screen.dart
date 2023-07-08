@@ -50,7 +50,6 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(settingsProvider);
-    const duration = Duration(milliseconds: 1000);
     final mediaQuery = MediaQuery.of(context);
     final appBar = sliverAppBar;
     return Scaffold(
@@ -236,6 +235,7 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
   }
 }
 
+// ignore: must_be_immutable
 class SortDialogBox extends StatefulWidget {
   String groupBy;
   SortDialogBox({

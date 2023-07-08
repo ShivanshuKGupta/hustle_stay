@@ -7,6 +7,7 @@ import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/chat/choose_users.dart.dart';
 import 'package:hustle_stay/widgets/profile_image.dart';
 
+// ignore: must_be_immutable
 class EditCategoryFrom extends StatefulWidget {
   Category category;
   final List<String> allRecepients;
