@@ -28,8 +28,6 @@ Future<String> getAttendanceData(RoommateData roommateData, String hostelName,
   final documentRef = storage
       .collection('hostels')
       .doc(hostelName)
-      .collection('Rooms')
-      .doc(roomName)
       .collection('Roommates')
       .doc(roommateData.email)
       .collection('Attendance')
@@ -60,8 +58,6 @@ Future<bool> setAttendanceData(String email, String hostelName, String roomName,
     final docRef = storage
         .collection('hostels')
         .doc(hostelName)
-        .collection('Rooms')
-        .doc(roomName)
         .collection('Roommates')
         .doc(email)
         .collection('Attendance')
@@ -91,20 +87,21 @@ Future<bool> markAllAttendance(
     final docsRoomsRef = await storage
         .collection('hostels')
         .doc(hostelName)
-        .collection('Rooms')
+        .collection('Roommates')
         .get();
     final batch = storage.batch();
-    for (final roomDoc in docsRoomsRef.docs) {
-      final roommateDocs =
-          await roomDoc.reference.collection('Roommates').get();
-      for (final roommateDoc in roommateDocs.docs) {
-        final attendanceRef = await roommateDoc.reference
-            .collection('Attendance')
-            .doc(DateFormat('yyyy-MM-dd').format(selectedDate))
-            .get();
-        if (attendanceRef.exists &&
-            attendanceRef.data()!['status'] != 'onLeave' &&
-            attendanceRef.data()!['status'] != 'internship') {
+    for (final x in docsRoomsRef.docs) {
+      final attendanceRefSnapshot = await x.reference
+          .collection('Attendance')
+          .where(FieldPath.documentId,
+              isEqualTo: DateFormat('yyyy-MM-dd').format(selectedDate))
+          .where('status',
+              isEqualTo: statusVal == 'present' ? 'absent' : 'present')
+          .get();
+      if (attendanceRefSnapshot.size > 0) {
+        final attendanceRef = attendanceRefSnapshot.docs.first;
+
+        if (attendanceRef.exists) {
           batch.set(
             attendanceRef.reference,
             {'status': statusVal},
@@ -167,12 +164,10 @@ Future<Map<String, double>> getAttendanceStatistics(
   final docsAttendanceRef = await storage
       .collection('hostels')
       .doc(hostelName)
-      .collection('Rooms')
-      .doc(roomName)
       .collection('Roommates')
       .doc(email)
       .collection('Attendance')
-      .get(source == null ? null : GetOptions(source: source));
+      .get();
   for (final docs in docsAttendanceRef.docs) {
     if (range == null ||
         (DateFormat('yyyy-MM-dd')
@@ -213,36 +208,22 @@ Future<Map<String, double>> getHostelAttendanceStatistics(
     {Source? source}) async {
   final storage = FirebaseFirestore.instance;
 
-  final roomsQuery = await storage
+  final roommatesQuery = await storage
       .collection('hostels')
       .doc(hostelName)
-      .collection('Rooms')
+      .collection('Roommates')
       .get(source == null ? null : GetOptions(source: source));
 
   double present = 0;
   double absent = 0;
   double leave = 0;
   double internship = 0;
-
-  final batchFetches = <Future<DocumentSnapshot>>[];
-
-  for (final roomDoc in roomsQuery.docs) {
-    final roommateDocs = await roomDoc.reference
-        .collection('Roommates')
-        .get(source == null ? null : GetOptions(source: source));
-    for (final roommateDoc in roommateDocs.docs) {
-      final attendanceRef = roommateDoc.reference
-          .collection('Attendance')
-          .doc(DateFormat('yyyy-MM-dd').format(date));
-      batchFetches.add(attendanceRef.get());
-    }
-  }
-
-  final batchResults = await Future.wait(batchFetches);
-
-  for (final result in batchResults) {
-    if (result.exists) {
-      final attendanceData = result.data() as Map<String, dynamic>;
+  for (final x in roommatesQuery.docs) {
+    final attendanceData = await x.reference
+        .collection('Attendance')
+        .doc(DateFormat('yyyy-MM-dd').format(date))
+        .get();
+    if (attendanceData.exists) {
       switch (attendanceData['status']) {
         case 'present':
           present += 1;
@@ -258,6 +239,7 @@ Future<Map<String, double>> getHostelAttendanceStatistics(
       }
     }
   }
+
   final attendanceStats = {
     'present': present,
     'absent': absent,
@@ -270,59 +252,38 @@ Future<Map<String, double>> getHostelAttendanceStatistics(
 Future<List<RoommateInfo>> getFilteredStudents(
     String statusVal, DateTime date, String hostelName,
     {Source? source}) async {
+  List<RoommateInfo> list = [];
   final storage = FirebaseFirestore.instance;
-
-  final roomsQuery = await storage
+  final docsRoomsRef = await storage
       .collection('hostels')
       .doc(hostelName)
-      .collection('Rooms')
+      .collection('Roommates')
       .get(source == null ? null : GetOptions(source: source));
+  for (final x in docsRoomsRef.docs) {
+    final attendanceRefSnapshot = await x.reference
+        .collection('Attendance')
+        .where(FieldPath.documentId,
+            isEqualTo: DateFormat('yyyy-MM-dd').format(date))
+        .where('status', isEqualTo: statusVal)
+        .get();
+    if (attendanceRefSnapshot.size > 0) {
+      final attendanceRef = attendanceRefSnapshot.docs.first;
 
-  final roomDocs = roomsQuery.docs;
-
-  final attendanceDocs = await Future.wait(
-    roomDocs.map((roomDoc) => roomDoc.reference
-        .collection('Roommates')
-        .get(source == null ? null : GetOptions(source: source))
-        .then((roommateDocsSnapshot) => Future.wait(roommateDocsSnapshot.docs
-            .map((roommateDoc) => roommateDoc.reference
-                .collection('Attendance')
-                .doc(DateFormat('yyyy-MM-dd').format(date))
-                .get(source == null ? null : GetOptions(source: source)))
-            .toList()))),
-  );
-
-  final list = <RoommateInfo>[];
-
-  for (var i = 0; i < roomDocs.length; i++) {
-    final roomDoc = roomDocs[i];
-    final roommateDocsSnapshot = await roomDoc.reference
-        .collection('Roommates')
-        .get(source == null ? null : GetOptions(source: source));
-    final roommateDocs = roommateDocsSnapshot.docs;
-
-    for (var j = 0; j < roommateDocs.length; j++) {
-      final roommateDoc = roommateDocs[j];
-      final attendanceRef = attendanceDocs[i][j];
-
-      if (attendanceRef.exists &&
-          attendanceRef.data()!['status'] == statusVal) {
-        final data = roommateDoc.data();
+      if (attendanceRef.exists) {
+        final data = attendanceRef.data();
         final onLeave = data['onLeave'] ?? false;
         final leaveStartDate = data['leaveStartDate'] as Timestamp?;
         final leaveEndDate = data['leaveEndDate'] as Timestamp?;
         list.add(RoommateInfo(
-          roomName: roomDoc.id,
-          roommateData: RoommateData(
-            email: data['email'] ?? '',
-            onLeave: onLeave,
-            leaveStartDate: leaveStartDate?.toDate(),
-            leaveEndDate: leaveEndDate?.toDate(),
-          ),
-        ));
+            roomName: x.data()['roomName'],
+            roommateData: RoommateData(
+              email: data['email'] ?? '',
+              onLeave: onLeave,
+              leaveStartDate: leaveStartDate?.toDate(),
+              leaveEndDate: leaveEndDate?.toDate(),
+            )));
       }
     }
   }
-
   return list;
 }

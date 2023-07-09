@@ -23,13 +23,11 @@ class Room {
   int numberOfRoommates;
   String roomName;
   int capacity;
-  List<RoommateData>? roomMatesData;
 
   Room({
     required this.numberOfRoommates,
     required this.roomName,
     required this.capacity,
-    required this.roomMatesData,
   });
 }
 
@@ -43,46 +41,15 @@ Future<List<Room>> fetchRooms(String hostelName, {Source? src}) async {
       .get(src != null ? GetOptions(source: src) : null);
   final roomDocs = roomSnapshot.docs;
 
-  final List<Future<List<QueryDocumentSnapshot>>> roommatesDataFutures = [];
-
-  for (final roomDoc in roomDocs) {
-    final roomRef = roomDoc.reference;
-    final roommatesCollectionRef = roomRef.collection('Roommates');
-    final roommatesDataFuture = roommatesCollectionRef
-        .get(src != null ? GetOptions(source: src) : null)
-        .then((roommatesSnapshot) => roommatesSnapshot.docs);
-    roommatesDataFutures.add(roommatesDataFuture);
-  }
-
-  final roommatesDataSnapshots = await Future.wait(roommatesDataFutures);
-
   final List<Room> roomDataList = [];
 
   for (int i = 0; i < roomDocs.length; i++) {
     final roomDoc = roomDocs[i];
-    final roommatesDocs = roommatesDataSnapshots[i];
-
-    final List<RoommateData> roommatesData = roommatesDocs.map((roommateDoc) {
-      final data =
-          roommateDoc.data() as Map<String, dynamic>; // Explicit type casting
-      final onLeave = data['onLeave'] ?? false;
-      final leaveStartDate = data['leaveStartDate'] as Timestamp?;
-      final leaveEndDate = data['leaveEndDate'] as Timestamp?;
-
-      return RoommateData(
-        email: data['email'] ?? '',
-        onLeave: onLeave,
-        leaveStartDate: leaveStartDate?.toDate(),
-        leaveEndDate: leaveEndDate?.toDate(),
-      );
-    }).toList();
 
     final roomData = Room(
-      capacity: roomDoc['capacity'],
-      numberOfRoommates: roomDoc['numRoommates'],
-      roomName: roomDoc['roomName'],
-      roomMatesData: roommatesData,
-    );
+        capacity: roomDoc['capacity'],
+        numberOfRoommates: roomDoc['numRoommates'],
+        roomName: roomDoc['roomName']);
     roomDataList.add(roomData);
   }
 
@@ -120,22 +87,43 @@ Future<bool> deleteRoom(String roomName, String hostelName) async {
   }
 }
 
+Future<List<RoommateData>> fetchRoommates(
+    String hostelName, String roomName) async {
+  List<RoommateData> list = [];
+  final roommateSnapshot = await storage
+      .collection('hostels')
+      .doc(hostelName)
+      .collection('Roommates')
+      .where('roomName', isEqualTo: roomName)
+      .get();
+
+  for (final x in roommateSnapshot.docs) {
+    final data = x.data();
+    final onLeave = data['onLeave'] ?? false;
+    final leaveStartDate = data['leaveStartDate'] as Timestamp?;
+    final leaveEndDate = data['leaveEndDate'] as Timestamp?;
+    list.add(RoommateData(
+      email: data['email'] ?? '',
+      onLeave: onLeave,
+      leaveStartDate: leaveStartDate?.toDate(),
+      leaveEndDate: leaveEndDate?.toDate(),
+    ));
+  }
+  return list;
+}
+
 Future<void> copyRoommateAttendance(String email, String hostelName,
     String roomName, String destHostelName, String destRoomName) async {
   try {
     final collectionRef = storage
         .collection('hostels')
         .doc(hostelName)
-        .collection('Rooms')
-        .doc(roomName)
         .collection('Roommates')
         .doc(email);
 
     final destRef = storage
         .collection('hostels')
         .doc(destHostelName)
-        .collection('Rooms')
-        .doc(destRoomName)
         .collection('Roommates')
         .doc(email);
     final attendanceRef = collectionRef.collection('Attendance');
@@ -159,9 +147,8 @@ Future<void> copyRoommateAttendance(String email, String hostelName,
 
     return;
   } catch (e) {
-    print(e);
+    return;
   }
-  return;
 }
 
 Future<bool> changeRoom(String email, String hostelName, String roomName,
@@ -172,8 +159,12 @@ Future<bool> changeRoom(String email, String hostelName, String roomName,
         .doc(hostelName)
         .collection('Rooms')
         .doc(roomName);
-    final sourceRef = sourceRoomRef.collection('Roommates').doc(email);
-    final sData = await sourceRef.get();
+    final sourceRef = storage
+        .collection('hostels')
+        .doc(hostelName)
+        .collection('Roommates')
+        .doc(email);
+
     final destRoomLoc = storage
         .collection('hostels')
         .doc(destHostelName)
@@ -182,32 +173,58 @@ Future<bool> changeRoom(String email, String hostelName, String roomName,
     final destRoomSnapshot = await destRoomLoc.get();
     final capacity = destRoomSnapshot['capacity'];
     final numRoommates = destRoomSnapshot['numRoommates'];
+    if (destHostelName == hostelName) {
+      try {
+        if (capacity > numRoommates) {
+          final batch = storage.batch();
+          batch.set(sourceRoomRef, {'numRoommates': FieldValue.increment(-1)},
+              SetOptions(merge: true));
+          batch.set(destRoomLoc, {'numRoommates': FieldValue.increment(1)},
+              SetOptions(merge: true));
+          batch.set(
+              sourceRef, {'roomName': destRoomName}, SetOptions(merge: true));
+          batch.set(storage.collection('users').doc(email),
+              {'roomName': destRoomName}, SetOptions(merge: true));
+          await batch.commit();
+          return true;
+        } else {
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('$destRoomName is filled with its capacity')));
+          return false;
+        }
+      } catch (e) {
+        return false;
+      }
+    }
+    final destDataLoc = storage
+        .collection('hostels')
+        .doc(destHostelName)
+        .collection('Roommates');
 
+    final roomdata = {'roomName': roomName, 'hostelName': hostelName};
     if (capacity > numRoommates) {
-      final destLoc = destRoomLoc.collection('Roommates');
+      final sData = await sourceRef.get();
       final sourceData = sData.data();
-
       await storage.runTransaction((transaction) async {
         transaction
             .update(destRoomLoc, {'numRoommates': FieldValue.increment(1)});
-        transaction.set(destLoc.doc(email), sourceData!);
+        transaction.set(destDataLoc.doc(email), sourceData!);
+        transaction.set(
+            destDataLoc.doc(email), roomdata, SetOptions(merge: true));
         transaction
             .update(sourceRoomRef, {'numRoommates': FieldValue.increment(-1)});
+        transaction.set(
+            storage.collection('users').doc(email),
+            {'roomName': destRoomName, 'hostelName': destHostelName},
+            SetOptions(merge: true));
+        await copyRoommateAttendance(
+            email, hostelName, roomName, destHostelName, destRoomName);
+        transaction.delete(sourceRef);
+
+        return true;
       });
-
-      await copyRoommateAttendance(
-          email, hostelName, roomName, destHostelName, destRoomName);
-
-      await storage.collection('users').doc(email).set(
-          {'hostelName': destHostelName, 'roomName': destRoomName},
-          SetOptions(merge: true)).catchError((error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Error occurred in updation')));
-      });
-
-      await sourceRef.delete();
-
-      return true;
+      return false;
     } else {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -232,22 +249,36 @@ Future<bool> swapRoom(
     BuildContext context) async {
   try {
     await storage.runTransaction((transaction) async {
-      final sourceLoc = storage
-          .collection('hostels')
-          .doc(hostelName)
-          .collection('Rooms')
-          .doc(roomName)
-          .collection('Roommates');
-      final sourceRef = sourceLoc.doc(email);
-      final sData = await transaction.get(sourceRef);
+      final sourceLoc =
+          storage.collection('hostels').doc(hostelName).collection('Roommates');
 
       final destLoc = storage
           .collection('hostels')
           .doc(destHostelName)
-          .collection('Rooms')
-          .doc(destRoomName)
           .collection('Roommates');
       final destRef = destLoc.doc(destRoommateEmail);
+      final sourceRef = sourceLoc.doc(email);
+      if (destHostelName == hostelName) {
+        try {
+          final batch = storage.batch();
+          batch.set(destRef, {'roomName': roomName}, SetOptions(merge: true));
+          batch.set(
+              sourceRef, {'roomName': destRoomName}, SetOptions(merge: true));
+          batch.set(
+              storage.collection('users').doc(email),
+              {'roomName': destRoomName, 'hostelName': destHostelName},
+              SetOptions(merge: true));
+          batch.set(storage.collection('users').doc(destRoommateEmail),
+              {'roomName': roomName}, SetOptions(merge: true));
+          await batch.commit();
+          return true;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      final sData = await transaction.get(sourceRef);
+
       final dData = await transaction.get(destRef);
 
       final sourceData = sData.data();
@@ -261,16 +292,14 @@ Future<bool> swapRoom(
           email, hostelName, roomName, destHostelName, destRoomName);
       await copyRoommateAttendance(destRoommateEmail, destHostelName,
           destRoomName, hostelName, roomName);
-
       transaction.set(
           storage.collection('users').doc(email),
-          {'hostelName': destHostelName, 'roomName': destRoomName},
+          {'roomName': destRoomName, 'hostelName': destHostelName},
           SetOptions(merge: true));
       transaction.set(
           storage.collection('users').doc(destRoommateEmail),
-          {'hostelName': hostelName, 'roomName': roomName},
+          {'roomName': roomName, 'hostelName': hostelName},
           SetOptions(merge: true));
-
       transaction.delete(sourceRef);
       transaction.delete(destRef);
     });
@@ -315,9 +344,8 @@ Future<List<DropdownMenuItem>> fetchRoommateNames(
   final storageRef = await storage
       .collection('hostels')
       .doc(hostelName)
-      .collection('Rooms')
-      .doc(roomName)
       .collection('Roommates')
+      .where('roomName', isEqualTo: roomName)
       .get(src == null ? null : GetOptions(source: src));
   for (var element in storageRef.docs) {
     list.add(DropdownMenuItem(
@@ -331,49 +359,33 @@ Future<List<DropdownMenuItem>> fetchRoommateNames(
   return list;
 }
 
-Future<List<AttendanceRecord>> fetchAttendanceByStudent(String email) async {
+Future<List<AttendanceRecord>> fetchAttendanceByStudent(
+    String email, String hostelName) async {
   List<AttendanceRecord> list = [];
 
-  final infoRef = await storage.collection('users').doc(email).get();
-  if (infoRef.exists) {
-    final hostelName = infoRef.data()!['hostelName'];
-    final roomName = infoRef.data()!['roomName'];
-    if (hostelName != null && roomName != null) {
-      final attendanceDataRef = await storage
-          .collection('hostels')
-          .doc(hostelName)
-          .collection('Rooms')
-          .doc(roomName)
-          .collection('Roommates')
-          .doc(email)
-          .collection('Attendance')
-          .get();
-      final attendanceData = attendanceDataRef.docs;
-      for (final doc in attendanceData) {
-        list.add(AttendanceRecord(status: doc.data()['status'], date: doc.id));
-      }
-    }
+  final attendanceDataRef = await storage
+      .collection('hostels')
+      .doc(hostelName)
+      .collection('Roommates')
+      .doc(email)
+      .collection('Attendance')
+      .get();
+  final attendanceData = attendanceDataRef.docs;
+  for (final doc in attendanceData) {
+    list.add(AttendanceRecord(status: doc.data()['status'], date: doc.id));
   }
+
   return list;
 }
 
-Future<bool> deleteRoommate(String email,
-    {String? hostelName, String? roomName}) async {
+Future<bool> deleteRoommate(
+    String email, String hostelName, String? roomName) async {
   final user = storage.collection('users').doc(email);
-  if (hostelName == null || roomName == null) {
-    await user.get().then(
-      (value) {
-        hostelName = value.data()!['hostelName'];
-        roomName = value.data()!['roomName'];
-      },
-    );
-  }
+
   try {
     final collectionRef = storage
         .collection('hostels')
         .doc(hostelName)
-        .collection('Rooms')
-        .doc(roomName)
         .collection('Roommates')
         .doc(email);
 
@@ -399,7 +411,6 @@ Future<bool> deleteRoommate(String email,
     await batch.commit();
     return true;
   } catch (e) {
-    print(e);
     return false;
   }
 }

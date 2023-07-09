@@ -91,7 +91,6 @@ Future<bool> setLeave(
     String email, String hostelName, String roomName, bool status,
     {DateTime? leaveStartDate, DateTime? leaveEndDate}) async {
   try {
-    print('ready here');
     await FirebaseFirestore.instance
         .collection('hostels')
         .doc(hostelName)

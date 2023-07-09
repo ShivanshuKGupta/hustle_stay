@@ -51,8 +51,7 @@ class _CompleteDetailsState extends State<CompleteDetails> {
                       isDeleting = true;
                     });
                     if (await deleteRoommate(widget.user.email!,
-                        hostelName: widget.hostelName,
-                        roomName: widget.roomName)) {
+                        widget.hostelName, widget.roomName)) {
                       Navigator.of(context).pop(true);
                     } else {
                       setState(() {

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/hostel/rooms/room.dart';
 
 class FilteredRecords extends StatefulWidget {
-  FilteredRecords({super.key, required this.email});
-  String email;
+  const FilteredRecords(
+      {super.key, required this.email, required this.hostelName});
+  final String email;
+  final String hostelName;
 
   @override
   State<FilteredRecords> createState() => _FilteredRecordsState();
@@ -27,7 +29,8 @@ class _FilteredRecordsState extends State<FilteredRecords> {
   }
 
   Future<void> filterAttendance() async {
-    final listData = await fetchAttendanceByStudent(widget.email);
+    final listData =
+        await fetchAttendanceByStudent(widget.email, widget.hostelName);
     setState(() {
       if (listData.isEmpty) {
         isEmpty = true;

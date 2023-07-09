@@ -174,7 +174,10 @@ class _RoomsScreenState extends State<RoomsScreen> {
                   ),
                   if (isOpen)
                     Expanded(
-                        child: FilteredRecords(email: emailController.text)),
+                        child: FilteredRecords(
+                      email: emailController.text,
+                      hostelName: widget.hostelName,
+                    )),
                 ],
               )
             : Container(
