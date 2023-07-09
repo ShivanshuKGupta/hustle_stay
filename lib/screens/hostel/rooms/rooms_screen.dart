@@ -52,7 +52,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
     setState(() {});
   }
 
-  final emailController = TextEditingController();
+  ValueNotifier<String>? textController = ValueNotifier("");
 
   @override
   Widget build(BuildContext context) {
@@ -159,25 +159,19 @@ class _RoomsScreenState extends State<RoomsScreen> {
                       Expanded(
                         child: TextField(
                           decoration: const InputDecoration(
-                              hintText: "Enter email to filter"),
-                          controller: emailController,
+                              hintText: "Search by email/name"),
+                          onChanged: (value) {
+                            textController!.value = value;
+                          },
                         ),
                       ),
-                      IconButton(
-                          onPressed: () {
-                            setState(() {
-                              isOpen = true;
-                            });
-                          },
-                          icon: const Icon(Icons.search_sharp)),
                     ],
                   ),
-                  if (isOpen)
-                    Expanded(
-                        child: FilteredRecords(
-                      email: emailController.text,
-                      hostelName: widget.hostelName,
-                    )),
+                  Expanded(
+                      child: FilteredRecords(
+                    text: textController,
+                    hostelName: widget.hostelName,
+                  )),
                 ],
               )
             : Container(
