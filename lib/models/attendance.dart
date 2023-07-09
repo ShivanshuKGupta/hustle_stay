@@ -170,7 +170,7 @@ Future<bool> markAllRoommateAttendance(String hostelName, String roomName,
 }
 
 Future<Map<String, double>> getAttendanceStatistics(
-    String email, String hostelName, String roomName,
+    String email, String hostelName,
     {DateTimeRange? range, Source? source}) async {
   double presentData = 0;
   double absentData = 0;

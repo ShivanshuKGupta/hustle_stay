@@ -431,77 +431,84 @@ Future<bool> deleteRoommate(String email, String hostelName, String? roomName,
   }
 }
 
-int calculateSimilarity(String a, String b, int len) {
+int calculateSimilarity(String a, String b) {
   int matchCount = 0;
+  int minLength = a.length < b.length ? a.length : b.length;
 
-  for (int i = 0; i < len; i++) {
+  for (int i = 0; i < minLength; i++) {
     if (a[i] == b[i]) {
       matchCount++;
-    } else {
-      break;
     }
   }
 
   return matchCount;
 }
 
-Future<List<DropdownMenuEntry>> fetchOptions(
-    String hostelName, String text) async {
-  List<DropdownMenuEntry> list = [];
+Future<List<Map<String, String>>> fetchOptions(
+    String hostelName, String text, bool isEmail) async {
+  List<Map<String, String>> list = [];
   List<String> listData = [];
 
-  QuerySnapshot<Map<String, dynamic>> snapshot = await storage
-      .collection('users')
-      .where('hostelName', isEqualTo: hostelName)
-      .where(FieldPath.documentId, isGreaterThanOrEqualTo: text)
-      .limit(2)
-      .get();
+  if (isEmail) {
+    QuerySnapshot<Map<String, dynamic>> snapshot = await storage
+        .collection('users')
+        .where('hostelName', isEqualTo: hostelName)
+        .where(FieldPath.documentId, isGreaterThanOrEqualTo: text)
+        .limit(20)
+        .get();
 
-  List<Future<void>> snapshotFutures = snapshot.docs.map((element) async {
-    final nameRef =
-        await element.reference.collection('editable').doc('details').get();
-    final name = nameRef.data()!['name'];
-    list.add(
-        DropdownMenuEntry(value: element.id, label: "${element.id} (${name})"));
-    listData.add(element.id);
-  }).toList();
+    List<Future<void>> snapshotFutures = snapshot.docs.map((element) async {
+      final nameRef =
+          await element.reference.collection('editable').doc('details').get();
+      final name = nameRef.data()!['name'];
+      list.add({
+        'name': name,
+        'email': element.id,
+        'leading': element.id,
+        'imageUrl': nameRef.data()!['imgUrl'],
+      });
+      listData.add(element.id);
+    }).toList();
 
-  await Future.wait(
-      snapshotFutures); // Wait for all the snapshot futures to complete
+    await Future.wait(snapshotFutures);
+  } else {
+    QuerySnapshot<Map<String, dynamic>> secondSnapshot = await storage
+        .collection('users')
+        .where('hostelName', isEqualTo: hostelName)
+        .get();
 
-  QuerySnapshot<Map<String, dynamic>> secondSnapshot = await storage
-      .collection('users')
-      .where('hostelName', isEqualTo: hostelName)
-      .get();
+    int x = 0;
+    List<Future<void>> secondSnapshotFutures =
+        secondSnapshot.docs.map((elementVal) async {
+      if (x < 20) {
+        final elementRef = await elementVal.reference
+            .collection('editable')
+            .where('name', isGreaterThanOrEqualTo: text)
+            .get();
+        if (elementRef.size > 0) {
+          final element = elementRef.docs.first;
 
-  int x = 0;
-  List<Future<void>> secondSnapshotFutures =
-      secondSnapshot.docs.map((elementVal) async {
-    if (x < 2 && !listData.contains(elementVal.id)) {
-      final elementRef = await elementVal.reference
-          .collection('editable')
-          .where('name', isGreaterThanOrEqualTo: text)
-          .get();
-      if (elementRef.size > 0) {
-        final element = elementRef.docs.first;
-
-        list.add(DropdownMenuEntry(
-            value: element.id,
-            label: "${element.data()['name']} (${elementVal.id})"));
-        listData.add(element.id);
-        x++;
+          list.add({
+            'name': element.data()['name'],
+            'email': elementVal.id,
+            'leading': element.data()['name'],
+            'imageUrl': element.data()['imgUrl'],
+          });
+          listData.add(element.id);
+          x++;
+        }
       }
-    }
-  }).toList();
+    }).toList();
 
-  await Future.wait(
-      secondSnapshotFutures); // Wait for all the secondSnapshot futures to complete
-  int len = text.length;
-  list.sort((a, b) {
-    int valA = calculateSimilarity(a.label, text, len);
-    int valB = calculateSimilarity(b.label, text, len);
-    return valB.compareTo(valA);
-  });
+    await Future.wait(secondSnapshotFutures);
+  }
+  if (list.isNotEmpty) {
+    list.sort((a, b) {
+      int valA = calculateSimilarity(a['leading']!, text);
+      int valB = calculateSimilarity(b['leading']!, text);
+      return valB.compareTo(valA);
+    });
+  }
 
   return list;
 }

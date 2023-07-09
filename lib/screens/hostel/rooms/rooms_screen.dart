@@ -52,8 +52,6 @@ class _RoomsScreenState extends State<RoomsScreen> {
     setState(() {});
   }
 
-  ValueNotifier<String>? textController = ValueNotifier("");
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -152,27 +150,8 @@ class _RoomsScreenState extends State<RoomsScreen> {
             selectedDate: selectedDate,
           )
         : filterRecord
-            ? Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          decoration: const InputDecoration(
-                              hintText: "Search by email/name"),
-                          onChanged: (value) {
-                            textController!.value = value;
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  Expanded(
-                      child: FilteredRecords(
-                    text: textController,
-                    hostelName: widget.hostelName,
-                  )),
-                ],
+            ? FilteredRecords(
+                hostelName: widget.hostelName,
               )
             : Container(
                 child: numberOfRooms == 0

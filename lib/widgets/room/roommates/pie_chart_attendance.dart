@@ -1,5 +1,4 @@
 import 'package:animated_icon/animated_icon.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/attendance.dart';
 import 'package:hustle_stay/screens/hostel/rooms/filter_status_data.dart';
@@ -138,8 +137,7 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
       },
       future: widget.email == null && value != null
           ? getHostelAttendanceStatistics(widget.hostelName, value)
-          : getAttendanceStatistics(
-              widget.email!, widget.hostelName, widget.roomName!),
+          : getAttendanceStatistics(widget.email!, widget.hostelName),
     );
   }
 
