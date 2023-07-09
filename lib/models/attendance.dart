@@ -82,34 +82,51 @@ Future<bool> setAttendanceData(String email, String hostelName, String roomName,
 Future<bool> markAllAttendance(
     String hostelName, bool status, DateTime selectedDate) async {
   try {
-    String statusVal = status ? 'present' : 'absent';
+    final statusVal = status ? 'present' : 'absent';
     final storage = FirebaseFirestore.instance;
-    final docsRoomsRef = await storage
+
+    final QuerySnapshot<Map<String, dynamic>> roommatesQuery = await storage
         .collection('hostels')
         .doc(hostelName)
         .collection('Roommates')
         .get();
+
     final batch = storage.batch();
-    for (final x in docsRoomsRef.docs) {
-      final attendanceRefSnapshot = await x.reference
+    final List<Future<QuerySnapshot<Map<String, dynamic>>>> attendanceFutures =
+        [];
+
+    for (final x in roommatesQuery.docs) {
+      final attendanceQuery = x.reference
           .collection('Attendance')
           .where(FieldPath.documentId,
               isEqualTo: DateFormat('yyyy-MM-dd').format(selectedDate))
           .where('status',
               isEqualTo: statusVal == 'present' ? 'absent' : 'present')
           .get();
-      if (attendanceRefSnapshot.size > 0) {
-        final attendanceRef = attendanceRefSnapshot.docs.first;
 
-        if (attendanceRef.exists) {
+      attendanceFutures.add(attendanceQuery);
+    }
+
+    final List<QuerySnapshot<Map<String, dynamic>>> attendanceSnapshots =
+        await Future.wait(attendanceFutures);
+
+    for (int i = 0; i < attendanceSnapshots.length; i++) {
+      final QuerySnapshot<Map<String, dynamic>> attendanceSnapshot =
+          attendanceSnapshots[i];
+      if (attendanceSnapshot.size > 0) {
+        final QueryDocumentSnapshot<Map<String, dynamic>> attendanceDoc =
+            attendanceSnapshot.docs.first;
+
+        if (attendanceDoc.exists) {
           batch.set(
-            attendanceRef.reference,
+            attendanceDoc.reference,
             {'status': statusVal},
             SetOptions(merge: true),
           );
         }
       }
     }
+
     await batch.commit();
     return true;
   } catch (e) {
@@ -214,17 +231,28 @@ Future<Map<String, double>> getHostelAttendanceStatistics(
       .collection('Roommates')
       .get(source == null ? null : GetOptions(source: source));
 
+  final List<Future<DocumentSnapshot<Map<String, dynamic>>>> attendanceFutures =
+      [];
+
+  for (final x in roommatesQuery.docs) {
+    final attendanceRef = x.reference
+        .collection('Attendance')
+        .doc(DateFormat('yyyy-MM-dd').format(date));
+
+    attendanceFutures.add(attendanceRef.get());
+  }
+
+  final List<DocumentSnapshot<Map<String, dynamic>>> attendanceSnapshots =
+      await Future.wait(attendanceFutures);
+
   double present = 0;
   double absent = 0;
   double leave = 0;
   double internship = 0;
-  for (final x in roommatesQuery.docs) {
-    final attendanceData = await x.reference
-        .collection('Attendance')
-        .doc(DateFormat('yyyy-MM-dd').format(date))
-        .get();
-    if (attendanceData.exists) {
-      switch (attendanceData['status']) {
+
+  for (final attendanceSnapshot in attendanceSnapshots) {
+    if (attendanceSnapshot.exists) {
+      switch (attendanceSnapshot['status']) {
         case 'present':
           present += 1;
           break;
@@ -246,44 +274,65 @@ Future<Map<String, double>> getHostelAttendanceStatistics(
     'leave': leave,
     'internship': internship,
   };
+
   return attendanceStats;
 }
 
 Future<List<RoommateInfo>> getFilteredStudents(
     String statusVal, DateTime date, String hostelName,
     {Source? source}) async {
-  List<RoommateInfo> list = [];
   final storage = FirebaseFirestore.instance;
-  final docsRoomsRef = await storage
+
+  final QuerySnapshot<Map<String, dynamic>> roommatesQuery = await storage
       .collection('hostels')
       .doc(hostelName)
       .collection('Roommates')
       .get(source == null ? null : GetOptions(source: source));
-  for (final x in docsRoomsRef.docs) {
-    final attendanceRefSnapshot = await x.reference
+
+  final List<Future<QuerySnapshot<Map<String, dynamic>>>> attendanceFutures =
+      [];
+
+  for (final x in roommatesQuery.docs) {
+    final attendanceQuery = x.reference
         .collection('Attendance')
         .where(FieldPath.documentId,
             isEqualTo: DateFormat('yyyy-MM-dd').format(date))
         .where('status', isEqualTo: statusVal)
         .get();
-    if (attendanceRefSnapshot.size > 0) {
-      final attendanceRef = attendanceRefSnapshot.docs.first;
 
-      if (attendanceRef.exists) {
-        final data = attendanceRef.data();
+    attendanceFutures.add(attendanceQuery);
+  }
+
+  final List<QuerySnapshot<Map<String, dynamic>>> attendanceSnapshots =
+      await Future.wait(attendanceFutures);
+
+  final List<RoommateInfo> list = [];
+
+  for (int i = 0; i < attendanceSnapshots.length; i++) {
+    final QuerySnapshot<Map<String, dynamic>> attendanceSnapshot =
+        attendanceSnapshots[i];
+    if (attendanceSnapshot.size > 0) {
+      final QueryDocumentSnapshot<Map<String, dynamic>> attendanceDoc =
+          attendanceSnapshot.docs.first;
+
+      if (attendanceDoc.exists) {
+        final data = attendanceDoc.data();
         final onLeave = data['onLeave'] ?? false;
         final leaveStartDate = data['leaveStartDate'] as Timestamp?;
         final leaveEndDate = data['leaveEndDate'] as Timestamp?;
+
         list.add(RoommateInfo(
-            roomName: x.data()['roomName'],
-            roommateData: RoommateData(
-              email: data['email'] ?? '',
-              onLeave: onLeave,
-              leaveStartDate: leaveStartDate?.toDate(),
-              leaveEndDate: leaveEndDate?.toDate(),
-            )));
+          roomName: roommatesQuery.docs[i].data()['roomName'],
+          roommateData: RoommateData(
+            email: roommatesQuery.docs[i].id,
+            onLeave: onLeave,
+            leaveStartDate: leaveStartDate?.toDate(),
+            leaveEndDate: leaveEndDate?.toDate(),
+          ),
+        ));
       }
     }
   }
+
   return list;
 }

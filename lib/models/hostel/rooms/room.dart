@@ -56,17 +56,19 @@ Future<List<Room>> fetchRooms(String hostelName, {Source? src}) async {
   return roomDataList;
 }
 
-Future<bool> isRoomExists(String hostelName, String roomName) async {
+Future<bool> isRoomExists(String hostelName, String roomName,
+    {Source? source}) async {
   final storageRef = await storage
       .collection('hostels')
       .doc(hostelName)
       .collection('Rooms')
       .doc(roomName)
-      .get();
+      .get(source == null ? null : GetOptions(source: source));
   return storageRef.exists;
 }
 
-Future<bool> deleteRoom(String roomName, String hostelName) async {
+Future<bool> deleteRoom(String roomName, String hostelName,
+    {Source? source}) async {
   try {
     final result = await storage.runTransaction((transaction) async {
       final storageRef = storage.collection('hostels').doc(hostelName);
@@ -87,15 +89,15 @@ Future<bool> deleteRoom(String roomName, String hostelName) async {
   }
 }
 
-Future<List<RoommateData>> fetchRoommates(
-    String hostelName, String roomName) async {
+Future<List<RoommateData>> fetchRoommates(String hostelName, String roomName,
+    {Source? source}) async {
   List<RoommateData> list = [];
   final roommateSnapshot = await storage
       .collection('hostels')
       .doc(hostelName)
       .collection('Roommates')
       .where('roomName', isEqualTo: roomName)
-      .get();
+      .get(source == null ? null : GetOptions(source: source));
 
   for (final x in roommateSnapshot.docs) {
     final data = x.data();
@@ -113,7 +115,8 @@ Future<List<RoommateData>> fetchRoommates(
 }
 
 Future<void> copyRoommateAttendance(String email, String hostelName,
-    String roomName, String destHostelName, String destRoomName) async {
+    String roomName, String destHostelName, String destRoomName,
+    {Source? source}) async {
   try {
     final collectionRef = storage
         .collection('hostels')
@@ -128,7 +131,8 @@ Future<void> copyRoommateAttendance(String email, String hostelName,
         .doc(email);
     final attendanceRef = collectionRef.collection('Attendance');
 
-    final attendanceSnapshot = await attendanceRef.get();
+    final attendanceSnapshot = await attendanceRef
+        .get(source == null ? null : GetOptions(source: source));
     final attendanceDocuments = attendanceSnapshot.docs;
     if (attendanceDocuments.isNotEmpty) {
       final batch = storage.batch();
@@ -152,7 +156,8 @@ Future<void> copyRoommateAttendance(String email, String hostelName,
 }
 
 Future<bool> changeRoom(String email, String hostelName, String roomName,
-    String destHostelName, String destRoomName, BuildContext context) async {
+    String destHostelName, String destRoomName, BuildContext context,
+    {Source? source}) async {
   try {
     final sourceRoomRef = storage
         .collection('hostels')
@@ -170,7 +175,8 @@ Future<bool> changeRoom(String email, String hostelName, String roomName,
         .doc(destHostelName)
         .collection('Rooms')
         .doc(destRoomName);
-    final destRoomSnapshot = await destRoomLoc.get();
+    final destRoomSnapshot = await destRoomLoc
+        .get(source == null ? null : GetOptions(source: source));
     final capacity = destRoomSnapshot['capacity'];
     final numRoommates = destRoomSnapshot['numRoommates'];
     if (destHostelName == hostelName) {
@@ -202,9 +208,10 @@ Future<bool> changeRoom(String email, String hostelName, String roomName,
         .doc(destHostelName)
         .collection('Roommates');
 
-    final roomdata = {'roomName': roomName, 'hostelName': hostelName};
+    final roomdata = {'roomName': destRoomName, 'hostelName': destHostelName};
     if (capacity > numRoommates) {
-      final sData = await sourceRef.get();
+      final sData = await sourceRef
+          .get(source == null ? null : GetOptions(source: source));
       final sourceData = sData.data();
       await storage.runTransaction((transaction) async {
         transaction
@@ -360,7 +367,8 @@ Future<List<DropdownMenuItem>> fetchRoommateNames(
 }
 
 Future<List<AttendanceRecord>> fetchAttendanceByStudent(
-    String email, String hostelName) async {
+    String email, String hostelName,
+    {Source? source}) async {
   List<AttendanceRecord> list = [];
 
   final attendanceDataRef = await storage
@@ -369,7 +377,7 @@ Future<List<AttendanceRecord>> fetchAttendanceByStudent(
       .collection('Roommates')
       .doc(email)
       .collection('Attendance')
-      .get();
+      .get(source == null ? null : GetOptions(source: source));
   final attendanceData = attendanceDataRef.docs;
   for (final doc in attendanceData) {
     list.add(AttendanceRecord(status: doc.data()['status'], date: doc.id));
@@ -378,8 +386,8 @@ Future<List<AttendanceRecord>> fetchAttendanceByStudent(
   return list;
 }
 
-Future<bool> deleteRoommate(
-    String email, String hostelName, String? roomName) async {
+Future<bool> deleteRoommate(String email, String hostelName, String? roomName,
+    {Source? source}) async {
   final user = storage.collection('users').doc(email);
 
   try {
@@ -391,7 +399,8 @@ Future<bool> deleteRoommate(
 
     final attendanceRef = collectionRef.collection('Attendance');
     final batch = storage.batch();
-    final attendanceSnapshot = await attendanceRef.get();
+    final attendanceSnapshot = await attendanceRef
+        .get(source == null ? null : GetOptions(source: source));
     final attendanceDocuments = attendanceSnapshot.docs;
     if (attendanceDocuments.isNotEmpty) {
       batch.update(user, {'hostelName': null, 'roomName': null});
