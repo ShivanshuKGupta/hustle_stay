@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hustle_stay/screens/hostel/rooms/rooms_screen.dart';
@@ -8,8 +7,6 @@ import '../../models/hostel/hostels.dart';
 import '../../tools.dart';
 import 'rooms/add_rooms.dart';
 // import 'package:hustle_stay/models/user.dart';
-
-final _firebase = FirebaseAuth.instance;
 
 class HostelScreen extends StatefulWidget {
   const HostelScreen({super.key});

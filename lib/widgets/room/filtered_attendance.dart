@@ -2,6 +2,7 @@ import 'package:animated_icon/animated_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import 'package:hustle_stay/tools.dart';
+import 'package:hustle_stay/widgets/room/room_data.dart';
 import 'package:hustle_stay/widgets/room/roommates/roommate_data.dart';
 
 class FilteredRecords extends StatefulWidget {
@@ -24,12 +25,13 @@ class _FilteredRecordsState extends State<FilteredRecords> {
   }
 
   String email = "";
-  bool? isEmail;
+  String? filterType;
   ValueNotifier<String>? textController = ValueNotifier("");
 
   List<DropdownMenuEntry> listDropDown = const [
-    DropdownMenuEntry(value: true, label: 'Email'),
-    DropdownMenuEntry(value: false, label: 'Name')
+    DropdownMenuEntry(value: 'email', label: 'Email'),
+    DropdownMenuEntry(value: 'name', label: 'Name'),
+    DropdownMenuEntry(value: 'room', label: 'Room'),
   ];
 
   @override
@@ -42,12 +44,12 @@ class _FilteredRecordsState extends State<FilteredRecords> {
               dropdownMenuEntries: listDropDown,
               onSelected: (value) {
                 setState(() {
-                  isEmail = value;
+                  filterType = value;
                 });
               },
             ),
             TextField(
-              enabled: isEmail != null,
+              enabled: filterType != null,
               decoration: const InputDecoration(hintText: "Enter here"),
               onChanged: (value) {
                 textController!.value = value;
@@ -56,7 +58,7 @@ class _FilteredRecordsState extends State<FilteredRecords> {
           ],
         ),
         const Divider(),
-        isEmail == null
+        filterType == null
             ? Text(
                 'Please select one of the options first!',
                 style: Theme.of(context)
@@ -64,40 +66,76 @@ class _FilteredRecordsState extends State<FilteredRecords> {
                     .bodyMedium!
                     .copyWith(color: Theme.of(context).colorScheme.error),
               )
-            : ValueListenableBuilder(
-                valueListenable: textController!,
-                builder: (context, value, child) {
-                  return value == ""
-                      ? const Center(
-                          child: Text('No data'),
-                        )
-                      : FutureBuilder(
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return Center(
-                                child: circularProgressIndicator(),
-                              );
-                            }
-                            if (!snapshot.hasData) {
-                              return const Center(
-                                child: Text('No data'),
-                              );
-                            }
-                            if (snapshot.data!.isEmpty) {
-                              return const Center(
-                                child: Text('No matches found'),
-                              );
-                            }
-
-                            return listOptions(snapshot.data!);
-                          },
-                          future:
-                              fetchOptions(widget.hostelName, value, isEmail!),
-                        );
-                },
-              ),
+            : filterType == 'room'
+                ? filterByRoom()
+                : filterByNameOrEmail()
       ],
+    );
+  }
+
+  Widget filterByRoom() {
+    return ValueListenableBuilder(
+      valueListenable: textController!,
+      builder: (context, value, child) {
+        return value == ""
+            ? const Center(
+                child: Text('No data'),
+              )
+            : FutureBuilder(
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: circularProgressIndicator(),
+                    );
+                  }
+                  if (!snapshot.hasData) {
+                    return const Center(
+                      child: Text('No data'),
+                    );
+                  }
+                  return RoomDataWidget(
+                      roomData: snapshot.data!,
+                      hostelName: widget.hostelName,
+                      selectedDate: widget.selectedDate!);
+                },
+                future: fetchRoomOptions(widget.hostelName, value),
+              );
+      },
+    );
+  }
+
+  Widget filterByNameOrEmail() {
+    return ValueListenableBuilder(
+      valueListenable: textController!,
+      builder: (context, value, child) {
+        return value == ""
+            ? const Center(
+                child: Text('No data'),
+              )
+            : FutureBuilder(
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: circularProgressIndicator(),
+                    );
+                  }
+                  if (!snapshot.hasData) {
+                    return const Center(
+                      child: Text('No data'),
+                    );
+                  }
+                  if (snapshot.data!.isEmpty) {
+                    return const Center(
+                      child: Text('No matches found'),
+                    );
+                  }
+
+                  return listOptions(snapshot.data!);
+                },
+                future: fetchOptions(
+                    widget.hostelName, value, filterType == 'email'),
+              );
+      },
     );
   }
 

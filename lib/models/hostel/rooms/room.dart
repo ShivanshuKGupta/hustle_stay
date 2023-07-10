@@ -495,3 +495,27 @@ Future<List<Map<String, String>>> fetchOptions(
 
   return list;
 }
+
+Future<Room> fetchRoomOptions(String hostelName, String value) async {
+  value = capitalizeEachWord(value);
+  QuerySnapshot<Map<String, dynamic>> data = await storage
+      .collection('hostels')
+      .doc(hostelName)
+      .collection('Rooms')
+      .where(FieldPath.documentId, isEqualTo: value)
+      .limit(1)
+      .get();
+  if (data.size == 0) {
+    data = await storage
+        .collection('hostels')
+        .doc(hostelName)
+        .collection('Rooms')
+        .where(FieldPath.documentId, isGreaterThanOrEqualTo: value)
+        .limit(1)
+        .get();
+  }
+  return Room(
+      numberOfRoommates: data.docs[0].data()['numRoommates'],
+      roomName: data.docs[0].id,
+      capacity: data.docs[0].data()['capacity']);
+}
