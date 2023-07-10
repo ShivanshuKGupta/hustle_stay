@@ -72,7 +72,10 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
           ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Error occured in updation')));
         });
-        await loc.update({'numRoommates': FieldValue.increment(1)});
+        await loc
+            .collection('Rooms')
+            .doc(widget.roomName)
+            .update({'numRoommates': FieldValue.increment(1)});
         if (currentRoommateNumber < numOfRoommates - 1) {
           setState(() {
             currentRoommateNumber += 1;

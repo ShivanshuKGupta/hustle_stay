@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/attendance.dart';
 import 'package:hustle_stay/models/hostel/rooms/room.dart';
@@ -12,16 +13,18 @@ import '../../../tools.dart';
 class RoommateDataWidget extends StatefulWidget {
   const RoommateDataWidget(
       {super.key,
-      required this.roommateData,
+      this.roommateData,
       required this.selectedDate,
-      required this.roomName,
+      this.roomName,
       required this.hostelName,
       this.isNeeded,
-      this.status});
-  final RoommateData roommateData;
+      this.status,
+      this.email});
+  final RoommateData? roommateData;
   final DateTime selectedDate;
   final String hostelName;
-  final String roomName;
+  final String? roomName;
+  final String? email;
   final bool? isNeeded;
   final String? status;
 
@@ -30,16 +33,28 @@ class RoommateDataWidget extends StatefulWidget {
 }
 
 class _RoommateDataWidgetState extends State<RoommateDataWidget> {
+  RoommateData? roommateData;
+  String? roomName;
   @override
   void didUpdateWidget(covariant RoommateDataWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _getAttendanceData();
+    if (widget.email != null && widget.roommateData == null ||
+        widget.roomName == null) {
+      getRoommateData(widget.email!, widget.hostelName);
+    } else if (widget.isNeeded == null || widget.isNeeded == true) {
+      _getAttendanceData();
+    } else {
+      status = widget.status;
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    if (widget.isNeeded == null || widget.isNeeded == true) {
+    if (widget.email != null && widget.roommateData == null ||
+        widget.roomName == null) {
+      getRoommateData(widget.email!, widget.hostelName);
+    } else if (widget.isNeeded == null || widget.isNeeded == true) {
       _getAttendanceData();
     } else {
       status = widget.status;
@@ -50,14 +65,47 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
   bool isRunning = false;
   String? status;
   Future<void> _getAttendanceData() async {
-    String resp = await getAttendanceData(widget.roommateData,
-        widget.hostelName, widget.roomName, widget.selectedDate);
+    String resp = await getAttendanceData(widget.roommateData ?? roommateData!,
+        widget.hostelName, widget.roomName ?? roomName!, widget.selectedDate);
     if (mounted) {
       setState(() {
         status = resp;
       });
     }
     return;
+  }
+
+  Future<void> getRoommateData(String email, String hostelName) async {
+    final ref = await storage
+        .collection('hostels')
+        .doc(hostelName)
+        .collection('Roommates')
+        .doc(email)
+        .get();
+    if (ref.exists) {
+      final data = ref.data();
+      final onLeave = data!['onLeave'] ?? false;
+      final leaveStartDate = data['leaveStartDate'] as Timestamp?;
+      final leaveEndDate = data['leaveEndDate'] as Timestamp?;
+      final rData = RoommateData(
+        email: ref.id,
+        onLeave: onLeave,
+        leaveStartDate: leaveStartDate?.toDate(),
+        leaveEndDate: leaveEndDate?.toDate(),
+      );
+      String resp = await getAttendanceData(
+          widget.roommateData ?? rData,
+          widget.hostelName,
+          widget.roomName ?? data['roomName'],
+          widget.selectedDate);
+      if (mounted) {
+        setState(() {
+          status = resp;
+          roommateData = rData;
+          roomName = data['roomName'];
+        });
+      }
+    }
   }
 
   void pushAgain() {
@@ -71,8 +119,8 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
         builder: (_) => CompleteDetails(
             user: user,
             hostelName: widget.hostelName,
-            roomName: widget.roomName,
-            roommateData: widget.roommateData)));
+            roomName: widget.roomName ?? roomName!,
+            roommateData: widget.roommateData ?? roommateData!)));
     if (value == null) {
       return;
     }
@@ -93,7 +141,7 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
     double widthScreen = MediaQuery.of(context).size.width;
     return isOnScreen
         ? UserBuilder(
-            email: widget.roommateData.email,
+            email: widget.email ?? widget.roommateData!.email,
             loadingWidget: Padding(
               padding: const EdgeInsets.all(1),
               child: Center(
@@ -120,7 +168,7 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
                           ),
                         )),
                     title: Text(
-                      user.name ?? widget.roommateData.email,
+                      user.name ?? widget.email ?? widget.roommateData!.email,
                       style: const TextStyle(fontSize: 16),
                     ),
                     contentPadding: EdgeInsets.all(widthScreen * 0.002),
@@ -131,9 +179,9 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
                     trailing: status == null
                         ? null
                         : AttendanceIcon(
-                            roommateData: widget.roommateData,
+                            roommateData: widget.roommateData ?? roommateData!,
                             selectedDate: widget.selectedDate,
-                            roomName: widget.roomName,
+                            roomName: widget.roomName ?? roomName!,
                             hostelName: widget.hostelName,
                             status: status!)),
               );

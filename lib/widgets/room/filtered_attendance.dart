@@ -1,14 +1,14 @@
 import 'package:animated_icon/animated_icon.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/hostel/rooms/room.dart';
-import 'package:hustle_stay/screens/hostel/rooms/profile_view_screen.dart';
-import 'package:hustle_stay/screens/hostel/rooms/user_statistics.dart';
 import 'package:hustle_stay/tools.dart';
+import 'package:hustle_stay/widgets/room/roommates/roommate_data.dart';
 
 class FilteredRecords extends StatefulWidget {
-  const FilteredRecords({super.key, required this.hostelName});
+  const FilteredRecords(
+      {super.key, required this.hostelName, required this.selectedDate});
   final String hostelName;
+  final ValueNotifier<DateTime>? selectedDate;
 
   @override
   State<FilteredRecords> createState() => _FilteredRecordsState();
@@ -116,30 +116,35 @@ class _FilteredRecordsState extends State<FilteredRecords> {
                 : ValueListenableBuilder(
                     valueListenable: textController!,
                     builder: (context, value, child) {
-                      return FutureBuilder(
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return Center(
-                              child: circularProgressIndicator(),
-                            );
-                          }
-                          if (!snapshot.hasData) {
-                            return const Center(
+                      return value == ""
+                          ? const Center(
                               child: Text('No data'),
-                            );
-                          }
-                          if (snapshot.data == []) {
-                            return const Center(
-                              child: Text('No matches found'),
-                            );
-                          }
+                            )
+                          : FutureBuilder(
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Center(
+                                    child: circularProgressIndicator(),
+                                  );
+                                }
+                                if (!snapshot.hasData) {
+                                  return const Center(
+                                    child: Text('No data'),
+                                  );
+                                }
+                                print('list: ${snapshot.data!}');
+                                if (snapshot.data!.isEmpty) {
+                                  return const Center(
+                                    child: Text('No matches found'),
+                                  );
+                                }
 
-                          return listOptions(snapshot.data!);
-                        },
-                        future:
-                            fetchOptions(widget.hostelName, value, isEmail!),
-                      );
+                                return listOptions(snapshot.data!);
+                              },
+                              future: fetchOptions(
+                                  widget.hostelName, value, isEmail!),
+                            );
                     },
                   ),
       ],
@@ -148,38 +153,18 @@ class _FilteredRecordsState extends State<FilteredRecords> {
 
   Widget listOptions(List<Map<String, String>> list) {
     return Expanded(
-      child: ListView.builder(
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => UserStatistics(
-                    data: list[index], hostelName: widget.hostelName),
-              ));
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(2.0),
-              child: ListTile(
-                leading: CircleAvatar(
-                    radius: 50,
-                    child: ClipOval(
-                      child: AspectRatio(
-                        aspectRatio: 1.0,
-                        child: list[index]['imageUrl'] == null
-                            ? null
-                            : CachedNetworkImage(
-                                imageUrl: list[index]['imageUrl']!,
-                                fit: BoxFit.cover,
-                              ),
-                      ),
-                    )),
-                title: Text(list[index]['name']!),
-                trailing: Text(list[index]['email']!),
-              ),
-            ),
-          );
-        },
-        itemCount: list.length,
+      child: ValueListenableBuilder(
+        valueListenable: widget.selectedDate!,
+        builder: (context, value, child) => ListView.builder(
+          itemBuilder: (context, index) {
+            return RoommateDataWidget(
+              selectedDate: value,
+              hostelName: widget.hostelName,
+              email: list[index]['email'],
+            );
+          },
+          itemCount: list.length,
+        ),
       ),
     );
   }

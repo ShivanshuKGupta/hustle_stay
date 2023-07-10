@@ -152,6 +152,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
         : filterRecord
             ? FilteredRecords(
                 hostelName: widget.hostelName,
+                selectedDate: selectedDate,
               )
             : Container(
                 child: numberOfRooms == 0
