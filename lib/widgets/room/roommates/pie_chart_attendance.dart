@@ -43,11 +43,20 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
         }
       });
     } else {
-      if (category == 'Leave') {
-        category = 'onLeave';
-      } else {
-        category = category.toLowerCase();
+      switch (category) {
+        case 'Leave':
+          category = 'onLeave';
+          break;
+        case 'Late':
+          category = 'presentLate';
+          break;
+        case 'Not Taken':
+          category = "";
+          break;
+        default:
+          category = category.toLowerCase();
       }
+
       Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => AttendanceStudent(
           hostelName: widget.hostelName,
@@ -71,20 +80,27 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
     double sum = adata['present']! +
         adata['absent']! +
         adata['internship']! +
-        adata['leave']!;
+        adata['leave']! +
+        adata['presentLate']!;
 
-    double present = adata['present']! / sum * 100;
-    double leave = adata['leave']! / sum * 100;
-    double internship = adata['internship']! / sum * 100;
-    double absent = adata['absent']! / sum * 100;
+    double present = adata['present']! / adata['total']! * 100;
+    double leave = adata['leave']! / adata['total']! * 100;
+    double internship = adata['internship']! / adata['total']! * 100;
+    double absent = adata['absent']! / adata['total']! * 100;
+    double presentLate = adata['presentLate']! / adata['total']! * 100;
+    double noStatus = (adata['total']! - sum) / adata['total']! * 100;
 
     List<ChartData> chartdata = [
       ChartData(
           'Present', double.parse(present.toStringAsFixed(2)), Colors.green),
       ChartData('Absent', double.parse(absent.toStringAsFixed(2)), Colors.red),
-      ChartData('Leave', double.parse(leave.toStringAsFixed(2)), Colors.yellow),
+      ChartData('Leave', double.parse(leave.toStringAsFixed(2)), Colors.cyan),
       ChartData('Internship', double.parse(internship.toStringAsFixed(2)),
-          Colors.cyan),
+          Colors.orange),
+      ChartData(
+          'Late', double.parse(presentLate.toStringAsFixed(2)), Colors.yellow),
+      ChartData('Not Taken', double.parse(noStatus.toStringAsFixed(2)),
+          Colors.blueGrey),
     ];
 
     return chartdata;
@@ -233,14 +249,32 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
           ),
         ),
         ListTile(
+          title: const Text('Late'),
+          leading: const Icon(Icons.all_inbox),
+          trailing: Text(
+            (data['presentLate']!).toStringAsFixed(0),
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+        ),
+        ListTile(
+          title: const Text('Not Taken Yet'),
+          leading: const Icon(Icons.all_inbox),
+          trailing: Text(
+            ((data['total']! -
+                    (data['present']! +
+                        data['absent']! +
+                        data['internship']! +
+                        data['leave']! +
+                        data['presentLate']!)))
+                .toStringAsFixed(0),
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+        ),
+        ListTile(
           title: const Text('Total'),
           leading: const Icon(Icons.all_inbox),
           trailing: Text(
-            (data['present']! +
-                    data['absent']! +
-                    data['internship']! +
-                    data['leave']!)
-                .toStringAsFixed(0),
+            (data['total']!).toStringAsFixed(0),
             style: Theme.of(context).textTheme.bodyLarge,
           ),
         )

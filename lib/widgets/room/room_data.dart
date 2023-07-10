@@ -24,6 +24,28 @@ class _RoomDataWidgetState extends State<RoomDataWidget> {
   bool isRunning = false;
   bool allPresent = false;
   bool isDisabled = false;
+  // Color tileColor = Colors.white;
+  @override
+  void didUpdateWidget(covariant RoomDataWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // tileColor = findColor();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // tileColor = findColor();
+  }
+
+  // Color findColor() {
+  //   if (widget.roomData.statusFraction != null) {
+  //     int red = (255 * (1 - widget.roomData.statusFraction!)).toInt();
+  //     int green = (255 * widget.roomData.statusFraction!).toInt();
+  //     return Color.fromRGBO(red, green, 10, 1);
+  //   }
+  //   return Colors.grey;
+  // }
+
   @override
   Widget build(BuildContext context) {
     double widthScreen = MediaQuery.of(context).size.width;
@@ -35,7 +57,7 @@ class _RoomDataWidgetState extends State<RoomDataWidget> {
             borderRadius: BorderRadius.circular(20),
             side: const BorderSide(
                 color: Colors.black, style: BorderStyle.solid)),
-        color: (Theme.of(context).colorScheme.secondary).withOpacity(0.3),
+        color: (const Color(0xFFE6E6FA)).withOpacity(0.4),
         child: Padding(
           padding: const EdgeInsets.all(5),
           child: Column(
@@ -50,16 +72,16 @@ class _RoomDataWidgetState extends State<RoomDataWidget> {
                         Text(
                           widget.roomData.roomName,
                           style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Capacity: ${widget.roomData.capacity}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 16,
-                            color: Colors.grey[600],
+                            color: Colors.black54,
                           ),
                         ),
                       ],
@@ -127,7 +149,11 @@ class _RoomDataWidgetState extends State<RoomDataWidget> {
                       : const Icon(Icons.arrow_drop_up_outlined)),
               if (isOpen)
                 widget.roomData.numberOfRoommates == 0
-                    ? const Center(child: Text("No roommates added yet"))
+                    ? const Center(
+                        child: Text(
+                        "No roommates added yet",
+                        style: TextStyle(color: Colors.black),
+                      ))
                     : RoommateWidget(
                         roomData: widget.roomData,
                         selectedDate: widget.selectedDate,

@@ -236,6 +236,7 @@ Future<Map<String, double>> getAttendanceStatistics(
   double absentData = 0;
   double leaveData = 0;
   double internshipData = 0;
+  double presentLateData = 0;
   double total = 0;
 
   final storage = FirebaseFirestore.instance;
@@ -267,7 +268,9 @@ Future<Map<String, double>> getAttendanceStatistics(
         case 'onLeave':
           leaveData += 1;
           break;
-
+        case 'presentLate':
+          presentLateData += 1;
+          break;
         default:
           internshipData += 1;
       }
@@ -278,6 +281,7 @@ Future<Map<String, double>> getAttendanceStatistics(
     'absent': absentData,
     'leave': leaveData,
     'internship': internshipData,
+    'presentLate': presentLateData,
     'total': total,
   };
 

@@ -133,7 +133,7 @@ Color colorPickerAttendance(String resp) {
     case 'internship':
       return Colors.orangeAccent;
 
-    case 'leave':
+    case 'onLeave':
       return Colors.cyanAccent;
 
     default:

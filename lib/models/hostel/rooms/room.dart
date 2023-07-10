@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/models/user.dart';
+import 'package:intl/intl.dart';
 
 class RoommateData {
   String email;
@@ -26,6 +26,7 @@ class Room {
   int numberOfRoommates;
   String roomName;
   int capacity;
+  // double? statusFraction;
 
   Room({
     required this.numberOfRoommates,
@@ -36,7 +37,8 @@ class Room {
 
 final storage = FirebaseFirestore.instance;
 
-Future<List<Room>> fetchRooms(String hostelName, {Source? src}) async {
+Future<List<Room>> fetchRooms(String hostelName, DateTime date,
+    {Source? src}) async {
   final roomsCollectionRef =
       storage.collection('hostels').doc(hostelName).collection('Rooms');
 
@@ -58,6 +60,44 @@ Future<List<Room>> fetchRooms(String hostelName, {Source? src}) async {
 
   return roomDataList;
 }
+
+// Future<List<Room>> fetchRooms(String hostelName, DateTime date, {Source? src}) async {
+//   final roomsCollectionRef = storage.collection('hostels').doc(hostelName).collection('Rooms');
+
+//   final roomSnapshot = await roomsCollectionRef.get(src != null ? GetOptions(source: src) : null);
+//   final roomDocs = roomSnapshot.docs;
+
+//   final List<Future<Room>> roomFutures = roomDocs.map((roomDoc) async {
+//     double val = 0;
+//     if (roomDoc['numRoommates'] > 0) {
+//       final ref = await storage.collection('hostels').doc(hostelName).collection('Roommates').where('roomName', isEqualTo: roomDoc.id).get();
+
+//       final attendanceFutures = ref.docs.map((x) async {
+//         final attendRef = await x.reference.collection('Attendance').doc(DateFormat('yyyy-MM-dd').format(date)).get();
+//         if (attendRef.exists && attendRef.data()!['status'] != 'absent') {
+//           return 1;
+//         } else {
+//           return 0;
+//         }
+//       });
+
+//       final attendanceResults = await Future.wait(attendanceFutures);
+//       final xval = attendanceResults.fold(0, (sum, val) => sum + val);
+//       val = xval / roomDoc.data()['numRoommates'];
+//     }
+
+//     return Room(
+//       capacity: roomDoc['capacity'],
+//       numberOfRoommates: roomDoc['numRoommates'],
+//       roomName: roomDoc['roomName'],
+//       statusFraction: roomDoc['numRoommates'] > 0 ? val : null,
+//     );
+//   }).toList();
+
+//   final roomDataList = await Future.wait(roomFutures);
+
+//   return roomDataList;
+// }
 
 Future<bool> isRoomExists(String hostelName, String roomName,
     {Source? source}) async {

@@ -1,16 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/attendance.dart';
 import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/hostel/rooms/rooms_screen.dart';
 import 'package:hustle_stay/widgets/room/roommates/attendance_icon.dart';
 
 import '../../../screens/hostel/rooms/complete_details_screen.dart';
 import '../../../tools.dart';
 
-class RoommateDataWidget extends StatefulWidget {
+class RoommateDataWidget extends ConsumerStatefulWidget {
   const RoommateDataWidget(
       {super.key,
       this.roommateData,
@@ -29,10 +31,10 @@ class RoommateDataWidget extends StatefulWidget {
   final String? status;
 
   @override
-  State<RoommateDataWidget> createState() => _RoommateDataWidgetState();
+  ConsumerState<RoommateDataWidget> createState() => _RoommateDataWidgetState();
 }
 
-class _RoommateDataWidgetState extends State<RoommateDataWidget> {
+class _RoommateDataWidgetState extends ConsumerState<RoommateDataWidget> {
   RoommateData? roommateData;
   String? roomName;
   @override
@@ -105,6 +107,7 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
           status = resp;
           roommateData = rData;
           roomName = data['roomName'];
+          tileColor!.value = colorPickerAttendance(resp);
         });
       }
     }
@@ -164,7 +167,7 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
                             borderRadius: BorderRadius.circular(20),
                             side: const BorderSide(
                                 color: Colors.black, style: BorderStyle.solid)),
-                        tileColor: (value).withOpacity(0.3),
+                        tileColor: (value).withOpacity(0.7),
                         leading: CircleAvatar(
                             radius: 50,
                             child: ClipOval(
@@ -182,12 +185,14 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
                           user.name ??
                               widget.email ??
                               widget.roommateData!.email,
-                          style: const TextStyle(fontSize: 16),
+                          style: const TextStyle(
+                              fontSize: 16, color: Colors.black),
                         ),
                         contentPadding: EdgeInsets.all(widthScreen * 0.002),
                         subtitle: Text(
                           user.email!.substring(0, 9).toUpperCase(),
-                          style: const TextStyle(fontSize: 14),
+                          style: const TextStyle(
+                              fontSize: 14, color: Colors.black),
                         ),
                         trailing: status == null
                             ? null
