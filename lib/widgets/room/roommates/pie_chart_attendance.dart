@@ -1,6 +1,7 @@
 import 'package:animated_icon/animated_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/attendance.dart';
+import 'package:hustle_stay/screens/hostel/rooms/attendance_stats_student.dart';
 import 'package:hustle_stay/screens/hostel/rooms/filter_status_data.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -41,6 +42,19 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
           setState(() {});
         }
       });
+    } else {
+      if (category == 'Leave') {
+        category = 'onLeave';
+      } else {
+        category = category.toLowerCase();
+      }
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => AttendanceStudent(
+          hostelName: widget.hostelName,
+          email: widget.email!,
+          status: category,
+        ),
+      ));
     }
   }
 

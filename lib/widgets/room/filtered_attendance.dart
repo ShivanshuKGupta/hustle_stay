@@ -56,97 +56,47 @@ class _FilteredRecordsState extends State<FilteredRecords> {
           ],
         ),
         const Divider(),
-        isFound
-            ? FutureBuilder(
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: double.infinity,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            AnimateIcon(
-                              onTap: () {},
-                              iconType: IconType.continueAnimation,
-                              animateIcon: AnimateIcons.loading1,
-                              color: Theme.of(context).colorScheme.secondary,
-                            ),
-                            const Text('Loading...')
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-                  if (!snapshot.hasData && snapshot.error != null) {
-                    return Center(
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: double.infinity,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            AnimateIcon(
-                              onTap: () {},
-                              iconType: IconType.continueAnimation,
-                              animateIcon: AnimateIcons.error,
-                              color: Theme.of(context).colorScheme.secondary,
-                            ),
-                            const Text('No data available')
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-                  return listData(snapshot.data!);
-                },
-                future: fetchAttendanceByStudent(email, widget.hostelName),
+        isEmail == null
+            ? Text(
+                'Please select one of the options first!',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium!
+                    .copyWith(color: Theme.of(context).colorScheme.error),
               )
-            : isEmail == null
-                ? Text(
-                    'Please select one of the options first!',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium!
-                        .copyWith(color: Theme.of(context).colorScheme.error),
-                  )
-                : ValueListenableBuilder(
-                    valueListenable: textController!,
-                    builder: (context, value, child) {
-                      return value == ""
-                          ? const Center(
-                              child: Text('No data'),
-                            )
-                          : FutureBuilder(
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return Center(
-                                    child: circularProgressIndicator(),
-                                  );
-                                }
-                                if (!snapshot.hasData) {
-                                  return const Center(
-                                    child: Text('No data'),
-                                  );
-                                }
-                                print('list: ${snapshot.data!}');
-                                if (snapshot.data!.isEmpty) {
-                                  return const Center(
-                                    child: Text('No matches found'),
-                                  );
-                                }
+            : ValueListenableBuilder(
+                valueListenable: textController!,
+                builder: (context, value, child) {
+                  return value == ""
+                      ? const Center(
+                          child: Text('No data'),
+                        )
+                      : FutureBuilder(
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return Center(
+                                child: circularProgressIndicator(),
+                              );
+                            }
+                            if (!snapshot.hasData) {
+                              return const Center(
+                                child: Text('No data'),
+                              );
+                            }
+                            if (snapshot.data!.isEmpty) {
+                              return const Center(
+                                child: Text('No matches found'),
+                              );
+                            }
 
-                                return listOptions(snapshot.data!);
-                              },
-                              future: fetchOptions(
-                                  widget.hostelName, value, isEmail!),
-                            );
-                    },
-                  ),
+                            return listOptions(snapshot.data!);
+                          },
+                          future:
+                              fetchOptions(widget.hostelName, value, isEmail!),
+                        );
+                },
+              ),
       ],
     );
   }
@@ -166,25 +116,6 @@ class _FilteredRecordsState extends State<FilteredRecords> {
           itemCount: list.length,
         ),
       ),
-    );
-  }
-
-  Widget listData(List<AttendanceRecord> list) {
-    return ListView.builder(
-      itemBuilder: (context, index) {
-        return ListTile(
-          title: Text(list[index].date),
-          trailing: list[index].status == 'onLeave'
-              ? Text(
-                  'on leave',
-                  style: TextStyle(backgroundColor: Colors.yellow[400]),
-                )
-              : Icon(list[index].status == 'present'
-                  ? Icons.check_box_rounded
-                  : Icons.close),
-        );
-      },
-      itemCount: list.length,
     );
   }
 }

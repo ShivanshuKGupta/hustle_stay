@@ -20,12 +20,6 @@ class UserSearchData {
   UserSearchData({required this.name, required this.email});
 }
 
-class AttendanceRecord {
-  String status;
-  String date;
-  AttendanceRecord({required this.status, required this.date});
-}
-
 class Room {
   int numberOfRoommates;
   String roomName;
@@ -373,26 +367,6 @@ Future<List<DropdownMenuItem>> fetchRoommateNames(
   return list;
 }
 
-Future<List<AttendanceRecord>> fetchAttendanceByStudent(
-    String email, String hostelName,
-    {Source? source}) async {
-  List<AttendanceRecord> list = [];
-
-  final attendanceDataRef = await storage
-      .collection('hostels')
-      .doc(hostelName)
-      .collection('Roommates')
-      .doc(email)
-      .collection('Attendance')
-      .get(source == null ? null : GetOptions(source: source));
-  final attendanceData = attendanceDataRef.docs;
-  for (final doc in attendanceData) {
-    list.add(AttendanceRecord(status: doc.data()['status'], date: doc.id));
-  }
-
-  return list;
-}
-
 Future<bool> deleteRoommate(String email, String hostelName, String? roomName,
     {Source? source}) async {
   final user = storage.collection('users').doc(email);
@@ -429,6 +403,14 @@ Future<bool> deleteRoommate(String email, String hostelName, String? roomName,
   } catch (e) {
     return false;
   }
+}
+
+String capitalizeEachWord(String x) {
+  List<String> z = x.split(' ');
+  for (int i = 0; i < z.length; i++) {
+    z[i] = "${z[i][0].toUpperCase()}${z[i].substring(1)}";
+  }
+  return z.join(' ');
 }
 
 int calculateSimilarity(String a, String b) {
@@ -472,6 +454,7 @@ Future<List<Map<String, String>>> fetchOptions(
 
     await Future.wait(snapshotFutures);
   } else {
+    text = capitalizeEachWord(text);
     QuerySnapshot<Map<String, dynamic>> secondSnapshot = await storage
         .collection('users')
         .where('hostelName', isEqualTo: hostelName)

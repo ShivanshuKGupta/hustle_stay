@@ -94,8 +94,6 @@ Future<bool> setLeave(
     await FirebaseFirestore.instance
         .collection('hostels')
         .doc(hostelName)
-        .collection('Rooms')
-        .doc(roomName)
         .collection('Roommates')
         .doc(email)
         .set({

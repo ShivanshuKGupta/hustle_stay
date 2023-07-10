@@ -79,6 +79,32 @@ Future<bool> setAttendanceData(String email, String hostelName, String roomName,
   }
 }
 
+Future<List<DateTime>> fetchAttendanceByStudent(
+    String email, String hostelName, String status,
+    {Source? source}) async {
+  List<DateTime> list = [];
+
+  final attendanceDataRef = await storage
+      .collection('hostels')
+      .doc(hostelName)
+      .collection('Roommates')
+      .doc(email)
+      .collection('Attendance')
+      .where('status', isEqualTo: status)
+      .get(source == null ? null : GetOptions(source: source));
+  final attendanceData = attendanceDataRef.docs;
+  for (final doc in attendanceData) {
+    List<String> dateComponents = doc.id.split('-');
+
+    int year = int.parse(dateComponents[0]);
+    int month = int.parse(dateComponents[1]);
+    int day = int.parse(dateComponents[2]);
+    list.add(DateTime(year, month, day));
+  }
+
+  return list;
+}
+
 Future<bool> markAllAttendance(
     String hostelName, bool status, DateTime selectedDate) async {
   try {
@@ -100,8 +126,6 @@ Future<bool> markAllAttendance(
           .collection('Attendance')
           .where(FieldPath.documentId,
               isEqualTo: DateFormat('yyyy-MM-dd').format(selectedDate))
-          .where('status',
-              isEqualTo: statusVal == 'present' ? 'absent' : 'present')
           .get();
 
       attendanceFutures.add(attendanceQuery);
@@ -113,17 +137,29 @@ Future<bool> markAllAttendance(
     for (int i = 0; i < attendanceSnapshots.length; i++) {
       final QuerySnapshot<Map<String, dynamic>> attendanceSnapshot =
           attendanceSnapshots[i];
+
       if (attendanceSnapshot.size > 0) {
         final QueryDocumentSnapshot<Map<String, dynamic>> attendanceDoc =
             attendanceSnapshot.docs.first;
 
-        if (attendanceDoc.exists) {
+        if (statusVal == 'present' &&
+                attendanceDoc.data()['status'] == 'absent' ||
+            statusVal == 'absent' &&
+                attendanceDoc.data()['status'] == 'present') {
           batch.set(
             attendanceDoc.reference,
             {'status': statusVal},
             SetOptions(merge: true),
           );
         }
+      } else {
+        final attendanceCollection =
+            roommatesQuery.docs[i].reference.collection('Attendance');
+        batch.set(
+          attendanceCollection
+              .doc(DateFormat('yyyy-MM-dd').format(selectedDate)),
+          {'status': statusVal},
+        );
       }
     }
 
