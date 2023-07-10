@@ -87,8 +87,8 @@ Future<bool> deleteHostel(String hostelName) async {
   }
 }
 
-Future<bool> setLeave(
-    String email, String hostelName, String roomName, bool status,
+Future<bool> setLeave(String email, String hostelName, String roomName,
+    bool status, bool isInternship,
     {DateTime? leaveStartDate, DateTime? leaveEndDate}) async {
   try {
     await FirebaseFirestore.instance
@@ -97,6 +97,7 @@ Future<bool> setLeave(
         .collection('Roommates')
         .doc(email)
         .set({
+      'internship': isInternship,
       'onLeave': !status,
       'leaveStartDate': status ? null : leaveStartDate,
       'leaveEndDate': status ? null : leaveEndDate,

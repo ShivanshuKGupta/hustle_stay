@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/attendance.dart';
 import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import 'package:hustle_stay/models/user.dart';
-import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/hostel/rooms/rooms_screen.dart';
 import 'package:hustle_stay/widgets/room/roommates/attendance_icon.dart';
 
@@ -60,6 +59,7 @@ class _RoommateDataWidgetState extends ConsumerState<RoommateDataWidget> {
       _getAttendanceData();
     } else {
       status = widget.status;
+      tileColor!.value = colorPickerAttendance(widget.status!);
     }
   }
 

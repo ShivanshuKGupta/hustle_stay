@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class RoommateData {
   String email;
@@ -145,6 +144,7 @@ Future<List<RoommateData>> fetchRoommates(String hostelName, String roomName,
   for (final x in roommateSnapshot.docs) {
     final data = x.data();
     final onLeave = data['onLeave'] ?? false;
+    final internship = data['internship'] ?? false;
     final leaveStartDate = data['leaveStartDate'] as Timestamp?;
     final leaveEndDate = data['leaveEndDate'] as Timestamp?;
     list.add(RoommateData(
@@ -152,6 +152,7 @@ Future<List<RoommateData>> fetchRoommates(String hostelName, String roomName,
       onLeave: onLeave,
       leaveStartDate: leaveStartDate?.toDate(),
       leaveEndDate: leaveEndDate?.toDate(),
+      internship: internship,
     ));
   }
   return list;

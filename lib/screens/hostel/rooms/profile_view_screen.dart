@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/hostel/hostels.dart';
 import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import 'package:hustle_stay/models/user.dart';
+import 'package:intl/intl.dart';
 
 import '../../../widgets/room/change_room/change_room.dart';
 
@@ -56,6 +57,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
 
   DateTime? pickedRangeStart;
   DateTime? pickedRangeEnd;
+  ValueNotifier<bool>? _isChecked = ValueNotifier(false);
 
   @override
   Widget build(BuildContext context) {
@@ -122,16 +124,38 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                                 });
                               }
                             },
-                            icon: AnimateIcon(
-                                onTap: () {},
-                                iconType: IconType.animatedOnHover,
-                                animateIcon: AnimateIcons.calendar),
-                            label: const Text('Select Leave Dates'),
+                            icon: const Icon(Icons.calendar_today),
+                            label: Text(pickedRangeStart == null &&
+                                    pickedRangeEnd == null
+                                ? 'Select Dates'
+                                : '${pickedRangeStart!.day}-${DateFormat('dd-MM-yyyy').format(pickedRangeEnd!)}'),
                           ),
-                        ElevatedButton.icon(
+                        if (!onLeave)
+                          CheckboxListTile(
+                            title: const Text('Internship Leave'),
+                            value: _isChecked!.value,
+                            onChanged: (value) {
+                              _isChecked!.value = value!;
+                            },
+                            controlAffinity: ListTileControlAffinity
+                                .leading, // Place checkbox to the left of the text
+                          ),
+                        Checkbox(
+                          shape: const CircleBorder(),
+                          value: _isChecked!.value,
+                          onChanged: (value) {
+                            setState(() {
+                              _isChecked!.value = value!;
+                            });
+                          },
+                        ),
+                        TextButton(
                             onPressed: () async {
-                              bool resp = await setLeave(widget.user.email!,
-                                  widget.hostelName, widget.roomName, onLeave,
+                              bool resp = await setLeave(
+                                  widget.user.email!,
+                                  widget.hostelName,
+                                  widget.roomName,
+                                  onLeave,
                                   leaveStartDate:
                                       onLeave && pickedRangeStart == null
                                           ? null
@@ -139,17 +163,13 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                                   leaveEndDate:
                                       onLeave && pickedRangeEnd == null
                                           ? null
-                                          : pickedRangeEnd);
+                                          : pickedRangeEnd,
+                                  _isChecked!.value);
                               if (resp) {
                                 Navigator.of(context).pop(true);
                               }
                             },
-                            icon: AnimateIcon(
-                              animateIcon: AnimateIcons.checkbox,
-                              onTap: () {},
-                              iconType: IconType.continueAnimation,
-                            ),
-                            label: Text(!onLeave ? 'Start Leave' : 'End Leave'))
+                            child: Text(!onLeave ? 'Start Leave' : 'End Leave'))
                       ],
                     )
                   ],

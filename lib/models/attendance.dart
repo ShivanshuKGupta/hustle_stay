@@ -393,6 +393,8 @@ Future<List<RoommateInfo>> getFilteredStudents(
       if (attendanceDoc.exists) {
         final data = attendanceDoc.data();
         final onLeave = data['onLeave'] ?? false;
+        final internship = data['internship'] ?? false;
+
         final leaveStartDate = data['leaveStartDate'] as Timestamp?;
         final leaveEndDate = data['leaveEndDate'] as Timestamp?;
 
@@ -403,6 +405,7 @@ Future<List<RoommateInfo>> getFilteredStudents(
             onLeave: onLeave,
             leaveStartDate: leaveStartDate?.toDate(),
             leaveEndDate: leaveEndDate?.toDate(),
+            internship: internship,
           ),
         ));
       }

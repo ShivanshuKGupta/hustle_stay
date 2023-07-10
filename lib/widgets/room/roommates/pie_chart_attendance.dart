@@ -25,12 +25,20 @@ class AttendancePieChart extends StatefulWidget {
 
 class _AttendancePieChartState extends State<AttendancePieChart> {
   void onClickNavigation(String category) {
-    if (widget.email == null && widget.selectedDate != null) {
-      if (category == 'Leave') {
+    switch (category) {
+      case 'Leave':
         category = 'onLeave';
-      } else {
+        break;
+      case 'Late':
+        category = 'presentLate';
+        break;
+      case 'Internship':
+        category = "onInternship";
+        break;
+      default:
         category = category.toLowerCase();
-      }
+    }
+    if (widget.email == null && widget.selectedDate != null) {
       Navigator.of(context)
           .push(MaterialPageRoute(
               builder: (_) => FilterStudents(
@@ -43,20 +51,6 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
         }
       });
     } else {
-      switch (category) {
-        case 'Leave':
-          category = 'onLeave';
-          break;
-        case 'Late':
-          category = 'presentLate';
-          break;
-        case 'Not Taken':
-          category = "";
-          break;
-        default:
-          category = category.toLowerCase();
-      }
-
       Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => AttendanceStudent(
           hostelName: widget.hostelName,

@@ -130,7 +130,7 @@ Color colorPickerAttendance(String resp) {
     case 'absent':
       return Colors.redAccent;
 
-    case 'internship':
+    case 'onInternship':
       return Colors.orangeAccent;
 
     case 'onLeave':
