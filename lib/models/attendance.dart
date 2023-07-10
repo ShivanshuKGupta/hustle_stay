@@ -38,8 +38,12 @@ Future<String> getAttendanceData(RoommateData roommateData, String hostelName,
       (roommateData.leaveStartDate!.isBefore(date)) &&
       roommateData.leaveEndDate != null &&
       (roommateData.leaveEndDate!.isAfter(date))) {
-    await documentRef.set({'status': 'onLeave'}, SetOptions(merge: false));
-    return 'onLeave';
+    String val =
+        roommateData.internship != null && roommateData.internship == true
+            ? 'onInternship'
+            : 'onLeave';
+    await documentRef.set({'status': val}, SetOptions(merge: false));
+    return val;
   }
 
   final documentSnapshot = await documentRef.get();
@@ -55,6 +59,10 @@ Future<bool> setAttendanceData(String email, String hostelName, String roomName,
     DateTime date, bool status) async {
   try {
     final storage = FirebaseFirestore.instance;
+    String lateVal =
+        DateTime.now().isAfter(DateTime(date.year, date.month, date.day, 23))
+            ? 'presentLate'
+            : 'present';
     final docRef = storage
         .collection('hostels')
         .doc(hostelName)
@@ -66,9 +74,9 @@ Future<bool> setAttendanceData(String email, String hostelName, String roomName,
     await storage.runTransaction((transaction) async {
       final snapshot = await transaction.get(docRef);
       if (!snapshot.exists) {
-        transaction.set(docRef, {'status': status ? 'absent' : 'present'});
+        transaction.set(docRef, {'status': status ? 'absent' : lateVal});
       } else {
-        transaction.update(docRef, {'status': status ? 'absent' : 'present'});
+        transaction.update(docRef, {'status': status ? 'absent' : lateVal});
       }
     });
 
@@ -146,11 +154,21 @@ Future<bool> markAllAttendance(
                 attendanceDoc.data()['status'] == 'absent' ||
             statusVal == 'absent' &&
                 attendanceDoc.data()['status'] == 'present') {
-          batch.set(
-            attendanceDoc.reference,
-            {'status': statusVal},
-            SetOptions(merge: true),
-          );
+          if (statusVal == 'present' &&
+              DateTime.now().isAfter(DateTime(selectedDate.year,
+                  selectedDate.month, selectedDate.day, 23))) {
+            batch.set(
+              attendanceDoc.reference,
+              {'status': 'presentLate'},
+              SetOptions(merge: true),
+            );
+          } else {
+            batch.set(
+              attendanceDoc.reference,
+              {'status': statusVal},
+              SetOptions(merge: true),
+            );
+          }
         }
       } else {
         final attendanceCollection =
@@ -193,7 +211,13 @@ Future<bool> markAllRoommateAttendance(String hostelName, String roomName,
           attendanceRef.data()!['status'] != 'internship') {
         batch.set(
           attendanceRef.reference,
-          {'status': statusVal},
+          {
+            'status': statusVal == 'present' &&
+                    DateTime.now().isAfter(DateTime(selectedDate.year,
+                        selectedDate.month, selectedDate.day, 23))
+                ? 'presentLate'
+                : statusVal
+          },
           SetOptions(merge: true),
         );
       }
@@ -212,6 +236,7 @@ Future<Map<String, double>> getAttendanceStatistics(
   double absentData = 0;
   double leaveData = 0;
   double internshipData = 0;
+  double total = 0;
 
   final storage = FirebaseFirestore.instance;
   final docsAttendanceRef = await storage
@@ -221,6 +246,7 @@ Future<Map<String, double>> getAttendanceStatistics(
       .doc(email)
       .collection('Attendance')
       .get();
+  total = docsAttendanceRef.docs.length.toDouble();
   for (final docs in docsAttendanceRef.docs) {
     if (range == null ||
         (DateFormat('yyyy-MM-dd')
@@ -241,6 +267,7 @@ Future<Map<String, double>> getAttendanceStatistics(
         case 'onLeave':
           leaveData += 1;
           break;
+
         default:
           internshipData += 1;
       }
@@ -250,7 +277,8 @@ Future<Map<String, double>> getAttendanceStatistics(
     'present': presentData,
     'absent': absentData,
     'leave': leaveData,
-    'internship': internshipData
+    'internship': internshipData,
+    'total': total,
   };
 
   return attendanceStats;
@@ -260,13 +288,14 @@ Future<Map<String, double>> getHostelAttendanceStatistics(
     String hostelName, DateTime date,
     {Source? source}) async {
   final storage = FirebaseFirestore.instance;
+  double total = 0;
 
   final roommatesQuery = await storage
       .collection('hostels')
       .doc(hostelName)
       .collection('Roommates')
       .get(source == null ? null : GetOptions(source: source));
-
+  total = roommatesQuery.docs.length.toDouble();
   final List<Future<DocumentSnapshot<Map<String, dynamic>>>> attendanceFutures =
       [];
 
@@ -285,6 +314,7 @@ Future<Map<String, double>> getHostelAttendanceStatistics(
   double absent = 0;
   double leave = 0;
   double internship = 0;
+  double presentLate = 0;
 
   for (final attendanceSnapshot in attendanceSnapshots) {
     if (attendanceSnapshot.exists) {
@@ -298,6 +328,9 @@ Future<Map<String, double>> getHostelAttendanceStatistics(
         case 'onLeave':
           leave += 1;
           break;
+        case 'presentLate':
+          presentLate += 1;
+          break;
         default:
           internship += 1;
       }
@@ -306,9 +339,11 @@ Future<Map<String, double>> getHostelAttendanceStatistics(
 
   final attendanceStats = {
     'present': present,
+    'presentLate': presentLate,
     'absent': absent,
     'leave': leave,
     'internship': internship,
+    'total': total
   };
 
   return attendanceStats;

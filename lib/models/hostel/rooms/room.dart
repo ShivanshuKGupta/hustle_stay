@@ -7,10 +7,12 @@ class RoommateData {
   bool? onLeave;
   DateTime? leaveStartDate;
   DateTime? leaveEndDate;
+  bool? internship;
   RoommateData(
       {required this.email,
       this.leaveStartDate,
       this.leaveEndDate,
+      this.internship,
       this.onLeave});
 }
 

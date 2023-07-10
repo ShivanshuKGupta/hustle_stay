@@ -32,8 +32,10 @@ class _RoomDataWidgetState extends State<RoomDataWidget> {
       child: Card(
         elevation: 3,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(
+                color: Colors.black, style: BorderStyle.solid)),
+        color: (Theme.of(context).colorScheme.secondary).withOpacity(0.3),
         child: Padding(
           padding: const EdgeInsets.all(5),
           child: Column(

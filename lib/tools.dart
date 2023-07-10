@@ -122,6 +122,25 @@ showSnackBar(BuildContext context, SnackBar snackBar) {
   return ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
 
+Color colorPickerAttendance(String resp) {
+  switch (resp) {
+    case 'present':
+      return Colors.greenAccent;
+
+    case 'absent':
+      return Colors.redAccent;
+
+    case 'internship':
+      return Colors.orangeAccent;
+
+    case 'leave':
+      return Colors.cyanAccent;
+
+    default:
+      return Colors.yellowAccent;
+  }
+}
+
 /// contains validating functions for input text fields
 class Validate {
   static String? email(String? email, {bool required = true}) {

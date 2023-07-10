@@ -62,6 +62,7 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
   }
 
   bool isOnScreen = true;
+  ValueNotifier<Color>? tileColor = ValueNotifier(Colors.white);
   bool isRunning = false;
   String? status;
   Future<void> _getAttendanceData() async {
@@ -70,6 +71,7 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
     if (mounted) {
       setState(() {
         status = resp;
+        tileColor!.value = colorPickerAttendance(resp);
       });
     }
     return;
@@ -140,52 +142,67 @@ class _RoommateDataWidgetState extends State<RoommateDataWidget> {
   Widget build(BuildContext context) {
     double widthScreen = MediaQuery.of(context).size.width;
     return isOnScreen
-        ? UserBuilder(
-            email: widget.email ?? widget.roommateData!.email,
-            loadingWidget: Padding(
-              padding: const EdgeInsets.all(1),
-              child: Center(
-                child: circularProgressIndicator(),
+        ? ValueListenableBuilder(
+            valueListenable: tileColor!,
+            builder: (context, value, child) => UserBuilder(
+              email: widget.email ?? widget.roommateData!.email,
+              loadingWidget: Padding(
+                padding: const EdgeInsets.all(1),
+                child: Center(
+                  child: circularProgressIndicator(),
+                ),
               ),
+              builder: (context, user) {
+                return GestureDetector(
+                  onTap: () {
+                    onChangeScreen(user, context);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(2.0),
+                    child: ListTile(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            side: const BorderSide(
+                                color: Colors.black, style: BorderStyle.solid)),
+                        tileColor: (value).withOpacity(0.3),
+                        leading: CircleAvatar(
+                            radius: 50,
+                            child: ClipOval(
+                              child: AspectRatio(
+                                aspectRatio: 1.0,
+                                child: user.imgUrl == null
+                                    ? null
+                                    : CachedNetworkImage(
+                                        imageUrl: user.imgUrl!,
+                                        fit: BoxFit.cover,
+                                      ),
+                              ),
+                            )),
+                        title: Text(
+                          user.name ??
+                              widget.email ??
+                              widget.roommateData!.email,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        contentPadding: EdgeInsets.all(widthScreen * 0.002),
+                        subtitle: Text(
+                          user.email!.substring(0, 9).toUpperCase(),
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        trailing: status == null
+                            ? null
+                            : AttendanceIcon(
+                                tileColor: tileColor,
+                                roommateData:
+                                    widget.roommateData ?? roommateData!,
+                                selectedDate: widget.selectedDate,
+                                roomName: widget.roomName ?? roomName!,
+                                hostelName: widget.hostelName,
+                                status: status!)),
+                  ),
+                );
+              },
             ),
-            builder: (context, user) {
-              return GestureDetector(
-                onTap: () {
-                  onChangeScreen(user, context);
-                },
-                child: ListTile(
-                    leading: CircleAvatar(
-                        radius: 50,
-                        child: ClipOval(
-                          child: AspectRatio(
-                            aspectRatio: 1.0,
-                            child: user.imgUrl == null
-                                ? null
-                                : CachedNetworkImage(
-                                    imageUrl: user.imgUrl!,
-                                    fit: BoxFit.cover,
-                                  ),
-                          ),
-                        )),
-                    title: Text(
-                      user.name ?? widget.email ?? widget.roommateData!.email,
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    contentPadding: EdgeInsets.all(widthScreen * 0.002),
-                    subtitle: Text(
-                      user.email!.substring(0, 9).toUpperCase(),
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                    trailing: status == null
-                        ? null
-                        : AttendanceIcon(
-                            roommateData: widget.roommateData ?? roommateData!,
-                            selectedDate: widget.selectedDate,
-                            roomName: widget.roomName ?? roomName!,
-                            hostelName: widget.hostelName,
-                            status: status!)),
-              );
-            },
           )
         : Container();
   }

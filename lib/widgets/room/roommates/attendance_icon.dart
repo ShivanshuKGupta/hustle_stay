@@ -12,6 +12,7 @@ class AttendanceIcon extends StatefulWidget {
     required this.roomName,
     required this.hostelName,
     required this.status,
+    this.tileColor,
   }) : super(key: key);
 
   final RoommateData roommateData;
@@ -19,6 +20,7 @@ class AttendanceIcon extends StatefulWidget {
   final String hostelName;
   final String roomName;
   final String status;
+  final ValueNotifier<Color>? tileColor;
 
   @override
   _AttendanceIconState createState() => _AttendanceIconState();
@@ -26,17 +28,19 @@ class AttendanceIcon extends StatefulWidget {
 
 class _AttendanceIconState extends State<AttendanceIcon> {
   final presentIcon =
-      const Icon(Icons.check_circle_outline, color: Colors.green);
-  final absentIcon = const Icon(Icons.close_rounded, color: Colors.red);
+      const Icon(Icons.check_circle_outline, color: Colors.black);
+  final absentIcon = const Icon(Icons.close_rounded, color: Colors.black);
   String? status;
-  Icon currentIcon = const Icon(Icons.close_rounded, color: Colors.red);
+  Icon currentIcon = const Icon(Icons.close_rounded, color: Colors.black);
   bool isRunning = false;
 
   @override
   void initState() {
     super.initState();
     status = widget.status;
-    currentIcon = status == 'present' ? presentIcon : absentIcon;
+    currentIcon = status == 'present' || status == 'presentLate'
+        ? presentIcon
+        : absentIcon;
   }
 
   Future<void> _getAttendanceData() async {
@@ -48,7 +52,10 @@ class _AttendanceIconState extends State<AttendanceIcon> {
     );
     if (mounted) {
       setState(() {
-        currentIcon = resp == 'present' ? presentIcon : absentIcon;
+        widget.tileColor!.value = colorPickerAttendance(resp);
+        currentIcon = resp == 'present' || resp == 'presentLate'
+            ? presentIcon
+            : absentIcon;
         isRunning = false;
       });
     }
@@ -56,7 +63,6 @@ class _AttendanceIconState extends State<AttendanceIcon> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
   }
 
@@ -69,16 +75,22 @@ class _AttendanceIconState extends State<AttendanceIcon> {
 
   @override
   Widget build(BuildContext context) {
-    return status == 'onLeave'
-        ? const Text(
-            'On Leave',
-            style: TextStyle(
-                backgroundColor: Colors.yellow, fontWeight: FontWeight.bold),
+    return status == 'onLeave' || status == 'onInternship'
+        ? Padding(
+            padding: const EdgeInsets.all(2.0),
+            child: ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: widget.tileColor!.value,
+                  side: const BorderSide(
+                      style: BorderStyle.solid, color: Colors.black)),
+              child: Text(status!),
+            ),
           )
-        : AttendanceWid();
+        : attendanceWid();
   }
 
-  Widget AttendanceWid() {
+  Widget attendanceWid() {
     return isRunning
         ? circularProgressIndicator()
         : IconButton(
