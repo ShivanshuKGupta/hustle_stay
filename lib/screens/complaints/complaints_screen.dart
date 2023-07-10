@@ -8,7 +8,7 @@ import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/complaints/edit_complaints_page.dart';
 import 'package:hustle_stay/screens/complaints/resolved_complaints_screen.dart';
 import 'package:hustle_stay/screens/drawers/main_drawer.dart';
-import 'package:hustle_stay/screens/filter_screen/filter_screen.dart';
+import 'package:hustle_stay/screens/filter_screen/stats_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/chat/complaint_template_message.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_category_widget.dart';
@@ -40,12 +40,12 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
         ),
         actions: [
           IconButton(
-            onPressed: () => navigatorPush(context, const FilterScreen()),
-            icon: const Icon(Icons.filter_alt_rounded),
+            onPressed: () => navigatorPush(context, const StatisticsPage()),
+            icon: const Icon(Icons.donut_large_rounded),
           ),
           IconButton(
             onPressed: _showSortDialog,
-            icon: const Icon(Icons.sort_rounded),
+            icon: const Icon(Icons.compare_arrows_rounded),
           ),
           IconButton(
             onPressed: _addComplaint,

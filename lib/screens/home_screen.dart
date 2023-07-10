@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/complaints/complaints_screen.dart';
-import 'package:hustle_stay/screens/drawers/main_drawer.dart';
 import 'package:hustle_stay/screens/hostel/hostel_screen.dart';
 import 'package:hustle_stay/screens/settings/settings_screen.dart';
 import 'package:hustle_stay/tools.dart';
@@ -44,7 +43,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ];
     return Scaffold(
         extendBody: true,
-        drawer: const Drawer(elevation: 5, child: MainDrawer()),
         bottomNavigationBar: Padding(
           padding: const EdgeInsets.only(left: 0, right: 0, bottom: 0, top: 2),
           child: GlassWidget(

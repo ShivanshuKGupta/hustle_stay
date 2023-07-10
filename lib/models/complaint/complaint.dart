@@ -168,10 +168,12 @@ Future<List<ComplaintData>> fetchComplaints(
 class ComplaintsBuilder extends ConsumerWidget {
   final Widget Function(BuildContext ctx, List<ComplaintData> complaints)
       builder;
+  final Future<List<ComplaintData>> Function({Source? src})? complaintsProvider;
   final Source? src;
   final Widget? loadingWidget;
   const ComplaintsBuilder({
     super.key,
+    this.complaintsProvider,
     required this.builder,
     this.loadingWidget,
     this.src,
@@ -184,8 +186,13 @@ class ComplaintsBuilder extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     ref.watch(complaintBuilderSwitch);
     return FutureBuilder(
-      future: fetchComplaints(src: src),
+      future: complaintsProvider != null
+          ? complaintsProvider!(src: src)
+          : fetchComplaints(src: src),
       builder: (ctx, snapshot) {
+        if (snapshot.hasError) {
+          throw snapshot.error.toString();
+        }
         if (!snapshot.hasData) {
           if (src == Source.cache) {
             return complaints.isEmpty && loadingWidget != null
@@ -193,7 +200,9 @@ class ComplaintsBuilder extends ConsumerWidget {
                 : builder(context, complaints);
           }
           return FutureBuilder(
-            future: fetchComplaints(src: Source.cache),
+            future: complaintsProvider != null
+                ? complaintsProvider!(src: src)
+                : fetchComplaints(src: Source.cache),
             builder: (ctx, snapshot) {
               if (!snapshot.hasData) {
                 // Returning this Widget when nothing has arrived
