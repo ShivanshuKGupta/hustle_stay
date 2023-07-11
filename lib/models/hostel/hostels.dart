@@ -91,7 +91,7 @@ Future<bool> deleteHostel(String hostelName) async {
 }
 
 Future<bool> setLeave(String email, String hostelName, String roomName,
-    bool status, bool currentLeave,
+    bool status, bool endleave,
     {DateTime? leaveStartDate,
     DateTime? leaveEndDate,
     String? reason,
@@ -104,43 +104,69 @@ Future<bool> setLeave(String email, String hostelName, String roomName,
         .collection('Roommates')
         .doc(email)
         .get();
-    if (currentLeave) {
-      await ref.reference.set({
-        'internship': reason == 'Internship',
-        'onLeave': !status,
-        'leaveStartDate': status ? null : leaveStartDate,
-        'leaveEndDate': status ? null : leaveEndDate,
-      }, SetOptions(merge: true));
-    }
-    if (leaveEndDate != null) {
-      if (data != null) {
-        final updateRef = await ref.reference
-            .collection('Leaves')
-            .where('startDate', isEqualTo: data.startDate)
-            .where('endDate', isEqualTo: data.endDate)
-            .get();
-        await updateRef.docs[0].reference.set(
-            {'endDate': leaveEndDate, 'startDate': leaveStartDate},
-            SetOptions(merge: true));
-      } else {
-        await ref.reference.collection('Leaves').doc().set({
-          'leaveType': reason,
-          'startDate': leaveStartDate,
-          'endDate': leaveEndDate
-        });
+    if (endleave) {
+      print('in end leave');
+      final startDate = ref.data()!['leaveStartDate'];
+      final endDate = ref.data()!['leaveEndDate'];
+      final updateLeavepath = await ref.reference
+          .collection('Leaves')
+          .where('startDate', isEqualTo: startDate)
+          .where('endDate', isEqualTo: endDate)
+          .limit(1)
+          .get();
+      if (updateLeavepath.size > 0) {
+        final updateLeaveRef = updateLeavepath.docs.single.reference;
+        updateLeaveRef
+            .set({'endDate': DateTime.now()}, SetOptions(merge: true));
       }
-    }
-    if (status == true &&
-        selectedDate != null &&
-        selectedDate == DateTime.now()) {
-      await FirebaseFirestore.instance
-          .collection('hostels')
-          .doc(hostelName)
-          .collection('Roommates')
-          .doc(email)
-          .collection('Attendance')
-          .doc(DateFormat('yyyy-MM-dd').format(selectedDate))
-          .set({'status': 'absent'});
+      ref.reference.set({
+        'onLeave': false,
+        'onInternship': false,
+        'leaveStartDate': null,
+        'leaveEndDate': null
+      }, SetOptions(merge: true));
+      if (DateTime.now().isBefore(endDate.toDate())) {
+        await ref.reference
+            .collection('Attendance')
+            .doc(DateFormat('yyyy-MM-dd').format(DateTime.now()))
+            .set({'status': 'absent'}, SetOptions(merge: true));
+      }
+      return true;
+    } else if (data != null) {
+      final updateLeavepath = await ref.reference
+          .collection('Leaves')
+          .where('startDate', isEqualTo: data.startDate)
+          .where('endDate', isEqualTo: data.endDate)
+          .limit(1)
+          .get();
+      if (updateLeavepath.size > 0) {
+        final updateLeaveRef = updateLeavepath.docs.single.reference;
+        updateLeaveRef.set(
+            {'startDate': leaveStartDate, 'endDate': leaveEndDate},
+            SetOptions(merge: true));
+      }
+      ref.reference.set(
+          {'leaveStartDate': leaveStartDate, 'leaveEndDate': leaveEndDate},
+          SetOptions(merge: true));
+      if (DateTime.now().isAfter(leaveEndDate!)) {
+        await ref.reference
+            .collection('Attendance')
+            .doc(DateFormat('yyyy-MM-dd').format(DateTime.now()))
+            .set({'status': 'absent'}, SetOptions(merge: true));
+      }
+    } else {
+      await ref.reference.collection('Leaves').doc().set({
+        'startDate': leaveStartDate,
+        'endDate': leaveEndDate,
+        'leaveType': reason
+      });
+
+      ref.reference.set({
+        'onLeave': !status,
+        'onInternship': reason == "Internship",
+        'leaveStartDate': leaveStartDate,
+        'leaveEndDate': leaveEndDate
+      }, SetOptions(merge: true));
     }
     return true;
   } catch (e) {

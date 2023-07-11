@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/hostel/hostels.dart';
+import 'package:hustle_stay/screens/hostel/rooms/rooms_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:intl/intl.dart';
 
@@ -69,10 +70,14 @@ class _AttendanceIconState extends State<AttendanceIcon> {
     super.dispose();
   }
 
+  bool isChanged = false;
+
   @override
   void didUpdateWidget(covariant AttendanceIcon oldWidget) {
     super.didUpdateWidget(oldWidget);
-    status = widget.status;
+    {
+      status = widget.status;
+    }
     _getAttendanceData();
   }
 
@@ -93,13 +98,11 @@ class _AttendanceIconState extends State<AttendanceIcon> {
                 if (response == "yes") {
                   bool resp = await setLeave(widget.roommateData.email,
                       widget.hostelName, widget.roomName, true, true,
-                      selectedDate: DateTime.now());
+                      leaveEndDate: DateTime.now());
                   if (resp) {
-                    setState(() {
-                      status = 'absent';
-                      widget.tileColor!.value = Colors.redAccent;
-                      currentIcon = absentIcon;
-                    });
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(
+                        builder: (_) =>
+                            RoomsScreen(hostelName: widget.hostelName)));
                   }
                 }
               },

@@ -1,6 +1,7 @@
 import 'package:animated_icon/animated_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/screens/hostel/rooms/profile_view_screen.dart';
+import 'package:hustle_stay/widgets/room/leave_widget.dart';
 import 'package:hustle_stay/widgets/room/roommates/pie_chart_attendance.dart';
 
 import '../../../models/hostel/rooms/room.dart';
@@ -25,6 +26,7 @@ class CompleteDetails extends StatefulWidget {
 class _CompleteDetailsState extends State<CompleteDetails> {
   bool isDeleting = false;
   bool showStats = false;
+  bool showLeaveData = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,6 +36,15 @@ class _CompleteDetailsState extends State<CompleteDetails> {
             title: '${widget.user.name ?? widget.user.email}\'s Profile',
           ),
           actions: [
+            if (!isDeleting)
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    showLeaveData = !showLeaveData;
+                  });
+                },
+                icon: Icon(Icons.holiday_village),
+              ),
             if (!isDeleting)
               IconButton(
                   onPressed: () {
@@ -93,15 +104,25 @@ class _CompleteDetailsState extends State<CompleteDetails> {
                   ),
                 ),
               )
-            : showStats
-                ? AttendancePieChart(
-                    email: widget.user.email!,
-                    hostelName: widget.hostelName,
-                    roomName: widget.roomName)
-                : ProfileViewScreen(
+            : showLeaveData
+                ? LeaveWidget(
                     hostelName: widget.hostelName,
                     roomName: widget.roomName,
                     user: widget.user,
-                    roommateData: widget.roommateData));
+                    roommateData: widget.roommateData)
+                : toShowWidget());
+  }
+
+  Widget toShowWidget() {
+    return showStats
+        ? AttendancePieChart(
+            email: widget.user.email!,
+            hostelName: widget.hostelName,
+            roomName: widget.roomName)
+        : ProfileViewScreen(
+            hostelName: widget.hostelName,
+            roomName: widget.roomName,
+            user: widget.user,
+            roommateData: widget.roommateData);
   }
 }

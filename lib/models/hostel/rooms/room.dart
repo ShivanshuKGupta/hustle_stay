@@ -144,7 +144,7 @@ Future<List<RoommateData>> fetchRoommates(String hostelName, String roomName,
   for (final x in roommateSnapshot.docs) {
     final data = x.data();
     final onLeave = data['onLeave'] ?? false;
-    final internship = data['internship'] ?? false;
+    final internship = data['onInternship'] ?? false;
     final leaveStartDate = data['leaveStartDate'] as Timestamp?;
     final leaveEndDate = data['leaveEndDate'] as Timestamp?;
     list.add(RoommateData(
