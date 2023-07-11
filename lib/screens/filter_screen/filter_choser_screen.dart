@@ -7,17 +7,33 @@ import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/complaints/selection_vault.dart';
 
 class FilterChooserScreen extends StatelessWidget {
-  const FilterChooserScreen({super.key});
+  final Map<String, dynamic> filters;
+  const FilterChooserScreen({super.key, required this.filters});
 
   @override
   Widget build(BuildContext context) {
-    final filters = [
-      CreatedWithin(onChange: (dateRange) {}),
-      ResolvedChoose(onChange: (resolved) {
-        // TODO: when resolved == false remove the resolved filter and show it only if resolved == true
-      }),
-      ResolvedWithin(onChange: (dateRange) {}),
-      ScopeChooser(onChange: (scope) {}),
+    final filterWidgets = [
+      CreatedWithin(
+          dateRange: filters['createdWithin'],
+          onChange: (dateRange) {
+            filters['createdWithin'] = dateRange;
+          }),
+      ResolvedChoose(
+          resolved: filters['resolved'],
+          onChange: (resolved) {
+            filters['resolved'] = resolved;
+            // TODO: when resolved == false remove the resolved filter and show it only if resolved == true
+          }),
+      ResolvedWithin(
+          dateRange: filters['resolvedWithin'],
+          onChange: (dateRange) {
+            filters['resolvedWithin'] = dateRange;
+          }),
+      ScopeChooser(
+          scope: filters['scope'],
+          onChange: (scope) {
+            filters['scope'] = scope;
+          }),
       CategoriesBuilder(
         src: Source.cache,
         loadingWidget: Center(
@@ -27,9 +43,11 @@ class FilterChooserScreen extends StatelessWidget {
           ),
         ),
         builder: (ctx, categories) => CategoryChooser(
-            onChange: ((chosenCategories) {}),
+            onChange: ((chosenCategories) {
+              filters['categories'] = chosenCategories;
+            }),
             allCategories: categories.map((e) => e.id).toList(),
-            chosenCategories: const []),
+            chosenCategories: filters['categories'] ?? []),
       ),
       UsersBuilder(
         src: Source.cache,
@@ -41,8 +59,10 @@ class FilterChooserScreen extends StatelessWidget {
         ),
         builder: (ctx, users) => ComplainantChooser(
           allUsers: users,
-          onChange: (users) {},
-          chosenUsers: const [],
+          onChange: (users) {
+            filters['complainants'] = users;
+          },
+          chosenUsers: filters['complainants'] ?? [],
         ),
       ),
       UsersBuilder(
@@ -56,8 +76,10 @@ class FilterChooserScreen extends StatelessWidget {
         ),
         builder: (ctx, users) => ComplaineeChooser(
           allUsers: users,
-          onChange: (users) {},
-          chosenUsers: const [],
+          onChange: (users) {
+            filters['complainees'] = users;
+          },
+          chosenUsers: filters['complainees'] ?? [],
         ),
       ),
       // TODO: add more filters here
@@ -69,7 +91,8 @@ class FilterChooserScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () {
-              // TODO: add reset functionality here
+              filters.clear();
+              Navigator.of(context).pop();
             },
             child: const Text('Reset'),
           ),
@@ -82,11 +105,11 @@ class FilterChooserScreen extends StatelessWidget {
           await fetchComplainees();
         },
         child: ListView.separated(
-          itemCount: filters.length,
+          itemCount: filterWidgets.length,
           separatorBuilder: (ctx, index) => const Divider(),
           itemBuilder: (ctx, index) => Padding(
             padding: const EdgeInsets.only(left: 8.0, bottom: 8),
-            child: filters[index],
+            child: filterWidgets[index],
           ),
         ),
       ),

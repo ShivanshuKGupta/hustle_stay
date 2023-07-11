@@ -13,9 +13,13 @@ class StatisticsPage extends StatefulWidget {
 }
 
 class _StatisticsPageState extends State<StatisticsPage> {
+  late Map<String, dynamic> filters;
+
   @override
   void initState() {
     super.initState();
+    // TODO: read any saved filter and assign it to filters
+    filters = {};
   }
 
   @override
@@ -30,7 +34,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                 isScrollControlled: true,
                 context: context,
                 useSafeArea: true,
-                builder: (ctx) => const FilterChooserScreen(),
+                builder: (ctx) => FilterChooserScreen(filters: filters),
               );
             },
             icon: const Icon(Icons.filter_alt_rounded),
