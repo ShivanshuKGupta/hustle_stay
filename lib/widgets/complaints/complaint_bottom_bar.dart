@@ -6,7 +6,7 @@ import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/state_switch.dart';
 import 'package:hustle_stay/tools.dart';
-import 'package:hustle_stay/widgets/chat/choose_users.dart.dart';
+import 'package:hustle_stay/widgets/chat/multi_choser.dart';
 
 // ignore: must_be_immutable
 class ComplaintBottomBar extends ConsumerWidget {
@@ -85,9 +85,11 @@ class ComplaintBottomBar extends ConsumerWidget {
               insetPadding: EdgeInsets.zero,
               contentPadding: const EdgeInsets.only(top: 20),
               actionsAlignment: MainAxisAlignment.center,
-              content: ChooseUsers(
-                allUsers: allUsers,
-                chosenUsers: chosenUsers,
+              content: MultiChooser(
+                hintTxt: "Select a receipient",
+                label: 'Complainees',
+                allOptions: allUsers,
+                chosenOptions: chosenUsers,
                 onUpdate: (newUsers) {
                   chosenUsers = newUsers;
                 },

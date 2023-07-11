@@ -192,8 +192,16 @@ Future<UserData> fetchUserData(
   return userData;
 }
 
-Future<List<UserData>> fetchUsers(List<String> emails, {Source? src}) async {
-  return [for (final email in emails) await fetchUserData(email, src: src)];
+Future<List<UserData>> fetchUsers({List<String>? emails, Source? src}) async {
+  if (emails != null) {
+    return [for (final email in emails) await fetchUserData(email, src: src)];
+  }
+  return (await firestore.collection('users').get(
+            src == null ? null : GetOptions(source: src),
+          ))
+      .docs
+      .map((e) => UserData(email: e.id)..load(e.data()))
+      .toList();
 }
 
 Future<List<String>> fetchComplainees() async {
@@ -288,6 +296,51 @@ class UserBuilder extends StatelessWidget {
         // Returning this widget when data arrives from server
         userData = snapshot.data!;
         return builder(ctx, userData);
+      },
+    );
+  }
+}
+
+/// A widget used to display widget using UserData
+/// This will change according to the userData
+// ignore: must_be_immutable
+class UsersBuilder extends StatelessWidget {
+  final Widget Function(BuildContext ctx, List<UserData> emails) builder;
+  final Source? src;
+  final Widget? loadingWidget;
+  const UsersBuilder({
+    super.key,
+    required this.builder,
+    this.loadingWidget,
+    this.src,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: fetchUsers(src: src),
+      builder: (ctx, snapshot) {
+        if (snapshot.hasError && src == Source.cache) {
+          return UsersBuilder(builder: builder, loadingWidget: loadingWidget);
+        }
+        if (!snapshot.hasData) {
+          if (src == Source.cache) {
+            return loadingWidget ?? circularProgressIndicator();
+          }
+          return FutureBuilder(
+            future: fetchUsers(src: Source.cache),
+            builder: (ctx, snapshot) {
+              if (!snapshot.hasData) {
+                // Returning this Widget when nothing has arrived
+                return loadingWidget ?? circularProgressIndicator();
+              }
+              // Returning this widget from cache while data arrives from server
+              return builder(ctx, snapshot.data!);
+            },
+          );
+        }
+        // Returning this widget when data arrives from server
+        return builder(ctx, snapshot.data!);
       },
     );
   }

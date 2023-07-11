@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/category/category.dart';
 import 'package:hustle_stay/providers/image.dart';
 import 'package:hustle_stay/tools.dart';
-import 'package:hustle_stay/widgets/chat/choose_users.dart.dart';
+import 'package:hustle_stay/widgets/chat/multi_choser.dart';
 import 'package:hustle_stay/widgets/profile_image.dart';
 
 // ignore: must_be_immutable
@@ -86,9 +86,10 @@ class _EditCategoryFromState extends State<EditCategoryFrom> {
                     enteredID = id!.trim();
                   },
                 ),
-              ChooseUsers(
-                allUsers: widget.allRecepients,
-                chosenUsers: widget.category.allReceipients,
+              MultiChooser(
+                hintTxt: "Select a receipient",
+                allOptions: widget.allRecepients,
+                chosenOptions: widget.category.allReceipients,
                 onUpdate: (value) {
                   setState(() {
                     widget.category.allReceipients = value;
@@ -96,10 +97,11 @@ class _EditCategoryFromState extends State<EditCategoryFrom> {
                 },
                 label: 'All Receipients',
               ),
-              ChooseUsers(
+              MultiChooser(
+                hintTxt: "Select a receipient",
                 key: UniqueKey(),
-                allUsers: widget.category.allReceipients,
-                chosenUsers: widget.category.defaultReceipient,
+                allOptions: widget.category.allReceipients,
+                chosenOptions: widget.category.defaultReceipient,
                 onUpdate: (value) {
                   widget.category.defaultReceipient = value;
                 },

@@ -3,31 +3,33 @@ import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/widgets/chat/user_tile.dart';
 
 // ignore: must_be_immutable
-class ChooseUsers extends StatefulWidget {
-  final List<String> allUsers;
-  List<String> chosenUsers;
-  final void Function(List<String> newEmails) onUpdate;
+class MultiChooser extends StatefulWidget {
+  final List<String> allOptions;
+  List<String> chosenOptions;
+  final void Function(List<String> chosenOptions) onUpdate;
   final String label;
-  ChooseUsers({
+  final String hintTxt;
+  MultiChooser({
     super.key,
-    required this.allUsers,
-    this.chosenUsers = const [],
+    required this.allOptions,
+    this.chosenOptions = const [],
     required this.onUpdate,
-    this.label = "Complainees",
+    required this.label,
+    required this.hintTxt,
   }) {
-    if (chosenUsers.isEmpty) chosenUsers = [];
+    if (chosenOptions.isEmpty) chosenOptions = [];
   }
 
   @override
-  State<ChooseUsers> createState() => _ChooseUsersState();
+  State<MultiChooser> createState() => _MultiChooserState();
 }
 
-class _ChooseUsersState extends State<ChooseUsers> {
+class _MultiChooserState extends State<MultiChooser> {
   int i = 0;
   @override
   Widget build(BuildContext context) {
-    final users = widget.allUsers
-        .where((element) => !widget.chosenUsers.contains(element));
+    final users = widget.allOptions
+        .where((element) => !widget.chosenOptions.contains(element));
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -42,20 +44,20 @@ class _ChooseUsersState extends State<ChooseUsers> {
               dropdownMenuEntries: users
                   .map((e) => DropdownMenuEntry(label: e, value: e))
                   .toList(),
-              label: const Text("Select a receipient"),
+              label: Text(widget.hintTxt),
               hintText: 'attender@iiitr.ac.in',
               leadingIcon: const Icon(Icons.person_add_alt_1_rounded),
               onSelected: (value) {
                 setState(() {
-                  widget.chosenUsers.add(value!.toString());
+                  widget.chosenOptions.add(value!.toString());
                   i++;
                 });
-                widget.onUpdate(widget.chosenUsers);
+                widget.onUpdate(widget.chosenOptions);
               },
               initialSelection: null,
             ),
             Wrap(
-              children: widget.chosenUsers
+              children: widget.chosenOptions
                   .map((e) =>
                       UserTile(key: ValueKey(e), email: e, removeUser: _remove))
                   .toList(),
@@ -68,7 +70,7 @@ class _ChooseUsersState extends State<ChooseUsers> {
 
   void _remove(UserData user) {
     setState(() {
-      widget.chosenUsers.remove(user.email);
+      widget.chosenOptions.remove(user.email);
       i--;
     });
   }

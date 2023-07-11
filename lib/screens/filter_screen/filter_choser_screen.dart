@@ -1,6 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/models/category/category.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
+import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/tools.dart';
+import 'package:hustle_stay/widgets/complaints/selection_vault.dart';
 
 class FilterChooserScreen extends StatelessWidget {
   const FilterChooserScreen({super.key});
@@ -9,9 +13,58 @@ class FilterChooserScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final filters = [
       CreatedWithin(onChange: (dateRange) {}),
+      ResolvedChoose(onChange: (resolved) {
+        // TODO: when resolved == false remove the resolved filter and show it only if resolved == true
+      }),
       ResolvedWithin(onChange: (dateRange) {}),
       ScopeChooser(onChange: (scope) {}),
-      ResolvedChoose(onChange: (resolved) {}),
+      CategoriesBuilder(
+        src: Source.cache,
+        loadingWidget: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: circularProgressIndicator(),
+          ),
+        ),
+        builder: (ctx, categories) => CategoryChooser(
+            onChange: ((chosenCategories) {}),
+            allCategories: categories.map((e) => e.id).toList(),
+            chosenCategories: const []),
+      ),
+      UsersBuilder(
+        src: Source.cache,
+        loadingWidget: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: circularProgressIndicator(),
+          ),
+        ),
+        builder: (ctx, users) => ComplainantChooser(
+          allUsers: users
+              .where((element) => element.readonly.type == 'student')
+              .map((e) => e.name ?? e.email!)
+              .toList(),
+          onChange: (users) {},
+          chosenUsers: const [],
+        ),
+      ),
+      UsersBuilder(
+        src: Source.cache,
+        loadingWidget: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: circularProgressIndicator(),
+          ),
+        ),
+        builder: (ctx, users) => ComplaineeChooser(
+          allUsers: users
+              .where((element) => element.readonly.type == 'student')
+              .map((e) => e.name ?? e.email!)
+              .toList(),
+          onChange: (users) {},
+          chosenUsers: const [],
+        ),
+      ),
       // TODO: add more filters here
     ];
     return Scaffold(
@@ -27,12 +80,18 @@ class FilterChooserScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView.separated(
-        itemCount: filters.length,
-        separatorBuilder: (ctx, index) => const Divider(),
-        itemBuilder: (ctx, index) => Padding(
-          padding: const EdgeInsets.only(left: 8.0, bottom: 8),
-          child: filters[index],
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await fetchUsers();
+          await fetchAllCategories();
+        },
+        child: ListView.separated(
+          itemCount: filters.length,
+          separatorBuilder: (ctx, index) => const Divider(),
+          itemBuilder: (ctx, index) => Padding(
+            padding: const EdgeInsets.only(left: 8.0, bottom: 8),
+            child: filters[index],
+          ),
         ),
       ),
     );
@@ -231,7 +290,7 @@ class _CreatedWithinState extends State<CreatedWithin> {
         Wrap(children: items)
       else
         SizedBox(
-          height: 41,
+          height: 40,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             separatorBuilder: (ctx, index) => const SizedBox(width: 5),
@@ -400,7 +459,7 @@ class _ResolvedWithinState extends State<ResolvedWithin> {
         Wrap(children: items)
       else
         SizedBox(
-          height: 41,
+          height: 40,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             separatorBuilder: (ctx, index) => const SizedBox(width: 5),
@@ -471,7 +530,7 @@ class _ScopeChooserState extends State<ScopeChooser> {
       const _Title('Scope'),
       const SizedBox(height: 8),
       SizedBox(
-        height: 41,
+        height: 40,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           separatorBuilder: (ctx, index) => const SizedBox(width: 5),
@@ -542,7 +601,7 @@ class _ResolvedChooseState extends State<ResolvedChoose> {
       const _Title('Status'),
       const SizedBox(height: 8),
       SizedBox(
-        height: 41,
+        height: 40,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           separatorBuilder: (ctx, index) => const SizedBox(width: 5),
@@ -557,6 +616,96 @@ class _ResolvedChooseState extends State<ResolvedChoose> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: children,
+    );
+  }
+}
+
+class ComplainantChooser extends StatelessWidget {
+  final void Function(List<String> chosenUsers) onChange;
+  final List<String> allUsers;
+  final List<String> chosenUsers;
+  const ComplainantChooser({
+    super.key,
+    required this.onChange,
+    required this.allUsers,
+    required this.chosenUsers,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        const _Title('Complainants'),
+        const SizedBox(height: 8),
+        SelectionVault(
+          helpText: 'Select a Complainant',
+          onChange: onChange,
+          allItems: allUsers,
+          chosenItems: chosenUsers,
+        ),
+      ],
+    );
+  }
+}
+
+class ComplaineeChooser extends StatelessWidget {
+  final void Function(List<String> chosenUsers) onChange;
+  final List<String> allUsers;
+  final List<String> chosenUsers;
+  const ComplaineeChooser({
+    super.key,
+    required this.onChange,
+    required this.allUsers,
+    required this.chosenUsers,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        const _Title('Complainees'),
+        const SizedBox(height: 8),
+        SelectionVault(
+          helpText: 'Select a Complainee',
+          onChange: onChange,
+          allItems: allUsers,
+          chosenItems: chosenUsers,
+        ),
+      ],
+    );
+  }
+}
+
+class CategoryChooser extends StatelessWidget {
+  final void Function(List<String> chosenCategories) onChange;
+  final List<String> allCategories;
+  final List<String> chosenCategories;
+  const CategoryChooser({
+    super.key,
+    required this.onChange,
+    required this.allCategories,
+    required this.chosenCategories,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        const _Title('Categories'),
+        const SizedBox(height: 8),
+        SelectionVault(
+          helpText: 'Select a Category',
+          onChange: onChange,
+          allItems: allCategories,
+          chosenItems: chosenCategories,
+        ),
+      ],
     );
   }
 }

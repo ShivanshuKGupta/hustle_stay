@@ -27,8 +27,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
           IconButton(
             onPressed: () {
               showModalBottomSheet(
+                isScrollControlled: true,
                 context: context,
-                enableDrag: true,
+                useSafeArea: true,
                 builder: (ctx) => const FilterChooserScreen(),
               );
             },

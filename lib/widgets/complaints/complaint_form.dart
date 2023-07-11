@@ -6,7 +6,7 @@ import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/image.dart';
 import 'package:hustle_stay/tools.dart';
-import 'package:hustle_stay/widgets/chat/choose_users.dart.dart';
+import 'package:hustle_stay/widgets/chat/multi_choser.dart';
 import 'package:hustle_stay/widgets/profile_image.dart';
 
 // ignore: must_be_immutable
@@ -208,9 +208,11 @@ class _ComplaintFormState extends State<ComplaintForm> {
               widget.complaint!.category == 'Other')
             (_userFetchLoading)
                 ? circularProgressIndicator()
-                : ChooseUsers(
-                    allUsers: recepients,
-                    chosenUsers: widget.complaint!.to,
+                : MultiChooser(
+                    hintTxt: "Select a receipient",
+                    label: 'Complainees',
+                    allOptions: recepients,
+                    chosenOptions: widget.complaint!.to,
                     onUpdate: (value) => widget.complaint!.to = value,
                   ),
           const SizedBox(height: 10),
