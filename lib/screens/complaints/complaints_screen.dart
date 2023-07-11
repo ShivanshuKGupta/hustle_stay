@@ -118,15 +118,18 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
                                       navigatorPush(context,
                                           const ResolvedComplaintsScreen());
                                     },
-                                    child: Text(
-                                      " 23 resolved ",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium!
-                                          .copyWith(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary),
+                                    child: FutureBuilder(
+                                      future: getComplaintsCount(),
+                                      builder: (ctx, snapshot) => Text(
+                                        " ${snapshot.data ?? 0} resolved ",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium!
+                                            .copyWith(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .primary),
+                                      ),
                                     ),
                                   ),
                                   const Text("in the last 30 days"),

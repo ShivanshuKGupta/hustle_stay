@@ -44,6 +44,7 @@ class ComplaintData {
       "scope": scope.name,
       "title": title,
       "to": to,
+      "resolved": resolvedAt != null,
       "resolvedAt": resolvedAt,
       "imgUrl": imgUrl,
       "category": category,
@@ -108,6 +109,9 @@ class ComplaintData {
     //     complaintData["resolvedAt"].runtimeType != int) {
     //   updateComplaint(this);
     // }
+    if (complaintData["resolved"] == null) {
+      updateComplaint(this);
+    }
     // --------------
   }
 }
@@ -131,6 +135,17 @@ Future<void> deleteComplaint({ComplaintData? complaint, int? id}) async {
   await firestore.doc('complaints/${id ?? complaint!.id}').delete();
 }
 
+/// Counts the number of resolved complaints
+Future<int> getComplaintsCount(
+    {AggregateSource? src, bool resolved = true}) async {
+  return (await firestore
+          .collection('complaints')
+          .where('resolved', isEqualTo: resolved)
+          .count()
+          .get(source: src ?? AggregateSource.server))
+      .count;
+}
+
 /// fetches a complaint of given ID
 Future<ComplaintData> fetchComplaint(int id) async {
   final response = await firestore.doc('complaints/$id').get();
@@ -147,7 +162,7 @@ Future<List<ComplaintData>> fetchComplaints(
   final publicComplaints = await firestore
       .collection('complaints')
       .where('scope', isEqualTo: 'public')
-      .where('resolvedAt', isNull: !resolved)
+      .where('resolved', isEqualTo: resolved)
       .get(src != null ? GetOptions(source: src) : null);
   List<ComplaintData> ans = publicComplaints.docs
       .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
@@ -157,7 +172,7 @@ Future<List<ComplaintData>> fetchComplaints(
       .collection('complaints')
       .where('from', isEqualTo: currentUser.email)
       .where('scope', isEqualTo: 'private')
-      .where('resolvedAt', isNull: !resolved)
+      .where('resolved', isEqualTo: resolved)
       .get(src != null ? GetOptions(source: src) : null);
   ans += myComplaints.docs
       .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
@@ -167,7 +182,7 @@ Future<List<ComplaintData>> fetchComplaints(
       .collection('complaints')
       .where('to', arrayContains: currentUser.email)
       .where('scope', isEqualTo: 'private')
-      .where('resolvedAt', isNull: !resolved)
+      .where('resolved', isEqualTo: resolved)
       .get(src != null ? GetOptions(source: src) : null);
   ans += includedComplaints.docs
       .map((e) => ComplaintData.load(int.parse(e.id), e.data()))

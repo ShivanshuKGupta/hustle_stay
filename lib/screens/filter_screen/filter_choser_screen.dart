@@ -469,7 +469,7 @@ class _ResolvedWithinState extends State<ResolvedWithin> {
     final children = [
       Row(
         children: [
-          const _Title('Resolved before'),
+          const _Title('Resolved within'),
           IconButton(
             onPressed: () {
               setState(() {

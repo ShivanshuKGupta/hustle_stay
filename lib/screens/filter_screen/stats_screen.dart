@@ -119,7 +119,7 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
       ),
       body: ComplaintsBuilder(
         complaintsProvider: _complaintsProvider,
-        // src: Source.cache,
+        src: Source.cache,
         loadingWidget: AnimateIcon(
           onTap: () {},
           iconType: IconType.continueAnimation,
@@ -131,7 +131,7 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
           return RefreshIndicator(
             onRefresh: () async {
               try {
-                await fetchComplaints();
+                await _complaintsProvider();
               } catch (e) {
                 showMsg(context, e.toString());
               }
@@ -197,14 +197,6 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
           .where('createdAt',
               isLessThanOrEqualTo: createdWithin.end.millisecondsSinceEpoch);
     }
-    if (resolvedWithin != null) {
-      collection = collection
-          .where('createdAt',
-              isGreaterThanOrEqualTo:
-                  resolvedWithin.start.millisecondsSinceEpoch)
-          .where('createdAt',
-              isLessThanOrEqualTo: resolvedWithin.end.millisecondsSinceEpoch);
-    }
     if (categories.isNotEmpty) {
       collection = collection.where('category', whereIn: categories);
     }
@@ -212,7 +204,15 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
       collection = collection.where('from', whereIn: complainants);
     }
     if (resolved != null) {
-      collection = collection.where('resolvedAt', isNull: !resolved);
+      collection = collection.where('resolved', isEqualTo: resolved);
+      if (resolved && resolvedWithin != null) {
+        collection = collection
+            .where('resolvedAt',
+                isGreaterThanOrEqualTo:
+                    resolvedWithin.start.millisecondsSinceEpoch)
+            .where('resolvedAt',
+                isLessThanOrEqualTo: resolvedWithin.end.millisecondsSinceEpoch);
+      }
     }
     if (scope != null) {
       collection = collection.where('scope', isEqualTo: scope.name);
@@ -220,7 +220,9 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
     if (complainees.isNotEmpty) {
       collection = collection.where('to', arrayContainsAny: complainees);
     }
-    final docs = (await collection.get()).docs;
+    final docs =
+        (await collection.get(src == null ? null : GetOptions(source: src)))
+            .docs;
     print(docs);
     return [
       for (final doc in docs) ComplaintData.load(int.parse(doc.id), doc.data())
