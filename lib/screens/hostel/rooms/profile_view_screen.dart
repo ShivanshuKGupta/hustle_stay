@@ -130,7 +130,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                     Text("Name: ${widget.user.name ?? ''}"),
                     Text("${widget.user.phoneNumber}"),
                     Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         if (!onLeave)
                           IconButton(
@@ -165,14 +165,14 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                               reason!.value = value;
                             },
                           ),
-                        if (!onLeave &&
-                            reason!.value == 'Other(please specify)')
+                        if (!onLeave)
                           TextField(
                             onChanged: (value) {
                               reason!.value = value;
                             },
                             decoration: const InputDecoration(
-                                hintText: 'Enter your reason here'),
+                                hintText:
+                                    'Reason (Optional if chosen any option except Others.)'),
                           ),
                         if (onLeave && currentLeave != null)
                           GestureDetector(
@@ -216,32 +216,44 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                             },
                             child: LeaveTile(currentLeave!),
                           ),
-                        TextButton(
-                            onPressed: () async {
-                              bool resp = await setLeave(
-                                  widget.user.email!,
-                                  widget.hostelName,
-                                  widget.roomName,
-                                  onLeave,
-                                  true,
-                                  leaveStartDate:
-                                      onLeave && pickedRangeStart == null
-                                          ? null
-                                          : pickedRangeStart,
-                                  leaveEndDate:
-                                      onLeave && pickedRangeEnd == null
-                                          ? null
-                                          : pickedRangeEnd,
-                                  reason: onLeave && pickedRangeStart == null
-                                      ? null
-                                      : reason!.value,
-                                  selectedDate: DateTime.now());
-                              if (resp) {
-                                Navigator.of(context).pop(true);
-                              }
-                            },
-                            child:
-                                Text(!onLeave ? 'Start Leave' : 'End Leave')),
+                        ValueListenableBuilder(
+                          valueListenable: reason!,
+                          builder: (context, value, child) => TextButton(
+                              onPressed: value != "" &&
+                                      value != 'Other(please specify)'
+                                  ? () {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(const SnackBar(
+                                              content: Text(
+                                                  'Select/ Enter a reason first!')));
+                                    }
+                                  : () async {
+                                      bool resp = await setLeave(
+                                          widget.user.email!,
+                                          widget.hostelName,
+                                          widget.roomName,
+                                          onLeave,
+                                          true,
+                                          leaveStartDate: onLeave &&
+                                                  pickedRangeStart == null
+                                              ? null
+                                              : pickedRangeStart,
+                                          leaveEndDate:
+                                              onLeave && pickedRangeEnd == null
+                                                  ? null
+                                                  : pickedRangeEnd,
+                                          reason: onLeave &&
+                                                  pickedRangeStart == null
+                                              ? null
+                                              : reason!.value,
+                                          selectedDate: DateTime.now());
+                                      if (resp) {
+                                        Navigator.of(context).pop(true);
+                                      }
+                                    },
+                              child:
+                                  Text(!onLeave ? 'Start Leave' : 'End Leave')),
+                        ),
                         const Divider(),
                         Column(
                           children: [
