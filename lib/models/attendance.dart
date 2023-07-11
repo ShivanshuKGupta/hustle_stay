@@ -12,6 +12,13 @@ class ChartData {
   ChartData(this.category, this.value, this.color);
 }
 
+class LeaveData {
+  final DateTime startDate;
+  final DateTime endDate;
+  final String leaveType;
+  LeaveData(this.startDate, this.endDate, this.leaveType);
+}
+
 class RoommateInfo {
   final RoommateData roommateData;
   final String roomName;
@@ -196,9 +203,8 @@ Future<bool> markAllRoommateAttendance(String hostelName, String roomName,
     final docsRoommatesRef = await storage
         .collection('hostels')
         .doc(hostelName)
-        .collection('Rooms')
-        .doc(roomName)
         .collection('Roommates')
+        .where('roomName', isEqualTo: roomName)
         .get();
     final batch = storage.batch();
     for (final roommateDoc in docsRoommatesRef.docs) {
@@ -412,5 +418,65 @@ Future<List<RoommateInfo>> getFilteredStudents(
     }
   }
 
+  return list;
+}
+
+Future<LeaveData?> fetchCurrentLeave(String hostelName, String email) async {
+  final refR = await storage
+      .collection('hostels')
+      .doc(hostelName)
+      .collection('Roommates')
+      .doc(email)
+      .get();
+
+  final leaveStartDate = refR.data()!['leaveStartDate'];
+  final leaveEndDate = refR.data()!['leaveEndDate'];
+
+  final ref = await refR.reference
+      .collection('Leaves')
+      .where('startDate', isEqualTo: leaveStartDate)
+      .where('endDate', isEqualTo: leaveEndDate)
+      .limit(1)
+      .get();
+
+  if (ref.size > 0) {
+    return LeaveData(
+      ref.docs[0].data()['startDate'].toDate(),
+      ref.docs[0].data()['endDate'].toDate(),
+      ref.docs[0].data()['leaveType'],
+    );
+  } else {
+    return null;
+  }
+}
+
+Future<List<LeaveData>> fetchLeaves(String hostelName, String email) async {
+  final refR = await storage
+      .collection('hostels')
+      .doc(hostelName)
+      .collection('Roommates')
+      .doc(email)
+      .get();
+
+  final leaveStartDate = refR.data()!['leaveStartDate'];
+  final onLeave = refR.data()!['onLeave'];
+
+  final leavesRef = refR.reference.collection('Leaves');
+
+  QuerySnapshot<Map<String, dynamic>> ref;
+
+  if (onLeave == true) {
+    ref =
+        await leavesRef.where('startDate', isNotEqualTo: leaveStartDate).get();
+  } else {
+    ref = await leavesRef.get();
+  }
+
+  final list = ref.docs
+      .map((x) => LeaveData(x.data()['startDate'].toDate(),
+          x.data()['endDate'].toDate(), x.data()['leaveType']))
+      .toList();
+
+  print('leave list: $list');
   return list;
 }

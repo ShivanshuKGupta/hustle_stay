@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/models/hostel/hostels.dart';
 import 'package:hustle_stay/tools.dart';
+import 'package:intl/intl.dart';
 
 import '../../../models/attendance.dart';
 import '../../../models/hostel/rooms/room.dart';
@@ -29,9 +32,9 @@ class AttendanceIcon extends StatefulWidget {
 class _AttendanceIconState extends State<AttendanceIcon> {
   final presentIcon =
       const Icon(Icons.check_circle_outline, color: Colors.black);
-  final absentIcon = const Icon(Icons.close_rounded, color: Colors.black);
+  final absentIcon = const Icon(Icons.cancel_outlined, color: Colors.black);
   String? status;
-  Icon currentIcon = const Icon(Icons.close_rounded, color: Colors.black);
+  Icon currentIcon = const Icon(Icons.cancel_outlined, color: Colors.black);
   bool isRunning = false;
 
   @override
@@ -79,12 +82,35 @@ class _AttendanceIconState extends State<AttendanceIcon> {
         ? Padding(
             padding: const EdgeInsets.all(2.0),
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: null,
+              onLongPress: () async {
+                final response = await askUser(
+                  context,
+                  'Are you sure to end Leave ?',
+                  yes: true,
+                  no: true,
+                );
+                if (response == "yes") {
+                  bool resp = await setLeave(widget.roommateData.email,
+                      widget.hostelName, widget.roomName, true, true,
+                      selectedDate: DateTime.now());
+                  if (resp) {
+                    setState(() {
+                      status = 'absent';
+                      widget.tileColor!.value = Colors.redAccent;
+                      currentIcon = absentIcon;
+                    });
+                  }
+                }
+              },
               style: ElevatedButton.styleFrom(
                   backgroundColor: widget.tileColor!.value,
                   side: const BorderSide(
                       style: BorderStyle.solid, color: Colors.black)),
-              child: Text(status!),
+              child: Text(
+                "${status![0].toUpperCase()}${status![1]} ${status!.substring(2)}",
+                style: const TextStyle(color: Colors.black),
+              ),
             ),
           )
         : attendanceWid();

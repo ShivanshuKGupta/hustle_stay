@@ -1,5 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+import '../attendance.dart';
 
 // enum String {
 //   boys,
@@ -88,20 +91,57 @@ Future<bool> deleteHostel(String hostelName) async {
 }
 
 Future<bool> setLeave(String email, String hostelName, String roomName,
-    bool status, bool isInternship,
-    {DateTime? leaveStartDate, DateTime? leaveEndDate}) async {
+    bool status, bool currentLeave,
+    {DateTime? leaveStartDate,
+    DateTime? leaveEndDate,
+    String? reason,
+    LeaveData? data,
+    DateTime? selectedDate}) async {
   try {
-    await FirebaseFirestore.instance
+    final ref = await FirebaseFirestore.instance
         .collection('hostels')
         .doc(hostelName)
         .collection('Roommates')
         .doc(email)
-        .set({
-      'internship': isInternship,
-      'onLeave': !status,
-      'leaveStartDate': status ? null : leaveStartDate,
-      'leaveEndDate': status ? null : leaveEndDate,
-    }, SetOptions(merge: true));
+        .get();
+    if (currentLeave) {
+      await ref.reference.set({
+        'internship': reason == 'Internship',
+        'onLeave': !status,
+        'leaveStartDate': status ? null : leaveStartDate,
+        'leaveEndDate': status ? null : leaveEndDate,
+      }, SetOptions(merge: true));
+    }
+    if (leaveEndDate != null) {
+      if (data != null) {
+        final updateRef = await ref.reference
+            .collection('Leaves')
+            .where('startDate', isEqualTo: data.startDate)
+            .where('endDate', isEqualTo: data.endDate)
+            .get();
+        await updateRef.docs[0].reference.set(
+            {'endDate': leaveEndDate, 'startDate': leaveStartDate},
+            SetOptions(merge: true));
+      } else {
+        await ref.reference.collection('Leaves').doc().set({
+          'leaveType': reason,
+          'startDate': leaveStartDate,
+          'endDate': leaveEndDate
+        });
+      }
+    }
+    if (status == true &&
+        selectedDate != null &&
+        selectedDate == DateTime.now()) {
+      await FirebaseFirestore.instance
+          .collection('hostels')
+          .doc(hostelName)
+          .collection('Roommates')
+          .doc(email)
+          .collection('Attendance')
+          .doc(DateFormat('yyyy-MM-dd').format(selectedDate))
+          .set({'status': 'absent'});
+    }
     return true;
   } catch (e) {
     debugPrint(e.toString());

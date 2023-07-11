@@ -47,20 +47,28 @@ class _CompleteDetailsState extends State<CompleteDetails> {
             if (!isDeleting)
               IconButton(
                   onPressed: () async {
-                    setState(() {
-                      isDeleting = true;
-                    });
-                    if (await deleteRoommate(widget.user.email!,
-                        widget.hostelName, widget.roomName)) {
-                      Navigator.of(context).pop(true);
-                    } else {
+                    final response = await askUser(
+                      context,
+                      'Are you sure, The Deleted Records won\'t be retrieved ?',
+                      yes: true,
+                      no: true,
+                    );
+                    if (response == 'yes') {
                       setState(() {
-                        isDeleting = false;
+                        isDeleting = true;
                       });
-                      ScaffoldMessenger.of(context).clearSnackBars();
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text(
-                              "Error deleting ${widget.user.name ?? widget.user.email}. Try again later.")));
+                      if (await deleteRoommate(widget.user.email!,
+                          widget.hostelName, widget.roomName)) {
+                        Navigator.of(context).pop(true);
+                      } else {
+                        setState(() {
+                          isDeleting = false;
+                        });
+                        ScaffoldMessenger.of(context).clearSnackBars();
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(
+                                "Error deleting ${widget.user.name ?? widget.user.email}. Try again later.")));
+                      }
                     }
                   },
                   icon: const Icon(Icons.delete))

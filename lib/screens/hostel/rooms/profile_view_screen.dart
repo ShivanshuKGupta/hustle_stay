@@ -1,9 +1,11 @@
 import 'package:animated_icon/animated_icon.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/models/attendance.dart';
 import 'package:hustle_stay/models/hostel/hostels.dart';
 import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/tools.dart';
 import 'package:intl/intl.dart';
 
 import '../../../widgets/room/change_room/change_room.dart';
@@ -53,11 +55,39 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
   void initState() {
     super.initState();
     onLeave = widget.roommateData.onLeave ?? false;
+    fetchLeavesValues();
   }
+
+  LeaveData? currentLeave;
+  Future<void> fetchLeavesValues() async {
+    LeaveData? cLeave =
+        await fetchCurrentLeave(widget.hostelName, widget.roommateData.email);
+    List<LeaveData> rLeaves =
+        await fetchLeaves(widget.hostelName, widget.roommateData.email);
+    setState(() {
+      currentLeave = cLeave;
+      recentLeaves = rLeaves;
+    });
+    return;
+  }
+
+  List<LeaveData> recentLeaves = [];
+
+  List<DropdownMenuEntry> listDropDown = [
+    const DropdownMenuEntry(value: 'Internship', label: 'Internship'),
+    const DropdownMenuEntry(
+        value: 'Family Emergency', label: 'Family Emergency'),
+    const DropdownMenuEntry(value: 'Mid-Sem Break', label: 'Mid-Sem Break'),
+    const DropdownMenuEntry(value: 'End-Sem Break', label: 'End-Sem Break'),
+    const DropdownMenuEntry(
+        value: 'Medical Issue/Emergency', label: 'Medical Issue/Emergency'),
+    const DropdownMenuEntry(
+        value: 'Other(please specify)', label: 'Other(please specify)')
+  ];
 
   DateTime? pickedRangeStart;
   DateTime? pickedRangeEnd;
-  ValueNotifier<bool>? _isChecked = ValueNotifier(false);
+  ValueNotifier<String>? reason = ValueNotifier("");
 
   @override
   Widget build(BuildContext context) {
@@ -99,10 +129,12 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                     const Divider(),
                     Text("Name: ${widget.user.name ?? ''}"),
                     Text("${widget.user.phoneNumber}"),
-                    Wrap(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (!onLeave)
-                          TextButton.icon(
+                          IconButton(
+                            alignment: Alignment.center,
                             onPressed: () async {
                               final picked = await showDateRangePicker(
                                   context: context,
@@ -125,30 +157,65 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                               }
                             },
                             icon: const Icon(Icons.calendar_today),
-                            label: Text(pickedRangeStart == null &&
-                                    pickedRangeEnd == null
-                                ? 'Select Dates'
-                                : '${pickedRangeStart!.day}-${DateFormat('dd-MM-yyyy').format(pickedRangeEnd!)}'),
                           ),
                         if (!onLeave)
-                          CheckboxListTile(
-                            title: const Text('Internship Leave'),
-                            value: _isChecked!.value,
-                            onChanged: (value) {
-                              _isChecked!.value = value!;
+                          DropdownMenu(
+                            dropdownMenuEntries: listDropDown,
+                            onSelected: (value) {
+                              reason!.value = value;
                             },
-                            controlAffinity: ListTileControlAffinity
-                                .leading, // Place checkbox to the left of the text
                           ),
-                        Checkbox(
-                          shape: const CircleBorder(),
-                          value: _isChecked!.value,
-                          onChanged: (value) {
-                            setState(() {
-                              _isChecked!.value = value!;
-                            });
-                          },
-                        ),
+                        if (!onLeave &&
+                            reason!.value == 'Other(please specify)')
+                          TextField(
+                            onChanged: (value) {
+                              reason!.value = value;
+                            },
+                            decoration: const InputDecoration(
+                                hintText: 'Enter your reason here'),
+                          ),
+                        if (onLeave && currentLeave != null)
+                          GestureDetector(
+                            onLongPress: () async {
+                              final response = await askUser(
+                                context,
+                                'Want to update the Dates?',
+                                yes: true,
+                                no: true,
+                              );
+                              if (response == 'yes') {
+                                final picked = await showDateRangePicker(
+                                    context: context,
+                                    firstDate: currentLeave!.startDate
+                                            .isAfter(DateTime.now())
+                                        ? DateTime.now()
+                                        : currentLeave!.startDate,
+                                    lastDate: DateTime(DateTime.now().year + 1),
+                                    initialDateRange: DateTimeRange(
+                                        start: currentLeave!.startDate,
+                                        end: currentLeave!.endDate));
+                                if (picked == null) {
+                                  return;
+                                }
+                                final newPickedRangeStart = picked.start
+                                    .subtract(const Duration(microseconds: 1));
+                                final newPickedRangeEnd = picked.end
+                                    .add(const Duration(days: 1))
+                                    .subtract(const Duration(microseconds: 1));
+
+                                await setLeave(
+                                    widget.user.email!,
+                                    widget.hostelName,
+                                    widget.roomName,
+                                    true,
+                                    true,
+                                    leaveStartDate: newPickedRangeStart,
+                                    leaveEndDate: newPickedRangeEnd,
+                                    data: currentLeave);
+                              }
+                            },
+                            child: LeaveTile(currentLeave!),
+                          ),
                         TextButton(
                             onPressed: () async {
                               bool resp = await setLeave(
@@ -156,6 +223,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                                   widget.hostelName,
                                   widget.roomName,
                                   onLeave,
+                                  true,
                                   leaveStartDate:
                                       onLeave && pickedRangeStart == null
                                           ? null
@@ -164,12 +232,27 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                                       onLeave && pickedRangeEnd == null
                                           ? null
                                           : pickedRangeEnd,
-                                  _isChecked!.value);
+                                  reason: onLeave && pickedRangeStart == null
+                                      ? null
+                                      : reason!.value,
+                                  selectedDate: DateTime.now());
                               if (resp) {
                                 Navigator.of(context).pop(true);
                               }
                             },
-                            child: Text(!onLeave ? 'Start Leave' : 'End Leave'))
+                            child:
+                                Text(!onLeave ? 'Start Leave' : 'End Leave')),
+                        const Divider(),
+                        Column(
+                          children: [
+                            const Text(
+                              'Recent Leaves',
+                            ),
+                            recentLeaves.isEmpty
+                                ? Text('nothing to show...')
+                                : listLeaves(recentLeaves),
+                          ],
+                        ),
                       ],
                     )
                   ],
@@ -222,6 +305,57 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget listLeaves(List<LeaveData> list) {
+    return ListView.builder(
+      shrinkWrap: true,
+      itemCount: list.length,
+      itemBuilder: (context, index) {
+        return LeaveTile(list[index]);
+      },
+    );
+  }
+
+  Widget LeaveTile(LeaveData dataVal) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 10.0),
+      padding: EdgeInsets.all(10.0),
+      decoration: BoxDecoration(
+        border: Border.all(style: BorderStyle.solid, color: Colors.black),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            blurRadius: 4.0,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            dataVal.leaveType,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16.0,
+            ),
+          ),
+          const SizedBox(height: 4.0),
+          Text(
+            'Start Date: ${dataVal.startDate.toString()}',
+            style: TextStyle(fontSize: 14.0, color: Colors.grey),
+          ),
+          const SizedBox(height: 4.0),
+          Text(
+            'End Date: ${dataVal.endDate.toString()}',
+            style: const TextStyle(fontSize: 14.0, color: Colors.grey),
+          ),
+        ],
       ),
     );
   }
