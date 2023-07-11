@@ -40,15 +40,13 @@ class FilterChooserScreen extends StatelessWidget {
           ),
         ),
         builder: (ctx, users) => ComplainantChooser(
-          allUsers: users
-              .where((element) => element.readonly.type == 'student')
-              .map((e) => e.name ?? e.email!)
-              .toList(),
+          allUsers: users,
           onChange: (users) {},
           chosenUsers: const [],
         ),
       ),
       UsersBuilder(
+        provider: fetchComplainees,
         src: Source.cache,
         loadingWidget: Center(
           child: Padding(
@@ -57,10 +55,7 @@ class FilterChooserScreen extends StatelessWidget {
           ),
         ),
         builder: (ctx, users) => ComplaineeChooser(
-          allUsers: users
-              .where((element) => element.readonly.type == 'student')
-              .map((e) => e.name ?? e.email!)
-              .toList(),
+          allUsers: users,
           onChange: (users) {},
           chosenUsers: const [],
         ),
@@ -82,8 +77,9 @@ class FilterChooserScreen extends StatelessWidget {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          await fetchUsers();
+          await fetchAllUserEmails();
           await fetchAllCategories();
+          await fetchComplainees();
         },
         child: ListView.separated(
           itemCount: filters.length,

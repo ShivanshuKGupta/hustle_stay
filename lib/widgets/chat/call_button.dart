@@ -13,7 +13,7 @@ class CallButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: fetchUsers(emails: emails, src: src),
+      future: fetchUsers(emails, src: src),
       builder: (ctx, snapshot) {
         if (snapshot.hasError) {
           showMsg(context, snapshot.error.toString());

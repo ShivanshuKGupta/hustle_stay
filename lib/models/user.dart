@@ -192,24 +192,34 @@ Future<UserData> fetchUserData(
   return userData;
 }
 
-Future<List<UserData>> fetchUsers({List<String>? emails, Source? src}) async {
+Future<List<UserData>> fetchUsers(List<String>? emails, {Source? src}) async {
   if (emails != null) {
     return [for (final email in emails) await fetchUserData(email, src: src)];
   }
+  return [
+    for (final doc in (await firestore.collection('users').get(
+              src == null ? null : GetOptions(source: src),
+            ))
+        .docs)
+      await fetchUserData(doc.id)
+  ];
+}
+
+Future<List<String>> fetchAllUserEmails({Source? src}) async {
   return (await firestore.collection('users').get(
             src == null ? null : GetOptions(source: src),
           ))
       .docs
-      .map((e) => UserData(email: e.id)..load(e.data()))
+      .map((doc) => doc.id)
       .toList();
 }
 
-Future<List<String>> fetchComplainees() async {
+Future<List<String>> fetchComplainees({Source? src}) async {
   final querySnapshot =
       await firestore.collection('users').where('type', whereIn: [
     'attender',
     'warden',
-  ]).get();
+  ]).get(src == null ? null : GetOptions(source: src));
   return querySnapshot.docs.map((e) => e.id).toList();
 }
 
@@ -305,7 +315,8 @@ class UserBuilder extends StatelessWidget {
 /// This will change according to the userData
 // ignore: must_be_immutable
 class UsersBuilder extends StatelessWidget {
-  final Widget Function(BuildContext ctx, List<UserData> emails) builder;
+  final Widget Function(BuildContext ctx, List<String> emails) builder;
+  final Future<List<String>> Function({Source? src})? provider;
   final Source? src;
   final Widget? loadingWidget;
   const UsersBuilder({
@@ -313,12 +324,14 @@ class UsersBuilder extends StatelessWidget {
     required this.builder,
     this.loadingWidget,
     this.src,
+    this.provider,
   });
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: fetchUsers(src: src),
+      future:
+          provider != null ? provider!(src: src) : fetchAllUserEmails(src: src),
       builder: (ctx, snapshot) {
         if (snapshot.hasError && src == Source.cache) {
           return UsersBuilder(builder: builder, loadingWidget: loadingWidget);
@@ -328,7 +341,9 @@ class UsersBuilder extends StatelessWidget {
             return loadingWidget ?? circularProgressIndicator();
           }
           return FutureBuilder(
-            future: fetchUsers(src: Source.cache),
+            future: provider != null
+                ? provider!(src: src)
+                : fetchAllUserEmails(src: src),
             builder: (ctx, snapshot) {
               if (!snapshot.hasData) {
                 // Returning this Widget when nothing has arrived
