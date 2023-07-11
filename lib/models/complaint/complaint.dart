@@ -15,10 +15,10 @@ class ComplaintData {
   late String from;
 
   /// createdAt dateTime object converted into a string or integer
-  late String id;
+  late int id;
 
   /// resolvedAt dateTime object converted into a string or integer
-  String? resolvedAt;
+  int? resolvedAt;
   late Scope scope;
   late String title;
   late List<String> to;
@@ -47,6 +47,7 @@ class ComplaintData {
       "resolvedAt": resolvedAt,
       "imgUrl": imgUrl,
       "category": category,
+      "createdAt": id,
     };
   }
 
@@ -92,12 +93,22 @@ class ComplaintData {
     scope = Scope.values
         .firstWhere((element) => element.name == complaintData["scope"]);
     title = complaintData["title"];
-    resolvedAt = complaintData["resolved"];
+    resolvedAt = complaintData["resolvedAt"];
     imgUrl = complaintData["imgUrl"];
     category = complaintData["category"];
     to = (complaintData["to"] as List<dynamic>)
         .map((e) => e.toString())
         .toList();
+    // Below code was used to correct the data in the db and is no longer needed
+    // if (complaintData['createdAt'] == null ||
+    //     complaintData['createdAt'].runtimeType != int) {
+    //   updateComplaint(this);
+    // }
+    // if (complaintData["resolvedAt"] != null &&
+    //     complaintData["resolvedAt"].runtimeType != int) {
+    //   updateComplaint(this);
+    // }
+    // --------------
   }
 }
 
@@ -115,13 +126,13 @@ Future<void> updateComplaint(ComplaintData complaint) async {
 }
 
 /// updates an exisiting complaint or will create if complaint does not exists
-Future<void> deleteComplaint({ComplaintData? complaint, String? id}) async {
+Future<void> deleteComplaint({ComplaintData? complaint, int? id}) async {
   assert(complaint != null || id != null);
   await firestore.doc('complaints/${id ?? complaint!.id}').delete();
 }
 
 /// fetches a complaint of given ID
-Future<ComplaintData> fetchComplaint(String id) async {
+Future<ComplaintData> fetchComplaint(int id) async {
   final response = await firestore.doc('complaints/$id').get();
   if (!response.exists) throw "Complaint Doesn't exists";
   final data = response.data();
@@ -139,7 +150,7 @@ Future<List<ComplaintData>> fetchComplaints(
       .where('resolvedAt', isNull: !resolved)
       .get(src != null ? GetOptions(source: src) : null);
   List<ComplaintData> ans = publicComplaints.docs
-      .map((e) => ComplaintData.load(e.id, e.data()))
+      .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
       .toList();
   // Fetching Private Complaints made by the user itself
   final myComplaints = await firestore
@@ -148,8 +159,9 @@ Future<List<ComplaintData>> fetchComplaints(
       .where('scope', isEqualTo: 'private')
       .where('resolvedAt', isNull: !resolved)
       .get(src != null ? GetOptions(source: src) : null);
-  ans +=
-      myComplaints.docs.map((e) => ComplaintData.load(e.id, e.data())).toList();
+  ans += myComplaints.docs
+      .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
+      .toList();
   // Fetching all complaints in which the user is included
   final includedComplaints = await firestore
       .collection('complaints')
@@ -158,9 +170,9 @@ Future<List<ComplaintData>> fetchComplaints(
       .where('resolvedAt', isNull: !resolved)
       .get(src != null ? GetOptions(source: src) : null);
   ans += includedComplaints.docs
-      .map((e) => ComplaintData.load(e.id, e.data()))
+      .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
       .toList();
-  ans.sort((a, b) => (int.parse(a.id) < int.parse(b.id)) ? 1 : 0);
+  ans.sort((a, b) => (a.id < b.id) ? 1 : 0);
   return ans;
 }
 

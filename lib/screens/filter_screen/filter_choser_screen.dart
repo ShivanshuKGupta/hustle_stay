@@ -6,33 +6,41 @@ import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/complaints/selection_vault.dart';
 
-class FilterChooserScreen extends StatelessWidget {
+class FilterChooserScreen extends StatefulWidget {
   final Map<String, dynamic> filters;
   const FilterChooserScreen({super.key, required this.filters});
 
   @override
+  State<FilterChooserScreen> createState() => _FilterChooserScreenState();
+}
+
+class _FilterChooserScreenState extends State<FilterChooserScreen> {
+  @override
   Widget build(BuildContext context) {
     final filterWidgets = [
       CreatedWithin(
-          dateRange: filters['createdWithin'],
+          dateRange: widget.filters['createdWithin'],
           onChange: (dateRange) {
-            filters['createdWithin'] = dateRange;
+            widget.filters['createdWithin'] = dateRange;
           }),
       ResolvedChoose(
-          resolved: filters['resolved'],
+          resolved: widget.filters['resolved'],
           onChange: (resolved) {
-            filters['resolved'] = resolved;
+            setState(() {
+              widget.filters['resolved'] = resolved;
+            });
             // TODO: when resolved == false remove the resolved filter and show it only if resolved == true
           }),
-      ResolvedWithin(
-          dateRange: filters['resolvedWithin'],
-          onChange: (dateRange) {
-            filters['resolvedWithin'] = dateRange;
-          }),
+      if (widget.filters['resolved'] == true)
+        ResolvedWithin(
+            dateRange: widget.filters['resolvedWithin'],
+            onChange: (dateRange) {
+              widget.filters['resolvedWithin'] = dateRange;
+            }),
       ScopeChooser(
-          scope: filters['scope'],
+          scope: widget.filters['scope'],
           onChange: (scope) {
-            filters['scope'] = scope;
+            widget.filters['scope'] = scope;
           }),
       CategoriesBuilder(
         src: Source.cache,
@@ -44,10 +52,10 @@ class FilterChooserScreen extends StatelessWidget {
         ),
         builder: (ctx, categories) => CategoryChooser(
             onChange: ((chosenCategories) {
-              filters['categories'] = chosenCategories;
+              widget.filters['categories'] = chosenCategories;
             }),
             allCategories: categories.map((e) => e.id).toList(),
-            chosenCategories: filters['categories'] ?? []),
+            chosenCategories: widget.filters['categories'] ?? []),
       ),
       UsersBuilder(
         src: Source.cache,
@@ -60,9 +68,9 @@ class FilterChooserScreen extends StatelessWidget {
         builder: (ctx, users) => ComplainantChooser(
           allUsers: users,
           onChange: (users) {
-            filters['complainants'] = users;
+            widget.filters['complainants'] = users;
           },
-          chosenUsers: filters['complainants'] ?? [],
+          chosenUsers: widget.filters['complainants'] ?? [],
         ),
       ),
       UsersBuilder(
@@ -77,9 +85,9 @@ class FilterChooserScreen extends StatelessWidget {
         builder: (ctx, users) => ComplaineeChooser(
           allUsers: users,
           onChange: (users) {
-            filters['complainees'] = users;
+            widget.filters['complainees'] = users;
           },
-          chosenUsers: filters['complainees'] ?? [],
+          chosenUsers: widget.filters['complainees'] ?? [],
         ),
       ),
       // TODO: add more filters here
@@ -91,7 +99,7 @@ class FilterChooserScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () {
-              filters.clear();
+              widget.filters.clear();
               Navigator.of(context).pop();
             },
             child: const Text('Reset'),
@@ -195,8 +203,8 @@ class _CreatedWithinState extends State<CreatedWithin> {
       } else {
         selectedIndex = 5;
       }
-    } else if (widget.dateRange!.end == DateTime(now.year, now.month - 1, 1) &&
-        widget.dateRange!.start == DateTime(now.year, now.month - 2, 1)) {
+    } else if (widget.dateRange!.end == DateTime(now.year, now.month, 1) &&
+        widget.dateRange!.start == DateTime(now.year, now.month - 1, 1)) {
       selectedIndex = 0;
     } else {
       selectedIndex = 5;
@@ -210,8 +218,8 @@ class _CreatedWithinState extends State<CreatedWithin> {
         onPressed: () {
           setState(() {
             widget.dateRange = DateTimeRange(
-              start: DateTime(now.year, now.month - 2, 1),
-              end: DateTime(now.year, now.month - 1, 1),
+              start: DateTime(now.year, now.month - 1, 1),
+              end: DateTime(now.year, now.month, 1),
             );
           });
           widget.onChange(widget.dateRange);
@@ -364,8 +372,8 @@ class _ResolvedWithinState extends State<ResolvedWithin> {
       } else {
         selectedIndex = 5;
       }
-    } else if (widget.dateRange!.end == DateTime(now.year, now.month - 1, 1) &&
-        widget.dateRange!.start == DateTime(now.year, now.month - 2, 1)) {
+    } else if (widget.dateRange!.end == DateTime(now.year, now.month, 1) &&
+        widget.dateRange!.start == DateTime(now.year, now.month - 1, 1)) {
       selectedIndex = 0;
     } else {
       selectedIndex = 5;
@@ -379,8 +387,8 @@ class _ResolvedWithinState extends State<ResolvedWithin> {
         onPressed: () {
           setState(() {
             widget.dateRange = DateTimeRange(
-              start: DateTime(now.year, now.month - 2, 1),
-              end: DateTime(now.year, now.month - 1, 1),
+              start: DateTime(now.year, now.month - 1, 1),
+              end: DateTime(now.year, now.month, 1),
             );
           });
           widget.onChange(widget.dateRange);

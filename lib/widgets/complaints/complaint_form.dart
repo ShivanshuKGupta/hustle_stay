@@ -41,7 +41,7 @@ class _ComplaintFormState extends State<ComplaintForm> {
     widget.complaint = widget.complaint ??
         ComplaintData(
           from: currentUser.email!,
-          id: "",
+          id: 0,
           title: "",
           to: [],
         );
@@ -50,7 +50,7 @@ class _ComplaintFormState extends State<ComplaintForm> {
 
   Future<void> initialize() async {
     if (!_disposed) setState(() => _userFetchLoading = true);
-    if (widget.complaint != null && widget.complaint!.id.isNotEmpty) {
+    if (widget.complaint != null && widget.complaint!.id != 0) {
       try {
         widget.complaint = await fetchComplaint(widget.complaint!.id);
       } catch (e) {
@@ -89,11 +89,11 @@ class _ComplaintFormState extends State<ComplaintForm> {
               context,
               img,
               "${widget.complaint!.from}/complaint-image",
-              widget.complaint!.id,
+              widget.complaint!.id.toString(),
             )
           : widget.complaint!.imgUrl;
-      if (widget.complaint!.id.isEmpty) {
-        widget.complaint!.id = DateTime.now().millisecondsSinceEpoch.toString();
+      if (widget.complaint!.id == 0) {
+        widget.complaint!.id = DateTime.now().millisecondsSinceEpoch;
       }
       await widget.onSubmit(widget.complaint!);
       if (!_disposed && context.mounted) {
