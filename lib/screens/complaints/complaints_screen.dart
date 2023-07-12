@@ -6,7 +6,6 @@ import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/complaints/edit_complaints_page.dart';
-import 'package:hustle_stay/screens/complaints/resolved_complaints_screen.dart';
 import 'package:hustle_stay/screens/drawers/main_drawer.dart';
 import 'package:hustle_stay/screens/filter_screen/stats_screen.dart';
 import 'package:hustle_stay/tools.dart';
@@ -109,31 +108,9 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
                       : SliverChildBuilderDelegate(
                           (ctx, index) {
                             if (index == 0) {
-                              return Wrap(
-                                alignment: WrapAlignment.center,
-                                children: [
-                                  Text("${complaints.length} pending and"),
-                                  InkWell(
-                                    onTap: () {
-                                      navigatorPush(context,
-                                          const ResolvedComplaintsScreen());
-                                    },
-                                    child: FutureBuilder(
-                                      future: getComplaintsCount(),
-                                      builder: (ctx, snapshot) => Text(
-                                        " ${snapshot.data ?? 0} resolved ",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium!
-                                            .copyWith(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .primary),
-                                      ),
-                                    ),
-                                  ),
-                                  const Text("in the last 30 days"),
-                                ],
+                              return Center(
+                                child: Text(
+                                    "${complaints.length} complaints are pending"),
                               );
                             } else if (index == children.length + 1) {
                               return SizedBox(

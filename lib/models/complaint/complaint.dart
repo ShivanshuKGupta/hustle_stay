@@ -109,9 +109,9 @@ class ComplaintData {
     //     complaintData["resolvedAt"].runtimeType != int) {
     //   updateComplaint(this);
     // }
-    if (complaintData["resolved"] == null) {
-      updateComplaint(this);
-    }
+    // if (complaintData["resolved"] == null) {
+    //   updateComplaint(this);
+    // }
     // --------------
   }
 }
@@ -133,17 +133,6 @@ Future<void> updateComplaint(ComplaintData complaint) async {
 Future<void> deleteComplaint({ComplaintData? complaint, int? id}) async {
   assert(complaint != null || id != null);
   await firestore.doc('complaints/${id ?? complaint!.id}').delete();
-}
-
-/// Counts the number of resolved complaints
-Future<int> getComplaintsCount(
-    {AggregateSource? src, bool resolved = true}) async {
-  return (await firestore
-          .collection('complaints')
-          .where('resolved', isEqualTo: resolved)
-          .count()
-          .get(source: src ?? AggregateSource.server))
-      .count;
 }
 
 /// fetches a complaint of given ID

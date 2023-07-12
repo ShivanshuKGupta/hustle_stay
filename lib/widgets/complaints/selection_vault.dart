@@ -39,17 +39,11 @@ class _SelectionVaultState extends State<SelectionVault> {
             },
           ),
         ),
-        if (widget.chosenItems.isEmpty)
-          OutlinedButton.icon(
-            onPressed: _add,
-            icon: const Icon(Icons.add_rounded),
-            label: Text(widget.helpText ?? ''),
-          )
-        else
-          IconButton(
-            onPressed: _add,
-            icon: const Icon(Icons.add_rounded),
-          ),
+        OutlinedButton.icon(
+          onPressed: _add,
+          icon: const Icon(Icons.add_rounded),
+          label: Text(widget.helpText ?? 'Select an option'),
+        ),
       ],
     );
   }

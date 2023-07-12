@@ -1,4 +1,3 @@
-import 'package:animated_icon/animated_icon.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -119,12 +118,8 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
       ),
       body: ComplaintsBuilder(
         complaintsProvider: _complaintsProvider,
-        src: Source.cache,
-        loadingWidget: AnimateIcon(
-          onTap: () {},
-          iconType: IconType.continueAnimation,
-          animateIcon: AnimateIcons.loading5,
-        ),
+        // src: Source.cache,
+        loadingWidget: Center(child: circularProgressIndicator()),
         builder: (ctx, complaints) {
           List<Widget> children =
               calculateUI(settings.complaintsGrouping, complaints);
