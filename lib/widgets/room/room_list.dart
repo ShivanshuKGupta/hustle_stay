@@ -25,7 +25,6 @@ class _RoomListState extends State<RoomList> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     checkConnectivity();
   }
@@ -40,34 +39,31 @@ class _RoomListState extends State<RoomList> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: widget.selectedDate,
-      builder: (context, value, child) => FutureBuilder(
-        future: fetchRooms(widget.hostelName, value!,
-            src: isConnected ? null : Source.cache),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: circularProgressIndicator(
-                height: null,
-                width: null,
-              ),
-            );
-          }
-          if (!snapshot.hasData) {
-            return Center(
-              child: ErrorWidget(const Text(
-                  'Unable to fetch data. The data could be empty or you might not have the permission to access the data. Contact the developers for more info.')),
-            );
-          }
-          return RoomListWidget(
-              snapshot.data!, widget.hostelName, widget.numberOfRooms);
-        },
-      ),
+    return FutureBuilder(
+      future:
+          fetchRooms(widget.hostelName, src: isConnected ? null : Source.cache),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: circularProgressIndicator(
+              height: null,
+              width: null,
+            ),
+          );
+        }
+        if (!snapshot.hasData) {
+          return Center(
+            child: ErrorWidget(const Text(
+                'Unable to fetch data. The data could be empty or you might not have the permission to access the data. Contact the developers for more info.')),
+          );
+        }
+        return roomListWidget(
+            snapshot.data!, widget.hostelName, widget.numberOfRooms);
+      },
     );
   }
 
-  Widget RoomListWidget(List<Room> room, String hostelName, int numberOfRooms) {
+  Widget roomListWidget(List<Room> room, String hostelName, int numberOfRooms) {
     return RefreshIndicator(
       onRefresh: () async {
         setState(() {});

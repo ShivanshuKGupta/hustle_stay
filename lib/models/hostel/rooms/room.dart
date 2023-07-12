@@ -36,8 +36,7 @@ class Room {
 
 final storage = FirebaseFirestore.instance;
 
-Future<List<Room>> fetchRooms(String hostelName, DateTime date,
-    {Source? src}) async {
+Future<List<Room>> fetchRooms(String hostelName, {Source? src}) async {
   final roomsCollectionRef =
       storage.collection('hostels').doc(hostelName).collection('Rooms');
 
