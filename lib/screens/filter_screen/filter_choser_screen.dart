@@ -29,7 +29,6 @@ class _FilterChooserScreenState extends State<FilterChooserScreen> {
             setState(() {
               widget.filters['resolved'] = resolved;
             });
-            // TODO: when resolved == false remove the resolved filter and show it only if resolved == true
           }),
       if (widget.filters['resolved'] == true)
         ResolvedWithin(
@@ -98,7 +97,6 @@ class _FilterChooserScreenState extends State<FilterChooserScreen> {
           chosenUsers: widget.filters['complainees'] ?? [],
         ),
       ),
-      // TODO: add more filters here
     ];
     return Scaffold(
       appBar: AppBar(
@@ -641,6 +639,7 @@ class _ResolvedChooseState extends State<ResolvedChoose> {
   }
 }
 
+// ignore: must_be_immutable
 class ComplainantChooser extends StatefulWidget {
   final void Function(List<String> chosenUsers) onChange;
   final List<String> allUsers;
@@ -668,7 +667,6 @@ class _ComplainantChooserState extends State<ComplainantChooser> {
         const SizedBox(height: 8),
         const _Title('Complainants'),
         const SizedBox(height: 8),
-        // TODO: add hostel names here like a list
         SelectionVault(
           helpText: 'Add a Complainant',
           onChange: widget.onChange,
@@ -685,6 +683,8 @@ class _ComplainantChooserState extends State<ComplainantChooser> {
               itemBuilder: (ctx, index) => OutlinedButton.icon(
                 icon: const Icon(Icons.add_rounded),
                 label: Text(keys[index]),
+                style: OutlinedButton.styleFrom(
+                    foregroundColor: Theme.of(context).dividerColor),
                 onPressed: () {
                   setState(() {
                     widget.chosenUsers.addAll(widget.hostels[keys[index]]!);

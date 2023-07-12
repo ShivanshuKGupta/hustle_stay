@@ -1,6 +1,6 @@
-// ignore: must_be_immutable
 import 'package:flutter/material.dart';
 
+// ignore: must_be_immutable
 class SelectionVault extends StatefulWidget {
   final List<String> allItems;
   final String? helpText;
