@@ -61,7 +61,7 @@ class _ComplaintFormState extends State<ComplaintForm> {
         }
       }
     }
-    recepients = await fetchComplainees();
+    recepients = (await fetchComplainees()).map((e) => e.email!).toList();
     if (!_disposed) setState(() => _userFetchLoading = false);
   }
 

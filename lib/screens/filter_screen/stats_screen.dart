@@ -218,7 +218,6 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
     final docs =
         (await collection.get(src == null ? null : GetOptions(source: src)))
             .docs;
-    print(docs);
     return [
       for (final doc in docs) ComplaintData.load(int.parse(doc.id), doc.data())
     ];

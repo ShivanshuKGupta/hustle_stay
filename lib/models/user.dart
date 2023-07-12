@@ -192,6 +192,7 @@ Future<UserData> fetchUserData(
   return userData;
 }
 
+/// this fetches all properties
 Future<List<UserData>> fetchUsers(List<String>? emails, {Source? src}) async {
   if (emails != null) {
     return [for (final email in emails) await fetchUserData(email, src: src)];
@@ -205,22 +206,28 @@ Future<List<UserData>> fetchUsers(List<String>? emails, {Source? src}) async {
   ];
 }
 
-Future<List<String>> fetchAllUserEmails({Source? src}) async {
-  return (await firestore.collection('users').get(
+/// This only fetches readonly properties
+Future<List<UserData>> fetchAllUserEmails({Source? src}) async {
+  final docs = (await firestore.collection('users').get(
             src == null ? null : GetOptions(source: src),
           ))
-      .docs
-      .map((doc) => doc.id)
-      .toList();
+      .docs;
+  return docs.map((doc) {
+    print(doc.data());
+    return UserData(email: doc.id)..readonly.load(doc.data());
+  }).toList();
 }
 
-Future<List<String>> fetchComplainees({Source? src}) async {
+/// This only fetches readonly properties
+Future<List<UserData>> fetchComplainees({Source? src}) async {
   final querySnapshot =
       await firestore.collection('users').where('type', whereIn: [
     'attender',
     'warden',
   ]).get(src == null ? null : GetOptions(source: src));
-  return querySnapshot.docs.map((e) => e.id).toList();
+  return querySnapshot.docs
+      .map((e) => UserData(email: e.id)..readonly.load(e.data()))
+      .toList();
 }
 
 Future<void> updateUserData(UserData userData) async {
@@ -315,8 +322,8 @@ class UserBuilder extends StatelessWidget {
 /// This will change according to the userData
 // ignore: must_be_immutable
 class UsersBuilder extends StatelessWidget {
-  final Widget Function(BuildContext ctx, List<String> emails) builder;
-  final Future<List<String>> Function({Source? src})? provider;
+  final Widget Function(BuildContext ctx, List<UserData> users) builder;
+  final Future<List<UserData>> Function({Source? src})? provider;
   final Source? src;
   final Widget? loadingWidget;
   const UsersBuilder({
@@ -365,7 +372,7 @@ class UsersBuilder extends StatelessWidget {
 /// This will change according to the userData
 // ignore: must_be_immutable
 class ComplaineeBuilder extends StatelessWidget {
-  final Widget Function(BuildContext ctx, List<String> complainees) builder;
+  final Widget Function(BuildContext ctx, List<UserData> complainees) builder;
   final Widget? loadingWidget;
   ComplaineeBuilder({
     super.key,

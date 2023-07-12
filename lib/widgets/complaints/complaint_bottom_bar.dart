@@ -70,7 +70,7 @@ class ComplaintBottomBar extends ConsumerWidget {
   Future<void> showIncludeBox() async {
     List<String> allUsers = [];
     try {
-      allUsers = await fetchComplainees();
+      allUsers = (await fetchComplainees()).map((e) => e.email!).toList();
     } catch (e) {
       showMsg(context, e.toString());
     }

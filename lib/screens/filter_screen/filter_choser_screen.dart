@@ -65,13 +65,21 @@ class _FilterChooserScreenState extends State<FilterChooserScreen> {
             child: circularProgressIndicator(),
           ),
         ),
-        builder: (ctx, users) => ComplainantChooser(
-          allUsers: users,
-          onChange: (users) {
-            widget.filters['complainants'] = users;
-          },
-          chosenUsers: widget.filters['complainants'] ?? [],
-        ),
+        builder: (ctx, users) {
+          final Map<String, Set<String>> hostels = {};
+          users.where((element) => element.readonly.hostelName != null).forEach(
+              (e) => hostels[e.readonly.hostelName!] =
+                  (hostels[e.readonly.hostelName!] ?? {})..add(e.email!));
+
+          return ComplainantChooser(
+            hostels: hostels,
+            allUsers: users.map((e) => e.email!).toList(),
+            onChange: (users) {
+              widget.filters['complainants'] = users;
+            },
+            chosenUsers: widget.filters['complainants'] ?? [],
+          );
+        },
       ),
       UsersBuilder(
         provider: fetchComplainees,
@@ -83,7 +91,7 @@ class _FilterChooserScreenState extends State<FilterChooserScreen> {
           ),
         ),
         builder: (ctx, users) => ComplaineeChooser(
-          allUsers: users,
+          allUsers: users.map((e) => e.email!).toList(),
           onChange: (users) {
             widget.filters['complainees'] = users;
           },
@@ -108,6 +116,7 @@ class _FilterChooserScreenState extends State<FilterChooserScreen> {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
+          /// Updating all cached information
           await fetchAllUserEmails();
           await fetchAllCategories();
           await fetchComplainees();
@@ -647,31 +656,60 @@ class _ResolvedChooseState extends State<ResolvedChoose> {
   }
 }
 
-class ComplainantChooser extends StatelessWidget {
+class ComplainantChooser extends StatefulWidget {
   final void Function(List<String> chosenUsers) onChange;
   final List<String> allUsers;
-  final List<String> chosenUsers;
-  const ComplainantChooser({
+  List<String> chosenUsers;
+  final Map<String, Set<String>> hostels;
+  ComplainantChooser({
     super.key,
     required this.onChange,
     required this.allUsers,
     required this.chosenUsers,
+    this.hostels = const {},
   });
 
   @override
+  State<ComplainantChooser> createState() => _ComplainantChooserState();
+}
+
+class _ComplainantChooserState extends State<ComplainantChooser> {
+  @override
   Widget build(BuildContext context) {
+    final keys = widget.hostels.keys.toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 8),
         const _Title('Complainants'),
         const SizedBox(height: 8),
+        // TODO: add hostel names here like a list
         SelectionVault(
           helpText: 'Add a Complainant',
-          onChange: onChange,
-          allItems: allUsers,
-          chosenItems: chosenUsers,
+          onChange: widget.onChange,
+          allItems: widget.allUsers,
+          chosenItems: widget.chosenUsers,
         ),
+        if (widget.hostels.isNotEmpty) const SizedBox(height: 8),
+        if (widget.hostels.isNotEmpty)
+          SizedBox(
+            height: 40,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              separatorBuilder: (ctx, index) => const SizedBox(width: 5),
+              itemBuilder: (ctx, index) => OutlinedButton.icon(
+                icon: const Icon(Icons.add_rounded),
+                label: Text(keys[index]),
+                onPressed: () {
+                  setState(() {
+                    widget.chosenUsers.addAll(widget.hostels[keys[index]]!);
+                    widget.chosenUsers = widget.chosenUsers.toSet().toList();
+                  });
+                },
+              ),
+              itemCount: widget.hostels.length,
+            ),
+          ),
       ],
     );
   }
