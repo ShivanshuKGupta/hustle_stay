@@ -162,7 +162,8 @@ class _OutlinedButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return OutlinedButton(
+    return OutlinedButton.icon(
+      icon: isSelected ? const Icon(Icons.done_rounded) : Container(),
       style: isSelected
           ? OutlinedButton.styleFrom(
               foregroundColor: theme.colorScheme.onPrimary,
@@ -171,7 +172,7 @@ class _OutlinedButton extends StatelessWidget {
             )
           : null,
       onPressed: onPressed,
-      child: Text(label),
+      label: Text(label),
     );
   }
 }
@@ -531,34 +532,26 @@ class _ScopeChooserState extends State<ScopeChooser> {
     final items = [
       _OutlinedButton(
         label: 'Private',
-        isSelected: widget.scope == Scope.private,
+        isSelected: widget.scope == Scope.private || widget.scope == null,
         onPressed: () {
           setState(() {
-            widget.scope = Scope.private;
+            if (widget.scope == Scope.private) widget.scope = null;
+            widget.scope = widget.scope == Scope.public ? null : Scope.public;
           });
           widget.onChange(widget.scope);
         },
       ),
       _OutlinedButton(
         label: 'Public',
-        isSelected: widget.scope == Scope.public,
+        isSelected: widget.scope == Scope.public || widget.scope == null,
         onPressed: () {
           setState(() {
-            widget.scope = Scope.public;
+            if (widget.scope == Scope.public) widget.scope = null;
+            widget.scope = widget.scope == Scope.private ? null : Scope.private;
           });
           widget.onChange(widget.scope);
         },
-      ),
-      _OutlinedButton(
-        label: 'Any',
-        isSelected: widget.scope == null,
-        onPressed: () {
-          setState(() {
-            widget.scope = null;
-          });
-          widget.onChange(widget.scope);
-        },
-      ),
+      )
     ];
 
     final children = [
@@ -602,30 +595,22 @@ class _ResolvedChooseState extends State<ResolvedChoose> {
     final items = [
       _OutlinedButton(
         label: 'Resolved',
-        isSelected: widget.resolved == true,
+        isSelected: widget.resolved == true || widget.resolved == null,
         onPressed: () {
           setState(() {
-            widget.resolved = true;
+            if (widget.resolved == true) widget.resolved = null;
+            widget.resolved = widget.resolved == false ? null : false;
           });
           widget.onChange(widget.resolved);
         },
       ),
       _OutlinedButton(
         label: 'Pending',
-        isSelected: widget.resolved == false,
+        isSelected: widget.resolved == false || widget.resolved == null,
         onPressed: () {
           setState(() {
-            widget.resolved = false;
-          });
-          widget.onChange(widget.resolved);
-        },
-      ),
-      _OutlinedButton(
-        label: 'Any',
-        isSelected: widget.resolved == null,
-        onPressed: () {
-          setState(() {
-            widget.resolved = null;
+            if (widget.resolved == false) widget.resolved = null;
+            widget.resolved = widget.resolved == true ? null : true;
           });
           widget.onChange(widget.resolved);
         },

@@ -1,6 +1,5 @@
 // ignore: must_be_immutable
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/tools.dart';
 
 class SelectionVault extends StatefulWidget {
   final List<String> allItems;
@@ -30,9 +29,6 @@ class _SelectionVaultState extends State<SelectionVault> {
         ...widget.chosenItems.map(
           (e) => _VaultTile(
             value: e,
-            onTap: (value) {
-              askUser(context, e.toString());
-            },
             onRemove: (value) {
               setState(() {
                 widget.chosenItems.remove(value);
@@ -103,18 +99,19 @@ class _SelectionVaultState extends State<SelectionVault> {
 
 class _VaultTile<String> extends StatelessWidget {
   final String value;
-  final void Function(String value) onTap, onRemove;
+  final void Function(String value)? onTap;
+  final void Function(String value) onRemove;
   const _VaultTile({
     super.key,
     required this.value,
-    required this.onTap,
+    this.onTap,
     required this.onRemove,
   });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => onTap(value),
+      onTap: () => (onTap ?? onRemove)(value),
       borderRadius: BorderRadius.circular(30),
       child: Container(
         decoration: BoxDecoration(
