@@ -50,6 +50,7 @@ class _SelectionVaultState extends State<SelectionVault> {
           ),
           margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
           child: DropdownButton(
+              key: UniqueKey(),
               iconSize: 24,
               style: Theme.of(context).textTheme.bodyMedium,
               isDense: true,
@@ -81,12 +82,13 @@ class _SelectionVaultState extends State<SelectionVault> {
         ),
         if (widget.allItems.isNotEmpty)
           TextButton(
+            key: UniqueKey(),
             onPressed: () {
               setState(() {
                 if (widget.chosenItems.length == widget.allItems.length) {
                   widget.chosenItems = [];
                 } else {
-                  widget.chosenItems = widget.allItems;
+                  widget.chosenItems = widget.allItems.map((e) => e).toList();
                 }
               });
               widget.onChange(widget.chosenItems);
