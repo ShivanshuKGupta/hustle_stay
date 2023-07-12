@@ -667,7 +667,7 @@ class ComplainantChooser extends StatelessWidget {
         const _Title('Complainants'),
         const SizedBox(height: 8),
         SelectionVault(
-          helpText: 'Select a Complainant',
+          helpText: 'Add a Complainant',
           onChange: onChange,
           allItems: allUsers,
           chosenItems: chosenUsers,
@@ -697,7 +697,7 @@ class ComplaineeChooser extends StatelessWidget {
         const _Title('Complainees'),
         const SizedBox(height: 8),
         SelectionVault(
-          helpText: 'Select a Complainee',
+          helpText: 'Add a Complainee',
           onChange: onChange,
           allItems: allUsers,
           chosenItems: chosenUsers,
@@ -727,7 +727,7 @@ class CategoryChooser extends StatelessWidget {
         const _Title('Categories'),
         const SizedBox(height: 8),
         SelectionVault(
-          helpText: 'Select a Category',
+          helpText: 'Add a Category',
           onChange: onChange,
           allItems: allCategories,
           chosenItems: chosenCategories,

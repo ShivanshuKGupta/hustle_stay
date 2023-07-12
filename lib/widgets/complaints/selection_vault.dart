@@ -20,6 +20,8 @@ class SelectionVault extends StatefulWidget {
 }
 
 class _SelectionVaultState extends State<SelectionVault> {
+  final _textEditingController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Wrap(
@@ -39,60 +41,61 @@ class _SelectionVaultState extends State<SelectionVault> {
             },
           ),
         ),
-        OutlinedButton.icon(
-          onPressed: _add,
-          icon: const Icon(Icons.add_rounded),
-          label: Text(widget.helpText ?? 'Select an option'),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30),
+            border: Border.fromBorderSide(
+              BorderSide(color: Theme.of(context).dividerColor),
+            ),
+          ),
+          margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+          child: DropdownButton(
+              iconSize: 24,
+              style: Theme.of(context).textTheme.bodyMedium,
+              isDense: true,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              borderRadius: BorderRadius.circular(20),
+              disabledHint: const Text('No options available'),
+              hint: Text(widget.helpText ?? "Choose an option"),
+              icon: const Icon(Icons.add_rounded),
+              underline: Container(),
+              items: widget.allItems
+                  .where((element) => !widget.chosenItems.contains(element))
+                  .map(
+                    (e) => DropdownMenuItem(
+                      value: e,
+                      child: Text(e.toString()),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() {
+                    if (widget.chosenItems.isEmpty) widget.chosenItems = [];
+                    widget.chosenItems.add(value);
+                  });
+                  _textEditingController.clear();
+                  widget.onChange(widget.chosenItems);
+                }
+              }),
         ),
+        if (widget.allItems.isNotEmpty)
+          TextButton(
+            onPressed: () {
+              setState(() {
+                if (widget.chosenItems.length == widget.allItems.length) {
+                  widget.chosenItems = [];
+                } else {
+                  widget.chosenItems = widget.allItems;
+                }
+              });
+              widget.onChange(widget.chosenItems);
+            },
+            child: Text(
+                '${widget.chosenItems.length == widget.allItems.length ? 'Deselect' : 'Select'} all'),
+          ),
       ],
     );
-  }
-
-  void _add() async {
-    final String? value = await showDialog(
-      context: context,
-      builder: (ctx) => Dialog(
-        alignment: Alignment.topCenter,
-        insetPadding: const EdgeInsets.all(8),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                widget.helpText ?? '',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              DropdownMenu(
-                menuHeight: 500,
-                width: MediaQuery.of(context).size.width - 100,
-                enabled: widget.allItems.isNotEmpty,
-                enableSearch: true,
-                enableFilter: true,
-                onSelected: (value) {
-                  Navigator.of(context).pop(value);
-                },
-                dropdownMenuEntries: widget.allItems
-                    .where((element) => !widget.chosenItems.contains(element))
-                    .map(
-                      (e) => DropdownMenuEntry(
-                        value: e,
-                        label: e.toString(),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-    if (value == null) return;
-    setState(() {
-      if (widget.chosenItems.isEmpty) widget.chosenItems = [];
-      widget.chosenItems.add(value);
-    });
-    widget.onChange(widget.chosenItems);
   }
 }
 
@@ -118,7 +121,7 @@ class _VaultTile<String> extends StatelessWidget {
             color: Theme.of(context).colorScheme.outline,
           ),
         ),
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.only(left: 10),
         margin: const EdgeInsets.all(2),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -133,7 +136,10 @@ class _VaultTile<String> extends StatelessWidget {
             InkWell(
               onTap: () => onRemove(value),
               borderRadius: BorderRadius.circular(30),
-              child: const Icon(Icons.close_rounded, size: 20),
+              child: const CircleAvatar(
+                  backgroundColor: Colors.transparent,
+                  radius: 20,
+                  child: Icon(Icons.close_rounded, size: 20)),
             ),
           ],
         ),
