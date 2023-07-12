@@ -15,10 +15,10 @@ class ComplaintData {
   late String from;
 
   /// createdAt dateTime object converted into a string or integer
-  late String id;
+  late int id;
 
   /// resolvedAt dateTime object converted into a string or integer
-  String? resolvedAt;
+  int? resolvedAt;
   late Scope scope;
   late String title;
   late List<String> to;
@@ -44,9 +44,11 @@ class ComplaintData {
       "scope": scope.name,
       "title": title,
       "to": to,
+      "resolved": resolvedAt != null,
       "resolvedAt": resolvedAt,
       "imgUrl": imgUrl,
       "category": category,
+      "createdAt": id,
     };
   }
 
@@ -92,12 +94,25 @@ class ComplaintData {
     scope = Scope.values
         .firstWhere((element) => element.name == complaintData["scope"]);
     title = complaintData["title"];
-    resolvedAt = complaintData["resolved"];
+    resolvedAt = complaintData["resolvedAt"];
     imgUrl = complaintData["imgUrl"];
     category = complaintData["category"];
     to = (complaintData["to"] as List<dynamic>)
         .map((e) => e.toString())
         .toList();
+    // Below code was used to correct the data in the db and is no longer needed
+    // if (complaintData['createdAt'] == null ||
+    //     complaintData['createdAt'].runtimeType != int) {
+    //   updateComplaint(this);
+    // }
+    // if (complaintData["resolvedAt"] != null &&
+    //     complaintData["resolvedAt"].runtimeType != int) {
+    //   updateComplaint(this);
+    // }
+    // if (complaintData["resolved"] == null) {
+    //   updateComplaint(this);
+    // }
+    // --------------
   }
 }
 
@@ -115,13 +130,13 @@ Future<void> updateComplaint(ComplaintData complaint) async {
 }
 
 /// updates an exisiting complaint or will create if complaint does not exists
-Future<void> deleteComplaint({ComplaintData? complaint, String? id}) async {
+Future<void> deleteComplaint({ComplaintData? complaint, int? id}) async {
   assert(complaint != null || id != null);
   await firestore.doc('complaints/${id ?? complaint!.id}').delete();
 }
 
 /// fetches a complaint of given ID
-Future<ComplaintData> fetchComplaint(String id) async {
+Future<ComplaintData> fetchComplaint(int id) async {
   final response = await firestore.doc('complaints/$id').get();
   if (!response.exists) throw "Complaint Doesn't exists";
   final data = response.data();
@@ -136,31 +151,32 @@ Future<List<ComplaintData>> fetchComplaints(
   final publicComplaints = await firestore
       .collection('complaints')
       .where('scope', isEqualTo: 'public')
-      .where('resolvedAt', isNull: !resolved)
+      .where('resolved', isEqualTo: resolved)
       .get(src != null ? GetOptions(source: src) : null);
   List<ComplaintData> ans = publicComplaints.docs
-      .map((e) => ComplaintData.load(e.id, e.data()))
+      .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
       .toList();
   // Fetching Private Complaints made by the user itself
   final myComplaints = await firestore
       .collection('complaints')
       .where('from', isEqualTo: currentUser.email)
       .where('scope', isEqualTo: 'private')
-      .where('resolvedAt', isNull: !resolved)
+      .where('resolved', isEqualTo: resolved)
       .get(src != null ? GetOptions(source: src) : null);
-  ans +=
-      myComplaints.docs.map((e) => ComplaintData.load(e.id, e.data())).toList();
+  ans += myComplaints.docs
+      .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
+      .toList();
   // Fetching all complaints in which the user is included
   final includedComplaints = await firestore
       .collection('complaints')
       .where('to', arrayContains: currentUser.email)
       .where('scope', isEqualTo: 'private')
-      .where('resolvedAt', isNull: !resolved)
+      .where('resolved', isEqualTo: resolved)
       .get(src != null ? GetOptions(source: src) : null);
   ans += includedComplaints.docs
-      .map((e) => ComplaintData.load(e.id, e.data()))
+      .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
       .toList();
-  ans.sort((a, b) => (int.parse(a.id) < int.parse(b.id)) ? 1 : 0);
+  ans.sort((a, b) => (a.id < b.id) ? 1 : 0);
   return ans;
 }
 
@@ -168,10 +184,12 @@ Future<List<ComplaintData>> fetchComplaints(
 class ComplaintsBuilder extends ConsumerWidget {
   final Widget Function(BuildContext ctx, List<ComplaintData> complaints)
       builder;
+  final Future<List<ComplaintData>> Function({Source? src})? complaintsProvider;
   final Source? src;
   final Widget? loadingWidget;
   const ComplaintsBuilder({
     super.key,
+    this.complaintsProvider,
     required this.builder,
     this.loadingWidget,
     this.src,
@@ -184,8 +202,13 @@ class ComplaintsBuilder extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     ref.watch(complaintBuilderSwitch);
     return FutureBuilder(
-      future: fetchComplaints(src: src),
+      future: complaintsProvider != null
+          ? complaintsProvider!(src: src)
+          : fetchComplaints(src: src),
       builder: (ctx, snapshot) {
+        if (snapshot.hasError) {
+          throw snapshot.error.toString();
+        }
         if (!snapshot.hasData) {
           if (src == Source.cache) {
             return complaints.isEmpty && loadingWidget != null
@@ -193,7 +216,9 @@ class ComplaintsBuilder extends ConsumerWidget {
                 : builder(context, complaints);
           }
           return FutureBuilder(
-            future: fetchComplaints(src: Source.cache),
+            future: complaintsProvider != null
+                ? complaintsProvider!(src: src)
+                : fetchComplaints(src: Source.cache),
             builder: (ctx, snapshot) {
               if (!snapshot.hasData) {
                 // Returning this Widget when nothing has arrived

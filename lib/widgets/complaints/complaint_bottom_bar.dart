@@ -6,7 +6,7 @@ import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/state_switch.dart';
 import 'package:hustle_stay/tools.dart';
-import 'package:hustle_stay/widgets/chat/choose_users.dart.dart';
+import 'package:hustle_stay/widgets/chat/multi_choser.dart';
 
 // ignore: must_be_immutable
 class ComplaintBottomBar extends ConsumerWidget {
@@ -70,7 +70,7 @@ class ComplaintBottomBar extends ConsumerWidget {
   Future<void> showIncludeBox() async {
     List<String> allUsers = [];
     try {
-      allUsers = await fetchComplainees();
+      allUsers = (await fetchComplainees()).map((e) => e.email!).toList();
     } catch (e) {
       showMsg(context, e.toString());
     }
@@ -85,9 +85,11 @@ class ComplaintBottomBar extends ConsumerWidget {
               insetPadding: EdgeInsets.zero,
               contentPadding: const EdgeInsets.only(top: 20),
               actionsAlignment: MainAxisAlignment.center,
-              content: ChooseUsers(
-                allUsers: allUsers,
-                chosenUsers: chosenUsers,
+              content: MultiChooser(
+                hintTxt: "Select a receipient",
+                label: 'Complainees',
+                allOptions: allUsers,
+                chosenOptions: chosenUsers,
                 onUpdate: (newUsers) {
                   chosenUsers = newUsers;
                 },
@@ -182,7 +184,7 @@ class ComplaintBottomBar extends ConsumerWidget {
       no: true,
     );
     if (response == 'yes') {
-      complaint.resolvedAt = DateTime.now().millisecondsSinceEpoch.toString();
+      complaint.resolvedAt = DateTime.now().millisecondsSinceEpoch;
       updateComplaint(complaint);
       await addMessage(
         ChatData(

@@ -158,8 +158,10 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
   }
 
   void _showInfo() {
-    final createdAt =
-        DateTime.fromMillisecondsSinceEpoch(int.parse(widget.complaint.id));
+    final createdAt = DateTime.fromMillisecondsSinceEpoch(widget.complaint.id);
+    final DateTime? resolvedAt = widget.complaint.resolvedAt == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(widget.complaint.resolvedAt!);
     Navigator.of(context).push(
       DialogRoute(
         context: context,
@@ -236,12 +238,12 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
                 ),
                 Text(widget.complaint.category ?? 'other'),
                 const Divider(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
                   children: [
                     Text(
                       "Created At: ",
-                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                             color: Theme.of(context).colorScheme.primary,
                           ),
                     ),
@@ -251,6 +253,22 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
                     ),
                   ],
                 ),
+                if (widget.complaint.resolvedAt != null)
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Resolved At: ",
+                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                      ),
+                      Text(
+                        "${ddmmyyyy(resolvedAt!)} ${timeFrom(resolvedAt)}",
+                        textAlign: TextAlign.right,
+                      ),
+                    ],
+                  ),
               ],
             ),
           );

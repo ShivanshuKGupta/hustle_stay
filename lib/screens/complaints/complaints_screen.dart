@@ -6,8 +6,8 @@ import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/complaints/edit_complaints_page.dart';
-import 'package:hustle_stay/screens/complaints/resolved_complaints_screen.dart';
 import 'package:hustle_stay/screens/drawers/main_drawer.dart';
+import 'package:hustle_stay/screens/filter_screen/stats_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/chat/complaint_template_message.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_category_widget.dart';
@@ -39,11 +39,17 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
         ),
         actions: [
           IconButton(
+            onPressed: () => navigatorPush(context, const StatisticsPage()),
+            icon: const Icon(Icons.donut_large_rounded),
+          ),
+          IconButton(
+            onPressed: _showSortDialog,
+            icon: const Icon(Icons.compare_arrows_rounded),
+          ),
+          IconButton(
             onPressed: _addComplaint,
             icon: const Icon(Icons.add_rounded),
           ),
-          IconButton(
-              onPressed: _showSortDialog, icon: const Icon(Icons.sort_rounded))
         ],
       );
 
@@ -53,6 +59,7 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
     final mediaQuery = MediaQuery.of(context);
     final appBar = sliverAppBar;
     return Scaffold(
+      backgroundColor: Colors.transparent,
       drawer: const MainDrawer(),
       body: ComplaintsBuilder(
         src: src,
@@ -101,28 +108,9 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
                       : SliverChildBuilderDelegate(
                           (ctx, index) {
                             if (index == 0) {
-                              return Wrap(
-                                alignment: WrapAlignment.center,
-                                children: [
-                                  Text("${complaints.length} pending and"),
-                                  InkWell(
-                                    onTap: () {
-                                      navigatorPush(context,
-                                          const ResolvedComplaintsScreen());
-                                    },
-                                    child: Text(
-                                      " 23 resolved ",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium!
-                                          .copyWith(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary),
-                                    ),
-                                  ),
-                                  const Text("in the last 30 days"),
-                                ],
+                              return Center(
+                                child: Text(
+                                    "${complaints.length} complaints are pending"),
                               );
                             } else if (index == children.length + 1) {
                               return SizedBox(

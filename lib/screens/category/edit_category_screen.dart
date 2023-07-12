@@ -22,7 +22,7 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
       body: ComplaineeBuilder(
         loadingWidget: Center(child: circularProgressIndicator()),
         builder: (ctx, complainees) {
-          final recepients = complainees;
+          final recepients = complainees.map((e) => e.email!).toList();
           return widget.id != null
               ? CategoryBuilder(
                   loadingWidget: Center(child: circularProgressIndicator()),
