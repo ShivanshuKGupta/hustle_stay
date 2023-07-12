@@ -70,9 +70,15 @@ class _FilterChooserScreenState extends State<FilterChooserScreen> {
               (e) => hostels[e.readonly.hostelName!] =
                   (hostels[e.readonly.hostelName!] ?? {})..add(e.email!));
 
+          final students = users
+              .where((element) => element.readonly.type == 'student')
+              .map((e) => e.email!)
+              .toList();
+          students.add('code_soc@students.iiitr.ac.in');
+
           return ComplainantChooser(
             hostels: hostels,
-            allUsers: users.map((e) => e.email!).toList(),
+            allUsers: students,
             onChange: (users) {
               widget.filters['complainants'] = users;
             },
