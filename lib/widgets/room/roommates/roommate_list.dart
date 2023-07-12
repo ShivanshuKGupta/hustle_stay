@@ -24,73 +24,28 @@ class _RoommateWidgetState extends State<RoommateWidget> {
     return FutureBuilder(
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return FutureBuilder(
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: double.infinity,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            AnimateIcon(
-                              onTap: () {},
-                              iconType: IconType.continueAnimation,
-                              animateIcon: AnimateIcons.loading1,
-                              color: Theme.of(context).colorScheme.secondary,
-                            ),
-                            const Text('Loading...')
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-                  if (!snapshot.hasData && snapshot.error != null) {
-                    return Center(
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: double.infinity,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            AnimateIcon(
-                              onTap: () {},
-                              iconType: IconType.continueAnimation,
-                              animateIcon: AnimateIcons.error,
-                              color: Theme.of(context).colorScheme.secondary,
-                            ),
-                            const Text('No data available')
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-                  return roommateListWidget(snapshot.data!);
-                },
-                future: fetchRoommates(
-                    widget.hostelName, widget.roomData.roomName));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  AnimateIcon(
+                    onTap: () {},
+                    iconType: IconType.continueAnimation,
+                    animateIcon: AnimateIcons.loading1,
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                ],
+              ),
+            );
           }
           if (!snapshot.hasData && snapshot.error != null) {
             return Center(
-              child: SizedBox(
-                width: double.infinity,
-                height: double.infinity,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    AnimateIcon(
-                      onTap: () {},
-                      iconType: IconType.continueAnimation,
-                      animateIcon: AnimateIcons.error,
-                      color: Theme.of(context).colorScheme.secondary,
-                    ),
-                    const Text('No data available')
-                  ],
-                ),
+              child: AnimateIcon(
+                onTap: () {},
+                iconType: IconType.continueAnimation,
+                animateIcon: AnimateIcons.error,
+                color: Theme.of(context).colorScheme.secondary,
               ),
             );
           }

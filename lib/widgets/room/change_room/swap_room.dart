@@ -4,7 +4,7 @@ import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import '../../../tools.dart';
 
 class SwapRoom extends StatefulWidget {
-  SwapRoom(
+  const SwapRoom(
       {super.key,
       required this.destRoomName,
       required this.isSwap,
@@ -13,13 +13,13 @@ class SwapRoom extends StatefulWidget {
       required this.roomName,
       required this.hostelName,
       required this.destRoommateEmail});
-  String destHostelName;
-  String destRoomName;
-  String email;
-  String roomName;
-  String hostelName;
-  bool isSwap;
-  String destRoommateEmail;
+  final String destHostelName;
+  final String destRoomName;
+  final String email;
+  final String roomName;
+  final String hostelName;
+  final bool isSwap;
+  final String destRoommateEmail;
 
   @override
   State<SwapRoom> createState() => _SwapRoomState();
@@ -35,7 +35,7 @@ class _SwapRoomState extends State<SwapRoom> {
         widget.destHostelName,
         widget.destRoomName,
         context);
-    if (!resp) {
+    if (!resp && mounted) {
       setState(() {
         isRunning = false;
       });

@@ -19,7 +19,10 @@ class FilterStudents extends StatefulWidget {
 }
 
 class _FilterStudentsState extends State<FilterStudents> {
+  
   ValueNotifier<List<RoommateInfo>>? list = ValueNotifier([]);
+
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(

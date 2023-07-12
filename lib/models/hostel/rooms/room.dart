@@ -326,22 +326,24 @@ Future<bool> swapRoom(
           return false;
         }
       }
-
+      print('reached');
       final sData = await transaction.get(sourceRef);
 
       final dData = await transaction.get(destRef);
 
       final sourceData = sData.data();
       final destData = dData.data();
-
-      transaction.set(destLoc.doc(email), sourceData!, SetOptions(merge: true));
+      sourceData!.update('roomName', (value) => destRoomName);
+      destData!.update('roomName', (value) => roomName);
+      transaction.set(destLoc.doc(email), sourceData, SetOptions(merge: true));
       transaction.set(
-          sourceLoc.doc(destRoommateEmail), destData!, SetOptions(merge: true));
+          sourceLoc.doc(destRoommateEmail), destData, SetOptions(merge: true));
 
       await copyRoommateAttendance(
           email, hostelName, roomName, destHostelName, destRoomName);
       await copyRoommateAttendance(destRoommateEmail, destHostelName,
           destRoomName, hostelName, roomName);
+      print('done');
       transaction.set(
           storage.collection('users').doc(email),
           {'roomName': destRoomName, 'hostelName': destHostelName},
@@ -353,9 +355,10 @@ Future<bool> swapRoom(
       transaction.delete(sourceRef);
       transaction.delete(destRef);
     });
-
+    print('hi');
     return true;
   } catch (e) {
+    print('bye');
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(e.toString())));
