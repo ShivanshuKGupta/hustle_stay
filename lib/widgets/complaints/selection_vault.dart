@@ -10,7 +10,7 @@ class SelectionVault extends StatefulWidget {
     super.key,
     required this.allItems,
     required this.onChange,
-    this.chosenItems = const [],
+    required this.chosenItems,
     this.helpText,
   });
 
@@ -82,7 +82,7 @@ class _SelectionVaultState extends State<SelectionVault> {
             onPressed: () {
               setState(() {
                 if (widget.chosenItems.length == widget.allItems.length) {
-                  widget.chosenItems = [];
+                  widget.chosenItems.clear();
                 } else {
                   widget.chosenItems = widget.allItems.map((e) => e).toList();
                 }
