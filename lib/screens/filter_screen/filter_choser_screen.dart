@@ -80,7 +80,7 @@ class _FilterChooserScreenState extends State<FilterChooserScreen> {
             hostels: hostels,
             allUsers: students,
             onChange: (users) {
-              widget.filters['complainants'] = users;
+              widget.filters['complainants'] = users.map((e) => e).toList();
             },
             chosenUsers: widget.filters['complainants'] ?? [],
           );
@@ -675,7 +675,10 @@ class _ComplainantChooserState extends State<ComplainantChooser> {
         const SizedBox(height: 8),
         SelectionVault(
           helpText: 'Add a Complainant',
-          onChange: widget.onChange,
+          onChange: (users) {
+            widget.chosenUsers = users;
+            widget.onChange(users);
+          },
           allItems: widget.allUsers,
           chosenItems: widget.chosenUsers,
         ),

@@ -3,12 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
-import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/filter_screen/filter_choser_screen.dart';
+import 'package:hustle_stay/screens/filter_screen/stats.dart';
 import 'package:hustle_stay/tools.dart';
-import 'package:hustle_stay/widgets/complaints/complaint_category_widget.dart';
-import 'package:hustle_stay/widgets/complaints/complaint_list_item.dart';
-import 'package:hustle_stay/widgets/settings/section.dart';
+import 'package:hustle_stay/widgets/complaints/complaints_list_view.dart';
 
 // ignore: must_be_immutable
 class StatisticsPage extends ConsumerStatefulWidget {
@@ -28,66 +26,8 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
     filters = {};
   }
 
-  List<Widget> calculateUI(String groupBy, List<ComplaintData> complaints) {
-    if (groupBy != 'none') {
-      Map<String, List<ComplaintData>> categoriesMap = {};
-      for (var element in complaints) {
-        String category = "";
-        if (groupBy == 'category') {
-          category = element.category ?? "Other";
-        } else if (groupBy == 'scope') {
-          category = element.scope.name;
-        } else if (groupBy == 'complainant') {
-          category = element.from;
-        } else {
-          throw "No matching groupBy field found";
-        }
-        if (categoriesMap.containsKey(category)) {
-          categoriesMap[category]!.add(element);
-        } else {
-          categoriesMap[category] = [element];
-        }
-      }
-      return categoriesMap.entries.map(
-        (entry) {
-          if (groupBy == 'category') {
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ComplaintCategory(
-                id: entry.key,
-                complaints: entry.value,
-              ),
-            );
-          }
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Section(
-              title: entry.key,
-              children: entry.value
-                  .map(
-                    (e) => ComplaintListItem(
-                      complaint: e,
-                    ),
-                  )
-                  .toList(),
-            ),
-          );
-        },
-      ).toList();
-    }
-    return complaints
-        .map(
-          (e) => ComplaintListItem(
-            complaint: e,
-          ),
-        )
-        .toList();
-  }
-
   @override
   Widget build(BuildContext context) {
-    final settings = ref.watch(settingsProvider);
-    final mediaQuery = MediaQuery.of(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Statistics'),
@@ -104,71 +44,58 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
             },
             icon: const Icon(Icons.filter_alt_rounded),
           ),
-          IconButton(
-            onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                enableDrag: true,
-                builder: (ctx) => const Text('Select sorting criteria here'),
-              );
-            },
-            icon: const Icon(Icons.swap_vert_rounded),
-          ),
         ],
       ),
       body: ComplaintsBuilder(
         complaintsProvider: _complaintsProvider,
-        // src: Source.cache,
+        src: Source.cache,
         loadingWidget: Center(child: circularProgressIndicator()),
         builder: (ctx, complaints) {
-          List<Widget> children =
-              calculateUI(settings.complaintsGrouping, complaints);
-          return RefreshIndicator(
-            onRefresh: () async {
-              try {
-                await _complaintsProvider();
-              } catch (e) {
-                showMsg(context, e.toString());
-              }
-              if (context.mounted) {
-                setState(() {});
-              }
-            },
-            child: ListView.builder(
-              itemCount: complaints.isEmpty ? 1 : children.length + 2,
-              itemBuilder: complaints.isEmpty
-                  ? (ctx, index) {
-                      return SizedBox(
-                        height: mediaQuery.size.height -
-                            mediaQuery.viewInsets.top -
-                            mediaQuery.padding.top -
-                            mediaQuery.padding.bottom -
-                            mediaQuery.viewInsets.bottom -
-                            150,
-                        child: Center(
-                          child: Text(
-                            'No Complaints Match the filters',
-                            style: Theme.of(context).textTheme.titleLarge,
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      );
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextButton(
+                onPressed: () {
+                  navigatorPush(
+                    context,
+                    Scaffold(
+                      appBar: AppBar(
+                        actions: [
+                          IconButton(
+                            onPressed: () {
+                              showModalBottomSheet(
+                                context: context,
+                                enableDrag: true,
+                                builder: (ctx) =>
+                                    const Text('Select sorting criteria here'),
+                              );
+                            },
+                            icon: const Icon(Icons.swap_vert_rounded),
+                          )
+                        ],
+                        title: const Text('Matching Complaints'),
+                      ),
+                      body: ComplaintsListView(complaints: complaints),
+                    ),
+                  );
+                },
+                child: Text(
+                    "Total ${complaints.length} complaints match your criteria"),
+              ),
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    try {
+                      await _complaintsProvider();
+                    } catch (e) {
+                      showMsg(context, e.toString());
                     }
-                  : (ctx, index) {
-                      if (index == 0) {
-                        return Center(
-                            child: Text(
-                                "${complaints.length} total matches found"));
-                      } else if (index == children.length + 1) {
-                        return SizedBox(
-                          height: mediaQuery.padding.bottom,
-                        );
-                      } else {
-                        index--;
-                      }
-                      return children[index];
-                    },
-            ),
+                    if (context.mounted) setState(() {});
+                  },
+                  child: Stats(complaints: complaints),
+                ),
+              ),
+            ],
           );
         },
       ),
