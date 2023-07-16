@@ -54,8 +54,8 @@ class _FilterChooserScreenState extends State<FilterChooserScreen> {
             onChange: ((chosenCategories) {
               widget.filters['categories'] = chosenCategories;
             }),
-            allCategories: categories.map((e) => e.id).toList(),
-            chosenCategories: widget.filters['categories'] ?? []),
+            allCategories: categories.map((e) => e.id).toSet(),
+            chosenCategories: widget.filters['categories'] ?? {}),
       ),
       UsersBuilder(
         src: Source.cache,
@@ -74,16 +74,16 @@ class _FilterChooserScreenState extends State<FilterChooserScreen> {
           final students = users
               .where((element) => element.readonly.type == 'student')
               .map((e) => e.email!)
-              .toList();
+              .toSet();
           students.add('code_soc@students.iiitr.ac.in');
 
           return ComplainantChooser(
             hostels: hostels,
             allUsers: students,
             onChange: (users) {
-              widget.filters['complainants'] = users.map((e) => e).toList();
+              widget.filters['complainants'] = users.map((e) => e).toSet();
             },
-            chosenUsers: widget.filters['complainants'] ?? [],
+            chosenUsers: widget.filters['complainants'] ?? {},
           );
         },
       ),
@@ -97,11 +97,11 @@ class _FilterChooserScreenState extends State<FilterChooserScreen> {
           ),
         ),
         builder: (ctx, users) => ComplaineeChooser(
-          allUsers: users.map((e) => e.email!).toList(),
+          allUsers: users.map((e) => e.email!).toSet(),
           onChange: (users) {
             widget.filters['complainees'] = users;
           },
-          chosenUsers: widget.filters['complainees'] ?? [],
+          chosenUsers: widget.filters['complainees'] ?? {},
         ),
       ),
     ];
@@ -621,9 +621,9 @@ class _ResolvedChooseState extends State<ResolvedChoose> {
 
 // ignore: must_be_immutable
 class ComplainantChooser extends StatefulWidget {
-  final void Function(List<String> chosenUsers) onChange;
-  final List<String> allUsers;
-  List<String> chosenUsers;
+  final void Function(Set<String> chosenUsers) onChange;
+  final Set<String> allUsers;
+  Set<String> chosenUsers;
   final Map<String, Set<String>> hostels;
   ComplainantChooser({
     super.key,
@@ -671,8 +671,8 @@ class _ComplainantChooserState extends State<ComplainantChooser> {
                 onPressed: () {
                   setState(() {
                     widget.chosenUsers.addAll(widget.hostels[keys[index]]!);
-                    widget.chosenUsers = widget.chosenUsers.toSet().toList();
                   });
+                  widget.onChange(widget.chosenUsers);
                 },
               ),
               itemCount: widget.hostels.length,
@@ -684,9 +684,9 @@ class _ComplainantChooserState extends State<ComplainantChooser> {
 }
 
 class ComplaineeChooser extends StatelessWidget {
-  final void Function(List<String> chosenUsers) onChange;
-  final List<String> allUsers;
-  final List<String> chosenUsers;
+  final void Function(Set<String> chosenUsers) onChange;
+  final Set<String> allUsers;
+  final Set<String> chosenUsers;
   const ComplaineeChooser({
     super.key,
     required this.onChange,
@@ -714,9 +714,9 @@ class ComplaineeChooser extends StatelessWidget {
 }
 
 class CategoryChooser extends StatelessWidget {
-  final void Function(List<String> chosenCategories) onChange;
-  final List<String> allCategories;
-  final List<String> chosenCategories;
+  final void Function(Set<String> chosenCategories) onChange;
+  final Set<String> allCategories;
+  final Set<String> chosenCategories;
   const CategoryChooser({
     super.key,
     required this.onChange,

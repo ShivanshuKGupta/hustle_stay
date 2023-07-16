@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
+import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/filter_screen/filter_choser_screen.dart';
 import 'package:hustle_stay/screens/filter_screen/stats.dart';
 import 'package:hustle_stay/tools.dart';
@@ -21,6 +22,8 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
   late Map<String, dynamic> filters;
 
   String groupBy = "None";
+
+  String interval = "Day";
 
   @override
   void initState() {
@@ -59,6 +62,7 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                     children: [
                       SelectOne(
                           title: 'Split Complaints by',
+                          subtitle: 'Compare the stats based on',
                           selectedOption: groupBy,
                           allOptions: const [
                             'None',
@@ -75,6 +79,21 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                             return true;
                           }),
                       const Divider(),
+                      SelectOne(
+                          title: 'Graph Interval',
+                          subtitle: 'Change x-axis interval by each',
+                          selectedOption: interval,
+                          allOptions: const [
+                            'Day',
+                            'Month',
+                            'Year',
+                          ],
+                          onChange: (value) {
+                            setState(() {
+                              interval = value;
+                            });
+                            return true;
+                          }),
                     ],
                   ),
                 ),
@@ -103,7 +122,18 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                     }
                     if (context.mounted) setState(() {});
                   },
-                  child: Stats(complaints: complaints, groupBy: groupBy),
+                  child: UsersBuilder(
+                    src: Source.cache,
+                    builder: (ctx, users) => Stats(
+                      interval: interval,
+                      complaints: complaints,
+                      groupBy: groupBy,
+                      users: users.fold({}, (previousValue, element) {
+                        previousValue[element.email!] = element;
+                        return previousValue;
+                      }),
+                    ),
+                  ),
                 ),
               ),
               TextButton(
@@ -142,50 +172,99 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
   }
 
   Future<List<ComplaintData>> _complaintsProvider({Source? src}) async {
-    Query<Map<String, dynamic>> collection = firestore.collection('complaints');
+    final docs = (await firestore
+            .collection('complaints')
+            .get(src == null ? null : GetOptions(source: src)))
+        .docs;
+    Iterable<ComplaintData> ans =
+        docs.map((doc) => ComplaintData.load(int.parse(doc.id), doc.data()));
     final DateTimeRange? createdWithin = filters['createdWithin'];
     final bool? resolved = filters['resolved'];
     final DateTimeRange? resolvedWithin = filters['resolvedWithin'];
     final Scope? scope = filters['scope'];
-    final List<String> categories = filters['categories'] ?? [];
-    final List<String> complainees = filters['complainees'] ?? [];
-    final List<String> complainants = filters['complainants'] ?? [];
+    final Set<String> categories = filters['categories'] ?? {};
+    final Set<String> complainees = filters['complainees'] ?? {};
+    final Set<String> complainants = filters['complainants'] ?? {};
     if (createdWithin != null) {
-      collection = collection
-          .where('createdAt',
-              isGreaterThanOrEqualTo:
-                  createdWithin.start.millisecondsSinceEpoch)
-          .where('createdAt',
-              isLessThanOrEqualTo: createdWithin.end.millisecondsSinceEpoch);
+      ans = ans.where((complaint) =>
+          complaint.id >= createdWithin.start.millisecondsSinceEpoch &&
+          complaint.id <= createdWithin.end.millisecondsSinceEpoch);
     }
     if (categories.isNotEmpty) {
-      collection = collection.where('category', whereIn: categories);
+      ans = ans.where((complaint) => categories.contains(complaint.category));
     }
     if (complainants.isNotEmpty) {
-      collection = collection.where('from', whereIn: complainants);
+      ans = ans.where((complaint) => complainants.contains(complaint.from));
     }
     if (resolved != null) {
-      collection = collection.where('resolved', isEqualTo: resolved);
-      if (resolved && resolvedWithin != null) {
-        collection = collection
-            .where('resolvedAt',
-                isGreaterThanOrEqualTo:
-                    resolvedWithin.start.millisecondsSinceEpoch)
-            .where('resolvedAt',
-                isLessThanOrEqualTo: resolvedWithin.end.millisecondsSinceEpoch);
+      if (resolvedWithin != null) {
+        ans = ans.where((complaint) =>
+            complaint.resolvedAt != null &&
+            complaint.resolvedAt! >=
+                resolvedWithin.start.millisecondsSinceEpoch &&
+            complaint.resolvedAt! <= resolvedWithin.end.millisecondsSinceEpoch);
+      } else {
+        ans = ans.where((complaint) => complaint.resolvedAt != null);
       }
     }
     if (scope != null) {
-      collection = collection.where('scope', isEqualTo: scope.name);
+      ans = ans.where((complaint) => complaint.scope == scope);
     }
     if (complainees.isNotEmpty) {
-      collection = collection.where('to', arrayContainsAny: complainees);
+      ans = ans.where((complaint) {
+        for (final element in complaint.to) {
+          if (complainees.contains(element)) return true;
+        }
+        return false;
+      });
     }
-    final docs =
-        (await collection.get(src == null ? null : GetOptions(source: src)))
-            .docs;
-    return [
-      for (final doc in docs) ComplaintData.load(int.parse(doc.id), doc.data())
-    ];
+    return ans.toList();
+
+    /// Use below code to fetch from server
+    // Query<Map<String, dynamic>> collection = firestore.collection('complaints');
+    // final DateTimeRange? createdWithin = filters['createdWithin'];
+    // final bool? resolved = filters['resolved'];
+    // final DateTimeRange? resolvedWithin = filters['resolvedWithin'];
+    // final Scope? scope = filters['scope'];
+    // final List<String> categories = filters['categories'] ?? [];
+    // final List<String> complainees = filters['complainees'] ?? [];
+    // final List<String> complainants = filters['complainants'] ?? [];
+    // if (createdWithin != null) {
+    //   collection = collection
+    //       .where('createdAt',
+    //           isGreaterThanOrEqualTo:
+    //               createdWithin.start.millisecondsSinceEpoch)
+    //       .where('createdAt',
+    //           isLessThanOrEqualTo: createdWithin.end.millisecondsSinceEpoch);
+    // }
+    // if (categories.isNotEmpty) {
+    //   collection = collection.where('category', whereIn: categories);
+    // }
+    // if (complainants.isNotEmpty) {
+    //   collection = collection.where('from', whereIn: complainants);
+    // }
+    // if (resolved != null) {
+    //   collection = collection.where('resolved', isEqualTo: resolved);
+    //   if (resolved && resolvedWithin != null) {
+    //     collection = collection
+    //         .where('resolvedAt',
+    //             isGreaterThanOrEqualTo:
+    //                 resolvedWithin.start.millisecondsSinceEpoch)
+    //         .where('resolvedAt',
+    //             isLessThanOrEqualTo: resolvedWithin.end.millisecondsSinceEpoch);
+    //   }
+    // }
+    // if (scope != null) {
+    //   collection = collection.where('scope', isEqualTo: scope.name);
+    // }
+    // if (complainees.isNotEmpty) {
+    //   collection = collection.where('to', arrayContainsAny: complainees);
+    // }
+    // final docs =
+    //     (await collection.get(src == null ? null : GetOptions(source: src)))
+    //         .docs;
+    // return [
+    //   for (final doc in docs) ComplaintData.load(int.parse(doc.id), doc.data())
+    // ];
   }
 }

@@ -3,10 +3,10 @@ import 'package:hustle_stay/widgets/complaints/vault_tile.dart';
 
 // ignore: must_be_immutable
 class SelectionVault extends StatefulWidget {
-  final List<String> allItems;
+  final Set<String> allItems;
   final String? helpText;
-  List<String> chosenItems;
-  final void Function(List<String> chosenItems) onChange;
+  Set<String> chosenItems;
+  final void Function(Set<String> chosenItems) onChange;
   SelectionVault({
     super.key,
     required this.allItems,
@@ -69,7 +69,7 @@ class _SelectionVaultState extends State<SelectionVault> {
               onChanged: (value) {
                 if (value != null) {
                   setState(() {
-                    if (widget.chosenItems.isEmpty) widget.chosenItems = [];
+                    if (widget.chosenItems.isEmpty) widget.chosenItems = {};
                     widget.chosenItems.add(value);
                   });
                   _textEditingController.clear();
@@ -85,7 +85,7 @@ class _SelectionVaultState extends State<SelectionVault> {
                 if (widget.chosenItems.length == widget.allItems.length) {
                   widget.chosenItems.clear();
                 } else {
-                  widget.chosenItems = widget.allItems.map((e) => e).toList();
+                  widget.chosenItems = widget.allItems.map((e) => e).toSet();
                 }
               });
               widget.onChange(widget.chosenItems);

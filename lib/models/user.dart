@@ -322,6 +322,7 @@ class UserBuilder extends StatelessWidget {
 /// This will change according to the userData
 // ignore: must_be_immutable
 class UsersBuilder extends StatelessWidget {
+  final List<String>? emails;
   final Widget Function(BuildContext ctx, List<UserData> users) builder;
   final Future<List<UserData>> Function({Source? src})? provider;
   final Source? src;
@@ -332,13 +333,17 @@ class UsersBuilder extends StatelessWidget {
     this.loadingWidget,
     this.src,
     this.provider,
+    this.emails,
   });
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future:
-          provider != null ? provider!(src: src) : fetchAllUserEmails(src: src),
+      future: provider != null
+          ? provider!(src: src)
+          : (emails == null
+              ? fetchAllUserEmails(src: src)
+              : fetchUsers(emails: emails, src: src)),
       builder: (ctx, snapshot) {
         if (snapshot.hasError && src == Source.cache) {
           return UsersBuilder(builder: builder, loadingWidget: loadingWidget);
@@ -350,7 +355,9 @@ class UsersBuilder extends StatelessWidget {
           return FutureBuilder(
             future: provider != null
                 ? provider!(src: Source.cache)
-                : fetchAllUserEmails(src: Source.cache),
+                : (emails == null
+                    ? fetchAllUserEmails(src: Source.cache)
+                    : fetchUsers(emails: emails, src: Source.cache)),
             builder: (ctx, snapshot) {
               if (!snapshot.hasData) {
                 // Returning this Widget when nothing has arrived

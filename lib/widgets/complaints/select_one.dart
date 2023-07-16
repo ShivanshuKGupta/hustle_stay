@@ -7,12 +7,14 @@ class SelectOne<T> extends StatefulWidget {
   T? selectedOption;
   final bool Function(T chosenOption) onChange;
   final String? title;
+  final String? subtitle;
   SelectOne({
     super.key,
     required this.allOptions,
     this.selectedOption,
     required this.onChange,
     this.title,
+    this.subtitle,
   });
 
   @override
@@ -25,7 +27,7 @@ class _SelectOneState<T> extends State<SelectOne<T>> {
   @override
   Widget build(BuildContext context) {
     final Wrap body = Wrap(
-      alignment: WrapAlignment.center,
+      alignment: WrapAlignment.start,
       runSpacing: 0,
       spacing: 5,
       children: widget.allOptions
@@ -43,15 +45,27 @@ class _SelectOneState<T> extends State<SelectOne<T>> {
           .toList(),
     );
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (widget.title != null)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: Row(
               children: [
-                Text(
-                  widget.title!,
-                  style: Theme.of(context).textTheme.bodyLarge,
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.title!,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    if (widget.subtitle != null)
+                      Text(
+                        widget.subtitle!,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                  ],
                 ),
                 IconButton(
                   onPressed: () {
