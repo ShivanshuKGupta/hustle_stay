@@ -349,8 +349,8 @@ class UsersBuilder extends StatelessWidget {
           }
           return FutureBuilder(
             future: provider != null
-                ? provider!(src: src)
-                : fetchAllUserEmails(src: src),
+                ? provider!(src: Source.cache)
+                : fetchAllUserEmails(src: Source.cache),
             builder: (ctx, snapshot) {
               if (!snapshot.hasData) {
                 // Returning this Widget when nothing has arrived
