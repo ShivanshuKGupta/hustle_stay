@@ -67,8 +67,38 @@ class _StatsState extends State<Stats> {
     final data = createdData;
     return ListView(
       children: [
+        SfCircularChart(
+          title: ChartTitle(text: 'Overall Distribution of Complaints'),
+          margin: EdgeInsets.zero,
+          tooltipBehavior: TooltipBehavior(enable: true),
+          legend: const Legend(
+            isVisible: true,
+            isResponsive: true,
+            alignment: ChartAlignment.center,
+            orientation: LegendItemOrientation.horizontal,
+            position: LegendPosition.bottom,
+            width: "100%",
+            overflowMode: LegendItemOverflowMode.wrap,
+          ),
+          series: <CircularSeries>[
+            PieSeries<pair, String>(
+              dataSource: <pair>[
+                ...groupedComplaints.entries.map(
+                  (entry) => pair(entry.key, entry.value.length),
+                ),
+              ],
+              xValueMapper: (pair point, _) => point.first,
+              yValueMapper: (pair point, _) => point.second,
+              dataLabelSettings: const DataLabelSettings(
+                isVisible: true,
+              ),
+              enableTooltip: true,
+            ),
+          ],
+        ),
+        const Divider(),
         SfCartesianChart(
-          title: ChartTitle(text: 'No of complaints vs date'),
+          title: ChartTitle(text: 'Complaint Count vs Date'),
           tooltipBehavior: TooltipBehavior(enable: true),
           onDataLabelTapped: (onTapArgs) {
             // TODO: show the complaints this data label represents
@@ -100,8 +130,8 @@ class _StatsState extends State<Stats> {
                   ...e.value.entries
                       .map((entry) => pair(entry.key, entry.value)),
                 ],
-                xValueMapper: (pair sales, _) => sales.first,
-                yValueMapper: (pair sales, _) => sales.second,
+                xValueMapper: (pair point, _) => point.first,
+                yValueMapper: (pair point, _) => point.second,
                 dataLabelSettings: const DataLabelSettings(isVisible: true),
                 enableTooltip: true,
                 legendItemText: e.key,
@@ -115,6 +145,7 @@ class _StatsState extends State<Stats> {
           //   enableSelectionZooming: true,
           // ),
         ),
+        const Divider(),
       ],
     );
   }

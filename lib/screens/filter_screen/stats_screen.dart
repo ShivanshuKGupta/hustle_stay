@@ -10,6 +10,8 @@ import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/complaints/complaints_list_view.dart';
 import 'package:hustle_stay/widgets/complaints/select_one.dart';
 
+import '../../models/category/category.dart';
+
 // ignore: must_be_immutable
 class StatisticsPage extends ConsumerStatefulWidget {
   const StatisticsPage({super.key});
@@ -117,6 +119,12 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                   onRefresh: () async {
                     try {
                       await _complaintsProvider();
+                      await fetchAllUserEmails();
+                      await fetchComplainees();
+                      await fetchAllCategories();
+                      if (context.mounted) {
+                        setState(() {});
+                      }
                     } catch (e) {
                       showMsg(context, e.toString());
                     }
