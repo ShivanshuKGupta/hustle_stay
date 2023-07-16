@@ -23,7 +23,8 @@ class Stats extends StatefulWidget {
 
 class _StatsState extends State<Stats> {
   late Map<String, UserData> complainees;
-  late Map<String, List<ComplaintData>> groupedComplaints;
+  Map<String, List<ComplaintData>> groupedComplaints = {};
+  Map<String, double> avgResolutionTime = {};
 
   @override
   void initState() {
@@ -37,7 +38,7 @@ class _StatsState extends State<Stats> {
   }
 
   /// Number of Complaints vs Date
-  Map<String, Map<DateTime, int>> get createdData {
+  Map<String, Map<DateTime, int>> get complaintCountVsDate {
     Map<String, Map<DateTime, int>> data = {};
     groupedComplaints.forEach((key, value) {
       data[key] = processData<ComplaintData, DateTime, int>(
@@ -57,6 +58,23 @@ class _StatsState extends State<Stats> {
     return data;
   }
 
+  // Avg Resolution Time per group
+  Map<String, double> get avgResTimePerGroup {
+    return groupedComplaints.map(
+      (key, list) => MapEntry(
+          key,
+          list.fold(
+                0,
+                (previousValue, complaint) =>
+                    previousValue +
+                    (complaint.resolvedAt == null
+                        ? 0
+                        : complaint.resolvedAt! - complaint.id),
+              ) /
+              list.length),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     groupedComplaints = groupComplaints(
@@ -64,39 +82,73 @@ class _StatsState extends State<Stats> {
         complainees: complainees,
         complaints: widget.complaints,
         groupBy: widget.groupBy);
-    final data = createdData;
+    avgResolutionTime = avgResTimePerGroup;
+    avgResolutionTime.removeWhere((key, value) => value == 0);
+    final data = complaintCountVsDate;
+    final Duration overallAvgResolutionTime = Duration(
+      milliseconds: avgResolutionTime.values
+              .fold(0.0, (previousValue, element) => previousValue + element) ~/
+          avgResolutionTime.length,
+    );
     return ListView(
       children: [
-        SfCircularChart(
-          title: ChartTitle(text: 'Overall Distribution of Complaints'),
-          margin: EdgeInsets.zero,
-          tooltipBehavior: TooltipBehavior(enable: true),
-          legend: const Legend(
-            isVisible: true,
-            isResponsive: true,
-            alignment: ChartAlignment.center,
-            orientation: LegendItemOrientation.horizontal,
-            position: LegendPosition.bottom,
-            width: "100%",
-            overflowMode: LegendItemOverflowMode.wrap,
-          ),
-          series: <CircularSeries>[
-            PieSeries<pair, String>(
-              dataSource: <pair>[
-                ...groupedComplaints.entries.map(
-                  (entry) => pair(entry.key, entry.value.length),
+        if (widget.groupBy != 'None')
+          Stack(
+            children: [
+              Positioned(
+                top: 0,
+                bottom: 10,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${widget.complaints.length}',
+                        style: Theme.of(context).textTheme.titleLarge,
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        'total\ncomplaints',
+                        style: Theme.of(context).textTheme.bodySmall,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-              xValueMapper: (pair point, _) => point.first,
-              yValueMapper: (pair point, _) => point.second,
-              dataLabelSettings: const DataLabelSettings(
-                isVisible: true,
               ),
-              enableTooltip: true,
-            ),
-          ],
-        ),
-        const Divider(),
+              SfCircularChart(
+                title: ChartTitle(text: 'Overall Distribution of Complaints'),
+                margin: EdgeInsets.zero,
+                tooltipBehavior: TooltipBehavior(enable: true),
+                legend: const Legend(
+                  isVisible: true,
+                  isResponsive: true,
+                  alignment: ChartAlignment.center,
+                  orientation: LegendItemOrientation.horizontal,
+                  position: LegendPosition.bottom,
+                  width: "100%",
+                  overflowMode: LegendItemOverflowMode.scroll,
+                ),
+                series: <CircularSeries>[
+                  DoughnutSeries<pair, String>(
+                    animationDuration: 500,
+                    dataSource: <pair>[
+                      ...groupedComplaints.entries.map(
+                        (entry) => pair(entry.key, entry.value.length),
+                      ),
+                    ],
+                    xValueMapper: (pair point, _) => point.first,
+                    yValueMapper: (pair point, _) => point.second,
+                    dataLabelSettings: const DataLabelSettings(isVisible: true),
+                    enableTooltip: true,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        if (widget.groupBy != 'None') const Divider(),
         SfCartesianChart(
           title: ChartTitle(text: 'Complaint Count vs Date'),
           tooltipBehavior: TooltipBehavior(enable: true),
@@ -125,6 +177,7 @@ class _StatsState extends State<Stats> {
           series: <LineSeries<pair, DateTime>>[
             ...data.entries.map(
               (e) => LineSeries<pair, DateTime>(
+                animationDuration: 500,
                 name: e.key,
                 dataSource: <pair>[
                   ...e.value.entries
@@ -144,6 +197,73 @@ class _StatsState extends State<Stats> {
           //   enablePinching: true,
           //   enableSelectionZooming: true,
           // ),
+        ),
+        const Divider(),
+        Stack(
+          children: [
+            Positioned(
+              top: 0,
+              bottom: 10,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${overallAvgResolutionTime.inDays}',
+                      style: Theme.of(context).textTheme.titleLarge,
+                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      'days',
+                      style: Theme.of(context).textTheme.bodySmall,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SfCircularChart(
+              title: ChartTitle(text: 'Average Resolution Time'),
+              margin: EdgeInsets.zero,
+              tooltipBehavior: TooltipBehavior(enable: true),
+              legend: const Legend(
+                isVisible: true,
+                isResponsive: true,
+                alignment: ChartAlignment.center,
+                orientation: LegendItemOrientation.horizontal,
+                position: LegendPosition.bottom,
+                width: "100%",
+                overflowMode: LegendItemOverflowMode.scroll,
+              ),
+              onDataLabelRender: (dataLabelArgs) {
+                final duration = Duration(
+                    milliseconds: double.parse(dataLabelArgs.text).toInt());
+                dataLabelArgs.text = duration.inDays != 0
+                    ? '${duration.inDays} days'
+                    : (duration.inHours != 0
+                        ? '${duration.inHours} hrs'
+                        : '${duration.inMinutes} mins');
+              },
+              series: <CircularSeries>[
+                DoughnutSeries<pair, String>(
+                  animationDuration: 500,
+                  dataSource: <pair>[
+                    ...avgResolutionTime.entries.map(
+                      (entry) => pair(entry.key, entry.value),
+                    ),
+                  ],
+                  xValueMapper: (pair point, _) => point.first,
+                  yValueMapper: (pair point, _) => point.second,
+                  dataLabelSettings: const DataLabelSettings(
+                    isVisible: true,
+                  ),
+                  enableTooltip: true,
+                ),
+              ],
+            ),
+          ],
         ),
         const Divider(),
       ],
