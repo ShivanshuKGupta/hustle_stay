@@ -24,7 +24,7 @@ class Stats extends StatefulWidget {
 class _StatsState extends State<Stats> {
   late Map<String, UserData> complainees;
   Map<String, List<ComplaintData>> groupedComplaints = {};
-  Map<String, double> avgResolutionTime = {};
+  Map<String, double> avgResolutionTimePerGroup = {};
 
   @override
   void initState() {
@@ -38,7 +38,7 @@ class _StatsState extends State<Stats> {
   }
 
   /// Number of Complaints vs Date
-  Map<String, Map<DateTime, int>> get complaintCountVsDate {
+  Map<String, Map<DateTime, int>> get getComplaintCountVsDate {
     Map<String, Map<DateTime, int>> data = {};
     groupedComplaints.forEach((key, value) {
       data[key] = processData<ComplaintData, DateTime, int>(
@@ -59,7 +59,7 @@ class _StatsState extends State<Stats> {
   }
 
   // Avg Resolution Time per group
-  Map<String, double> get avgResTimePerGroup {
+  Map<String, double> get getAvgResTimePerGroup {
     return groupedComplaints.map(
       (key, list) => MapEntry(
           key,
@@ -82,13 +82,14 @@ class _StatsState extends State<Stats> {
         complainees: complainees,
         complaints: widget.complaints,
         groupBy: widget.groupBy);
-    avgResolutionTime = avgResTimePerGroup;
-    avgResolutionTime.removeWhere((key, value) => value == 0);
-    final data = complaintCountVsDate;
+    groupedComplaints.removeWhere((key, value) => value.isEmpty);
+    avgResolutionTimePerGroup = getAvgResTimePerGroup;
+    avgResolutionTimePerGroup.removeWhere((key, value) => value == 0);
+    final data = getComplaintCountVsDate;
     final Duration overallAvgResolutionTime = Duration(
-      milliseconds: avgResolutionTime.values
+      milliseconds: avgResolutionTimePerGroup.values
               .fold(0.0, (previousValue, element) => previousValue + element) ~/
-          avgResolutionTime.length,
+          avgResolutionTimePerGroup.length,
     );
     return ListView(
       children: [
@@ -250,7 +251,7 @@ class _StatsState extends State<Stats> {
                 DoughnutSeries<pair, String>(
                   animationDuration: 500,
                   dataSource: <pair>[
-                    ...avgResolutionTime.entries.map(
+                    ...avgResolutionTimePerGroup.entries.map(
                       (entry) => pair(entry.key, entry.value),
                     ),
                   ],
