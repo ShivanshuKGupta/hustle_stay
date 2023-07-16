@@ -125,64 +125,76 @@ Future<bool> markAllAttendance(
   try {
     final statusVal = status ? 'present' : 'absent';
     final storage = FirebaseFirestore.instance;
-
-    final QuerySnapshot<Map<String, dynamic>> roommatesQuery = await storage
-        .collection('hostels')
-        .doc(hostelName)
-        .collection('Roommates')
-        .get();
-
     final batch = storage.batch();
-    final List<Future<QuerySnapshot<Map<String, dynamic>>>> attendanceFutures =
-        [];
+    final roommatesRef =
+        storage.collection('hostels').doc(hostelName).collection('Roommates');
 
-    for (final x in roommatesQuery.docs) {
-      final attendanceQuery = x.reference
-          .collection('Attendance')
-          .where(FieldPath.documentId,
-              isEqualTo: DateFormat('yyyy-MM-dd').format(selectedDate))
-          .get();
+    QuerySnapshot<Map<String, dynamic>> roommatesQuery;
+    if (DateTime(selectedDate.year, selectedDate.month, selectedDate.day) !=
+        DateTime(
+          DateTime.now().year,
+          DateTime.now().month,
+          DateTime.now().day,
+        )) {
+      roommatesQuery = await roommatesRef.get();
+    } else {
+      roommatesQuery =
+          await roommatesRef.where('onLeave', isNotEqualTo: true).get();
+      final roommatesLeaveQuery =
+          await roommatesRef.where('onLeave', isEqualTo: true).get();
 
-      attendanceFutures.add(attendanceQuery);
+      for (final x in roommatesLeaveQuery.docs) {
+        final attendanceDocRef = x.reference
+            .collection('Attendance')
+            .doc(DateFormat('yyyy-MM-dd').format(selectedDate));
+
+        if (x.data()['onInternship'] == true) {
+          batch.set(attendanceDocRef, {'status': 'onInternship'});
+        } else {
+          batch.set(attendanceDocRef, {'status': 'onLeave'});
+        }
+      }
     }
 
-    final List<QuerySnapshot<Map<String, dynamic>>> attendanceSnapshots =
-        await Future.wait(attendanceFutures);
+    final attendanceFutures = roommatesQuery.docs.map((x) => x.reference
+        .collection('Attendance')
+        .where(FieldPath.documentId,
+            isEqualTo: DateFormat('yyyy-MM-dd').format(selectedDate))
+        .get());
+    final attendanceSnapshots = await Future.wait(attendanceFutures);
 
     for (int i = 0; i < attendanceSnapshots.length; i++) {
-      final QuerySnapshot<Map<String, dynamic>> attendanceSnapshot =
-          attendanceSnapshots[i];
+      final attendanceSnapshot = attendanceSnapshots[i];
 
       if (attendanceSnapshot.size > 0) {
-        final QueryDocumentSnapshot<Map<String, dynamic>> attendanceDoc =
-            attendanceSnapshot.docs.first;
+        final attendanceDoc = attendanceSnapshot.docs.first;
 
-        if (statusVal == 'present' &&
-                attendanceDoc.data()['status'] == 'absent' ||
-            statusVal == 'absent' &&
-                attendanceDoc.data()['status'] == 'present') {
+        if ((statusVal == 'present' &&
+                attendanceDoc.data()['status'] == 'absent') ||
+            (statusVal == 'absent' &&
+                attendanceDoc.data()['status'] == 'present')) {
+          final attendanceDocRef = attendanceDoc.reference;
           if (statusVal == 'present' &&
               DateTime.now().isAfter(DateTime(selectedDate.year,
                   selectedDate.month, selectedDate.day, 23))) {
             batch.set(
-              attendanceDoc.reference,
+              attendanceDocRef,
               {'status': 'presentLate'},
               SetOptions(merge: true),
             );
           } else {
             batch.set(
-              attendanceDoc.reference,
+              attendanceDocRef,
               {'status': statusVal},
               SetOptions(merge: true),
             );
           }
         }
       } else {
-        final attendanceCollection =
+        final attendanceDocRef =
             roommatesQuery.docs[i].reference.collection('Attendance');
         batch.set(
-          attendanceCollection
-              .doc(DateFormat('yyyy-MM-dd').format(selectedDate)),
+          attendanceDocRef.doc(DateFormat('yyyy-MM-dd').format(selectedDate)),
           {'status': statusVal},
         );
       }
