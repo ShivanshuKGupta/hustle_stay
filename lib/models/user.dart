@@ -193,7 +193,7 @@ Future<UserData> fetchUserData(
 }
 
 /// this fetches all properties
-Future<List<UserData>> fetchUsers(List<String>? emails, {Source? src}) async {
+Future<List<UserData>> fetchUsers({List<String>? emails, Source? src}) async {
   if (emails != null) {
     return [for (final email in emails) await fetchUserData(email, src: src)];
   }
@@ -202,7 +202,7 @@ Future<List<UserData>> fetchUsers(List<String>? emails, {Source? src}) async {
               src == null ? null : GetOptions(source: src),
             ))
         .docs)
-      await fetchUserData(doc.id)
+      await fetchUserData(doc.id, src: src)
   ];
 }
 
