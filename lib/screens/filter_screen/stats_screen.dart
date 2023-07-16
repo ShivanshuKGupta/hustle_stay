@@ -7,6 +7,7 @@ import 'package:hustle_stay/screens/filter_screen/filter_choser_screen.dart';
 import 'package:hustle_stay/screens/filter_screen/stats.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/complaints/complaints_list_view.dart';
+import 'package:hustle_stay/widgets/complaints/select_one.dart';
 
 // ignore: must_be_immutable
 class StatisticsPage extends ConsumerStatefulWidget {
@@ -18,6 +19,8 @@ class StatisticsPage extends ConsumerStatefulWidget {
 
 class _StatisticsPageState extends ConsumerState<StatisticsPage> {
   late Map<String, dynamic> filters;
+
+  String groupBy = "None";
 
   @override
   void initState() {
@@ -44,6 +47,42 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
             },
             icon: const Icon(Icons.filter_alt_rounded),
           ),
+          IconButton(
+            onPressed: () async {
+              await showModalBottomSheet(
+                context: context,
+                useSafeArea: true,
+                showDragHandle: true,
+                builder: (ctx) => Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Column(
+                    children: [
+                      SelectOne(
+                          title: 'Split Complaints by',
+                          selectedOption: groupBy,
+                          allOptions: const [
+                            'None',
+                            'Hostel',
+                            'Category',
+                            'Scope',
+                            'Complainant',
+                            'Complainee'
+                          ],
+                          onChange: (value) {
+                            setState(() {
+                              groupBy = value;
+                            });
+                            return true;
+                          }),
+                      const Divider(),
+                    ],
+                  ),
+                ),
+              );
+              setState(() {});
+            },
+            icon: const Icon(Icons.settings_rounded),
+          ),
         ],
       ),
       body: ComplaintsBuilder(
@@ -54,6 +93,19 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    try {
+                      await _complaintsProvider();
+                    } catch (e) {
+                      showMsg(context, e.toString());
+                    }
+                    if (context.mounted) setState(() {});
+                  },
+                  child: Stats(complaints: complaints, groupBy: groupBy),
+                ),
+              ),
               TextButton(
                 onPressed: () {
                   navigatorPush(
@@ -81,19 +133,6 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                 },
                 child: Text(
                     "Total ${complaints.length} complaints match your criteria"),
-              ),
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: () async {
-                    try {
-                      await _complaintsProvider();
-                    } catch (e) {
-                      showMsg(context, e.toString());
-                    }
-                    if (context.mounted) setState(() {});
-                  },
-                  child: Stats(complaints: complaints),
-                ),
               ),
             ],
           );

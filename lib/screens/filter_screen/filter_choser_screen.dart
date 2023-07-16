@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/category/category.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/screens/filter_screen/select_one_tile.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/complaints/selection_vault.dart';
 
@@ -154,33 +155,6 @@ class _Title extends StatelessWidget {
   }
 }
 
-class _OutlinedButton extends StatelessWidget {
-  final bool isSelected;
-  final void Function() onPressed;
-  final String label;
-  const _OutlinedButton({
-    required this.isSelected,
-    required this.onPressed,
-    required this.label,
-  });
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return OutlinedButton.icon(
-      icon: isSelected ? const Icon(Icons.done_rounded) : Container(),
-      style: isSelected
-          ? OutlinedButton.styleFrom(
-              foregroundColor: theme.colorScheme.onPrimary,
-              backgroundColor: theme.colorScheme.primary,
-              side: BorderSide(color: theme.colorScheme.primary),
-            )
-          : null,
-      onPressed: onPressed,
-      label: Text(label),
-    );
-  }
-}
-
 // ignore: must_be_immutable
 class CreatedWithin extends StatefulWidget {
   final void Function(DateTimeRange? dateRange) onChange;
@@ -226,7 +200,7 @@ class _CreatedWithinState extends State<CreatedWithin> {
 
     /// The items in this filter
     final items = [
-      _OutlinedButton(
+      SelectOneTile(
         label: 'Last month',
         isSelected: selectedIndex == i++,
         onPressed: () {
@@ -239,7 +213,7 @@ class _CreatedWithinState extends State<CreatedWithin> {
           widget.onChange(widget.dateRange);
         },
       ),
-      _OutlinedButton(
+      SelectOneTile(
         label: 'Last 7 Days',
         isSelected: selectedIndex == i++,
         onPressed: () {
@@ -252,7 +226,7 @@ class _CreatedWithinState extends State<CreatedWithin> {
           widget.onChange(widget.dateRange);
         },
       ),
-      _OutlinedButton(
+      SelectOneTile(
         label: 'Last 30 Days',
         isSelected: selectedIndex == i++,
         onPressed: () {
@@ -265,7 +239,7 @@ class _CreatedWithinState extends State<CreatedWithin> {
           widget.onChange(widget.dateRange);
         },
       ),
-      _OutlinedButton(
+      SelectOneTile(
         label: 'Last 365 Days',
         isSelected: selectedIndex == i++,
         onPressed: () {
@@ -278,7 +252,7 @@ class _CreatedWithinState extends State<CreatedWithin> {
           widget.onChange(widget.dateRange);
         },
       ),
-      _OutlinedButton(
+      SelectOneTile(
         label: 'All Time',
         isSelected: selectedIndex == i++,
         onPressed: () {
@@ -288,7 +262,7 @@ class _CreatedWithinState extends State<CreatedWithin> {
           widget.onChange(widget.dateRange);
         },
       ),
-      _OutlinedButton(
+      SelectOneTile(
         label: (selectedIndex == i
             ? '${ddmmyyyy(widget.dateRange!.start)} - ${ddmmyyyy(widget.dateRange!.end)}'
             : 'Custom'),
@@ -395,7 +369,7 @@ class _ResolvedWithinState extends State<ResolvedWithin> {
 
     /// The items in this filter
     final items = [
-      _OutlinedButton(
+      SelectOneTile(
         label: 'Last month',
         isSelected: selectedIndex == i++,
         onPressed: () {
@@ -408,7 +382,7 @@ class _ResolvedWithinState extends State<ResolvedWithin> {
           widget.onChange(widget.dateRange);
         },
       ),
-      _OutlinedButton(
+      SelectOneTile(
         label: 'Last 7 Days',
         isSelected: selectedIndex == i++,
         onPressed: () {
@@ -421,7 +395,7 @@ class _ResolvedWithinState extends State<ResolvedWithin> {
           widget.onChange(widget.dateRange);
         },
       ),
-      _OutlinedButton(
+      SelectOneTile(
         label: 'Last 30 Days',
         isSelected: selectedIndex == i++,
         onPressed: () {
@@ -434,7 +408,7 @@ class _ResolvedWithinState extends State<ResolvedWithin> {
           widget.onChange(widget.dateRange);
         },
       ),
-      _OutlinedButton(
+      SelectOneTile(
         label: 'Last 365 Days',
         isSelected: selectedIndex == i++,
         onPressed: () {
@@ -447,7 +421,7 @@ class _ResolvedWithinState extends State<ResolvedWithin> {
           widget.onChange(widget.dateRange);
         },
       ),
-      _OutlinedButton(
+      SelectOneTile(
         label: 'All Time',
         isSelected: selectedIndex == i++,
         onPressed: () {
@@ -457,7 +431,7 @@ class _ResolvedWithinState extends State<ResolvedWithin> {
           widget.onChange(widget.dateRange);
         },
       ),
-      _OutlinedButton(
+      SelectOneTile(
         label: (selectedIndex == i
             ? '${ddmmyyyy(widget.dateRange!.start)} - ${ddmmyyyy(widget.dateRange!.end)}'
             : 'Custom'),
@@ -534,7 +508,7 @@ class _ScopeChooserState extends State<ScopeChooser> {
   Widget build(BuildContext context) {
     /// The items in this filter
     final items = [
-      _OutlinedButton(
+      SelectOneTile(
         label: 'Private',
         isSelected: widget.scope == Scope.private || widget.scope == null,
         onPressed: () {
@@ -545,7 +519,7 @@ class _ScopeChooserState extends State<ScopeChooser> {
           widget.onChange(widget.scope);
         },
       ),
-      _OutlinedButton(
+      SelectOneTile(
         label: 'Public',
         isSelected: widget.scope == Scope.public || widget.scope == null,
         onPressed: () {
@@ -597,7 +571,7 @@ class _ResolvedChooseState extends State<ResolvedChoose> {
   Widget build(BuildContext context) {
     /// The items in this filter
     final items = [
-      _OutlinedButton(
+      SelectOneTile(
         label: 'Resolved',
         isSelected: widget.resolved == true || widget.resolved == null,
         onPressed: () {
@@ -608,7 +582,7 @@ class _ResolvedChooseState extends State<ResolvedChoose> {
           widget.onChange(widget.resolved);
         },
       ),
-      _OutlinedButton(
+      SelectOneTile(
         label: 'Pending',
         isSelected: widget.resolved == false || widget.resolved == null,
         onPressed: () {
