@@ -62,6 +62,8 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
     }
   }
 
+  String chartType = 'pieChart';
+
   bool isRunning = false;
   int total = 0;
 
@@ -78,12 +80,24 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
         adata['leave']! +
         adata['presentLate']!;
 
-    double present = adata['present']! / adata['total']! * 100;
-    double leave = adata['leave']! / adata['total']! * 100;
-    double internship = adata['internship']! / adata['total']! * 100;
-    double absent = adata['absent']! / adata['total']! * 100;
-    double presentLate = adata['presentLate']! / adata['total']! * 100;
-    double noStatus = (adata['total']! - sum) / adata['total']! * 100;
+    double present = chartType == 'barChart'
+        ? adata['present']!
+        : adata['present']! / adata['total']! * 100;
+    double leave = chartType == 'barChart'
+        ? adata['leave']!
+        : adata['leave']! / adata['total']! * 100;
+    double internship = chartType == 'barChart'
+        ? adata['internship']!
+        : adata['internship']! / adata['total']! * 100;
+    double absent = chartType == 'barChart'
+        ? adata['absent']!
+        : adata['absent']! / adata['total']! * 100;
+    double presentLate = chartType == 'barChart'
+        ? adata['presentLate']!
+        : adata['presentLate']! / adata['total']! * 100;
+    double noStatus = chartType == 'barChart'
+        ? adata['total']! - sum
+        : (adata['total']! - sum) / adata['total']! * 100;
 
     List<ChartData> chartdata = [
       ChartData(
@@ -100,6 +114,11 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
 
     return chartdata;
   }
+
+  List<DropdownMenuEntry> chartOptions = [
+    const DropdownMenuEntry(value: 'barChart', label: 'Bar Chart'),
+    const DropdownMenuEntry(value: 'pieChart', label: 'Pie Chart'),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -157,8 +176,8 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
             ),
           );
         }
-        List<ChartData> chartData = attendanceData(snapshot.data!);
-        return pieChartWidget(snapshot.data!, chartData);
+
+        return pieChartWidget(snapshot.data!);
       },
       future: widget.email == null && value != null
           ? getHostelAttendanceStatistics(widget.hostelName, value)
@@ -166,49 +185,81 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
     );
   }
 
-  Widget pieChartWidget(Map<String, double> data, List<ChartData> chartdata) {
+  Widget pieChartWidget(Map<String, double> data) {
+    List<ChartData> chartdata = attendanceData(data);
+
     return Column(
       children: [
+        DropdownMenu(
+          dropdownMenuEntries: chartOptions,
+          initialSelection: chartType,
+          onSelected: (value) {
+            setState(() {
+              chartType = value;
+            });
+          },
+        ),
         Expanded(
-          child: SfCircularChart(
-            series: <CircularSeries>[
-              PieSeries<ChartData, String>(
-                dataSource: chartdata,
-                pointColorMapper: (ChartData data, _) => data.color,
-                xValueMapper: (ChartData data, _) => data.category,
-                yValueMapper: (ChartData data, _) => data.value,
-                dataLabelSettings: const DataLabelSettings(
-                  isVisible: true,
+          child: chartType == 'pieChart'
+              ? SfCircularChart(
+                  series: <CircularSeries>[
+                    PieSeries<ChartData, String>(
+                      dataSource: chartdata,
+                      pointColorMapper: (ChartData data, _) => data.color,
+                      xValueMapper: (ChartData data, _) => data.category,
+                      yValueMapper: (ChartData data, _) => data.value,
+                      dataLabelSettings: const DataLabelSettings(
+                        isVisible: true,
+                      ),
+                      selectionBehavior: SelectionBehavior(enable: true),
+                      onPointLongPress: (pointInteractionDetails) {
+                        onClickNavigation(
+                            chartdata[pointInteractionDetails.pointIndex!]
+                                .category);
+                      },
+                    ),
+                  ],
+                  legend: const Legend(
+                    isVisible: true,
+                    isResponsive: true,
+                    position: LegendPosition.bottom,
+                    orientation: LegendItemOrientation.horizontal,
+                    alignment: ChartAlignment.center,
+                    width: "100%",
+                    overflowMode: LegendItemOverflowMode.scroll,
+                  ),
+                  tooltipBehavior: TooltipBehavior(
+                    enable: true,
+                    textStyle: const TextStyle(fontSize: 12),
+                    format: 'point.x: point.y%',
+                  ),
+                  palette: const <Color>[
+                    Colors.green,
+                    Colors.red,
+                    Colors.yellow,
+                    Colors.cyan,
+                  ],
+                  enableMultiSelection: false,
+                )
+              : SfCartesianChart(
+                  primaryXAxis: CategoryAxis(
+                      labelStyle: const TextStyle(fontWeight: FontWeight.bold)),
+                  primaryYAxis: NumericAxis(
+                      labelStyle: const TextStyle(fontWeight: FontWeight.bold)),
+                  series: <BarSeries<ChartData, String>>[
+                    BarSeries<ChartData, String>(
+                      dataSource: chartdata,
+                      xValueMapper: (ChartData data, _) => data.category,
+                      yValueMapper: (ChartData data, _) => data.value,
+                      pointColorMapper: (ChartData data, _) => data.color,
+                      onPointLongPress: (pointInteractionDetails) {
+                        onClickNavigation(
+                            chartdata[pointInteractionDetails.pointIndex!]
+                                .category);
+                      },
+                    ),
+                  ],
                 ),
-                selectionBehavior: SelectionBehavior(enable: true),
-                onPointLongPress: (pointInteractionDetails) {
-                  onClickNavigation(
-                      chartdata[pointInteractionDetails.pointIndex!].category);
-                },
-              ),
-            ],
-            legend: const Legend(
-              isVisible: true,
-              position: LegendPosition.bottom,
-              overflowMode: LegendItemOverflowMode.wrap,
-              textStyle: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            tooltipBehavior: TooltipBehavior(
-              enable: true,
-              textStyle: const TextStyle(fontSize: 12),
-              format: 'point.x: point.y%',
-            ),
-            palette: const <Color>[
-              Colors.green,
-              Colors.red,
-              Colors.yellow,
-              Colors.cyan,
-            ],
-            enableMultiSelection: false,
-          ),
         ),
         const Divider(),
         ListTile(

@@ -63,14 +63,9 @@ Future<String> getAttendanceData(RoommateData roommateData, String hostelName,
 }
 
 Future<bool> setAttendanceData(String email, String hostelName, String roomName,
-    DateTime date, bool status) async {
+    DateTime date, String status) async {
   try {
-    final storage = FirebaseFirestore.instance;
-    String lateVal =
-        DateTime.now().isAfter(DateTime(date.year, date.month, date.day, 23))
-            ? 'presentLate'
-            : 'present';
-    final docRef = storage
+    final docRef = FirebaseFirestore.instance
         .collection('hostels')
         .doc(hostelName)
         .collection('Roommates')
@@ -78,13 +73,19 @@ Future<bool> setAttendanceData(String email, String hostelName, String roomName,
         .collection('Attendance')
         .doc(DateFormat('yyyy-MM-dd').format(date));
 
-    await storage.runTransaction((transaction) async {
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
       final snapshot = await transaction.get(docRef);
-      if (!snapshot.exists) {
-        transaction.set(docRef, {'status': status ? 'absent' : lateVal});
-      } else {
-        transaction.update(docRef, {'status': status ? 'absent' : lateVal});
-      }
+      transaction.set(
+          docRef,
+          {
+            'status': (status == 'present' || status == 'presentLate')
+                ? 'absent'
+                : (DateTime.now()
+                        .isAfter(DateTime(date.year, date.month, date.day, 23)))
+                    ? 'presentLate'
+                    : 'present',
+          },
+          SetOptions(merge: true));
     });
 
     return true;
@@ -172,7 +173,8 @@ Future<bool> markAllAttendance(
         if ((statusVal == 'present' &&
                 attendanceDoc.data()['status'] == 'absent') ||
             (statusVal == 'absent' &&
-                attendanceDoc.data()['status'] == 'present')) {
+                (attendanceDoc.data()['status'] == 'present' ||
+                    attendanceDoc.data()['status'] == 'presentLate'))) {
           final attendanceDocRef = attendanceDoc.reference;
           if (statusVal == 'present' &&
               DateTime.now().isAfter(DateTime(selectedDate.year,
@@ -489,6 +491,6 @@ Future<List<LeaveData>> fetchLeaves(String hostelName, String email) async {
           x.data()['endDate'].toDate(), x.data()['leaveType']))
       .toList();
 
-  print('leave list: $list');
+  // print('leave list: $list');
   return list;
 }

@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/attendance.dart';
 import 'package:hustle_stay/widgets/room/room_list.dart';
-import 'package:hustle_stay/widgets/room/roommates/pie_chart_attendance.dart';
+import 'package:hustle_stay/widgets/room/roommates/chart_attendance.dart';
 
 import '../../../tools.dart';
 import '../../../widgets/room/filtered_attendance.dart';

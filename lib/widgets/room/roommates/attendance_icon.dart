@@ -56,6 +56,7 @@ class _AttendanceIconState extends State<AttendanceIcon> {
     );
     if (mounted) {
       setState(() {
+        status = resp;
         widget.tileColor!.value = colorPickerAttendance(resp);
         currentIcon = resp == 'present' || resp == 'presentLate'
             ? presentIcon
@@ -132,7 +133,7 @@ class _AttendanceIconState extends State<AttendanceIcon> {
                 widget.hostelName,
                 widget.roomName,
                 widget.selectedDate,
-                currentIcon == presentIcon,
+                status!,
               );
               await _getAttendanceData();
             },

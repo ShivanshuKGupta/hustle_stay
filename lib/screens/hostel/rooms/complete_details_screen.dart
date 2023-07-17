@@ -2,7 +2,7 @@ import 'package:animated_icon/animated_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/screens/hostel/rooms/profile_view_screen.dart';
 import 'package:hustle_stay/widgets/room/leave_widget.dart';
-import 'package:hustle_stay/widgets/room/roommates/pie_chart_attendance.dart';
+import 'package:hustle_stay/widgets/room/roommates/chart_attendance.dart';
 
 import '../../../models/hostel/rooms/room.dart';
 import '../../../models/user.dart';
