@@ -17,6 +17,12 @@ class _Settings {
   /// used for showing complaints in groups and in a certain order
   String complaintsGrouping = "category";
 
+  /// The groupBy in Stats of ComplaintsScreen
+  String groupBy = 'Category';
+
+  /// The groupBy in Stats of ComplaintsScreen
+  String interval = 'Day';
+
   /// converts setting parameters into a string
   String encode() {
     return json.encode({
@@ -24,6 +30,8 @@ class _Settings {
       "currentPage": currentPage,
       "introductionScreenVisited": introductionScreenVisited,
       "complaintsGrouping": complaintsGrouping,
+      "groupBy": groupBy,
+      "interval": interval,
     });
   }
 
@@ -34,6 +42,8 @@ class _Settings {
     introductionScreenVisited = settings["introductionScreenVisited"] ?? false;
     currentPage = settings["currentPage"] ?? 0;
     complaintsGrouping = (settings["complaintsGrouping"] ?? "category");
+    groupBy = (settings["groupBy"] ?? 'Category');
+    interval = (settings["interval"] ?? 'Day');
   }
 }
 

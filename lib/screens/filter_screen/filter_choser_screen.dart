@@ -1,28 +1,33 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/category/category.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/filter_screen/select_one_tile.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/complaints/selection_vault.dart';
 
-class FilterChooserScreen extends StatefulWidget {
+class FilterChooserScreen extends ConsumerStatefulWidget {
   final Map<String, dynamic> filters;
   const FilterChooserScreen({super.key, required this.filters});
 
   @override
-  State<FilterChooserScreen> createState() => _FilterChooserScreenState();
+  ConsumerState<FilterChooserScreen> createState() =>
+      _FilterChooserScreenState();
 }
 
-class _FilterChooserScreenState extends State<FilterChooserScreen> {
+class _FilterChooserScreenState extends ConsumerState<FilterChooserScreen> {
   @override
   Widget build(BuildContext context) {
+    final settingsClass = ref.read(settingsProvider.notifier);
     final filterWidgets = [
       CreatedWithin(
           dateRange: widget.filters['createdWithin'],
           onChange: (dateRange) {
             widget.filters['createdWithin'] = dateRange;
+            settingsClass.saveSettings();
           }),
       ResolvedChoose(
           resolved: widget.filters['resolved'],
@@ -30,17 +35,20 @@ class _FilterChooserScreenState extends State<FilterChooserScreen> {
             setState(() {
               widget.filters['resolved'] = resolved;
             });
+            settingsClass.saveSettings();
           }),
       if (widget.filters['resolved'] == true)
         ResolvedWithin(
             dateRange: widget.filters['resolvedWithin'],
             onChange: (dateRange) {
               widget.filters['resolvedWithin'] = dateRange;
+              settingsClass.saveSettings();
             }),
       ScopeChooser(
           scope: widget.filters['scope'],
           onChange: (scope) {
             widget.filters['scope'] = scope;
+            settingsClass.saveSettings();
           }),
       CategoriesBuilder(
         src: Source.cache,
@@ -53,6 +61,7 @@ class _FilterChooserScreenState extends State<FilterChooserScreen> {
         builder: (ctx, categories) => CategoryChooser(
             onChange: ((chosenCategories) {
               widget.filters['categories'] = chosenCategories;
+              settingsClass.saveSettings();
             }),
             allCategories: categories.map((e) => e.id).toSet(),
             chosenCategories: widget.filters['categories'] ?? {}),
@@ -82,6 +91,7 @@ class _FilterChooserScreenState extends State<FilterChooserScreen> {
             allUsers: students,
             onChange: (users) {
               widget.filters['complainants'] = users.map((e) => e).toSet();
+              settingsClass.saveSettings();
             },
             chosenUsers: widget.filters['complainants'] ?? {},
           );
@@ -100,6 +110,7 @@ class _FilterChooserScreenState extends State<FilterChooserScreen> {
           allUsers: users.map((e) => e.email!).toSet(),
           onChange: (users) {
             widget.filters['complainees'] = users;
+            settingsClass.saveSettings();
           },
           chosenUsers: widget.filters['complainees'] ?? {},
         ),

@@ -1,5 +1,5 @@
-class pair<A, B> {
+class Pair<A, B> {
   A first;
   B second;
-  pair(this.first, this.second);
+  Pair(this.first, this.second);
 }

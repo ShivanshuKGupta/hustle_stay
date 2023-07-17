@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hustle_stay/models/category/category.dart';
 import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user.dart';
@@ -43,7 +44,7 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
             icon: const Icon(Icons.donut_large_rounded),
           ),
           IconButton(
-            onPressed: _showSortDialog,
+            onPressed: () => showSortDialog(context, ref),
             icon: const Icon(Icons.compare_arrows_rounded),
           ),
           IconButton(
@@ -72,6 +73,7 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
             edgeOffset: (appBar.expandedHeight ?? 0) + appBar.toolbarHeight,
             onRefresh: () async {
               try {
+                await fetchAllCategories();
                 await fetchComplaints();
               } catch (e) {
                 showMsg(context, e.toString());
@@ -210,17 +212,17 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
       }
     }
   }
+}
 
-  Future<void> _showSortDialog() async {
-    final settings = ref.watch(settingsProvider);
-    final settingsClass = ref.read(settingsProvider.notifier);
-    settings.complaintsGrouping = await showDialog<String?>(
-          context: context,
-          builder: (ctx) => SortDialogBox(groupBy: settings.complaintsGrouping),
-        ) ??
-        settings.complaintsGrouping;
-    settingsClass.notifyListeners();
-  }
+Future<void> showSortDialog(BuildContext context, WidgetRef ref) async {
+  final settings = ref.watch(settingsProvider);
+  final settingsClass = ref.read(settingsProvider.notifier);
+  settings.complaintsGrouping = await showDialog<String?>(
+        context: context,
+        builder: (ctx) => SortDialogBox(groupBy: settings.complaintsGrouping),
+      ) ??
+      settings.complaintsGrouping;
+  settingsClass.notifyListeners();
 }
 
 // ignore: must_be_immutable
