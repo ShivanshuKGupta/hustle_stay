@@ -48,11 +48,21 @@ class SettingsScreen extends ConsumerWidget {
                     color: Colors.red,
                   ),
             ),
-            onTap: () {
+            onTap: () async {
               while (Navigator.of(context).canPop()) {
                 Navigator.of(context).pop();
               }
               settingsClass.clearSettings();
+              // final token = await FirebaseMessaging.instance.getToken();
+              // final delRef = await FirebaseFirestore.instance
+              //     .collection('userTokens')
+              //     .doc(currentUser.email)
+              //     .collection('Tokens')
+              //     .where('token', isEqualTo: token)
+              //     .get();
+              // delRef.docs.forEach((element) async {
+              //   await element.reference.delete();
+              // });
               auth.signOut();
             },
           ),
