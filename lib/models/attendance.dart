@@ -139,12 +139,13 @@ Future<bool> markAllAttendance(
         )) {
       roommatesQuery = await roommatesRef.get();
     } else {
-      roommatesQuery =
-          await roommatesRef.where('onLeave', isNotEqualTo: true).get();
+      List<String> leaveMembers = [];
+
       final roommatesLeaveQuery =
           await roommatesRef.where('onLeave', isEqualTo: true).get();
 
       for (final x in roommatesLeaveQuery.docs) {
+        leaveMembers.add(x.id);
         final attendanceDocRef = x.reference
             .collection('Attendance')
             .doc(DateFormat('yyyy-MM-dd').format(selectedDate));
@@ -155,6 +156,9 @@ Future<bool> markAllAttendance(
           batch.set(attendanceDocRef, {'status': 'onLeave'});
         }
       }
+      roommatesQuery = await roommatesRef
+          .where(FieldPath.documentId, whereNotIn: leaveMembers)
+          .get();
     }
 
     final attendanceFutures = roommatesQuery.docs.map((x) => x.reference
