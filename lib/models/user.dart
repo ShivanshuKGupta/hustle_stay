@@ -264,6 +264,14 @@ Future<void> login(String email, String password) async {
   UserCredential userCredential;
   userCredential =
       await auth.signInWithEmailAndPassword(email: email, password: password);
+  // final token = FirebaseMessaging.instance.getToken();
+  // await FirebaseFirestore.instance
+  //     .collection('userTokens')
+  //     .doc(email)
+  //     .collection('Tokens')
+  //     .doc()
+  //     .set({'token': token});
+
   currentUser = await fetchUserData(userCredential.user!.email!);
 }
 

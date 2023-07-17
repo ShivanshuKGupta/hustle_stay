@@ -62,9 +62,15 @@ Future<String> getAttendanceData(RoommateData roommateData, String hostelName,
   }
 }
 
-Future<bool> setAttendanceData(String email, String hostelName, String roomName,
-    DateTime date, String status) async {
+Future<String> setAttendanceData(String email, String hostelName,
+    String roomName, DateTime date, String status) async {
   try {
+    String statusVal = (status == 'present' || status == 'presentLate')
+        ? 'absent'
+        : (DateTime.now()
+                .isAfter(DateTime(date.year, date.month, date.day, 23)))
+            ? 'presentLate'
+            : 'present';
     final docRef = FirebaseFirestore.instance
         .collection('hostels')
         .doc(hostelName)
@@ -78,20 +84,15 @@ Future<bool> setAttendanceData(String email, String hostelName, String roomName,
       transaction.set(
           docRef,
           {
-            'status': (status == 'present' || status == 'presentLate')
-                ? 'absent'
-                : (DateTime.now()
-                        .isAfter(DateTime(date.year, date.month, date.day, 23)))
-                    ? 'presentLate'
-                    : 'present',
+            'status': statusVal,
           },
           SetOptions(merge: true));
     });
 
-    return true;
+    return statusVal;
   } catch (e) {
     debugPrint('Error while setting attendance data: $e');
-    return false;
+    return 'false';
   }
 }
 

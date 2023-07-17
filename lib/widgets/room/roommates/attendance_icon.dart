@@ -1,9 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/hostel/hostels.dart';
 import 'package:hustle_stay/screens/hostel/rooms/rooms_screen.dart';
 import 'package:hustle_stay/tools.dart';
-import 'package:intl/intl.dart';
 
 import '../../../models/attendance.dart';
 import '../../../models/hostel/rooms/room.dart';
@@ -128,14 +126,40 @@ class _AttendanceIconState extends State<AttendanceIcon> {
               setState(() {
                 isRunning = true;
               });
-              await setAttendanceData(
+              String resp = await setAttendanceData(
                 widget.roommateData.email,
                 widget.hostelName,
                 widget.roomName,
                 widget.selectedDate,
                 status!,
               );
-              await _getAttendanceData();
+              if (resp != 'false' && mounted) {
+                setState(() {
+                  status = resp;
+                  widget.tileColor!.value = colorPickerAttendance(resp);
+                  currentIcon = resp == 'present' || resp == 'presentLate'
+                      ? presentIcon
+                      : absentIcon;
+                  isRunning = false;
+                });
+              }
+              // final notRef = await FirebaseFirestore.instance
+              //     .collection('userTokens')
+              //     .doc(widget.roommateData.email)
+              //     .collection('Tokens')
+              //     .get();
+              // if (resp) {
+              //   final messaging = FirebaseMessaging.instance;
+              //   for (final x in notRef.docs) {
+              //     await messaging.sendMessage(
+              //       to: x.data()['token'],
+              //       collapseKey: 'update',
+              //       data: RemoteMessage(data: {
+              //         'title':'Marked'
+              //       })
+              //     );
+              //   }
+              // }
             },
             icon: currentIcon,
           );
