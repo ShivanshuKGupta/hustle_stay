@@ -87,9 +87,11 @@ class _StatsState extends State<Stats> {
     avgResolutionTimePerGroup.removeWhere((key, value) => value == 0);
     final data = getComplaintCountVsDate;
     final Duration overallAvgResolutionTime = Duration(
-      milliseconds: avgResolutionTimePerGroup.values
-              .fold(0.0, (previousValue, element) => previousValue + element) ~/
-          avgResolutionTimePerGroup.length,
+      milliseconds: avgResolutionTimePerGroup.isEmpty
+          ? 0
+          : avgResolutionTimePerGroup.values.fold(
+                  0.0, (previousValue, element) => previousValue + element) ~/
+              avgResolutionTimePerGroup.length,
     );
     return ListView(
       children: [
@@ -133,15 +135,15 @@ class _StatsState extends State<Stats> {
                   overflowMode: LegendItemOverflowMode.scroll,
                 ),
                 series: <CircularSeries>[
-                  DoughnutSeries<pair, String>(
+                  DoughnutSeries<Pair, String>(
                     animationDuration: 500,
-                    dataSource: <pair>[
+                    dataSource: <Pair>[
                       ...groupedComplaints.entries.map(
-                        (entry) => pair(entry.key, entry.value.length),
+                        (entry) => Pair(entry.key, entry.value.length),
                       ),
                     ],
-                    xValueMapper: (pair point, _) => point.first,
-                    yValueMapper: (pair point, _) => point.second,
+                    xValueMapper: (Pair point, _) => point.first,
+                    yValueMapper: (Pair point, _) => point.second,
                     dataLabelSettings: const DataLabelSettings(isVisible: true),
                     enableTooltip: true,
                   ),
@@ -175,17 +177,17 @@ class _StatsState extends State<Stats> {
             enableAutoIntervalOnZooming: true,
           ),
           // primaryYAxis: NumericAxis(title: AxisTitle(text: 'No of complaints')),
-          series: <LineSeries<pair, DateTime>>[
+          series: <LineSeries<Pair, DateTime>>[
             ...data.entries.map(
-              (e) => LineSeries<pair, DateTime>(
+              (e) => LineSeries<Pair, DateTime>(
                 animationDuration: 500,
                 name: e.key,
-                dataSource: <pair>[
+                dataSource: <Pair>[
                   ...e.value.entries
-                      .map((entry) => pair(entry.key, entry.value)),
+                      .map((entry) => Pair(entry.key, entry.value)),
                 ],
-                xValueMapper: (pair point, _) => point.first,
-                yValueMapper: (pair point, _) => point.second,
+                xValueMapper: (Pair point, _) => point.first,
+                yValueMapper: (Pair point, _) => point.second,
                 dataLabelSettings: const DataLabelSettings(isVisible: true),
                 enableTooltip: true,
                 legendItemText: e.key,
@@ -200,72 +202,73 @@ class _StatsState extends State<Stats> {
           // ),
         ),
         const Divider(),
-        Stack(
-          children: [
-            Positioned(
-              top: 0,
-              bottom: 10,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '${overallAvgResolutionTime.inDays}',
-                      style: Theme.of(context).textTheme.titleLarge,
-                      textAlign: TextAlign.center,
-                    ),
-                    Text(
-                      'days',
-                      style: Theme.of(context).textTheme.bodySmall,
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SfCircularChart(
-              title: ChartTitle(text: 'Average Resolution Time'),
-              margin: EdgeInsets.zero,
-              tooltipBehavior: TooltipBehavior(enable: true),
-              legend: const Legend(
-                isVisible: true,
-                isResponsive: true,
-                alignment: ChartAlignment.center,
-                orientation: LegendItemOrientation.horizontal,
-                position: LegendPosition.bottom,
-                width: "100%",
-                overflowMode: LegendItemOverflowMode.scroll,
-              ),
-              onDataLabelRender: (dataLabelArgs) {
-                final duration = Duration(
-                    milliseconds: double.parse(dataLabelArgs.text).toInt());
-                dataLabelArgs.text = duration.inDays != 0
-                    ? '${duration.inDays} days'
-                    : (duration.inHours != 0
-                        ? '${duration.inHours} hrs'
-                        : '${duration.inMinutes} mins');
-              },
-              series: <CircularSeries>[
-                DoughnutSeries<pair, String>(
-                  animationDuration: 500,
-                  dataSource: <pair>[
-                    ...avgResolutionTimePerGroup.entries.map(
-                      (entry) => pair(entry.key, entry.value),
-                    ),
-                  ],
-                  xValueMapper: (pair point, _) => point.first,
-                  yValueMapper: (pair point, _) => point.second,
-                  dataLabelSettings: const DataLabelSettings(
-                    isVisible: true,
+        if (avgResolutionTimePerGroup.isNotEmpty)
+          Stack(
+            children: [
+              Positioned(
+                top: 0,
+                bottom: 10,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${overallAvgResolutionTime.inDays}',
+                        style: Theme.of(context).textTheme.titleLarge,
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        'days',
+                        style: Theme.of(context).textTheme.bodySmall,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
-                  enableTooltip: true,
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+              SfCircularChart(
+                title: ChartTitle(text: 'Average Resolution Time'),
+                margin: EdgeInsets.zero,
+                tooltipBehavior: TooltipBehavior(enable: true),
+                legend: const Legend(
+                  isVisible: true,
+                  isResponsive: true,
+                  alignment: ChartAlignment.center,
+                  orientation: LegendItemOrientation.horizontal,
+                  position: LegendPosition.bottom,
+                  width: "100%",
+                  overflowMode: LegendItemOverflowMode.scroll,
+                ),
+                onDataLabelRender: (dataLabelArgs) {
+                  final duration = Duration(
+                      milliseconds: double.parse(dataLabelArgs.text).toInt());
+                  dataLabelArgs.text = duration.inDays != 0
+                      ? '${duration.inDays} days'
+                      : (duration.inHours != 0
+                          ? '${duration.inHours} hrs'
+                          : '${duration.inMinutes} mins');
+                },
+                series: <CircularSeries>[
+                  DoughnutSeries<Pair, String>(
+                    animationDuration: 500,
+                    dataSource: <Pair>[
+                      ...avgResolutionTimePerGroup.entries.map(
+                        (entry) => Pair(entry.key, entry.value),
+                      ),
+                    ],
+                    xValueMapper: (Pair point, _) => point.first,
+                    yValueMapper: (Pair point, _) => point.second,
+                    dataLabelSettings: const DataLabelSettings(
+                      isVisible: true,
+                    ),
+                    enableTooltip: true,
+                  ),
+                ],
+              ),
+            ],
+          ),
         const Divider(),
       ],
     );

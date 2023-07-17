@@ -236,7 +236,7 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
                         color: Theme.of(context).colorScheme.primary,
                       ),
                 ),
-                Text(widget.complaint.category ?? 'other'),
+                Text(widget.complaint.category ?? 'Other'),
                 const Divider(),
                 Wrap(
                   alignment: WrapAlignment.spaceBetween,

@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/providers/settings.dart';
+import 'package:hustle_stay/screens/complaints/complaints_screen.dart';
 import 'package:hustle_stay/screens/filter_screen/filter_choser_screen.dart';
 import 'package:hustle_stay/screens/filter_screen/stats.dart';
 import 'package:hustle_stay/tools.dart';
@@ -23,19 +25,22 @@ class StatisticsPage extends ConsumerStatefulWidget {
 class _StatisticsPageState extends ConsumerState<StatisticsPage> {
   late Map<String, dynamic> filters;
 
-  String groupBy = "None";
-
-  String interval = "Day";
-
   @override
   void initState() {
     super.initState();
-    // TODO: read any saved filter and assign it to filters
-    filters = {};
+    final now = DateTime.now();
+    filters = {
+      "createdWithin": DateTimeRange(
+        end: DateTime(now.year, now.month, now.day),
+        start: DateTime(now.year, now.month, now.day - 30),
+      )
+    };
   }
 
   @override
   Widget build(BuildContext context) {
+    final settings = ref.watch(settingsProvider);
+    final settingsClass = ref.read(settingsProvider.notifier);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Statistics'),
@@ -65,7 +70,7 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                       SelectOne(
                           title: 'Split Complaints by',
                           subtitle: 'Compare the stats based on',
-                          selectedOption: groupBy,
+                          selectedOption: settings.groupBy,
                           allOptions: const [
                             'None',
                             'Hostel',
@@ -76,15 +81,16 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                           ],
                           onChange: (value) {
                             setState(() {
-                              groupBy = value;
+                              settings.groupBy = value;
                             });
+                            settingsClass.saveSettings();
                             return true;
                           }),
                       const Divider(),
                       SelectOne(
                           title: 'Graph Interval',
                           subtitle: 'Change x-axis interval by each',
-                          selectedOption: interval,
+                          selectedOption: settings.interval,
                           allOptions: const [
                             'Day',
                             'Month',
@@ -92,8 +98,9 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                           ],
                           onChange: (value) {
                             setState(() {
-                              interval = value;
+                              settings.interval = value;
                             });
+                            settingsClass.saveSettings();
                             return true;
                           }),
                     ],
@@ -133,9 +140,9 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                   child: UsersBuilder(
                     src: Source.cache,
                     builder: (ctx, users) => Stats(
-                      interval: interval,
+                      interval: settings.interval,
                       complaints: complaints,
-                      groupBy: groupBy,
+                      groupBy: settings.groupBy,
                       users: users.fold({}, (previousValue, element) {
                         previousValue[element.email!] = element;
                         return previousValue;
@@ -152,16 +159,9 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                       appBar: AppBar(
                         actions: [
                           IconButton(
-                            onPressed: () {
-                              showModalBottomSheet(
-                                context: context,
-                                enableDrag: true,
-                                builder: (ctx) =>
-                                    const Text('Select sorting criteria here'),
-                              );
-                            },
-                            icon: const Icon(Icons.swap_vert_rounded),
-                          )
+                            onPressed: () => showSortDialog(context, ref),
+                            icon: const Icon(Icons.compare_arrows_rounded),
+                          ),
                         ],
                         title: const Text('Matching Complaints'),
                       ),
@@ -205,14 +205,15 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
       ans = ans.where((complaint) => complainants.contains(complaint.from));
     }
     if (resolved != null) {
-      if (resolvedWithin != null) {
+      if (resolved == true && resolvedWithin != null) {
         ans = ans.where((complaint) =>
             complaint.resolvedAt != null &&
             complaint.resolvedAt! >=
                 resolvedWithin.start.millisecondsSinceEpoch &&
             complaint.resolvedAt! <= resolvedWithin.end.millisecondsSinceEpoch);
       } else {
-        ans = ans.where((complaint) => complaint.resolvedAt != null);
+        ans =
+            ans.where((complaint) => resolved ^ (complaint.resolvedAt == null));
       }
     }
     if (scope != null) {

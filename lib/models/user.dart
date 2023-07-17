@@ -213,7 +213,6 @@ Future<List<UserData>> fetchAllUserEmails({Source? src}) async {
           ))
       .docs;
   return docs.map((doc) {
-    print(doc.data());
     return UserData(email: doc.id)..readonly.load(doc.data());
   }).toList();
 }

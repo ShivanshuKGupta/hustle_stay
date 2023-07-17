@@ -101,7 +101,9 @@ class _ComplaintFormState extends State<ComplaintForm> {
       }
       return;
     } catch (e) {
-      showMsg(context, e.toString());
+      if (context.mounted) {
+        showMsg(context, e.toString());
+      }
     }
     if (!_disposed) setState(() => _loading = false);
   }
