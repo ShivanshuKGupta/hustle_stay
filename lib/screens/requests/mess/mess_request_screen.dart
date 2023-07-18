@@ -20,8 +20,18 @@ class MessRequestScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            GridTileLogo(
+              onTap: () {
+                Navigator.of(context).pop();
+              },
+              title: 'Mess',
+              icon: const Icon(
+                Icons.restaurant_menu_rounded,
+                size: 50,
+              ),
+              color: theme.colorScheme.background,
+            ),
             Expanded(
               child: GridView.extent(
                 maxCrossAxisExtent: 200,

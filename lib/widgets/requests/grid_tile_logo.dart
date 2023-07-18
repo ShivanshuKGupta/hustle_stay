@@ -16,20 +16,29 @@ class GridTileLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GlassWidget(
-      radius: 30,
-      child: Container(
-        color: color.withOpacity(0.2),
-        padding: const EdgeInsets.all(10),
-        child: InkWell(
+    return Hero(
+      tag: title,
+      child: GlassWidget(
+        radius: 30,
+        child: GestureDetector(
           onTap: onTap,
-          child: GridTile(
-            header: Text(
-              title,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
+          child: Container(
+            color: color.withOpacity(0.2),
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                FittedBox(
+                  child: Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ),
+                icon,
+              ],
             ),
-            child: icon,
           ),
         ),
       ),

@@ -20,8 +20,18 @@ class AttendanceRequestScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            GridTileLogo(
+              onTap: () {
+                Navigator.of(context).pop();
+              },
+              title: 'Attendance',
+              icon: const Icon(
+                Icons.calendar_month_rounded,
+                size: 50,
+              ),
+              color: theme.colorScheme.background,
+            ),
             Expanded(
               child: GridView.extent(
                 maxCrossAxisExtent: 200,

@@ -9,9 +9,7 @@ class ChangeRoomRequest extends Request {
 
   @override
   Map<String, dynamic> encode() {
-    final Map<String, dynamic> ans = super.encode();
-    ans['targetRoomName'] = targetRoomName;
-    return ans;
+    return super.encode()..addAll({'targetRoomName': targetRoomName});
   }
 
   @override
