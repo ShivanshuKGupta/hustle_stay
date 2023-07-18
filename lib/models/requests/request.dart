@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
 
 import '../../tools.dart';
@@ -6,7 +7,8 @@ import '../../tools.dart';
 enum RequestStatus { pending, approved, denied }
 
 abstract class Request {
-  /// [id] also denotes when was the request created
+  /// [id] also denotes when was the request created,
+  /// its id in firestore and
   int id = 0;
 
   late String requestingUserEmail;
@@ -17,17 +19,15 @@ abstract class Request {
   /// This represents when was the request approved or denied
   int closedAt = 0;
 
-  List<String> _approvers = [];
+  /// The date after which the request will disappear from the UI
+  DateTime expiryDate = DateTime.fromMillisecondsSinceEpoch(0);
 
-  /// Return the list of approvers from cache
-  Future<List<String>> get approvers async {
-    if (_approvers.isEmpty) return await fetchApprovers(src: Source.cache);
-    return _approvers;
-  }
+  List<String> approvers = [];
 
   /// This denotes the type of request
   late String type;
 
+  /// The reason for posting the request
   String reason = "";
 
   /// This function is used to store data into a map with string keys
@@ -39,6 +39,7 @@ abstract class Request {
       "type": type,
       "reason": reason,
       "requestingUserEmail": requestingUserEmail,
+      "expiryDate": expiryDate.millisecondsSinceEpoch,
     };
   }
 
@@ -50,7 +51,11 @@ abstract class Request {
     type = data['type'] ?? type;
     reason = data['reason'] ?? reason;
     requestingUserEmail = data['requestingUserEmail'] ?? requestingUserEmail;
+    expiryDate = DateTime.fromMillisecondsSinceEpoch(data['expiryDate'] ?? 0);
   }
+
+  /// This function returns a custom widget for this type of request
+  Widget widget();
 
   /// This function is when the request is status
   void onApprove();
@@ -58,15 +63,24 @@ abstract class Request {
   /// This function is called every time the request is updated
   /// Do some checks on whether it is possible to update the request or not
   /// Like for van request is that time slot available or not
-  bool onPost() {
+  bool onUpdate() {
     final String? err = Validate.email(requestingUserEmail, required: true);
     if (err != null) throw err;
+
+    // if the request is being closed down and the expiry is not set yet
+    if (status != RequestStatus.pending &&
+        expiryDate == DateTime.fromMillisecondsSinceEpoch(0)) {
+      final closedDateTime = DateTime.fromMillisecondsSinceEpoch(closedAt);
+      // then set the expiry to 7 days after closedAt
+      expiryDate = DateTime(
+          closedDateTime.year, closedDateTime.month, closedDateTime.day + 7);
+    }
     return true;
   }
 
   /// Does what it does
   Future<void> update() async {
-    if (!onPost()) return;
+    if (!onUpdate()) return;
     final doc = firestore.collection('requests').doc(id.toString());
     await doc.set(encode());
   }
@@ -91,15 +105,15 @@ abstract class Request {
     final response =
         await doc.get(src == null ? null : GetOptions(source: src));
     final data = response.data()!;
-    _approvers = data['approvers'];
-    if (_approvers.isEmpty) throw "No approver found for request type: $type";
-    return _approvers;
+    approvers = data['approvers'];
+    if (approvers.isEmpty) throw "No approver found for request type: $type";
+    return approvers;
   }
 
   /// Use this function to update this request's list of approvers
-  Future<void> updateApprovers({required List<String> approvers}) async {
+  Future<void> updateApprovers({required List<String> newApprovers}) async {
     final doc = firestore.collection('requests').doc(type);
-    await doc.set({'approvers': approvers});
-    _approvers = approvers;
+    await doc.set({'approvers': newApprovers});
+    approvers = newApprovers;
   }
 }

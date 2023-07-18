@@ -1,32 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/screens/requests/attendance/attendance_request_screen.dart';
-import 'package:hustle_stay/screens/requests/mess/mess_request_screen.dart';
-import 'package:hustle_stay/screens/requests/van/van_requests_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
 
-class RequestsScreen extends StatelessWidget {
-  const RequestsScreen({super.key});
+class VanRequestScreen extends StatelessWidget {
+  const VanRequestScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return SafeArea(
-      child: Padding(
+    return Scaffold(
+      appBar: AppBar(
+        title: shaderText(
+          context,
+          title: 'Vehicle Request',
+          style:
+              theme.textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
+        ),
+      ),
+      body: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // TODO: add your requests widget here
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-              child: shaderText(
-                context,
-                title: 'Post a New Request',
-                style: theme.textTheme.titleLarge!
-                    .copyWith(fontWeight: FontWeight.bold),
-              ),
-            ),
             Expanded(
               child: GridView.extent(
                 maxCrossAxisExtent: 200,
@@ -36,45 +31,47 @@ class RequestsScreen extends StatelessWidget {
                 children: [
                   GridTileLogo(
                     onTap: () {
-                      navigatorPush(context, const AttendanceRequestScreen());
+                      navigatorPush(context, Container());
                     },
-                    title: 'Attendance',
+                    title: 'Night Travel',
                     icon: const Icon(
-                      Icons.calendar_month_rounded,
+                      Icons.nightlight_round,
                       size: 50,
                     ),
-                    color: Colors.red,
+                    color: Colors.blueAccent,
                   ),
                   GridTileLogo(
                     onTap: () {
-                      navigatorPush(context, const VanRequestScreen());
+                      navigatorPush(context, Container());
                     },
-                    title: 'Vehicle',
+                    title: 'Hospital Visit',
                     icon: const Icon(
-                      Icons.airport_shuttle_rounded,
+                      Icons.local_hospital_rounded,
                       size: 50,
                     ),
-                    color: Colors.deepPurpleAccent,
+                    color: Colors.tealAccent,
                   ),
                   GridTileLogo(
                     onTap: () {
-                      navigatorPush(context, const MessRequestScreen());
+                      navigatorPush(context, Container());
                     },
-                    title: 'Mess',
+                    title: 'Medical Emergency',
                     icon: const Icon(
-                      Icons.restaurant_menu_rounded,
+                      Icons.warning_rounded,
                       size: 50,
                     ),
-                    color: Colors.lightBlueAccent,
+                    color: Colors.redAccent,
                   ),
                   GridTileLogo(
-                    onTap: () {},
-                    title: 'Other',
+                    onTap: () {
+                      navigatorPush(context, Container());
+                    },
+                    title: 'Other Reason',
                     icon: const Icon(
                       Icons.more_horiz_rounded,
                       size: 50,
                     ),
-                    color: Colors.amber,
+                    color: Colors.lightGreenAccent,
                   ),
                 ],
               ),

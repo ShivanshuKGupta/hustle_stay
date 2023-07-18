@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/requests/request.dart';
 import 'package:hustle_stay/tools.dart';
 
@@ -23,11 +24,11 @@ class SwapRoomRequest extends Request {
   }
 
   @override
-  bool onPost() {
+  bool onUpdate() {
     targetUserEmail = targetUserEmail.trim();
     String? err = Validate.email(targetUserEmail, required: true);
     if (err != null) throw err;
-    return super.onPost();
+    return super.onUpdate();
   }
 
   @override
@@ -38,5 +39,11 @@ class SwapRoomRequest extends Request {
 
     // Use [targetUserEmail] and [requestingUserEmail] to complete this function
     // and super.reason to get some more info
+  }
+
+  @override
+  Widget widget() {
+    // TODO: implement widget
+    throw UnimplementedError();
   }
 }

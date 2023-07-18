@@ -35,13 +35,16 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
           title: shaderText(
             context,
             title: "Complaints",
-            style: Theme.of(context).textTheme.titleLarge,
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge!
+                .copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         actions: [
           IconButton(
             onPressed: () => navigatorPush(context, const StatisticsPage()),
-            icon: const Icon(Icons.donut_large_rounded),
+            icon: const Icon(Icons.insert_chart_outlined_sharp),
           ),
           IconButton(
             onPressed: () => showSortDialog(context, ref),

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/requests/request.dart';
 
 class ChangeRoomRequest extends Request {
@@ -22,10 +23,10 @@ class ChangeRoomRequest extends Request {
   }
 
   @override
-  bool onPost() {
+  bool onUpdate() {
     targetRoomName = targetRoomName.trim();
     assert(targetRoomName.isNotEmpty);
-    return super.onPost();
+    return super.onUpdate();
   }
 
   @override
@@ -37,5 +38,11 @@ class ChangeRoomRequest extends Request {
 
     // Use [targetRoomName] and [requestingUserEmail] to complete this function
     // and super.reason to get some more info
+  }
+
+  @override
+  Widget widget() {
+    // TODO: implement widget
+    throw UnimplementedError();
   }
 }
