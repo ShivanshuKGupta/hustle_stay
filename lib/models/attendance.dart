@@ -378,6 +378,59 @@ Future<Map<String, double>> getHostelAttendanceStatistics(
   return attendanceStats;
 }
 
+Future<Map<String, Map<String, int>>> getHostelRangeAttendanceStatistics(
+    String hostelName, DateTimeRange dateRange,
+    {Source? source}) async {
+  final storage = FirebaseFirestore.instance;
+  double total = 0;
+
+  final roommatesQuery = await storage
+      .collection('hostels')
+      .doc(hostelName)
+      .collection('Roommates')
+      .get(source == null ? null : GetOptions(source: source));
+  total = roommatesQuery.docs.length.toDouble();
+  final List<Future<QuerySnapshot<Map<String, dynamic>>>> attendanceFutures =
+      [];
+
+  for (final x in roommatesQuery.docs) {
+    final attendanceRef = x.reference.collection('Attendance').where(
+        FieldPath.documentId,
+        isLessThanOrEqualTo: DateFormat('yyyy-MM-dd').format(dateRange.end),
+        isGreaterThanOrEqualTo:
+            DateFormat('yyyy-MM-dd').format(dateRange.start));
+
+    attendanceFutures.add(attendanceRef.get());
+  }
+
+  final List<QuerySnapshot<Map<String, dynamic>>> attendanceSnapshots =
+      await Future.wait(attendanceFutures);
+  Map<String, Map<String, int>> list = {};
+
+  for (final x in attendanceSnapshots) {
+    x.docs.forEach((element) {
+      if (list[element.id] != null) {
+        final int x = list[element.id]![element.data()['status']]! + 1;
+
+        list[element.id]![element.data()['status']] = x;
+      } else {
+        list[element.id] = {
+          'present': 0,
+          'absent': 0,
+          'presentLate': 0,
+          'onLeave': 0,
+          'onInternship': 0,
+        };
+        list[element.id]![element.data()['status']] = 1;
+      }
+    });
+  }
+  final listEntries = list.entries.toList();
+  listEntries.sort((a, b) => a.key.compareTo(b.key));
+  list = Map.fromEntries(listEntries);
+  return list;
+}
+
 Future<List<RoommateInfo>> getFilteredStudents(
     String statusVal, DateTime date, String hostelName,
     {Source? source}) async {
