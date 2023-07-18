@@ -2,6 +2,7 @@ import 'package:animated_icon/animated_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/attendance.dart';
 import 'package:hustle_stay/screens/hostel/rooms/filter_status_data.dart';
+import 'package:hustle_stay/screens/hostel/rooms/range_chart.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../../../screens/hostel/rooms/attendance_stats_student.dart';
@@ -22,6 +23,32 @@ class AttendancePieChart extends StatefulWidget {
 
   @override
   State<AttendancePieChart> createState() => _AttendancePieChartState();
+}
+
+List<DataPoint> convertData(Map<String, Map<String, int>> data) {
+  List<DataPoint> convertedData = [];
+
+  data.forEach((date, statuses) {
+    statuses.forEach((status, count) {
+      List<String> dateComponents = date.split('-');
+
+      int year = int.parse(dateComponents[0]);
+      int month = int.parse(dateComponents[1]);
+      int day = int.parse(dateComponents[2]);
+      convertedData.add(DataPoint(
+          date: DateTime(year, month, day), status: status, count: count));
+    });
+  });
+
+  return convertedData;
+}
+
+class DataPoint {
+  final DateTime date;
+  final String status;
+  final int count;
+
+  DataPoint({required this.date, required this.status, required this.count});
 }
 
 class _AttendancePieChartState extends State<AttendancePieChart> {
@@ -63,7 +90,7 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
   }
 
   String chartType = 'pieChart';
-
+  bool isRangeChart = false;
   bool isRunning = false;
   int total = 0;
 
@@ -119,70 +146,128 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
     const DropdownMenuEntry(value: 'barChart', label: 'Bar Chart'),
     const DropdownMenuEntry(value: 'pieChart', label: 'Pie Chart'),
   ];
+  ValueNotifier<DateTimeRange?> dateRange = ValueNotifier(null);
 
   @override
   Widget build(BuildContext context) {
     return widget.email == null
-        ? ValueListenableBuilder(
-            valueListenable: widget.selectedDate!,
-            builder: (context, value, child) =>
-                futureBuilderWidget(value: value),
-          )
+        ? isRangeChart
+            ? ValueListenableBuilder(
+                valueListenable: dateRange,
+                builder: (context, value, child) =>
+                    futureBuilderWidget(valueRange: value),
+              )
+            : ValueListenableBuilder(
+                valueListenable: widget.selectedDate!,
+                builder: (context, value, child) =>
+                    futureBuilderWidget(value: value),
+              )
         : futureBuilderWidget();
   }
 
-  Widget futureBuilderWidget({DateTime? value}) {
-    return FutureBuilder(
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
-            child: SizedBox(
-              width: double.infinity,
-              height: double.infinity,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  AnimateIcon(
-                    onTap: () {},
-                    iconType: IconType.continueAnimation,
-                    animateIcon: AnimateIcons.loading1,
-                    color: Theme.of(context).colorScheme.secondary,
+  Widget futureBuilderWidget({DateTime? value, DateTimeRange? valueRange}) {
+    return isRangeChart
+        ? FutureBuilder(
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: double.infinity,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        AnimateIcon(
+                          onTap: () {},
+                          iconType: IconType.continueAnimation,
+                          animateIcon: AnimateIcons.loading1,
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
+                        const Text('Loading...')
+                      ],
+                    ),
                   ),
-                  const Text('Loading...')
-                ],
-              ),
-            ),
-          );
-        }
-        if (!snapshot.hasData && snapshot.error != null) {
-          return Center(
-            child: SizedBox(
-              width: double.infinity,
-              height: double.infinity,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  AnimateIcon(
-                    onTap: () {},
-                    iconType: IconType.continueAnimation,
-                    animateIcon: AnimateIcons.error,
-                    color: Theme.of(context).colorScheme.secondary,
+                );
+              }
+              if (!snapshot.hasData && snapshot.error != null) {
+                return Center(
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: double.infinity,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        AnimateIcon(
+                          onTap: () {},
+                          iconType: IconType.continueAnimation,
+                          animateIcon: AnimateIcons.error,
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
+                        const Text('No data available')
+                      ],
+                    ),
                   ),
-                  const Text('No data available')
-                ],
-              ),
-            ),
-          );
-        }
+                );
+              }
 
-        return pieChartWidget(snapshot.data!);
-      },
-      future: widget.email == null && value != null
-          ? getHostelAttendanceStatistics(widget.hostelName, value)
-          : getAttendanceStatistics(widget.email!, widget.hostelName),
-    );
+              return chart(snapshot.data!);
+            },
+            future: getHostelRangeAttendanceStatistics(
+                widget.hostelName, valueRange!),
+          )
+        : FutureBuilder(
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: double.infinity,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        AnimateIcon(
+                          onTap: () {},
+                          iconType: IconType.continueAnimation,
+                          animateIcon: AnimateIcons.loading1,
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
+                        const Text('Loading...')
+                      ],
+                    ),
+                  ),
+                );
+              }
+              if (!snapshot.hasData && snapshot.error != null) {
+                return Center(
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: double.infinity,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        AnimateIcon(
+                          onTap: () {},
+                          iconType: IconType.continueAnimation,
+                          animateIcon: AnimateIcons.error,
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
+                        const Text('No data available')
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              return pieChartWidget(snapshot.data!);
+            },
+            future: widget.email == null && value != null
+                ? getHostelAttendanceStatistics(widget.hostelName, value)
+                : getAttendanceStatistics(widget.email!, widget.hostelName),
+          );
   }
 
   Widget pieChartWidget(Map<String, double> data) {
@@ -190,34 +275,70 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
 
     return Column(
       children: [
-        DropdownMenu(
-          dropdownMenuEntries: chartOptions,
-          initialSelection: chartType,
-          onSelected: (value) {
-            setState(() {
-              chartType = value;
-            });
-          },
+        Wrap(
+          children: [
+            if (widget.email == null)
+              Checkbox(
+                  value: isRangeChart,
+                  onChanged: (value) {
+                    if (dateRange.value != null) {
+                      setState(() {
+                        isRangeChart = !isRangeChart;
+                      });
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text('Select Date Range first')));
+                    }
+                  }),
+            if (widget.email == null)
+              IconButton(
+                  onPressed: () async {
+                    final picked = await showDateRangePicker(
+                        context: context,
+                        firstDate: DateTime(2023, 01, 01),
+                        lastDate: DateTime.now());
+                    if (picked != null) {
+                      dateRange.value = picked;
+                    }
+                  },
+                  icon: const Icon(Icons.edit_calendar_outlined)),
+            if (!isRangeChart)
+              DropdownMenu(
+                dropdownMenuEntries: chartOptions,
+                initialSelection: chartType,
+                onSelected: (value) {
+                  setState(() {
+                    chartType = value;
+                  });
+                },
+              ),
+          ],
         ),
         Expanded(
           child: chartType == 'pieChart'
               ? SfCircularChart(
                   series: <CircularSeries>[
                     PieSeries<ChartData, String>(
-                      dataSource: chartdata,
-                      pointColorMapper: (ChartData data, _) => data.color,
-                      xValueMapper: (ChartData data, _) => data.category,
-                      yValueMapper: (ChartData data, _) => data.value,
-                      dataLabelSettings: const DataLabelSettings(
-                        isVisible: true,
-                      ),
-                      selectionBehavior: SelectionBehavior(enable: true),
-                      onPointLongPress: (pointInteractionDetails) {
-                        onClickNavigation(
-                            chartdata[pointInteractionDetails.pointIndex!]
-                                .category);
-                      },
-                    ),
+                        dataSource: chartdata,
+                        pointColorMapper: (ChartData data, _) => data.color,
+                        xValueMapper: (ChartData data, _) => data.category,
+                        yValueMapper: (ChartData data, _) => data.value,
+                        dataLabelSettings: const DataLabelSettings(
+                          isVisible: true,
+                        ),
+                        selectionBehavior: SelectionBehavior(enable: true),
+                        onPointLongPress: (pointInteractionDetails) {
+                          onClickNavigation(
+                              chartdata[pointInteractionDetails.pointIndex!]
+                                  .category);
+                        },
+                        onPointTap: (pointInteractionDetails) async {
+                          await getHostelRangeAttendanceStatistics(
+                              widget.hostelName,
+                              DateTimeRange(
+                                  start: DateTime(2023, 06, 25),
+                                  end: DateTime.now()));
+                        }),
                   ],
                   legend: const Legend(
                     isVisible: true,
@@ -326,5 +447,120 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
         )
       ],
     );
+  }
+
+  Widget chart(Map<String, Map<String, int>> data) {
+    List<DataPoint> chartData = convertData(data);
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Wrap(
+            children: [
+              Checkbox(
+                  value: isRangeChart,
+                  onChanged: (value) {
+                    if (dateRange.value != null) {
+                      setState(() {
+                        isRangeChart = !isRangeChart;
+                      });
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text('Select Date Range first')));
+                    }
+                  }),
+              IconButton(
+                  onPressed: () async {
+                    final picked = await showDateRangePicker(
+                        context: context,
+                        firstDate: DateTime(2023, 01, 01),
+                        lastDate: DateTime.now());
+                    if (picked != null) {
+                      dateRange.value = picked;
+                    }
+                  },
+                  icon: const Icon(Icons.edit_calendar_outlined)),
+              if (!isRangeChart)
+                DropdownMenu(
+                  dropdownMenuEntries: chartOptions,
+                  initialSelection: chartType,
+                  onSelected: (value) {
+                    setState(() {
+                      chartType = value;
+                    });
+                  },
+                ),
+            ],
+          ),
+          SfCartesianChart(
+            tooltipBehavior: TooltipBehavior(enable: true),
+            primaryXAxis: DateTimeAxis(
+              edgeLabelPlacement: EdgeLabelPlacement.shift,
+              isVisible: true,
+              associatedAxisName: 'Axis Name',
+              interval: 1,
+              name: 'Name',
+              title: AxisTitle(text: 'Date'),
+              enableAutoIntervalOnZooming: true,
+            ),
+            series: _getSeries(chartData),
+            zoomPanBehavior: ZoomPanBehavior(
+              enablePanning: true,
+              enableSelectionZooming: true,
+              enableMouseWheelZooming: true,
+              enableDoubleTapZooming: true,
+            ),
+            legend: const Legend(
+              isVisible: true,
+              isResponsive: true,
+              alignment: ChartAlignment.center,
+              orientation: LegendItemOrientation.horizontal,
+              position: LegendPosition.bottom,
+              width: "100%",
+              overflowMode: LegendItemOverflowMode.wrap,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<LineSeries<DataPoint, DateTime>> _getSeries(List<DataPoint> chartData) {
+    List<LineSeries<DataPoint, DateTime>> series = [];
+
+    // Get unique status values
+    Set<String> statusSet = chartData.map((data) => data.status).toSet();
+
+    // Create a separate line series for each status
+    statusSet.forEach((status) {
+      Color lineColor;
+      switch (status) {
+        case 'present':
+          lineColor = Colors.green;
+          break;
+        case 'absent':
+          lineColor = Colors.red;
+          break;
+        case 'onLeave':
+          lineColor = Colors.cyan;
+          break;
+        case 'onInternship':
+          lineColor = Colors.orange;
+          break;
+        default:
+          lineColor = Colors.yellow;
+          break;
+      }
+      series.add(LineSeries<DataPoint, DateTime>(
+        dataSource: chartData.where((data) => data.status == status).toList(),
+        xValueMapper: (DataPoint data, _) => data.date,
+        yValueMapper: (DataPoint data, _) => data.count,
+        color: lineColor,
+        dataLabelSettings: const DataLabelSettings(isVisible: true),
+        enableTooltip: true,
+        legendItemText: status,
+      ));
+    });
+
+    return series;
   }
 }
