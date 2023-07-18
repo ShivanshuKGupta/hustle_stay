@@ -7,10 +7,9 @@ import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/complaints/complaints_screen.dart';
 import 'package:hustle_stay/screens/hostel/hostel_screen.dart';
 import 'package:hustle_stay/screens/hostel/rooms/complete_details_screen.dart';
+import 'package:hustle_stay/screens/requests/requests_screen.dart';
 import 'package:hustle_stay/screens/settings/settings_screen.dart';
 import 'package:hustle_stay/tools.dart';
-
-import 'hostel/rooms/profile_view_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -52,9 +51,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       const Center(
         child: Text('Home Screen'),
       ),
-      const Center(
-        child: Text('Request Screen'),
-      ),
+      const RequestsScreen(),
       const SettingsScreen(),
     ];
     return Scaffold(
