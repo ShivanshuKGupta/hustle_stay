@@ -78,6 +78,16 @@ abstract class Request {
   /// This function returns a custom widget for this type of request
   Widget widget(BuildContext context);
 
+  Future<void> approve() async {
+    status = RequestStatus.approved;
+    await update();
+  }
+
+  Future<void> deny() async {
+    status = RequestStatus.denied;
+    await update();
+  }
+
   /// This function is when the request is status
   void onApprove();
 

@@ -184,7 +184,7 @@ class _VanRequestFormScreenState extends State<VanRequestFormScreen> {
         _loading = false;
       });
       while (Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(true);
       }
       navigatorPush(
         context,

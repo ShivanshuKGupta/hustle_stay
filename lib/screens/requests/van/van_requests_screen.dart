@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/models/requests/van/van_request.dart';
 import 'package:hustle_stay/screens/requests/van/van_request_form_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
@@ -53,11 +54,11 @@ class VanRequestScreen extends StatelessWidget {
                       );
                     },
                     title: 'Night Travel',
-                    icon: const Icon(
-                      Icons.nightlight_round,
+                    icon: Icon(
+                      VanRequest.uiElements['Night Travel']!['icon'],
                       size: 50,
                     ),
-                    color: Colors.blueAccent,
+                    color: VanRequest.uiElements['Night Travel']!['color'],
                   ),
                   GridTileLogo(
                     onTap: () {
@@ -77,11 +78,11 @@ class VanRequestScreen extends StatelessWidget {
                       );
                     },
                     title: 'Hospital Visit',
-                    icon: const Icon(
-                      Icons.local_hospital_rounded,
+                    icon: Icon(
+                      VanRequest.uiElements['Hospital Visit']!['icon'],
                       size: 50,
                     ),
-                    color: Colors.tealAccent,
+                    color: VanRequest.uiElements['Hospital Visit']!['color'],
                   ),
                   // GridTileLogo(
                   //   onTap: () {
@@ -122,11 +123,11 @@ class VanRequestScreen extends StatelessWidget {
                       );
                     },
                     title: 'Other Reason',
-                    icon: const Icon(
-                      Icons.more_horiz_rounded,
+                    icon: Icon(
+                      VanRequest.uiElements['Other Reason']!['icon'],
                       size: 50,
                     ),
-                    color: Colors.lightGreenAccent,
+                    color: VanRequest.uiElements['Other Reason']!['color'],
                   ),
                 ],
               ),
