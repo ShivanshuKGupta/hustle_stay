@@ -1,5 +1,9 @@
 import 'package:animated_icon/animated_icon.dart';
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/screens/admin_panel/manage_categories.dart';
+import 'package:hustle_stay/screens/admin_panel/manage_hostel_attendance.dart';
+import 'package:hustle_stay/screens/admin_panel/manage_requests.dart';
+import 'package:hustle_stay/screens/admin_panel/manage_user_permission.dart';
 
 class AdminPanel extends StatefulWidget {
   const AdminPanel({super.key});
@@ -34,7 +38,7 @@ class _AdminPanelState extends State<AdminPanel> {
         icon: const Icon(Icons.request_quote)),
     Operations(
         cardColor: const Color.fromARGB(255, 0, 146, 69),
-        operationName: 'Manage Hostels and Attendance',
+        operationName: 'Manage Hostels & Attendance',
         icon: const Icon(Icons.calendar_month))
   ];
 
@@ -48,7 +52,7 @@ class _AdminPanelState extends State<AdminPanel> {
       appBar: AppBar(
         title: Text('Admin Panel'),
       ),
-      body: Center(
+      body: SafeArea(
         child: GridView.builder(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
@@ -62,50 +66,74 @@ class _AdminPanelState extends State<AdminPanel> {
               end: Alignment.bottomCenter,
               colors: [
                 brightness == Brightness.light
-                    ? cardColor.withOpacity(0.9)
+                    ? cardColor.withOpacity(0.4)
                     : cardColor.withOpacity(0.7),
-                cardColor,
+                Colors.black,
               ],
             );
 
             return Padding(
-              padding: EdgeInsets.fromLTRB(2, 2, 8, 8),
-              child: Container(
-                width: gridWidth,
-                padding: EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16.0),
-                  gradient: gradient,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      spreadRadius: 2,
-                      blurRadius: 4,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      catList[index].icon.icon,
-                      size: screenWidth * 0.3,
-                    ),
-                    const SizedBox(
-                      height: 16.0,
-                    ),
-                    Divider(
-                      color: Colors.white,
-                    ),
-                    Text(
-                      catList[index].operationName,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                          fontWeight: FontWeight.bold, color: Colors.white),
-                    ),
-                    Divider(color: Colors.white),
-                  ],
+              padding: const EdgeInsets.fromLTRB(2, 2, 8, 8),
+              child: GestureDetector(
+                onTap: () {
+                  switch (catList[index].operationName) {
+                    case 'Manage Users & Permissions':
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => const ManageUsers()));
+                      break;
+                    case 'Manage Categories':
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => const ManageCategories()));
+                      break;
+                    case 'Manage Requests':
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => const ManageRequest()));
+                      break;
+                    case 'Manage Hostels & Attendance':
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => const ManageHostel()));
+                      break;
+                    default:
+                  }
+                },
+                child: Container(
+                  width: gridWidth,
+                  padding: const EdgeInsets.all(1),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16.0),
+                    gradient: gradient,
+                    boxShadow: [
+                      BoxShadow(
+                        color: brightness == Brightness.light
+                            ? Colors.black.withOpacity(0.5)
+                            : Colors.grey.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Icon(
+                          catList[index].icon.icon,
+                          size: screenWidth * 0.3,
+                        ),
+                      ),
+                      const Divider(
+                        color: Colors.white,
+                      ),
+                      Text(
+                        catList[index].operationName,
+                        overflow: TextOverflow.clip,
+                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                            fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                      const Divider(color: Colors.white),
+                    ],
+                  ),
                 ),
               ),
             );
