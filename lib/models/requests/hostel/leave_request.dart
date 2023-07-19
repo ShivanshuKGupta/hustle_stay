@@ -23,14 +23,14 @@ class LeaveRequest extends Request {
   }
 
   @override
-  bool onUpdate() {
+  bool beforeUpdate() {
     // TODO: Sani
     // using the [dateTime] object you can do some checks here
     // return false if those check are not meant or throw an error with some
     // description
 
     // If you return false request won't be posted
-    return super.onUpdate();
+    return super.beforeUpdate();
   }
 
   @override
@@ -45,7 +45,7 @@ class LeaveRequest extends Request {
   }
 
   @override
-  Widget widget() {
+  Widget widget(context) {
     // TODO: implement widget
     throw UnimplementedError();
   }

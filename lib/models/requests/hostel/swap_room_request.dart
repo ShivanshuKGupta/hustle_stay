@@ -24,11 +24,11 @@ class SwapRoomRequest extends Request {
   }
 
   @override
-  bool onUpdate() {
+  bool beforeUpdate() {
     targetUserEmail = targetUserEmail.trim();
     String? err = Validate.email(targetUserEmail, required: true);
     if (err != null) throw err;
-    return super.onUpdate();
+    return super.beforeUpdate();
   }
 
   @override
@@ -42,7 +42,7 @@ class SwapRoomRequest extends Request {
   }
 
   @override
-  Widget widget() {
+  Widget widget(context) {
     // TODO: implement widget
     throw UnimplementedError();
   }

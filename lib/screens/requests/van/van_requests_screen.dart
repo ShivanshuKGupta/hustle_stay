@@ -44,6 +44,10 @@ class VanRequestScreen extends StatelessWidget {
                               Icons.nightlight_round,
                               size: 50,
                             ),
+                            reasonOptions: const [
+                              'Train Arrival',
+                              'Train Departure',
+                            ],
                           ),
                         ),
                       );
@@ -65,6 +69,10 @@ class VanRequestScreen extends StatelessWidget {
                             Icons.local_hospital_rounded,
                             size: 50,
                           ),
+                          reasonOptions: const [
+                            'Fever',
+                            'Food Poisoning',
+                          ],
                         ),
                       );
                     },
@@ -75,26 +83,30 @@ class VanRequestScreen extends StatelessWidget {
                     ),
                     color: Colors.tealAccent,
                   ),
-                  GridTileLogo(
-                    onTap: () {
-                      navigatorPush(
-                        context,
-                        VanRequestFormScreen(
-                          title: 'Medical Issue',
-                          icon: const Icon(
-                            Icons.warning_rounded,
-                            size: 50,
-                          ),
-                        ),
-                      );
-                    },
-                    title: 'Medical Emergency',
-                    icon: const Icon(
-                      Icons.warning_rounded,
-                      size: 50,
-                    ),
-                    color: Colors.redAccent,
-                  ),
+                  // GridTileLogo(
+                  //   onTap: () {
+                  //     navigatorPush(
+                  //       context,
+                  //       VanRequestFormScreen(
+                  //         title: 'Medical Issue',
+                  //         icon: const Icon(
+                  //           Icons.warning_rounded,
+                  //           size: 50,
+                  //         ),
+                  //         reasonOptions: const [
+                  //           'Train Arrival',
+                  //           'Train Departure',
+                  //         ],
+                  //       ),
+                  //     );
+                  //   },
+                  //   title: 'Medical Emergency',
+                  //   icon: const Icon(
+                  //     Icons.warning_rounded,
+                  //     size: 50,
+                  //   ),
+                  //   color: Colors.redAccent,
+                  // ),
                   GridTileLogo(
                     onTap: () {
                       navigatorPush(
@@ -105,6 +117,7 @@ class VanRequestScreen extends StatelessWidget {
                             Icons.more_horiz_rounded,
                             size: 50,
                           ),
+                          reasonOptions: const [],
                         ),
                       );
                     },

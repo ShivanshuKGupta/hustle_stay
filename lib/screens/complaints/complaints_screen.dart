@@ -209,7 +209,7 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
             id: DateTime.now().millisecondsSinceEpoch.toString(),
             from: currentUser.email!,
             createdAt: DateTime.now(),
-            txt: templateMessage(complaint),
+            txt: complaintTemplateMessage(complaint),
           ),
         );
       }

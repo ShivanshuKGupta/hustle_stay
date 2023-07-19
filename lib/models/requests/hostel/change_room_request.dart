@@ -21,10 +21,10 @@ class ChangeRoomRequest extends Request {
   }
 
   @override
-  bool onUpdate() {
+  bool beforeUpdate() {
     targetRoomName = targetRoomName.trim();
     assert(targetRoomName.isNotEmpty);
-    return super.onUpdate();
+    return super.beforeUpdate();
   }
 
   @override
@@ -39,7 +39,7 @@ class ChangeRoomRequest extends Request {
   }
 
   @override
-  Widget widget() {
+  Widget widget(context) {
     // TODO: implement widget
     throw UnimplementedError();
   }

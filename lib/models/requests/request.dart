@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
+import 'package:hustle_stay/models/chat/chat.dart';
 
 import '../../tools.dart';
 
@@ -20,15 +21,35 @@ abstract class Request {
   int closedAt = 0;
 
   /// The date after which the request will disappear from the UI
-  DateTime expiryDate = DateTime.fromMillisecondsSinceEpoch(0);
+  DateTime expiryDate =
+      DateTime.fromMillisecondsSinceEpoch(8640000000000000); // infinite time
 
-  List<String> approvers = [];
+  List<String> get approvers {
+    return allApprovers[type]!;
+  }
+
+  set approvers(value) {
+    allApprovers[type] = value;
+  }
+
+  static Map<String, List<String>> allApprovers = {};
 
   /// This denotes the type of request
   late String type;
 
   /// The reason for posting the request
   String reason = "";
+
+  /// To get the chat associated with it
+  ChatData get chatData {
+    return ChatData(
+      owner: requestingUserEmail,
+      receivers: approvers,
+      title: type,
+      locked: status != RequestStatus.pending,
+      path: 'requests/$id',
+    );
+  }
 
   /// This function is used to store data into a map with string keys
   /// override it to store more properties in the map returned from super.encode()
@@ -55,7 +76,7 @@ abstract class Request {
   }
 
   /// This function returns a custom widget for this type of request
-  Widget widget();
+  Widget widget(BuildContext context);
 
   /// This function is when the request is status
   void onApprove();
@@ -63,7 +84,7 @@ abstract class Request {
   /// This function is called every time the request is updated
   /// Do some checks on whether it is possible to update the request or not
   /// Like for van request is that time slot available or not
-  bool onUpdate() {
+  bool beforeUpdate() {
     final String? err = Validate.email(requestingUserEmail, required: true);
     if (err != null) throw err;
 
@@ -75,12 +96,17 @@ abstract class Request {
       expiryDate = DateTime(
           closedDateTime.year, closedDateTime.month, closedDateTime.day + 7);
     }
+
+    // if the request doesn't have an id
+    if (id == 0) {
+      id = DateTime.now().millisecondsSinceEpoch;
+    }
     return true;
   }
 
   /// Does what it does
   Future<void> update() async {
-    if (!onUpdate()) return;
+    if (!beforeUpdate()) return;
     final doc = firestore.collection('requests').doc(id.toString());
     await doc.set(encode());
   }
@@ -105,7 +131,8 @@ abstract class Request {
     final response =
         await doc.get(src == null ? null : GetOptions(source: src));
     final data = response.data()!;
-    approvers = data['approvers'];
+    approvers =
+        (data['approvers'] as List<dynamic>).map((e) => e.toString()).toList();
     if (approvers.isEmpty) throw "No approver found for request type: $type";
     return approvers;
   }
@@ -116,4 +143,19 @@ abstract class Request {
     await doc.set({'approvers': newApprovers});
     approvers = newApprovers;
   }
+}
+
+Future<List<String>> fetchApprovers(String requestType, {Source? src}) async {
+  final doc = firestore.collection('requests').doc(requestType);
+  var response = await doc.get(src == null ? null : GetOptions(source: src));
+  if (response.data() == null && src == Source.cache) {
+    response = await doc.get();
+  }
+  final data = response.data()!;
+  Request.allApprovers[requestType] =
+      (data['approvers'] as List<dynamic>).map((e) => e.toString()).toList();
+  if (Request.allApprovers[requestType] == null) {
+    throw "No approver found for request type: $requestType";
+  }
+  return Request.allApprovers[requestType]!;
 }
