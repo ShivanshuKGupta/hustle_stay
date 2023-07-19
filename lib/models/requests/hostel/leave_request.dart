@@ -1,9 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/requests/request.dart';
 
 class LeaveRequest extends Request {
   DateTime dateTime;
   LeaveRequest({required this.dateTime}) {
-    super.type = "LeaveRequest";
+    super.type = "Leave";
   }
 
   @override
@@ -22,14 +23,14 @@ class LeaveRequest extends Request {
   }
 
   @override
-  bool onPost() {
+  bool beforeUpdate() {
     // TODO: Sani
     // using the [dateTime] object you can do some checks here
     // return false if those check are not meant or throw an error with some
     // description
 
     // If you return false request won't be posted
-    return super.onPost();
+    return super.beforeUpdate();
   }
 
   @override
@@ -41,5 +42,11 @@ class LeaveRequest extends Request {
 
     // Use [dateTime] and [requestingUserEmail] to complete this function
     // and super.reason to get some more info
+  }
+
+  @override
+  Widget widget(context) {
+    // TODO: implement widget
+    throw UnimplementedError();
   }
 }

@@ -3,7 +3,7 @@ import 'package:hustle_stay/screens/filter_screen/select_one_tile.dart';
 
 // ignore: must_be_immutable
 class SelectOne<T> extends StatefulWidget {
-  final List<T> allOptions;
+  final Set<T> allOptions;
   T? selectedOption;
   final bool Function(T chosenOption) onChange;
   final String? title;

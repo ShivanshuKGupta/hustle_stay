@@ -71,14 +71,14 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                           title: 'Split Complaints by',
                           subtitle: 'Compare the stats based on',
                           selectedOption: settings.groupBy,
-                          allOptions: const [
+                          allOptions: const {
                             'None',
                             'Hostel',
                             'Category',
                             'Scope',
                             'Complainant',
                             'Complainee'
-                          ],
+                          },
                           onChange: (value) {
                             setState(() {
                               settings.groupBy = value;
@@ -91,11 +91,11 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                           title: 'Graph Interval',
                           subtitle: 'Change x-axis interval by each',
                           selectedOption: settings.interval,
-                          allOptions: const [
+                          allOptions: const {
                             'Day',
                             'Month',
                             'Year',
-                          ],
+                          },
                           onChange: (value) {
                             setState(() {
                               settings.interval = value;

@@ -1,16 +1,15 @@
+import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/requests/request.dart';
 
 class ChangeRoomRequest extends Request {
   String targetRoomName;
   ChangeRoomRequest({this.targetRoomName = ''}) {
-    super.type = "ChangeRoomRequest";
+    super.type = "Change Room";
   }
 
   @override
   Map<String, dynamic> encode() {
-    final Map<String, dynamic> ans = super.encode();
-    ans['targetRoomName'] = targetRoomName;
-    return ans;
+    return super.encode()..addAll({'targetRoomName': targetRoomName});
   }
 
   @override
@@ -22,10 +21,10 @@ class ChangeRoomRequest extends Request {
   }
 
   @override
-  bool onPost() {
+  bool beforeUpdate() {
     targetRoomName = targetRoomName.trim();
     assert(targetRoomName.isNotEmpty);
-    return super.onPost();
+    return super.beforeUpdate();
   }
 
   @override
@@ -37,5 +36,11 @@ class ChangeRoomRequest extends Request {
 
     // Use [targetRoomName] and [requestingUserEmail] to complete this function
     // and super.reason to get some more info
+  }
+
+  @override
+  Widget widget(context) {
+    // TODO: implement widget
+    throw UnimplementedError();
   }
 }
