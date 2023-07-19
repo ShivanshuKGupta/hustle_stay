@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/screens/admin_panel/user_list.dart';
 import '../../models/common/operation.dart';
 
 class ManageUsers extends StatefulWidget {
@@ -65,7 +66,11 @@ class _ManageUsersState extends State<ManageUsers> {
             return Padding(
               padding: const EdgeInsets.fromLTRB(2, 2, 8, 8),
               child: GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) =>
+                          UserList(userType: catList[index].operationName)));
+                },
                 child: Container(
                   width: gridWidth,
                   padding: const EdgeInsets.all(1),

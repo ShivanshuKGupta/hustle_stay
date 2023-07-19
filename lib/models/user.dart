@@ -116,13 +116,17 @@ class UserData {
   String? imgUrl;
   ReadOnly readonly = ReadOnly();
   late MedicalInfo medicalInfo;
-  UserData({
-    this.email,
-    this.name,
-    this.phoneNumber,
-    this.address,
-    this.imgUrl,
-  }) {
+  UserData.other(
+      {this.email,
+      this.name,
+      this.phoneNumber,
+      this.address,
+      this.imgUrl,
+      required this.medicalInfo,
+      required this.readonly});
+
+  UserData(
+      {this.email, this.name, this.phoneNumber, this.address, this.imgUrl}) {
     medicalInfo = MedicalInfo();
   }
 
@@ -410,4 +414,59 @@ class ComplaineeBuilder extends StatelessWidget {
       },
     );
   }
+}
+
+Future<List<UserData>> fetchSpecificUsers(String userType) async {
+  final List<UserData> list = [];
+
+  QuerySnapshot<Map<String, dynamic>> userRef;
+
+  if (userType != 'admin' && userType != 'other') {
+    userRef = await FirebaseFirestore.instance
+        .collection('users')
+        .where('type', isEqualTo: userType)
+        .get();
+  } else if (userType == 'admin') {
+    userRef = await FirebaseFirestore.instance
+        .collection('users')
+        .where('isAdmin', isEqualTo: true)
+        .get();
+  } else {
+    userRef = await FirebaseFirestore.instance
+        .collection('users')
+        .where('type', whereIn: ['other', 'club']).get();
+  }
+
+  final List<Future<DocumentSnapshot<Map<String, dynamic>>>> userDataFutures =
+      userRef.docs
+          .map((x) => x.reference.collection('editable').doc('details').get())
+          .toList();
+
+  final userDataSnapshots = await Future.wait(userDataFutures);
+
+  for (int i = 0; i < userDataSnapshots.length; i++) {
+    final userData = userDataSnapshots[i];
+    if (userData.exists) {
+      final readOnly = ReadOnly();
+      final medicalInfo = MedicalInfo();
+
+      readOnly.load(userRef.docs[i].data());
+      if (userData.data()!['medicalInfo'] != null) {
+        medicalInfo.load(userData.data()!['medicalInfo']);
+      }
+      list.add(
+        UserData.other(
+          email: userRef.docs[i].id,
+          address: userData.data()!['address'],
+          imgUrl: userData.data()!['imgUrl'],
+          name: userData.data()!['name'],
+          medicalInfo: medicalInfo,
+          phoneNumber: userData.data()!['phoneNumber'],
+          readonly: readOnly,
+        ),
+      );
+    }
+  }
+
+  return list;
 }
