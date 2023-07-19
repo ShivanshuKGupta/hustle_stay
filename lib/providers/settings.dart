@@ -8,7 +8,7 @@ class _Settings {
   bool darkMode = false;
 
   /// the last visited page
-  int currentPage = 0;
+  int currentPage = 2;
 
   /// Introduction screen visisted
   bool introductionScreenVisited = false;

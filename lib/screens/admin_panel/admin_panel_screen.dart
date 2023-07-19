@@ -1,25 +1,16 @@
-import 'package:animated_icon/animated_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/screens/admin_panel/manage_categories.dart';
 import 'package:hustle_stay/screens/admin_panel/manage_hostel_attendance.dart';
 import 'package:hustle_stay/screens/admin_panel/manage_requests.dart';
 import 'package:hustle_stay/screens/admin_panel/manage_user_permission.dart';
 
+import '../../models/common/operation.dart';
+
 class AdminPanel extends StatefulWidget {
   const AdminPanel({super.key});
 
   @override
   State<AdminPanel> createState() => _AdminPanelState();
-}
-
-class Operations {
-  final String operationName;
-  final Icon icon;
-  final Color cardColor;
-  Operations(
-      {required this.cardColor,
-      required this.operationName,
-      required this.icon});
 }
 
 class _AdminPanelState extends State<AdminPanel> {
