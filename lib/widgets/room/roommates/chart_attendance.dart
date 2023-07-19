@@ -286,6 +286,7 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
                         isRangeChart = !isRangeChart;
                       });
                     } else {
+                      ScaffoldMessenger.of(context).clearSnackBars();
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                           content: Text('Select Date Range first')));
                     }
