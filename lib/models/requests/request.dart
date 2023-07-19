@@ -251,22 +251,37 @@ abstract class Request {
             iconType: IconType.continueAnimation,
             animateIcon: AnimateIcons.hourglass,
           )
-        : Icon(
-            status == RequestStatus.approved
-                ? Icons.check_circle_outline_rounded
-                : Icons.cancel_outlined,
-            color: status == RequestStatus.approved
-                ? Colors.greenAccent
-                : Colors.redAccent,
+        : IconButton(
+            onPressed: () {
+              showMsg(context, 'This request is ${status.name}.');
+            },
+            icon: Icon(
+              status == RequestStatus.approved
+                  ? Icons.check_circle_outline_rounded
+                  : Icons.cancel_outlined,
+              color: status == RequestStatus.approved
+                  ? Colors.greenAccent
+                  : Colors.redAccent,
+            ),
           );
-    // TODO: remove short circuiting
-    if (currentUser.readonly.type != 'student' && false) {
+    if (currentUser.readonly.type != 'student' &&
+        status == RequestStatus.pending &&
+        false) {
+      // TODO: Remove shortcircuiting
       trailing = Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
             onPressed: () async {
-              await approve();
+              final response = await askUser(
+                context,
+                'Do you want to approve this $type request?',
+                yes: true,
+                no: true,
+              );
+              if (response == 'yes') {
+                approve();
+              }
             },
             icon: const Icon(
               Icons.check_rounded,
@@ -275,10 +290,18 @@ abstract class Request {
           ),
           IconButton(
             onPressed: () async {
-              await deny();
+              final response = await askUser(
+                context,
+                'Do you want to deny this $type request?',
+                yes: true,
+                no: true,
+              );
+              if (response == 'yes') {
+                deny();
+              }
             },
             icon: const Icon(
-              Icons.close_rounded,
+              Icons.close,
               color: Colors.red,
             ),
           ),
@@ -300,10 +323,10 @@ abstract class Request {
             );
           },
           onLongPress: () {
-            showInfo(context);
+            showInfo(context, uiElement);
           },
           leading: Icon(uiElement['icon'], size: 50),
-          title: Text(type),
+          title: Text('$type Request'),
           trailing: trailing,
           subtitle: detailWidget,
         ),
@@ -311,7 +334,7 @@ abstract class Request {
     );
   }
 
-  void showInfo(BuildContext context) async {
+  void showInfo(BuildContext context, Map<String, dynamic> uiElement) async {
     final title = reason.split(':')[0];
     String subtitle = reason.substring(title.length + 2).trim();
     final theme = Theme.of(context);
@@ -325,7 +348,7 @@ abstract class Request {
           contentPadding: const EdgeInsets.only(top: 15, left: 20, right: 20),
           content: Column(
             children: [
-              Icon(uiElements[title]!['icon']),
+              Icon(uiElement['icon']),
               Text(
                 title,
                 style: theme.textTheme.bodyLarge,
@@ -361,12 +384,12 @@ abstract class Request {
                         // color: Theme.of(context).colorScheme.primary,
                         ),
                   ),
-                  // Text(
-                  //   ddmmyyyy(dateTime!),
-                  //   style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                  //         color: Theme.of(context).colorScheme.primary,
-                  //       ),
-                  // ),
+                  Text(
+                    ddmmyyyy(DateTime.fromMillisecondsSinceEpoch(id)),
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                  ),
                 ],
               ),
             ],

@@ -37,8 +37,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     List<Widget> bodyList = [
       !currentUser.readonly.isAdmin
           ? CompleteDetails(
-              hostelName: currentUser.readonly.hostelName!,
-              roomName: currentUser.readonly.roomName!,
+              hostelName: currentUser.readonly.hostelName ?? '',
+              roomName: currentUser.readonly.roomName ?? '',
               user: UserData(
                   email: currentUser.email,
                   address: currentUser.address,

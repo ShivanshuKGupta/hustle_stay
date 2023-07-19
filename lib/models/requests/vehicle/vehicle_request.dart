@@ -40,13 +40,21 @@ class VehicleRequest extends Request {
   Widget widget(BuildContext context) {
     final title = reason.split(':')[0];
     String subtitle = reason.substring(title.length + 2).trim();
+    final uiElement =
+        Request.uiElements[type]!.map((key, value) => MapEntry(key, value));
+    uiElement['color'] = Request.uiElements[type]!['children'][title]['color'];
+    uiElement['icon'] = Request.uiElements[type]!['children'][title]['icon'];
     return super.listWidget(
       context,
       Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (reason.isNotEmpty) Text(reason),
+          if (reason.isNotEmpty)
+            Text(
+              reason,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -65,7 +73,7 @@ class VehicleRequest extends Request {
           ),
         ],
       ),
-      Request.uiElements[type]!,
+      uiElement,
     );
   }
 }
