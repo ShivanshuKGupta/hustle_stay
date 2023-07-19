@@ -39,10 +39,15 @@ abstract class Request {
     allApprovers[type] = value;
   }
 
+  /// Map<RequestTypeName, List<approvers>>
   static Map<String, List<String>> allApprovers = {};
 
   /// This denotes the type of request
   late String type;
+
+  static const List<String> allTypes = [
+    'Vehicle',
+  ];
 
   /// The reason for posting the request
   String reason = "";
@@ -201,7 +206,7 @@ abstract class Request {
             'Food Poisoning',
           ],
         },
-        'Other Reason': {
+        'Other': {
           'color': Colors.lightGreenAccent,
           'icon': Icons.more_horiz_rounded,
           'reasonOptions': <String>[],
@@ -265,8 +270,7 @@ abstract class Request {
             ),
           );
     if (currentUser.readonly.type != 'student' &&
-        status == RequestStatus.pending &&
-        false) {
+        status == RequestStatus.pending) {
       // TODO: Remove shortcircuiting
       trailing = Row(
         mainAxisSize: MainAxisSize.min,
@@ -326,7 +330,7 @@ abstract class Request {
             showInfo(context, uiElement);
           },
           leading: Icon(uiElement['icon'], size: 50),
-          title: Text('$type Request'),
+          title: Text('$type Request', overflow: TextOverflow.fade),
           trailing: trailing,
           subtitle: detailWidget,
         ),
@@ -336,7 +340,9 @@ abstract class Request {
 
   void showInfo(BuildContext context, Map<String, dynamic> uiElement) async {
     final title = reason.split(':')[0];
-    String subtitle = reason.substring(title.length + 2).trim();
+    String subtitle = reason.length > title.length + 2
+        ? reason.substring(title.length + 2).trim()
+        : '';
     final theme = Theme.of(context);
     final response = await Navigator.of(context).push(
       DialogRoute<void>(

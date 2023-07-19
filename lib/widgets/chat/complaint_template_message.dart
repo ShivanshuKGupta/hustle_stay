@@ -9,5 +9,5 @@ String complaintTemplateMessage(ComplaintData complaint) {
 
 String vanRequestTemplateMessage(VehicleRequest request, String title) {
   final title = request.reason.split(':')[0];
-  return "Dear ${request.approvers},\n\nI hope this message finds you well. May I request permission to use the college van for $title on ${ddmmyyyy(request.dateTime!)} at ${timeFrom(request.dateTime!)}? The purpose is ${request.reason.substring(title.length + 2)}.\n\nThank you for your consideration.\n\nBest regards,\n\n${currentUser.name ?? currentUser.email}";
+  return "Dear ${request.approvers},\n\nI hope this message finds you well. May I request permission to use the college van for $title on ${ddmmyyyy(request.dateTime!)} at ${timeFrom(request.dateTime!)}?${request.reason.length > title.length + 2 ? " The purpose is ${request.reason.substring(title.length + 2)}." : ""}\n\nThank you for your consideration.\n\nBest regards,\n\n${currentUser.name ?? currentUser.email}";
 }
