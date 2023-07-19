@@ -35,7 +35,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     int i = 0;
     List<Widget> bodyList = [
-      !currentUser.readonly.isAdmin
+      currentUser.readonly.type == 'student'
           ? CompleteDetails(
               hostelName: currentUser.readonly.hostelName!,
               roomName: currentUser.readonly.roomName!,
