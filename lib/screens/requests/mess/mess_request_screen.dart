@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/models/requests/request.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
 
 class MessRequestScreen extends StatelessWidget {
+  static const String routeName = 'MessRequestScreen';
   const MessRequestScreen({super.key});
 
   @override
@@ -26,8 +28,8 @@ class MessRequestScreen extends StatelessWidget {
                 Navigator.of(context).pop();
               },
               title: 'Mess',
-              icon: const Icon(
-                Icons.restaurant_menu_rounded,
+              icon: Icon(
+                Request.uiElements['Mess']!['icon'],
                 size: 50,
               ),
               color: theme.colorScheme.background,
@@ -40,42 +42,40 @@ class MessRequestScreen extends StatelessWidget {
                 mainAxisSpacing: 5,
                 children: [
                   GridTileLogo(
-                    onTap: () {
-                      // code
-                    },
+                    onTap: () {},
                     title: 'Breakfast',
-                    icon: const Icon(
-                      Icons.local_cafe,
+                    icon: Icon(
+                      Request.uiElements['Mess']!['Breakfast']['icon'],
                       size: 50,
                     ),
-                    color: Colors.pinkAccent,
+                    color: Request.uiElements['Mess']!['Breakfast']['color'],
                   ),
                   GridTileLogo(
                     onTap: () {},
                     title: 'Lunch',
-                    icon: const Icon(
-                      Icons.restaurant,
+                    icon: Icon(
+                      Request.uiElements['Mess']!['Lunch']['icon'],
                       size: 50,
                     ),
-                    color: Colors.deepPurpleAccent,
+                    color: Request.uiElements['Mess']!['Lunch']['color'],
                   ),
                   GridTileLogo(
                     onTap: () {},
                     title: 'Snacks',
-                    icon: const Icon(
-                      Icons.fastfood,
+                    icon: Icon(
+                      Request.uiElements['Mess']!['Snacks']['icon'],
                       size: 50,
                     ),
-                    color: Colors.cyanAccent,
+                    color: Request.uiElements['Mess']!['Snacks']['color'],
                   ),
                   GridTileLogo(
                     onTap: () {},
                     title: 'Dinner',
-                    icon: const Icon(
-                      Icons.local_dining,
+                    icon: Icon(
+                      Request.uiElements['Mess']!['Dinner']['icon'],
                       size: 50,
                     ),
-                    color: Colors.lightGreenAccent,
+                    color: Request.uiElements['Mess']!['Dinner']['color'],
                   ),
                 ],
               ),

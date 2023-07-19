@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/chat/message.dart';
-import 'package:hustle_stay/models/requests/van/van_request.dart';
+import 'package:hustle_stay/models/requests/vehicle/vehicle_request.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/chat/chat_screen.dart';
 import 'package:hustle_stay/tools.dart';
@@ -9,12 +9,12 @@ import 'package:hustle_stay/widgets/complaints/select_one.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
 
 // ignore: must_be_immutable
-class VanRequestFormScreen extends StatefulWidget {
+class VehicleRequestFormScreen extends StatefulWidget {
   final String title;
   final Icon icon;
   List<String> reasonOptions;
-  VanRequest? request;
-  VanRequestFormScreen({
+  VehicleRequest? request;
+  VehicleRequestFormScreen({
     super.key,
     required this.title,
     required this.icon,
@@ -23,10 +23,11 @@ class VanRequestFormScreen extends StatefulWidget {
   });
 
   @override
-  State<VanRequestFormScreen> createState() => _VanRequestFormScreenState();
+  State<VehicleRequestFormScreen> createState() =>
+      _VehicleRequestFormScreenState();
 }
 
-class _VanRequestFormScreenState extends State<VanRequestFormScreen> {
+class _VehicleRequestFormScreenState extends State<VehicleRequestFormScreen> {
   final _txtController = TextEditingController();
 
   bool _loading = false;
@@ -34,7 +35,7 @@ class _VanRequestFormScreenState extends State<VanRequestFormScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    widget.request ??= VanRequest(requestingUserEmail: currentUser.email!);
+    widget.request ??= VehicleRequest(requestingUserEmail: currentUser.email!);
     widget.reasonOptions = widget.reasonOptions.map((e) => e).toList();
     TimeOfDay? time = widget.request!.dateTime == null
         ? null

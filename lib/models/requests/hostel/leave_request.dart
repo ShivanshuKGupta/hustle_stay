@@ -4,7 +4,7 @@ import 'package:hustle_stay/models/requests/request.dart';
 class LeaveRequest extends Request {
   DateTime dateTime;
   LeaveRequest({required this.dateTime}) {
-    super.type = "LeaveRequest";
+    super.type = "Leave";
   }
 
   @override

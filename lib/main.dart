@@ -10,6 +10,10 @@ import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/auth/auth_screen.dart';
 import 'package:hustle_stay/screens/home_screen.dart';
 import 'package:hustle_stay/screens/intro/intro_screen.dart';
+import 'package:hustle_stay/screens/requests/attendance/attendance_request_screen.dart';
+import 'package:hustle_stay/screens/requests/mess/mess_request_screen.dart';
+import 'package:hustle_stay/screens/requests/other/other_request_screen.dart';
+import 'package:hustle_stay/screens/requests/vehicle/vehicle_requests_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'firebase_options.dart';
@@ -90,19 +94,40 @@ class HustleStayApp extends ConsumerWidget {
 
       /// The app switches from Auth Screen to HomeScreen
       /// according to auth state
-      home: settings.introductionScreenVisited
-          ? StreamBuilder(
-              stream: auth.authStateChanges(),
-              builder: (ctx, user) {
-                return user.hasData ? const HomeScreen() : const AuthScreen();
-              },
-            )
-          : IntroScreen(
-              done: () {
-                settings.introductionScreenVisited = true;
-                ref.read(settingsProvider.notifier).notifyListeners();
-              },
-            ),
+      // home: settings.introductionScreenVisited
+      //     ? StreamBuilder(
+      //         stream: auth.authStateChanges(),
+      //         builder: (ctx, user) {
+      //           return user.hasData ? const HomeScreen() : const AuthScreen();
+      //         },
+      //       )
+      //     : IntroScreen(
+      //         done: () {
+      //           settings.introductionScreenVisited = true;
+      //           ref.read(settingsProvider.notifier).notifyListeners();
+      //         },
+      //       ),
+      routes: {
+        '/': (context) => settings.introductionScreenVisited
+            ? StreamBuilder(
+                stream: auth.authStateChanges(),
+                builder: (ctx, user) {
+                  return user.hasData ? const HomeScreen() : const AuthScreen();
+                },
+              )
+            : IntroScreen(
+                done: () {
+                  settings.introductionScreenVisited = true;
+                  ref.read(settingsProvider.notifier).notifyListeners();
+                },
+              ),
+        AttendanceRequestScreen.routeName: (context) =>
+            const AttendanceRequestScreen(),
+        VehicleRequestScreen.routeName: (context) =>
+            const VehicleRequestScreen(),
+        MessRequestScreen.routeName: (context) => const MessRequestScreen(),
+        OtherRequestScreen.routeName: (context) => const OtherRequestScreen(),
+      },
     );
   }
 }

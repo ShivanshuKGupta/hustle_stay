@@ -4,7 +4,7 @@ import 'package:hustle_stay/models/requests/request.dart';
 class ChangeRoomRequest extends Request {
   String targetRoomName;
   ChangeRoomRequest({this.targetRoomName = ''}) {
-    super.type = "ChangeRoomRequest";
+    super.type = "Change Room";
   }
 
   @override

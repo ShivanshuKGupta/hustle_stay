@@ -5,7 +5,7 @@ import 'package:hustle_stay/tools.dart';
 class SwapRoomRequest extends Request {
   String targetUserEmail;
   SwapRoomRequest({required this.targetUserEmail}) {
-    super.type = "SwapRoomRequest";
+    super.type = "Swap Room";
   }
 
   @override

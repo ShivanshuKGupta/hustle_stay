@@ -1,7 +1,14 @@
+import 'package:animated_icon/animated_icon.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
+import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/screens/chat/chat_screen.dart';
+import 'package:hustle_stay/screens/requests/attendance/attendance_request_screen.dart';
+import 'package:hustle_stay/screens/requests/mess/mess_request_screen.dart';
+import 'package:hustle_stay/screens/requests/other/other_request_screen.dart';
+import 'package:hustle_stay/screens/requests/vehicle/vehicle_requests_screen.dart';
 
 import '../../tools.dart';
 
@@ -75,9 +82,6 @@ abstract class Request {
     expiryDate = DateTime.fromMillisecondsSinceEpoch(data['expiryDate'] ?? 0);
   }
 
-  /// This function returns a custom widget for this type of request
-  Widget widget(BuildContext context);
-
   Future<void> approve() async {
     status = RequestStatus.approved;
     await update();
@@ -93,7 +97,7 @@ abstract class Request {
 
   /// This function is called every time the request is updated
   /// Do some checks on whether it is possible to update the request or not
-  /// Like for van request is that time slot available or not
+  /// Like for vehicle request is that time slot available or not
   bool beforeUpdate() {
     final String? err = Validate.email(requestingUserEmail, required: true);
     if (err != null) throw err;
@@ -153,12 +157,261 @@ abstract class Request {
     await doc.set({'approvers': newApprovers});
     approvers = newApprovers;
   }
+
+  static const Map<String, Map<String, dynamic>> uiElements = {
+    'Attendance': {
+      'color': Colors.red,
+      'icon': Icons.calendar_month_rounded,
+      'route': AttendanceRequestScreen.routeName,
+      'Change Room': {
+        'color': Colors.blueAccent,
+        'icon': Icons.transfer_within_a_station_rounded,
+      },
+      'Swap Room': {
+        'color': Colors.pinkAccent,
+        'icon': Icons.transfer_within_a_station_rounded,
+      },
+      'Leave Hostel': {
+        'color': Colors.indigoAccent,
+        'icon': Icons.exit_to_app_rounded,
+      },
+      'Return to Hostel': {
+        'color': Colors.lightGreenAccent,
+        'icon': Icons.keyboard_return_rounded,
+      },
+    },
+    'Vehicle': {
+      'color': Colors.deepPurpleAccent,
+      'icon': Icons.airport_shuttle_rounded,
+      'route': VehicleRequestScreen.routeName,
+      'children': {
+        'Night Travel': {
+          'color': Colors.blue,
+          'icon': Icons.nightlight_round,
+          'reasonOptions': [
+            'Train Arrival',
+            'Train Departure',
+          ],
+        },
+        'Hospital Visit': {
+          'color': Colors.tealAccent,
+          'icon': Icons.local_hospital_rounded,
+          'reasonOptions': [
+            'Fever',
+            'Food Poisoning',
+          ],
+        },
+        'Other Reason': {
+          'color': Colors.lightGreenAccent,
+          'icon': Icons.more_horiz_rounded,
+          'reasonOptions': <String>[],
+        },
+      }
+    },
+    'Mess': {
+      'color': Colors.lightBlueAccent,
+      'icon': Icons.restaurant_menu_rounded,
+      'route': MessRequestScreen.routeName,
+      'Breakfast': {
+        'color': Colors.pinkAccent,
+        'icon': Icons.local_cafe,
+      },
+      'Lunch': {
+        'color': Colors.deepPurpleAccent,
+        'icon': Icons.restaurant,
+      },
+      'Snacks': {
+        'color': Colors.cyanAccent,
+        'icon': Icons.fastfood,
+      },
+      'Dinner': {
+        'color': Colors.lightGreenAccent,
+        'icon': Icons.local_dining,
+      },
+    },
+    'Other': {
+      'color': Colors.amber,
+      'icon': Icons.more_horiz_rounded,
+      'route': OtherRequestScreen.routeName,
+    },
+  };
+
+  /// This function returns a custom widget for this type of request
+  Widget widget(BuildContext context);
+
+  /// This is the function returns a custom widget for this type of request
+  @protected
+  Widget listWidget(BuildContext context, Widget? detailWidget,
+      Map<String, dynamic> uiElement) {
+    Widget trailing = status == RequestStatus.pending
+        ? AnimateIcon(
+            onTap: () {
+              showMsg(context, 'This request is yet to be approved.');
+            },
+            iconType: IconType.continueAnimation,
+            animateIcon: AnimateIcons.hourglass,
+          )
+        : Icon(
+            status == RequestStatus.approved
+                ? Icons.check_circle_outline_rounded
+                : Icons.cancel_outlined,
+            color: status == RequestStatus.approved
+                ? Colors.greenAccent
+                : Colors.redAccent,
+          );
+    // TODO: remove short circuiting
+    if (currentUser.readonly.type != 'student' && false) {
+      trailing = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            onPressed: () async {
+              await approve();
+            },
+            icon: const Icon(
+              Icons.check_rounded,
+              color: Colors.green,
+            ),
+          ),
+          IconButton(
+            onPressed: () async {
+              await deny();
+            },
+            icon: const Icon(
+              Icons.close_rounded,
+              color: Colors.red,
+            ),
+          ),
+        ],
+      );
+    }
+    return GlassWidget(
+      radius: 30,
+      child: Container(
+        color: uiElement['color'].withOpacity(0.2),
+        child: ListTile(
+          contentPadding: const EdgeInsets.only(left: 10),
+          onTap: () {
+            navigatorPush(
+              context,
+              ChatScreen(
+                chat: chatData,
+              ),
+            );
+          },
+          onLongPress: () {
+            showInfo(context);
+          },
+          leading: Icon(uiElement['icon'], size: 50),
+          title: Text(type),
+          trailing: trailing,
+          subtitle: detailWidget,
+        ),
+      ),
+    );
+  }
+
+  void showInfo(BuildContext context) async {
+    final title = reason.split(':')[0];
+    String subtitle = reason.substring(title.length + 2).trim();
+    final theme = Theme.of(context);
+    final response = await Navigator.of(context).push(
+      DialogRoute<void>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          actionsAlignment: MainAxisAlignment.center,
+          scrollable: true,
+          actionsPadding: const EdgeInsets.only(bottom: 15, top: 10),
+          contentPadding: const EdgeInsets.only(top: 15, left: 20, right: 20),
+          content: Column(
+            children: [
+              Icon(uiElements[title]!['icon']),
+              Text(
+                title,
+                style: theme.textTheme.bodyLarge,
+              ),
+              Text(
+                subtitle,
+                style: theme.textTheme.bodySmall,
+              ),
+              const Divider(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "From:",
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        // color: Theme.of(context).colorScheme.primary,
+                        ),
+                  ),
+                  Text(
+                    requestingUserEmail,
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Requested At:",
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        // color: Theme.of(context).colorScheme.primary,
+                        ),
+                  ),
+                  // Text(
+                  //   ddmmyyyy(dateTime!),
+                  //   style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                  //         color: Theme.of(context).colorScheme.primary,
+                  //       ),
+                  // ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton.icon(
+              onPressed: () async {
+                final response = await askUser(
+                    context, 'Do you really want to withdraw this request?',
+                    yes: true, no: true);
+                if (response == 'yes') {
+                  try {
+                    await delete();
+                  } catch (e) {
+                    if (context.mounted) {
+                      showMsg(context, e.toString());
+                    }
+                    return;
+                  }
+                  if (context.mounted) {
+                    Navigator.of(context).pop(true);
+                  }
+                }
+              },
+              icon: const Icon(Icons.delete_rounded),
+              label: const Text('Withdraw'),
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+            )
+          ],
+        ),
+      ),
+    );
+  }
 }
 
+/// Fetch approvers of specific request type
 Future<List<String>> fetchApprovers(String requestType, {Source? src}) async {
   final doc = firestore.collection('requests').doc(requestType);
-  var response = await doc.get(src == null ? null : GetOptions(source: src));
-  if (response.data() == null && src == Source.cache) {
+  DocumentSnapshot<Map<String, dynamic>>? response;
+  try {
+    response = await doc.get(src == null ? null : GetOptions(source: src));
+  } catch (e) {
+    if (src == Source.cache) response = await doc.get();
+  }
+  if (response!.data() == null && src == Source.cache) {
     response = await doc.get();
   }
   final data = response.data()!;

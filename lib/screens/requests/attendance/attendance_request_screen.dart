@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/models/requests/request.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
 
 class AttendanceRequestScreen extends StatelessWidget {
+  static const String routeName = 'AttendanceRequestScreen';
   const AttendanceRequestScreen({super.key});
 
   @override
@@ -26,8 +28,8 @@ class AttendanceRequestScreen extends StatelessWidget {
                 Navigator.of(context).pop();
               },
               title: 'Attendance',
-              icon: const Icon(
-                Icons.calendar_month_rounded,
+              icon: Icon(
+                Request.uiElements['Attendance']!['icon'],
                 size: 50,
               ),
               color: theme.colorScheme.background,
@@ -40,42 +42,45 @@ class AttendanceRequestScreen extends StatelessWidget {
                 mainAxisSpacing: 5,
                 children: [
                   GridTileLogo(
-                    onTap: () {
-                      // code
-                    },
+                    onTap: () {},
                     title: 'Change Room',
-                    icon: const Icon(
-                      Icons.transfer_within_a_station_rounded,
+                    icon: Icon(
+                      Request.uiElements['Attendance']!['Change Room']['icon'],
                       size: 50,
                     ),
-                    color: Colors.blueAccent,
+                    color: Request.uiElements['Attendance']!['Change Room']
+                        ['color'],
                   ),
                   GridTileLogo(
                     onTap: () {},
                     title: 'Swap Room',
-                    icon: const Icon(
-                      Icons.transfer_within_a_station_rounded,
+                    icon: Icon(
+                      Request.uiElements['Attendance']!['Swap Room']['icon'],
                       size: 50,
                     ),
-                    color: Colors.pinkAccent,
+                    color: Request.uiElements['Attendance']!['Swap Room']
+                        ['color'],
                   ),
                   GridTileLogo(
                     onTap: () {},
-                    title: 'Leave Request',
-                    icon: const Icon(
-                      Icons.exit_to_app_rounded,
+                    title: 'Leave Hostel',
+                    icon: Icon(
+                      Request.uiElements['Attendance']!['Leave Hostel']['icon'],
                       size: 50,
                     ),
-                    color: Colors.indigoAccent,
+                    color: Request.uiElements['Attendance']!['Leave Hostel']
+                        ['color'],
                   ),
                   GridTileLogo(
                     onTap: () {},
-                    title: 'Return Request',
-                    icon: const Icon(
-                      Icons.keyboard_return_rounded,
+                    title: 'Return to Hostel',
+                    icon: Icon(
+                      Request.uiElements['Attendance']!['Return to Hostel']
+                          ['icon'],
                       size: 50,
                     ),
-                    color: Colors.lightGreenAccent,
+                    color: Request.uiElements['Attendance']!['Return to Hostel']
+                        ['color'],
                   ),
                 ],
               ),

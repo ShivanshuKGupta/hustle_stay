@@ -4,7 +4,7 @@ import 'package:hustle_stay/models/requests/request.dart';
 class ReturnRequest extends Request {
   DateTime dateTime;
   ReturnRequest({required this.dateTime}) {
-    super.type = "ReturnRequest";
+    super.type = "Return";
   }
 
   @override

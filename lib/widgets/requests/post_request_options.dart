@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/screens/requests/attendance/attendance_request_screen.dart';
-import 'package:hustle_stay/screens/requests/mess/mess_request_screen.dart';
-import 'package:hustle_stay/screens/requests/van/van_requests_screen.dart';
+import 'package:hustle_stay/models/requests/request.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
 
@@ -30,48 +28,15 @@ class PoptRequestOptions extends StatelessWidget {
           crossAxisSpacing: 5,
           mainAxisSpacing: 5,
           children: [
-            GridTileLogo(
-              onTap: () async {
-                await navigatorPush<bool?>(
-                    context, const AttendanceRequestScreen());
-              },
-              title: 'Attendance',
-              icon: const Icon(
-                Icons.calendar_month_rounded,
-                size: 50,
+            ...Request.uiElements.entries.map(
+              (entry) => GridTileLogo(
+                onTap: () {
+                  Navigator.of(context).pushNamed(entry.value['route']);
+                },
+                title: entry.key,
+                icon: Icon(entry.value['icon'], size: 50),
+                color: entry.value['color'],
               ),
-              color: Colors.red,
-            ),
-            GridTileLogo(
-              onTap: () async {
-                await navigatorPush<bool?>(context, const VanRequestScreen());
-              },
-              title: 'Vehicle',
-              icon: const Icon(
-                Icons.airport_shuttle_rounded,
-                size: 50,
-              ),
-              color: Colors.deepPurpleAccent,
-            ),
-            GridTileLogo(
-              onTap: () async {
-                await navigatorPush<bool?>(context, const MessRequestScreen());
-              },
-              title: 'Mess',
-              icon: const Icon(
-                Icons.restaurant_menu_rounded,
-                size: 50,
-              ),
-              color: Colors.lightBlueAccent,
-            ),
-            GridTileLogo(
-              onTap: () {},
-              title: 'Other',
-              icon: const Icon(
-                Icons.more_horiz_rounded,
-                size: 50,
-              ),
-              color: Colors.amber,
             ),
           ],
         )

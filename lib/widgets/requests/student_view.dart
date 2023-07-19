@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/requests/request.dart';
-import 'package:hustle_stay/models/requests/van/van_request.dart';
+import 'package:hustle_stay/models/requests/vehicle/vehicle_request.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/firestore_cache_builder.dart';
 import 'package:hustle_stay/tools.dart';
@@ -32,8 +32,8 @@ class _StudentViewState extends State<StudentView> {
       final data = doc.data();
       final type = data['type'];
       requestTypes.add(type);
-      if (type == 'VanRequest') {
-        return VanRequest(requestingUserEmail: data['requestingUserEmail'])
+      if (type == 'Vehicle') {
+        return VehicleRequest(requestingUserEmail: data['requestingUserEmail'])
           ..load(data);
       }
       throw "No such type exists: '$type'";
@@ -54,6 +54,9 @@ class _StudentViewState extends State<StudentView> {
       },
       child: ListView(
         children: [
+          if (currentUser.readonly.type == 'student' ||
+              true) // TODO: remove short circuiting
+            const PoptRequestOptions(),
           CacheBuilder(
             builder: (ctx, data) {
               final children = data.map((e) => e.widget(context)).toList();
@@ -88,9 +91,6 @@ class _StudentViewState extends State<StudentView> {
             },
             provider: getStudentRequests,
           ),
-          if (currentUser.readonly.type == 'student' ||
-              true) // TODO: remove short circuiting
-            const PoptRequestOptions(),
         ],
       ),
     );
