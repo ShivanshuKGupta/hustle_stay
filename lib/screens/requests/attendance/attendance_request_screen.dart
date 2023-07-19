@@ -36,7 +36,7 @@ class AttendanceRequestScreen extends StatelessWidget {
             ),
             Expanded(
               child: GridView.extent(
-                maxCrossAxisExtent: 200,
+                maxCrossAxisExtent: 300,
                 childAspectRatio: 3 / 2,
                 crossAxisSpacing: 5,
                 mainAxisSpacing: 5,
