@@ -23,7 +23,7 @@ class PoptRequestOptions extends StatelessWidget {
         GridView.extent(
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
-          maxCrossAxisExtent: 300,
+          maxCrossAxisExtent: 320,
           childAspectRatio: 3 / 2,
           crossAxisSpacing: 5,
           mainAxisSpacing: 5,

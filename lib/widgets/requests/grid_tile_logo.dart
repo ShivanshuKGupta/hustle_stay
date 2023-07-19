@@ -25,19 +25,20 @@ class GridTileLogo extends StatelessWidget {
           child: Container(
             color: color.withOpacity(0.2),
             padding: const EdgeInsets.all(10),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                FittedBox(
-                  child: Text(
+            child: FittedBox(
+              fit: BoxFit.fitHeight,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
                     title,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
-                ),
-                icon,
-              ],
+                  icon,
+                ],
+              ),
             ),
           ),
         ),
