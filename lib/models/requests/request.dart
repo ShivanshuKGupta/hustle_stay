@@ -3,16 +3,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
+import 'package:hustle_stay/models/requests/request_info.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/chat/chat_screen.dart';
 import 'package:hustle_stay/screens/requests/attendance/attendance_request_screen.dart';
 import 'package:hustle_stay/screens/requests/mess/mess_request_screen.dart';
 import 'package:hustle_stay/screens/requests/other/other_request_screen.dart';
 import 'package:hustle_stay/screens/requests/vehicle/vehicle_requests_screen.dart';
+import 'package:hustle_stay/widgets/requests/requests_bottom_bar.dart';
 
 import '../../tools.dart';
 
 enum RequestStatus { pending, approved, denied }
+
+final infDate = DateTime.fromMillisecondsSinceEpoch(8640000000000000);
 
 abstract class Request {
   /// [id] also denotes when was the request created,
@@ -28,8 +32,7 @@ abstract class Request {
   int closedAt = 0;
 
   /// The date after which the request will disappear from the UI
-  DateTime expiryDate =
-      DateTime.fromMillisecondsSinceEpoch(8640000000000000); // infinite time
+  DateTime expiryDate = infDate; // infinite time
 
   List<String> get approvers {
     return allApprovers[type]!;
@@ -108,8 +111,8 @@ abstract class Request {
     if (err != null) throw err;
 
     // if the request is being closed down and the expiry is not set yet
-    if (status != RequestStatus.pending &&
-        expiryDate == DateTime.fromMillisecondsSinceEpoch(0)) {
+    if (status != RequestStatus.pending && expiryDate == infDate) {
+      if (closedAt == 0) closedAt = DateTime.now().millisecondsSinceEpoch;
       final closedDateTime = DateTime.fromMillisecondsSinceEpoch(closedAt);
       // then set the expiry to 7 days after closedAt
       expiryDate = DateTime(
@@ -124,8 +127,11 @@ abstract class Request {
   }
 
   /// Does what it does
-  Future<void> update() async {
+  Future<void> update({DateTime? expiryDate}) async {
     if (!beforeUpdate()) return;
+    if (expiryDate != null) {
+      expiryDate = expiryDate;
+    }
     final doc = firestore.collection('requests').doc(id.toString());
     await doc.set(encode());
   }
@@ -247,7 +253,7 @@ abstract class Request {
   /// This is the function returns a custom widget for this type of request
   @protected
   Widget listWidget(BuildContext context, Widget? detailWidget,
-      Map<String, dynamic> uiElement) {
+      Map<String, dynamic> uiElement, Map<String, String> otherDetails) {
     Widget trailing = status == RequestStatus.pending
         ? AnimateIcon(
             onTap: () {
@@ -322,12 +328,16 @@ abstract class Request {
             navigatorPush(
               context,
               ChatScreen(
+                bottomBar: (currentUser.readonly.type == 'student')
+                    ? null
+                    : RequestBottomBar(request: this),
+                showInfo: () => showInfo(context, uiElement, otherDetails),
                 chat: chatData,
               ),
             );
           },
           onLongPress: () {
-            showInfo(context, uiElement);
+            showInfo(context, uiElement, otherDetails);
           },
           leading: Icon(uiElement['icon'], size: 50),
           title: Text('$type Request', overflow: TextOverflow.fade),
@@ -338,7 +348,8 @@ abstract class Request {
     );
   }
 
-  void showInfo(BuildContext context, Map<String, dynamic> uiElement) async {
+  void showInfo(BuildContext context, Map<String, dynamic> uiElement,
+      Map<String, String> otherDetails) async {
     final title = reason.split(':')[0];
     String subtitle = reason.length > title.length + 2
         ? reason.substring(title.length + 2).trim()
@@ -347,84 +358,20 @@ abstract class Request {
     final response = await Navigator.of(context).push(
       DialogRoute<void>(
         context: context,
-        builder: (BuildContext context) => AlertDialog(
-          actionsAlignment: MainAxisAlignment.center,
-          scrollable: true,
-          actionsPadding: const EdgeInsets.only(bottom: 15, top: 10),
-          contentPadding: const EdgeInsets.only(top: 15, left: 20, right: 20),
-          content: Column(
-            children: [
-              Icon(uiElement['icon']),
-              Text(
-                title,
-                style: theme.textTheme.bodyLarge,
-              ),
-              Text(
-                subtitle,
-                style: theme.textTheme.bodySmall,
-              ),
-              const Divider(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "From:",
-                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                        // color: Theme.of(context).colorScheme.primary,
-                        ),
-                  ),
-                  Text(
-                    requestingUserEmail,
-                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Requested At:",
-                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                        // color: Theme.of(context).colorScheme.primary,
-                        ),
-                  ),
-                  Text(
-                    ddmmyyyy(DateTime.fromMillisecondsSinceEpoch(id)),
-                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          actions: [
-            TextButton.icon(
-              onPressed: () async {
-                final response = await askUser(
-                    context, 'Do you really want to withdraw this request?',
-                    yes: true, no: true);
-                if (response == 'yes') {
-                  try {
-                    await delete();
-                  } catch (e) {
-                    if (context.mounted) {
-                      showMsg(context, e.toString());
-                    }
-                    return;
-                  }
-                  if (context.mounted) {
-                    Navigator.of(context).pop(true);
-                  }
-                }
-              },
-              icon: const Icon(Icons.delete_rounded),
-              label: const Text('Withdraw'),
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-            )
-          ],
+        builder: (BuildContext context) => RequestInfo(
+          uiElement: uiElement,
+          request: this,
+          details: {
+            'From': requestingUserEmail,
+            'Requested at': ddmmyyyy(DateTime.fromMillisecondsSinceEpoch(id)),
+            'Status': status.name,
+            if (status != RequestStatus.pending)
+              'Closed at':
+                  ddmmyyyy(DateTime.fromMillisecondsSinceEpoch(closedAt)),
+            'Approvers': approvers.toString(),
+            'Reason': reason,
+            ...otherDetails,
+          },
         ),
       ),
     );

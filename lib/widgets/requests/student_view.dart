@@ -1,3 +1,4 @@
+import 'package:animated_icon/animated_icon.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
@@ -81,6 +82,7 @@ class _RequestsListState extends State<RequestsList> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final mediaQuery = MediaQuery.of(context);
     return RefreshIndicator(
       onRefresh: () async {
         if (currentUser.readonly.type == 'student') {
@@ -97,6 +99,32 @@ class _RequestsListState extends State<RequestsList> {
           CacheBuilder(
             builder: (ctx, data) {
               final children = data.map((e) => e.widget(context)).toList();
+              if (children.isEmpty && currentUser.readonly.type != 'student') {
+                return SizedBox(
+                  height: mediaQuery.size.height -
+                      mediaQuery.viewInsets.top -
+                      mediaQuery.padding.top -
+                      mediaQuery.padding.bottom -
+                      mediaQuery.viewInsets.bottom -
+                      150,
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        AnimateIcon(
+                          onTap: () {},
+                          iconType: IconType.continueAnimation,
+                          animateIcon: AnimateIcons.cool,
+                        ),
+                        Text(
+                          'No requests are pending',
+                          style: theme.textTheme.titleLarge,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
               if (children.isNotEmpty) {
                 children.insert(
                   0,

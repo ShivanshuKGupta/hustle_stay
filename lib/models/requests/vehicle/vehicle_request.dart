@@ -73,6 +73,11 @@ class VehicleRequest extends Request {
         ],
       ),
       uiElement,
+      {
+        '-': '-',
+        'Requested Date': ddmmyyyy(dateTime!),
+        'Requested Time': timeFrom(dateTime!)
+      },
     );
   }
 }
