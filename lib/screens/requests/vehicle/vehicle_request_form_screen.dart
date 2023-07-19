@@ -181,7 +181,8 @@ class _VehicleRequestFormScreenState extends State<VehicleRequestFormScreen> {
     });
     final dateTime = widget.request!.dateTime!;
     await widget.request!.update(
-        expiryDate: DateTime(dateTime.year, dateTime.month, dateTime.day + 7));
+        chosenExpiryDate:
+            DateTime(dateTime.year, dateTime.month, dateTime.day + 7));
     await widget.request!.fetchApprovers();
     if (context.mounted) {
       setState(() {

@@ -127,10 +127,10 @@ abstract class Request {
   }
 
   /// Does what it does
-  Future<void> update({DateTime? expiryDate}) async {
+  Future<void> update({DateTime? chosenExpiryDate}) async {
     if (!beforeUpdate()) return;
-    if (expiryDate != null) {
-      expiryDate = expiryDate;
+    if (chosenExpiryDate != null) {
+      expiryDate = chosenExpiryDate;
     }
     final doc = firestore.collection('requests').doc(id.toString());
     await doc.set(encode());
