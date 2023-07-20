@@ -116,7 +116,7 @@ class _RequestsListState extends State<RequestsList> {
       child: ListView(
         children: [
           if (currentUser.readonly.type == 'student')
-            const PoptRequestOptions(),
+            const PostRequestOptions(),
           CacheBuilder(
             builder: (ctx, data) {
               final children = data.map((e) => e.widget(context)).toList();

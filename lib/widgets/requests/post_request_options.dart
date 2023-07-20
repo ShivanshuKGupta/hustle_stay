@@ -3,8 +3,8 @@ import 'package:hustle_stay/models/requests/request.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
 
-class PoptRequestOptions extends StatelessWidget {
-  const PoptRequestOptions({super.key});
+class PostRequestOptions extends StatelessWidget {
+  const PostRequestOptions({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -29,6 +29,8 @@ class _MenuChangeRequestScreenState extends State<MenuChangeRequestScreen> {
 
   bool _loading = false;
 
+  String? day;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -61,10 +63,29 @@ class _MenuChangeRequestScreenState extends State<MenuChangeRequestScreen> {
                 ],
               ),
               const SizedBox(height: 40),
+              SelectOne(
+                title: 'Which Day?',
+                subtitle: '(optional)',
+                allOptions: const {
+                  'Mon',
+                  'Tue',
+                  'Wed',
+                  'Thu',
+                  'Fri',
+                  'Sat',
+                  'Sun'
+                },
+                selectedOption: day,
+                onChange: (value) {
+                  day = value;
+                  return true;
+                },
+              ),
+              const SizedBox(height: 20),
               if (options.isNotEmpty)
                 SelectOne(
-                  title: 'Description',
-                  subtitle: 'Describe the details for the change below',
+                  title: 'Which Meal?',
+                  subtitle: '(optional)',
                   allOptions: (options..add('Other')).toSet(),
                   selectedOption: widget.request!.reason,
                   onChange: (value) {
@@ -74,6 +95,7 @@ class _MenuChangeRequestScreenState extends State<MenuChangeRequestScreen> {
                     return true;
                   },
                 ),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: _txtController,
                 decoration: InputDecoration(
@@ -110,7 +132,7 @@ class _MenuChangeRequestScreenState extends State<MenuChangeRequestScreen> {
       return;
     }
     widget.request!.reason =
-        "Mess Menu Change${widget.request!.reason.isNotEmpty && widget.request!.reason != 'Other' ? ": ${widget.request!.reason}" : ''}\n${_txtController.text.trim()}";
+        "Mess Menu Change${widget.request!.reason.isNotEmpty && widget.request!.reason != 'Other' ? ": ${widget.request!.reason}" : ''}${day == null ? '' : ' $day'}\n${_txtController.text.trim()}";
     setState(() {
       _loading = true;
     });
