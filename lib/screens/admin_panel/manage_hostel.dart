@@ -41,7 +41,7 @@ class _ManageHostelState extends State<ManageHostel> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Manage Users & Permissions'),
+        title: Text('Manage ${widget.hostel.hostelName}'),
       ),
       body: SafeArea(
         child: GridView.builder(
