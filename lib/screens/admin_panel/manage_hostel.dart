@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/hostel/hostels.dart';
+import 'package:hustle_stay/screens/admin_panel/stats_hostel.dart';
 import 'package:hustle_stay/screens/hostel/rooms/add_rooms.dart';
 import 'package:hustle_stay/screens/hostel/rooms/rooms_screen.dart';
 
@@ -82,7 +83,7 @@ class _ManageHostelState extends State<ManageHostel> {
                         break;
                       case 'View Statistics and Analytics':
                         Navigator.of(context).push(MaterialPageRoute(
-                            builder: (_) => RoomsScreen(
+                            builder: (_) => StatsPage(
                                 hostelName: widget.hostel.hostelName)));
                         break;
                       default:
