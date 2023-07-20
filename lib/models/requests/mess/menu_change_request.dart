@@ -14,7 +14,6 @@ class MenuChangeRequest extends Request {
 
   @override
   Widget widget(BuildContext context) {
-    final title = reason;
     final Map<String, dynamic> uiElement = Request.uiElements['Mess']![type]
         .map<String, dynamic>((key, value) => MapEntry(key.toString(), value));
     return super.listWidget(

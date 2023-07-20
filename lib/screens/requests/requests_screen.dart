@@ -11,7 +11,6 @@ class RequestsScreen extends StatefulWidget {
 class _RequestsScreenState extends State<RequestsScreen> {
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return const SafeArea(
       child: Padding(
         padding: EdgeInsets.all(10.0),

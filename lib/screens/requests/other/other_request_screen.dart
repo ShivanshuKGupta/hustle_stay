@@ -75,7 +75,7 @@ class _OtherRequestScreenState extends State<OtherRequestScreen> {
                   onChange: (users) {
                     widget.request!.approvers = users.toList();
                   },
-                  chosenUsers: widget.request!.approvers.toSet() ?? {},
+                  chosenUsers: widget.request!.approvers.toSet(),
                 ),
               ),
               const SizedBox(height: 20),
