@@ -50,7 +50,7 @@ class _ManageHostelState extends State<ManageHostel> {
             childAspectRatio: 1,
           ),
           itemBuilder: (context, index) {
-            final Color cardColor = catList[index].cardColor!;
+            final Color cardColor = catList[index].cardColor;
 
             final LinearGradient gradient = LinearGradient(
               begin: Alignment.topCenter,
