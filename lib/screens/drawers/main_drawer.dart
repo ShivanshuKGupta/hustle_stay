@@ -36,17 +36,7 @@ class MainDrawer extends StatelessWidget {
       children: [
         const CurrentUserTile(),
         const Divider(),
-        if (currentUser.readonly.isAdmin)
-          _drawerTile(
-            context,
-            title: "Add new Hostel",
-            subtitle: "Add a new hostel",
-            icon: Icons.add_home,
-            onTap: () {
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (_) => AddHostelForm()));
-            },
-          ),
+
         if (currentUser.readonly.isAdmin)
           _drawerTile(
             context,
@@ -58,19 +48,7 @@ class MainDrawer extends StatelessWidget {
                   .push(MaterialPageRoute(builder: (_) => const AdminPanel()));
             },
           ),
-        if (currentUser.readonly.isAdmin)
-          _drawerTile(
-            context,
-            title: "Add a user",
-            icon: Icons.person_add_rounded,
-            subtitle: "Add a user",
-            onTap: () async {
-              navigatorPush(
-                context,
-                EditProfile(),
-              );
-            },
-          ),
+
         _drawerTile(
           context,
           title: "Resolved Complaints",

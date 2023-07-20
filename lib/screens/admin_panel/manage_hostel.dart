@@ -1,41 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/screens/admin_panel/user_list.dart';
-import 'package:hustle_stay/screens/auth/edit_profile_screen.dart';
+import 'package:hustle_stay/models/hostel/hostels.dart';
+import 'package:hustle_stay/screens/hostel/rooms/add_rooms.dart';
+import 'package:hustle_stay/screens/hostel/rooms/rooms_screen.dart';
+
 import '../../models/common/operation.dart';
 
-class ManageUsers extends StatefulWidget {
-  const ManageUsers({super.key});
-
+class ManageHostel extends StatefulWidget {
+  const ManageHostel({super.key, required this.hostel});
+  final Hostels hostel;
   @override
-  State<ManageUsers> createState() => _ManageUsersState();
+  State<ManageHostel> createState() => _ManageHostelState();
 }
 
-class _ManageUsersState extends State<ManageUsers> {
+class _ManageHostelState extends State<ManageHostel> {
   List<Operations> catList = [
     Operations(
         cardColor: const Color.fromARGB(255, 98, 0, 238),
-        operationName: 'Manage Students',
-        icon: const Icon(Icons.person)),
+        operationName: 'Add Rooms',
+        icon: const Icon(Icons.person_add_outlined)),
     Operations(
         cardColor: const Color.fromARGB(255, 239, 108, 0),
-        operationName: 'Manage Wardens',
-        icon: const Icon(Icons.person_4_rounded)),
+        operationName: 'Manage Rooms',
+        icon: const Icon(Icons.room_preferences_sharp)),
     Operations(
         cardColor: const Color.fromARGB(255, 238, 0, 0),
-        operationName: 'Manage Attenders',
-        icon: const Icon(Icons.person_pin)),
+        operationName: 'View Statistics and Analytics',
+        icon: const Icon(Icons.bar_chart_rounded)),
     Operations(
         cardColor: const Color.fromARGB(255, 0, 146, 69),
-        operationName: 'Manage Admins',
-        icon: const Icon(Icons.admin_panel_settings_rounded)),
-    Operations(
-        cardColor: const Color.fromARGB(255, 146, 0, 146),
-        operationName: 'Manage Other Users',
-        icon: const Icon(Icons.all_inbox)),
-    Operations(
-        cardColor: const Color.fromARGB(255, 0, 146, 110),
-        operationName: 'Add new User',
-        icon: const Icon(Icons.person_add_outlined)),
+        operationName: 'Delete Hostel',
+        icon: const Icon(Icons.delete_forever)),
   ];
 
   @override
@@ -75,12 +69,28 @@ class _ManageUsersState extends State<ManageUsers> {
               padding: const EdgeInsets.fromLTRB(2, 2, 8, 8),
               child: GestureDetector(
                   onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) =>
-                            catList[index].operationName == 'Add new User'
-                                ? EditProfile()
-                                : UserList(
-                                    userType: catList[index].operationName)));
+                    switch (catList[index].operationName) {
+                      case 'Add Rooms':
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (_) =>
+                                AddRoom(hostelName: widget.hostel.hostelName)));
+                        break;
+                      case 'Manage Rooms':
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (_) => RoomsScreen(
+                                hostelName: widget.hostel.hostelName)));
+                        break;
+                      case 'View Statistics and Analytics':
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (_) => RoomsScreen(
+                                hostelName: widget.hostel.hostelName)));
+                        break;
+                      default:
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (_) => RoomsScreen(
+                                hostelName: widget.hostel.hostelName)));
+                        break;
+                    }
                   },
                   child: Container(
                     width: gridWidth,

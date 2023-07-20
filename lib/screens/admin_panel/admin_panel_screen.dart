@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/screens/admin_panel/manage_categories.dart';
-import 'package:hustle_stay/screens/admin_panel/manage_hostel_attendance.dart';
 import 'package:hustle_stay/screens/admin_panel/manage_requests.dart';
 import 'package:hustle_stay/screens/admin_panel/manage_user_permission.dart';
 
 import '../../models/common/operation.dart';
+import 'manage_hostel_attendance.dart';
 
 class AdminPanel extends StatefulWidget {
   const AdminPanel({super.key});
@@ -50,7 +50,7 @@ class _AdminPanelState extends State<AdminPanel> {
             childAspectRatio: 1,
           ),
           itemBuilder: (context, index) {
-            final Color cardColor = catList[index].cardColor;
+            final Color cardColor = catList[index].cardColor!;
 
             final LinearGradient gradient = LinearGradient(
               begin: Alignment.topCenter,
@@ -82,7 +82,7 @@ class _AdminPanelState extends State<AdminPanel> {
                       break;
                     case 'Manage Hostels & Attendance':
                       Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => const ManageHostel()));
+                          builder: (_) => const ManageHostelPage()));
                       break;
                     default:
                   }
@@ -92,37 +92,48 @@ class _AdminPanelState extends State<AdminPanel> {
                   padding: const EdgeInsets.all(1),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16.0),
-                    gradient: gradient,
-                    boxShadow: [
-                      BoxShadow(
-                        color: brightness == Brightness.light
-                            ? Colors.black.withOpacity(0.5)
-                            : Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+                    gradient: brightness == Brightness.light ? null : gradient,
+                    color: brightness == Brightness.light
+                        ? cardColor.withOpacity(0.2)
+                        : null,
+                    boxShadow: brightness == Brightness.light
+                        ? null
+                        : [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 2,
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Expanded(
                         child: Icon(
-                          catList[index].icon.icon,
+                          catList[index].icon!.icon,
                           size: screenWidth * 0.3,
                         ),
                       ),
-                      const Divider(
-                        color: Colors.white,
+                      Divider(
+                        color: brightness == Brightness.light
+                            ? Colors.black
+                            : Colors.white,
                       ),
                       Text(
                         catList[index].operationName,
                         overflow: TextOverflow.clip,
-                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                            fontWeight: FontWeight.bold, color: Colors.white),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall!
+                            .copyWith(fontWeight: FontWeight.bold),
                       ),
-                      const Divider(color: Colors.white),
+                      Divider(
+                        color: brightness == Brightness.light
+                            ? Colors.black
+                            : Colors.white,
+                      ),
                     ],
                   ),
                 ),

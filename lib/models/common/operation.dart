@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 
+import '../hostel/hostels.dart';
+
 class Operations {
   final String operationName;
-  final Icon icon;
-  final Color cardColor;
+  Icon? icon;
+  Color cardColor;
+  String? imgUrl;
+  Hostels? hostel;
   Operations(
       {required this.cardColor,
       required this.operationName,
-      required this.icon});
+      this.icon,
+      this.imgUrl,
+      this.hostel});
 }
