@@ -34,7 +34,7 @@ class _MenuChangeRequestScreenState extends State<MenuChangeRequestScreen> {
     final theme = Theme.of(context);
     widget.request ??= MenuChangeRequest(userEmail: currentUser.email!);
     final Map<String, dynamic> uiElement =
-        Request.uiElements['Mess']!['Menu Change'];
+        Request.uiElements['Mess']!['Menu_Change'];
     return Scaffold(
       appBar: AppBar(),
       body: Padding(

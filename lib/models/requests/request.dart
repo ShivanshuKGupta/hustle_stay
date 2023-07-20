@@ -26,7 +26,6 @@ abstract class Request {
   /// [id] also denotes when was the request created,
   /// its id in firestore and
   int id = 0;
-
   late String requestingUserEmail;
 
   /// The status of the request
@@ -39,11 +38,19 @@ abstract class Request {
   DateTime expiryDate = infDate; // infinite time
 
   List<String> get approvers {
-    return allApprovers[type]!;
+    if (type != 'Other') {
+      return allApprovers[type]!;
+    } else {
+      return allApprovers[id.toString()] ?? [];
+    }
   }
 
-  set approvers(value) {
-    allApprovers[type] = value;
+  set approvers(List<String> value) {
+    if (type != 'Other') {
+      allApprovers[type] = value;
+    } else {
+      allApprovers[id.toString()] = value;
+    }
   }
 
   /// Map<RequestTypeName, List<approvers>>
@@ -51,12 +58,6 @@ abstract class Request {
 
   /// This denotes the type of request
   late String type;
-
-  static const List<String> allTypes = [
-    'Vehicle',
-    'Menu Change',
-    'Other',
-  ];
 
   /// The reason for posting the request
   String reason = "";
@@ -82,6 +83,7 @@ abstract class Request {
       "reason": reason,
       "requestingUserEmail": requestingUserEmail,
       "expiryDate": expiryDate.millisecondsSinceEpoch,
+      if (type == 'Other') 'approvers': approvers,
     };
   }
 
@@ -94,6 +96,11 @@ abstract class Request {
     reason = data['reason'] ?? reason;
     requestingUserEmail = data['requestingUserEmail'] ?? requestingUserEmail;
     expiryDate = DateTime.fromMillisecondsSinceEpoch(data['expiryDate'] ?? 0);
+    if (type == 'Other') {
+      approvers = (data['approvers'] as List<dynamic>)
+          .map((e) => e.toString())
+          .toList();
+    }
   }
 
   Future<void> approve() async {
@@ -180,13 +187,22 @@ abstract class Request {
 
   /// Use this function to get this request's list of approvers
   Future<List<String>> fetchApprovers({Source? src}) async {
-    return await fetchApproversOfRequestType(type, src: src);
+    if (type != 'Other') {
+      return await fetchApproversOfRequestType(type, src: src);
+    } else {
+      return approvers;
+    }
   }
 
   /// Use this function to update this request's list of approvers
   Future<void> updateApprovers({required List<String> newApprovers}) async {
-    final doc = firestore.collection('requests').doc(type);
-    await doc.set({'approvers': newApprovers});
+    if (type != 'Other') {
+      final doc = firestore.collection('requests').doc(type);
+      await doc.set({'approvers': newApprovers});
+    } else {
+      final doc = firestore.collection('requests').doc(id.toString());
+      await doc.update({'approvers': newApprovers});
+    }
     approvers = newApprovers;
   }
 
@@ -244,7 +260,7 @@ abstract class Request {
       'color': Colors.lightBlueAccent,
       'icon': Icons.restaurant_menu_rounded,
       'route': MessRequestScreen.routeName,
-      'Menu Change': <String, dynamic>{
+      'Menu_Change': <String, dynamic>{
         'color': Colors.pinkAccent,
         'icon': Icons.restaurant,
       },
@@ -386,6 +402,7 @@ abstract class Request {
                   ddmmyyyy(DateTime.fromMillisecondsSinceEpoch(closedAt)),
             'Approvers': approvers.toString(),
             'Reason': reason,
+            if (type == 'Other') 'Approvers': approvers.toString(),
             ...otherDetails,
           },
         ),
@@ -394,9 +411,10 @@ abstract class Request {
   }
 }
 
-/// Fetch approvers of specific request type
+/// Fetch approvers of specific request type (type shouldn't be Other)
 Future<List<String>> fetchApproversOfRequestType(String requestType,
     {Source? src}) async {
+  if (requestType == 'Other') return [];
   final doc = firestore.collection('requests').doc(requestType);
   DocumentSnapshot<Map<String, dynamic>>? response;
   try {
@@ -418,11 +436,10 @@ Future<List<String>> fetchApproversOfRequestType(String requestType,
 
 Request decodeToRequest(Map<String, dynamic> data) {
   final type = data['type'];
-  assert(Request.allTypes.contains(type));
   if (type == 'Vehicle') {
     return VehicleRequest(requestingUserEmail: data['requestingUserEmail'])
       ..load(data);
-  } else if (type == 'Menu Change') {
+  } else if (type == 'Menu_Change') {
     return MenuChangeRequest(userEmail: data['requestingUserEmail'])
       ..load(data);
   } else if (type == 'Other') {

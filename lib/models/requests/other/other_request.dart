@@ -14,7 +14,7 @@ class OtherRequest extends Request {
 
   @override
   Widget widget(BuildContext context) {
-    final Map<String, dynamic> uiElement = Request.uiElements['Other']![type]
+    final Map<String, dynamic> uiElement = Request.uiElements['Other']!
         .map<String, dynamic>((key, value) => MapEntry(key.toString(), value));
     return super.listWidget(
       context,

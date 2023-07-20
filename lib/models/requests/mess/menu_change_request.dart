@@ -4,7 +4,7 @@ import 'package:hustle_stay/models/requests/request.dart';
 class MenuChangeRequest extends Request {
   MenuChangeRequest({required String userEmail}) {
     super.requestingUserEmail = userEmail;
-    super.type = "Menu Change";
+    super.type = "Menu_Change";
   }
 
   @override

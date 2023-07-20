@@ -48,10 +48,10 @@ class MessRequestScreen extends StatelessWidget {
                     },
                     title: 'Menu Change',
                     icon: Icon(
-                      Request.uiElements['Mess']!['Menu Change']['icon'],
+                      Request.uiElements['Mess']!['Menu_Change']['icon'],
                       size: 50,
                     ),
-                    color: Request.uiElements['Mess']!['Menu Change']['color'],
+                    color: Request.uiElements['Mess']!['Menu_Change']['color'],
                   ),
                   // GridTileLogo(
                   //   onTap: () {},
