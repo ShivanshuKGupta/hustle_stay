@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/requests/request.dart';
-import 'package:hustle_stay/models/requests/vehicle/vehicle_request.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/firestore_cache_builder.dart';
 import 'package:hustle_stay/tools.dart';
@@ -33,11 +32,7 @@ class _RequestsListState extends State<RequestsList> {
       final data = doc.data();
       final type = data['type'];
       requestTypes.add(type);
-      if (type == 'Vehicle') {
-        return VehicleRequest(requestingUserEmail: data['requestingUserEmail'])
-          ..load(data);
-      }
-      throw "No such type exists: '$type'";
+      return decodeToRequest(data);
     }).toList();
     for (var e in requestTypes) {
       fetchApprovers(e, src: src);
@@ -59,7 +54,7 @@ class _RequestsListState extends State<RequestsList> {
     if (myRequestTypes.isEmpty) {
       // This person is neither a approver nor a student
       // then assuming that this person is a student
-      return await getStudentRequests(src: src);
+      return await getApproverRequests(src: src);
     }
     final collection = firestore.collection('requests');
     final response = await collection
@@ -69,12 +64,7 @@ class _RequestsListState extends State<RequestsList> {
     final docs = response.docs;
     List<Request> requests = docs.map((doc) {
       final data = doc.data();
-      final type = data['type'];
-      if (type == 'Vehicle') {
-        return VehicleRequest(requestingUserEmail: data['requestingUserEmail'])
-          ..load(data);
-      }
-      throw "No such type exists: '$type'";
+      return decodeToRequest(data);
     }).toList();
     return requests;
   }

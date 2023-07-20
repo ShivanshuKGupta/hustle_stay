@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/requests/request.dart';
+import 'package:hustle_stay/screens/requests/mess/menu_change_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
 
@@ -42,41 +43,43 @@ class MessRequestScreen extends StatelessWidget {
                 mainAxisSpacing: 5,
                 children: [
                   GridTileLogo(
-                    onTap: () {},
-                    title: 'Breakfast',
+                    onTap: () {
+                      navigatorPush(context, MenuChangeRequestScreen());
+                    },
+                    title: 'Menu Change',
                     icon: Icon(
-                      Request.uiElements['Mess']!['Breakfast']['icon'],
+                      Request.uiElements['Mess']!['Menu Change']['icon'],
                       size: 50,
                     ),
-                    color: Request.uiElements['Mess']!['Breakfast']['color'],
+                    color: Request.uiElements['Mess']!['Menu Change']['color'],
                   ),
-                  GridTileLogo(
-                    onTap: () {},
-                    title: 'Lunch',
-                    icon: Icon(
-                      Request.uiElements['Mess']!['Lunch']['icon'],
-                      size: 50,
-                    ),
-                    color: Request.uiElements['Mess']!['Lunch']['color'],
-                  ),
-                  GridTileLogo(
-                    onTap: () {},
-                    title: 'Snacks',
-                    icon: Icon(
-                      Request.uiElements['Mess']!['Snacks']['icon'],
-                      size: 50,
-                    ),
-                    color: Request.uiElements['Mess']!['Snacks']['color'],
-                  ),
-                  GridTileLogo(
-                    onTap: () {},
-                    title: 'Dinner',
-                    icon: Icon(
-                      Request.uiElements['Mess']!['Dinner']['icon'],
-                      size: 50,
-                    ),
-                    color: Request.uiElements['Mess']!['Dinner']['color'],
-                  ),
+                  // GridTileLogo(
+                  //   onTap: () {},
+                  //   title: 'Lunch',
+                  //   icon: Icon(
+                  //     Request.uiElements['Mess']!['Lunch']['icon'],
+                  //     size: 50,
+                  //   ),
+                  //   color: Request.uiElements['Mess']!['Lunch']['color'],
+                  // ),
+                  // GridTileLogo(
+                  //   onTap: () {},
+                  //   title: 'Snacks',
+                  //   icon: Icon(
+                  //     Request.uiElements['Mess']!['Snacks']['icon'],
+                  //     size: 50,
+                  //   ),
+                  //   color: Request.uiElements['Mess']!['Snacks']['color'],
+                  // ),
+                  // GridTileLogo(
+                  //   onTap: () {},
+                  //   title: 'Dinner',
+                  //   icon: Icon(
+                  //     Request.uiElements['Mess']!['Dinner']['icon'],
+                  //     size: 50,
+                  //   ),
+                  //   color: Request.uiElements['Mess']!['Dinner']['color'],
+                  // ),
                 ],
               ),
             ),
