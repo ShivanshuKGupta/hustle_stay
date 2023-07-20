@@ -65,6 +65,10 @@ class ChatScreen extends StatelessWidget {
                     await addMessage(chat, msg);
                   },
                 ),
+              )
+            else
+              const SizedBox(
+                height: 15,
               ),
           ],
         ),

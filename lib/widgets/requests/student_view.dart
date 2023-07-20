@@ -1,3 +1,4 @@
+import 'package:animated_icon/animated_icon.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
@@ -8,14 +9,14 @@ import 'package:hustle_stay/providers/firestore_cache_builder.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/requests/post_request_options.dart';
 
-class StudentView extends StatefulWidget {
-  const StudentView({super.key});
+class RequestsList extends StatefulWidget {
+  const RequestsList({super.key});
 
   @override
-  State<StudentView> createState() => _StudentViewState();
+  State<RequestsList> createState() => _RequestsListState();
 }
 
-class _StudentViewState extends State<StudentView> {
+class _RequestsListState extends State<RequestsList> {
   /// It returns requests and fetches required approvers as well
   Future<List<Request>> getStudentRequests({Source? src}) async {
     final collection = firestore.collection('requests');
@@ -44,22 +45,86 @@ class _StudentViewState extends State<StudentView> {
     return requests;
   }
 
+  /// It returns requests and fetches required approvers as well
+  Future<List<Request>> getApproverRequests({Source? src}) async {
+    for (var e in Request.allTypes) {
+      await fetchApprovers(e, src: src);
+    }
+    final List<String> myRequestTypes = [];
+    for (var entry in Request.allApprovers.entries) {
+      if (entry.value.contains(currentUser.email)) {
+        myRequestTypes.add(entry.key);
+      }
+    }
+    if (myRequestTypes.isEmpty) {
+      // This person is neither a approver nor a student
+      // then assuming that this person is a student
+      return await getStudentRequests(src: src);
+    }
+    final collection = firestore.collection('requests');
+    final response = await collection
+        .where('type', whereIn: myRequestTypes)
+        .where('status', isEqualTo: RequestStatus.pending.index)
+        .get(src == null ? null : GetOptions(source: src));
+    final docs = response.docs;
+    List<Request> requests = docs.map((doc) {
+      final data = doc.data();
+      final type = data['type'];
+      if (type == 'Vehicle') {
+        return VehicleRequest(requestingUserEmail: data['requestingUserEmail'])
+          ..load(data);
+      }
+      throw "No such type exists: '$type'";
+    }).toList();
+    return requests;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final mediaQuery = MediaQuery.of(context);
     return RefreshIndicator(
       onRefresh: () async {
-        await getStudentRequests();
+        if (currentUser.readonly.type == 'student') {
+          await getStudentRequests();
+        } else {
+          await getApproverRequests();
+        }
         setState(() {});
       },
       child: ListView(
         children: [
-          if (currentUser.readonly.type == 'student' ||
-              true) // TODO: remove short circuiting
+          if (currentUser.readonly.type == 'student')
             const PoptRequestOptions(),
           CacheBuilder(
             builder: (ctx, data) {
               final children = data.map((e) => e.widget(context)).toList();
+              if (children.isEmpty && currentUser.readonly.type != 'student') {
+                return SizedBox(
+                  height: mediaQuery.size.height -
+                      mediaQuery.viewInsets.top -
+                      mediaQuery.padding.top -
+                      mediaQuery.padding.bottom -
+                      mediaQuery.viewInsets.bottom -
+                      150,
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        AnimateIcon(
+                          onTap: () {},
+                          iconType: IconType.continueAnimation,
+                          animateIcon: AnimateIcons.cool,
+                        ),
+                        Text(
+                          'No requests are pending',
+                          style: theme.textTheme.titleLarge,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
               if (children.isNotEmpty) {
                 children.insert(
                   0,
@@ -89,7 +154,9 @@ class _StudentViewState extends State<StudentView> {
                 },
               );
             },
-            provider: getStudentRequests,
+            provider: currentUser.readonly.type == 'student'
+                ? getStudentRequests
+                : getApproverRequests,
           ),
         ],
       ),

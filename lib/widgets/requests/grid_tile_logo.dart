@@ -26,9 +26,10 @@ class GridTileLogo extends StatelessWidget {
             color: color.withOpacity(0.2),
             padding: const EdgeInsets.all(10),
             child: FittedBox(
-              fit: BoxFit.fitHeight,
+              fit: BoxFit.scaleDown,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(

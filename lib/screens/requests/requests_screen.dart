@@ -15,7 +15,7 @@ class _RequestsScreenState extends State<RequestsScreen> {
     return const SafeArea(
       child: Padding(
         padding: EdgeInsets.all(10.0),
-        child: StudentView(),
+        child: RequestsList(),
       ),
     );
   }

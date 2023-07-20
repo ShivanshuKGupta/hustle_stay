@@ -171,14 +171,18 @@ class _VehicleRequestFormScreenState extends State<VehicleRequestFormScreen> {
       showMsg(context, 'Please specifiy a date and time');
       return;
     }
-    if (widget.request!.reason == 'Other') {
+    if (widget.request!.reason == 'Other' || widget.reasonOptions.isEmpty) {
       widget.request!.reason = _txtController.text.trim();
     }
-    widget.request!.reason = "${widget.title}: ${widget.request!.reason}";
+    widget.request!.reason =
+        "${widget.title}${widget.request!.reason.isNotEmpty ? ": ${widget.request!.reason}" : ''}";
     setState(() {
       _loading = true;
     });
-    await widget.request!.update();
+    final dateTime = widget.request!.dateTime!;
+    await widget.request!.update(
+        chosenExpiryDate:
+            DateTime(dateTime.year, dateTime.month, dateTime.day + 7));
     await widget.request!.fetchApprovers();
     if (context.mounted) {
       setState(() {

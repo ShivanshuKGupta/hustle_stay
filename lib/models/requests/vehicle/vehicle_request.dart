@@ -39,7 +39,6 @@ class VehicleRequest extends Request {
   @override
   Widget widget(BuildContext context) {
     final title = reason.split(':')[0];
-    String subtitle = reason.substring(title.length + 2).trim();
     final uiElement =
         Request.uiElements[type]!.map((key, value) => MapEntry(key, value));
     uiElement['color'] = Request.uiElements[type]!['children'][title]['color'];
@@ -74,6 +73,11 @@ class VehicleRequest extends Request {
         ],
       ),
       uiElement,
+      {
+        '-': '-',
+        'Requested Date': ddmmyyyy(dateTime!),
+        'Requested Time': timeFrom(dateTime!)
+      },
     );
   }
 }
