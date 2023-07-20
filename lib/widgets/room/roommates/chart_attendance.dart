@@ -152,19 +152,21 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.email == null
-        ? chartType == 'Line Chart'
-            ? ValueListenableBuilder(
-                valueListenable: dateRange,
-                builder: (context, value, child) =>
-                    futureBuilderWidget(valueRange: value),
-              )
-            : ValueListenableBuilder(
-                valueListenable: widget.selectedDate!,
-                builder: (context, value, child) =>
-                    futureBuilderWidget(value: value),
-              )
-        : futureBuilderWidget();
+    return SingleChildScrollView(
+      child: widget.email == null
+          ? chartType == 'Line Chart'
+              ? ValueListenableBuilder(
+                  valueListenable: dateRange,
+                  builder: (context, value, child) =>
+                      futureBuilderWidget(valueRange: value),
+                )
+              : ValueListenableBuilder(
+                  valueListenable: widget.selectedDate!,
+                  builder: (context, value, child) =>
+                      futureBuilderWidget(value: value),
+                )
+          : futureBuilderWidget(),
+    );
   }
 
   Widget futureBuilderWidget({DateTime? value, DateTimeRange? valueRange}) {
@@ -295,7 +297,7 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
                 );
               }
 
-              return pieChartWidget(snapshot.data!);
+              return pieBarChartWidget(snapshot.data!);
             },
             future: widget.email == null && value != null
                 ? getHostelAttendanceStatistics(widget.hostelName, value)
@@ -303,95 +305,111 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
           );
   }
 
-  Widget pieChartWidget(Map<String, double> data) {
+  ValueNotifier<bool> isOpen = ValueNotifier(false);
+  Widget pieBarChartWidget(Map<String, double> data) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final layout = MediaQuery.of(context).orientation;
     List<ChartData> chartdata = attendanceData(data);
 
-    return Column(
-      children: [
-        SelectOne(
-          title: 'Select Chart Type',
-          allOptions: widget.email != null
-              ? chartOptions.sublist(0, 2).toSet()
-              : chartOptions.toSet(),
-          selectedOption: chartType,
-          onChange: (value) {
-            setState(() {
-              chartType = value;
-            });
-            return true;
-          },
-        ),
-        Expanded(
-          child: chartType == 'Pie Chart'
-              ? SfCircularChart(
-                  series: <CircularSeries>[
-                    PieSeries<ChartData, String>(
+    return ValueListenableBuilder(
+      valueListenable: isOpen,
+      builder: (context, value, child) => Column(
+        children: [
+          SelectOne(
+            title: 'Select Chart Type',
+            allOptions: widget.email != null
+                ? chartOptions.sublist(0, 2).toSet()
+                : chartOptions.toSet(),
+            selectedOption: chartType,
+            onChange: (value) {
+              setState(() {
+                chartType = value;
+              });
+              return true;
+            },
+          ),
+          SizedBox(
+            height: value
+                ? layout == Orientation.landscape
+                    ? screenWidth * 0.3
+                    : screenWidth * 0.8
+                : layout == Orientation.landscape
+                    ? screenWidth * 0.5
+                    : screenWidth,
+            child: chartType == 'Pie Chart'
+                ? SfCircularChart(
+                    series: <CircularSeries>[
+                      PieSeries<ChartData, String>(
+                          dataSource: chartdata,
+                          pointColorMapper: (ChartData data, _) => data.color,
+                          xValueMapper: (ChartData data, _) => data.category,
+                          yValueMapper: (ChartData data, _) => data.value,
+                          dataLabelSettings: const DataLabelSettings(
+                            isVisible: true,
+                          ),
+                          selectionBehavior: SelectionBehavior(enable: true),
+                          onPointLongPress: (pointInteractionDetails) {
+                            onClickNavigation(
+                                chartdata[pointInteractionDetails.pointIndex!]
+                                    .category);
+                          },
+                          onPointTap: (pointInteractionDetails) async {
+                            await getHostelRangeAttendanceStatistics(
+                                widget.hostelName,
+                                DateTimeRange(
+                                    start: DateTime(2023, 06, 25),
+                                    end: DateTime.now()));
+                          }),
+                    ],
+                    legend: const Legend(
+                      isVisible: true,
+                      isResponsive: true,
+                      position: LegendPosition.bottom,
+                      orientation: LegendItemOrientation.horizontal,
+                      alignment: ChartAlignment.center,
+                      width: "100%",
+                      overflowMode: LegendItemOverflowMode.scroll,
+                    ),
+                    tooltipBehavior: TooltipBehavior(
+                      enable: true,
+                      textStyle: const TextStyle(fontSize: 12),
+                      format: 'point.x: point.y%',
+                    ),
+                    palette: const <Color>[
+                      Colors.green,
+                      Colors.red,
+                      Colors.yellow,
+                      Colors.cyan,
+                    ],
+                    enableMultiSelection: false,
+                  )
+                : SfCartesianChart(
+                    primaryXAxis: CategoryAxis(
+                        labelStyle:
+                            const TextStyle(fontWeight: FontWeight.bold)),
+                    primaryYAxis: NumericAxis(
+                        labelStyle:
+                            const TextStyle(fontWeight: FontWeight.bold)),
+                    series: <BarSeries<ChartData, String>>[
+                      BarSeries<ChartData, String>(
                         dataSource: chartdata,
-                        pointColorMapper: (ChartData data, _) => data.color,
                         xValueMapper: (ChartData data, _) => data.category,
                         yValueMapper: (ChartData data, _) => data.value,
-                        dataLabelSettings: const DataLabelSettings(
-                          isVisible: true,
-                        ),
-                        selectionBehavior: SelectionBehavior(enable: true),
+                        pointColorMapper: (ChartData data, _) => data.color,
                         onPointLongPress: (pointInteractionDetails) {
                           onClickNavigation(
                               chartdata[pointInteractionDetails.pointIndex!]
                                   .category);
                         },
-                        onPointTap: (pointInteractionDetails) async {
-                          await getHostelRangeAttendanceStatistics(
-                              widget.hostelName,
-                              DateTimeRange(
-                                  start: DateTime(2023, 06, 25),
-                                  end: DateTime.now()));
-                        }),
-                  ],
-                  legend: const Legend(
-                    isVisible: true,
-                    isResponsive: true,
-                    position: LegendPosition.bottom,
-                    orientation: LegendItemOrientation.horizontal,
-                    alignment: ChartAlignment.center,
-                    width: "100%",
-                    overflowMode: LegendItemOverflowMode.scroll,
+                      ),
+                    ],
                   ),
-                  tooltipBehavior: TooltipBehavior(
-                    enable: true,
-                    textStyle: const TextStyle(fontSize: 12),
-                    format: 'point.x: point.y%',
-                  ),
-                  palette: const <Color>[
-                    Colors.green,
-                    Colors.red,
-                    Colors.yellow,
-                    Colors.cyan,
-                  ],
-                  enableMultiSelection: false,
-                )
-              : SfCartesianChart(
-                  primaryXAxis: CategoryAxis(
-                      labelStyle: const TextStyle(fontWeight: FontWeight.bold)),
-                  primaryYAxis: NumericAxis(
-                      labelStyle: const TextStyle(fontWeight: FontWeight.bold)),
-                  series: <BarSeries<ChartData, String>>[
-                    BarSeries<ChartData, String>(
-                      dataSource: chartdata,
-                      xValueMapper: (ChartData data, _) => data.category,
-                      yValueMapper: (ChartData data, _) => data.value,
-                      pointColorMapper: (ChartData data, _) => data.color,
-                      onPointLongPress: (pointInteractionDetails) {
-                        onClickNavigation(
-                            chartdata[pointInteractionDetails.pointIndex!]
-                                .category);
-                      },
-                    ),
-                  ],
-                ),
-        ),
-        const Divider(),
-        StatList(data: data),
-      ],
+          ),
+          const Divider(),
+          StatList(data: data, isOpen: isOpen),
+        ],
+      ),
     );
   }
 
@@ -502,8 +520,9 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
 }
 
 class StatList extends StatefulWidget {
-  const StatList({super.key, required this.data});
+  const StatList({super.key, required this.data, required this.isOpen});
   final Map<String, double> data;
+  final ValueNotifier<bool> isOpen;
 
   @override
   State<StatList> createState() => _StatListState();
@@ -518,15 +537,13 @@ class _StatListState extends State<StatList> {
         ListTile(
           trailing: IconButton(
               onPressed: () {
-                setState(() {
-                  isOpen = !isOpen;
-                });
+                widget.isOpen.value = !widget.isOpen.value;
               },
-              icon: isOpen
+              icon: widget.isOpen.value
                   ? const Icon(Icons.arrow_drop_up)
                   : const Icon(Icons.arrow_drop_down)),
         ),
-        if (isOpen)
+        if (widget.isOpen.value)
           Column(
             children: [
               ListTile(
