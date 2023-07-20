@@ -6,6 +6,8 @@ import 'package:hustle_stay/screens/hostel/rooms/range_chart.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../../../screens/hostel/rooms/attendance_stats_student.dart';
+import '../../../tools.dart';
+import '../../complaints/select_one.dart';
 
 class AttendancePieChart extends StatefulWidget {
   const AttendancePieChart({
@@ -89,8 +91,7 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
     }
   }
 
-  String chartType = 'pieChart';
-  bool isRangeChart = false;
+  String chartType = 'Pie Chart';
   bool isRunning = false;
   int total = 0;
 
@@ -107,22 +108,22 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
         adata['leave']! +
         adata['presentLate']!;
 
-    double present = chartType == 'barChart'
+    double present = chartType == 'Bar Chart'
         ? adata['present']!
         : adata['present']! / adata['total']! * 100;
-    double leave = chartType == 'barChart'
+    double leave = chartType == 'Bar Chart'
         ? adata['leave']!
         : adata['leave']! / adata['total']! * 100;
     double internship = chartType == 'barChart'
         ? adata['internship']!
         : adata['internship']! / adata['total']! * 100;
-    double absent = chartType == 'barChart'
+    double absent = chartType == 'Bar Chart'
         ? adata['absent']!
         : adata['absent']! / adata['total']! * 100;
-    double presentLate = chartType == 'barChart'
+    double presentLate = chartType == 'Bar Chart'
         ? adata['presentLate']!
         : adata['presentLate']! / adata['total']! * 100;
-    double noStatus = chartType == 'barChart'
+    double noStatus = chartType == 'Bar Chart'
         ? adata['total']! - sum
         : (adata['total']! - sum) / adata['total']! * 100;
 
@@ -142,16 +143,17 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
     return chartdata;
   }
 
-  List<DropdownMenuEntry> chartOptions = [
-    const DropdownMenuEntry(value: 'barChart', label: 'Bar Chart'),
-    const DropdownMenuEntry(value: 'pieChart', label: 'Pie Chart'),
+  List<String> chartOptions = [
+    'Bar Chart',
+    'Pie Chart',
+    'Line Chart',
   ];
   ValueNotifier<DateTimeRange?> dateRange = ValueNotifier(null);
 
   @override
   Widget build(BuildContext context) {
     return widget.email == null
-        ? isRangeChart
+        ? chartType == 'Line Chart'
             ? ValueListenableBuilder(
                 valueListenable: dateRange,
                 builder: (context, value, child) =>
@@ -166,57 +168,88 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
   }
 
   Widget futureBuilderWidget({DateTime? value, DateTimeRange? valueRange}) {
-    return isRangeChart
-        ? FutureBuilder(
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: double.infinity,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        AnimateIcon(
-                          onTap: () {},
-                          iconType: IconType.continueAnimation,
-                          animateIcon: AnimateIcons.loading1,
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
-                        const Text('Loading...')
-                      ],
-                    ),
+    return chartType == 'Line Chart'
+        ? dateRange.value == null
+            ? Column(
+                children: [
+                  SelectOne(
+                    title: 'Select Chart Type',
+                    allOptions: chartOptions.toSet(),
+                    selectedOption: chartType,
+                    onChange: (value) {
+                      setState(() {
+                        chartType = value;
+                      });
+                      return true;
+                    },
                   ),
-                );
-              }
-              if (!snapshot.hasData && snapshot.error != null) {
-                return Center(
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: double.infinity,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        AnimateIcon(
-                          onTap: () {},
-                          iconType: IconType.continueAnimation,
-                          animateIcon: AnimateIcons.error,
-                          color: Theme.of(context).colorScheme.secondary,
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      final picked = await showDateRangePicker(
+                          context: context,
+                          firstDate: DateTime(2023, 01, 01),
+                          lastDate: DateTime.now());
+                      if (picked != null) {
+                        dateRange.value = picked;
+                      }
+                    },
+                    icon: const Icon(Icons.edit_calendar_outlined),
+                    label: Text(dateRange.value == null
+                        ? 'Select Date Range'
+                        : '${ddmmyyyy(dateRange.value!.start)}-${ddmmyyyy(dateRange.value!.end)}'),
+                  )
+                ],
+              )
+            : FutureBuilder(
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: double.infinity,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            AnimateIcon(
+                              onTap: () {},
+                              iconType: IconType.continueAnimation,
+                              animateIcon: AnimateIcons.loading1,
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                            const Text('Loading...')
+                          ],
                         ),
-                        const Text('No data available')
-                      ],
-                    ),
-                  ),
-                );
-              }
+                      ),
+                    );
+                  }
+                  if (!snapshot.hasData && snapshot.error != null) {
+                    return Center(
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: double.infinity,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            AnimateIcon(
+                              onTap: () {},
+                              iconType: IconType.continueAnimation,
+                              animateIcon: AnimateIcons.error,
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                            const Text('No data available')
+                          ],
+                        ),
+                      ),
+                    );
+                  }
 
-              return chart(snapshot.data!);
-            },
-            future: getHostelRangeAttendanceStatistics(
-                widget.hostelName, valueRange!),
-          )
+                  return chart(snapshot.data!);
+                },
+                future: getHostelRangeAttendanceStatistics(
+                    widget.hostelName, valueRange!),
+              )
         : FutureBuilder(
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -275,48 +308,21 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
 
     return Column(
       children: [
-        Wrap(
-          children: [
-            if (widget.email == null)
-              Checkbox(
-                  value: isRangeChart,
-                  onChanged: (value) {
-                    if (dateRange.value != null) {
-                      setState(() {
-                        isRangeChart = !isRangeChart;
-                      });
-                    } else {
-                      ScaffoldMessenger.of(context).clearSnackBars();
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('Select Date Range first')));
-                    }
-                  }),
-            if (widget.email == null)
-              IconButton(
-                  onPressed: () async {
-                    final picked = await showDateRangePicker(
-                        context: context,
-                        firstDate: DateTime(2023, 01, 01),
-                        lastDate: DateTime.now());
-                    if (picked != null) {
-                      dateRange.value = picked;
-                    }
-                  },
-                  icon: const Icon(Icons.edit_calendar_outlined)),
-            if (!isRangeChart)
-              DropdownMenu(
-                dropdownMenuEntries: chartOptions,
-                initialSelection: chartType,
-                onSelected: (value) {
-                  setState(() {
-                    chartType = value;
-                  });
-                },
-              ),
-          ],
+        SelectOne(
+          title: 'Select Chart Type',
+          allOptions: widget.email != null
+              ? chartOptions.sublist(0, 2).toSet()
+              : chartOptions.toSet(),
+          selectedOption: chartType,
+          onChange: (value) {
+            setState(() {
+              chartType = value;
+            });
+            return true;
+          },
         ),
         Expanded(
-          child: chartType == 'pieChart'
+          child: chartType == 'Pie Chart'
               ? SfCircularChart(
                   series: <CircularSeries>[
                     PieSeries<ChartData, String>(
@@ -384,68 +390,7 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
                 ),
         ),
         const Divider(),
-        ListTile(
-          title: const Text('Present'),
-          leading: const Icon(Icons.check_circle_outline),
-          trailing: Text(
-            data['present']!.toStringAsFixed(0),
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-        ),
-        ListTile(
-          title: const Text('Absent'),
-          leading: const Icon(Icons.cancel_outlined),
-          trailing: Text(
-            data['absent']!.toStringAsFixed(0),
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-        ),
-        ListTile(
-          title: const Text('Leave'),
-          leading: const Icon(Icons.trip_origin_sharp),
-          trailing: Text(
-            data['leave']!.toStringAsFixed(0),
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-        ),
-        ListTile(
-          title: const Text('Internship'),
-          leading: const Icon(Icons.work_history),
-          trailing: Text(
-            data['internship']!.toStringAsFixed(0),
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-        ),
-        ListTile(
-          title: const Text('Late'),
-          leading: const Icon(Icons.all_inbox),
-          trailing: Text(
-            (data['presentLate']!).toStringAsFixed(0),
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-        ),
-        ListTile(
-          title: const Text('Not Taken Yet'),
-          leading: const Icon(Icons.all_inbox),
-          trailing: Text(
-            ((data['total']! -
-                    (data['present']! +
-                        data['absent']! +
-                        data['internship']! +
-                        data['leave']! +
-                        data['presentLate']!)))
-                .toStringAsFixed(0),
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-        ),
-        ListTile(
-          title: const Text('Total'),
-          leading: const Icon(Icons.all_inbox),
-          trailing: Text(
-            (data['total']!).toStringAsFixed(0),
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-        )
+        StatList(data: data),
       ],
     );
   }
@@ -455,43 +400,33 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          Wrap(
-            children: [
-              Checkbox(
-                  value: isRangeChart,
-                  onChanged: (value) {
-                    if (dateRange.value != null) {
-                      setState(() {
-                        isRangeChart = !isRangeChart;
-                      });
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('Select Date Range first')));
-                    }
-                  }),
-              IconButton(
-                  onPressed: () async {
-                    final picked = await showDateRangePicker(
-                        context: context,
-                        firstDate: DateTime(2023, 01, 01),
-                        lastDate: DateTime.now());
-                    if (picked != null) {
-                      dateRange.value = picked;
-                    }
-                  },
-                  icon: const Icon(Icons.edit_calendar_outlined)),
-              if (!isRangeChart)
-                DropdownMenu(
-                  dropdownMenuEntries: chartOptions,
-                  initialSelection: chartType,
-                  onSelected: (value) {
-                    setState(() {
-                      chartType = value;
-                    });
-                  },
-                ),
-            ],
+          SelectOne(
+            title: 'Select Chart Type',
+            allOptions: chartOptions.toSet(),
+            selectedOption: chartType,
+            onChange: (value) {
+              setState(() {
+                chartType = value;
+              });
+              return true;
+            },
           ),
+          if (chartType == 'Line Chart')
+            OutlinedButton.icon(
+              onPressed: () async {
+                final picked = await showDateRangePicker(
+                    context: context,
+                    firstDate: DateTime(2023, 01, 01),
+                    lastDate: DateTime.now());
+                if (picked != null) {
+                  dateRange.value = picked;
+                }
+              },
+              icon: const Icon(Icons.edit_calendar_outlined),
+              label: Text(dateRange.value == null
+                  ? 'Select Date Range'
+                  : '${ddmmyyyy(dateRange.value!.start)} to ${ddmmyyyy(dateRange.value!.end)}'),
+            ),
           SfCartesianChart(
             tooltipBehavior: TooltipBehavior(enable: true),
             primaryXAxis: DateTimeAxis(
@@ -563,5 +498,102 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
     });
 
     return series;
+  }
+}
+
+class StatList extends StatefulWidget {
+  const StatList({super.key, required this.data});
+  final Map<String, double> data;
+
+  @override
+  State<StatList> createState() => _StatListState();
+}
+
+class _StatListState extends State<StatList> {
+  bool isOpen = false;
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ListTile(
+          trailing: IconButton(
+              onPressed: () {
+                setState(() {
+                  isOpen = !isOpen;
+                });
+              },
+              icon: isOpen
+                  ? const Icon(Icons.arrow_drop_up)
+                  : const Icon(Icons.arrow_drop_down)),
+        ),
+        if (isOpen)
+          Column(
+            children: [
+              ListTile(
+                title: const Text('Present'),
+                leading: const Icon(Icons.check_circle_outline),
+                trailing: Text(
+                  widget.data['present']!.toStringAsFixed(0),
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ),
+              ListTile(
+                title: const Text('Absent'),
+                leading: const Icon(Icons.cancel_outlined),
+                trailing: Text(
+                  widget.data['absent']!.toStringAsFixed(0),
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ),
+              ListTile(
+                title: const Text('Leave'),
+                leading: const Icon(Icons.trip_origin_sharp),
+                trailing: Text(
+                  widget.data['leave']!.toStringAsFixed(0),
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ),
+              ListTile(
+                title: const Text('Internship'),
+                leading: const Icon(Icons.work_history),
+                trailing: Text(
+                  widget.data['internship']!.toStringAsFixed(0),
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ),
+              ListTile(
+                title: const Text('Late'),
+                leading: const Icon(Icons.all_inbox),
+                trailing: Text(
+                  (widget.data['presentLate']!).toStringAsFixed(0),
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ),
+              ListTile(
+                title: const Text('Not Taken Yet'),
+                leading: const Icon(Icons.all_inbox),
+                trailing: Text(
+                  ((widget.data['total']! -
+                          (widget.data['present']! +
+                              widget.data['absent']! +
+                              widget.data['internship']! +
+                              widget.data['leave']! +
+                              widget.data['presentLate']!)))
+                      .toStringAsFixed(0),
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ),
+              ListTile(
+                title: const Text('Total'),
+                leading: const Icon(Icons.all_inbox),
+                trailing: Text(
+                  (widget.data['total']!).toStringAsFixed(0),
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              )
+            ],
+          )
+      ],
+    );
   }
 }
