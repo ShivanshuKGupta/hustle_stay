@@ -5,6 +5,7 @@ import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/requests/mess/menu_change_request.dart';
+import 'package:hustle_stay/models/requests/other/other_request.dart';
 import 'package:hustle_stay/models/requests/request_info.dart';
 import 'package:hustle_stay/models/requests/vehicle/vehicle_request.dart';
 import 'package:hustle_stay/models/user.dart';
@@ -54,6 +55,7 @@ abstract class Request {
   static const List<String> allTypes = [
     'Vehicle',
     'Menu Change',
+    'Other',
   ];
 
   /// The reason for posting the request
@@ -178,14 +180,7 @@ abstract class Request {
 
   /// Use this function to get this request's list of approvers
   Future<List<String>> fetchApprovers({Source? src}) async {
-    final doc = firestore.collection('requests').doc(type);
-    final response =
-        await doc.get(src == null ? null : GetOptions(source: src));
-    final data = response.data()!;
-    approvers =
-        (data['approvers'] as List<dynamic>).map((e) => e.toString()).toList();
-    if (approvers.isEmpty) throw "No approver found for request type: $type";
-    return approvers;
+    return await fetchApproversOfRequestType(type, src: src);
   }
 
   /// Use this function to update this request's list of approvers
@@ -400,7 +395,8 @@ abstract class Request {
 }
 
 /// Fetch approvers of specific request type
-Future<List<String>> fetchApprovers(String requestType, {Source? src}) async {
+Future<List<String>> fetchApproversOfRequestType(String requestType,
+    {Source? src}) async {
   final doc = firestore.collection('requests').doc(requestType);
   DocumentSnapshot<Map<String, dynamic>>? response;
   try {
@@ -429,6 +425,8 @@ Request decodeToRequest(Map<String, dynamic> data) {
   } else if (type == 'Menu Change') {
     return MenuChangeRequest(userEmail: data['requestingUserEmail'])
       ..load(data);
+  } else if (type == 'Other') {
+    return OtherRequest(userEmail: data['requestingUserEmail'])..load(data);
   }
   throw "No such type exists: '$type'";
 }

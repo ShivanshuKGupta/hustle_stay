@@ -1,5 +1,6 @@
 import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/requests/mess/menu_change_request.dart';
+import 'package:hustle_stay/models/requests/other/other_request.dart';
 import 'package:hustle_stay/models/requests/vehicle/vehicle_request.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/tools.dart';
@@ -15,4 +16,8 @@ String vanRequestTemplateMessage(VehicleRequest request, String title) {
 
 String messMenuChangeMessage(MenuChangeRequest request) {
   return 'Dear ${request.approvers},\n\nKindly consider this mess menu change request: ${request.reason}. \n\nThank you for your attention to this matter.\n\nSincerely,\n\n${request.requestingUserEmail}';
+}
+
+String otherRequestMessage(OtherRequest request) {
+  return 'Hello ${request.approvers},\n\nI hope you are doing well.\n\nI am writing to kindly request for the following reason: ${request.reason}. \n\nIf possible, could you please assist me with this matter?\n\nThank you very much for your attention and support.\n\nBest regards,\n\n${request.requestingUserEmail}';
 }

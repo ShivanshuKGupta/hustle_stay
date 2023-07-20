@@ -35,7 +35,7 @@ class _RequestsListState extends State<RequestsList> {
       return decodeToRequest(data);
     }).toList();
     for (var e in requestTypes) {
-      fetchApprovers(e, src: src);
+      fetchApproversOfRequestType(e, src: src);
     }
     return requests;
   }
@@ -43,7 +43,7 @@ class _RequestsListState extends State<RequestsList> {
   /// It returns requests and fetches required approvers as well
   Future<List<Request>> getApproverRequests({Source? src}) async {
     for (var e in Request.allTypes) {
-      await fetchApprovers(e, src: src);
+      await fetchApproversOfRequestType(e, src: src);
     }
     final List<String> myRequestTypes = [];
     for (var entry in Request.allApprovers.entries) {
