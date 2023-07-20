@@ -1,38 +1,40 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/chat/message.dart';
-import 'package:hustle_stay/models/requests/other/other_request.dart';
+import 'package:hustle_stay/models/requests/mess/menu_change_request.dart';
 import 'package:hustle_stay/models/requests/request.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/chat/chat_screen.dart';
-import 'package:hustle_stay/screens/filter_screen/filter_choser_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/chat/complaint_template_message.dart';
+import 'package:hustle_stay/widgets/complaints/select_one.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
 
 // ignore: must_be_immutable
-class OtherRequestScreen extends StatefulWidget {
-  static const routeName = 'Other Request Screen';
-  OtherRequest? request;
-  OtherRequestScreen({
+class MenuChangeRequestScreen extends StatefulWidget {
+  MenuChangeRequest? request;
+  MenuChangeRequestScreen({
     super.key,
     this.request,
   });
 
   @override
-  State<OtherRequestScreen> createState() => _OtherRequestScreenState();
+  State<MenuChangeRequestScreen> createState() =>
+      _MenuChangeRequestScreenState();
 }
 
-class _OtherRequestScreenState extends State<OtherRequestScreen> {
+class _MenuChangeRequestScreenState extends State<MenuChangeRequestScreen> {
   final _txtController = TextEditingController();
+
+  final List<String> options = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
 
   bool _loading = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    widget.request ??= OtherRequest(userEmail: currentUser.email!);
-    final Map<String, dynamic> uiElement = Request.uiElements['Other']!;
+    widget.request ??= MenuChangeRequest(userEmail: currentUser.email!);
+    final Map<String, dynamic> uiElement =
+        Request.uiElements['Mess']!['Menu_Change'];
     return Scaffold(
       appBar: AppBar(),
       body: Padding(
@@ -49,7 +51,7 @@ class _OtherRequestScreenState extends State<OtherRequestScreen> {
                     onTap: () {
                       Navigator.of(context).pop();
                     },
-                    title: 'Other',
+                    title: 'Menu Change',
                     icon: Icon(
                       uiElement['icon'],
                       size: 50,
@@ -59,30 +61,23 @@ class _OtherRequestScreenState extends State<OtherRequestScreen> {
                 ],
               ),
               const SizedBox(height: 40),
-              UsersBuilder(
-                provider: fetchComplainees,
-                src: Source.cache,
-                loadingWidget: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: circularProgressIndicator(),
-                  ),
-                ),
-                builder: (ctx, users) => ComplaineeChooser(
-                  title: 'Who to request?',
-                  helpText: 'Add a user',
-                  allUsers: users.map((e) => e.email!).toSet(),
-                  onChange: (users) {
-                    widget.request!.approvers = users.toList();
+              if (options.isNotEmpty)
+                SelectOne(
+                  title: 'Description',
+                  subtitle: 'Describe the details for the change below',
+                  allOptions: (options..add('Other')).toSet(),
+                  selectedOption: widget.request!.reason,
+                  onChange: (value) {
+                    setState(() {
+                      widget.request!.reason = value;
+                    });
+                    return true;
                   },
-                  chosenUsers: widget.request!.approvers.toSet() ?? {},
                 ),
-              ),
-              const SizedBox(height: 20),
               TextFormField(
                 controller: _txtController,
                 decoration: InputDecoration(
-                  hintText: 'Specify the details for the request here',
+                  hintText: 'Please specify the details for the change here',
                   border: OutlineInputBorder(
                     borderSide: const BorderSide(width: 1),
                     borderRadius: BorderRadius.circular(30),
@@ -108,18 +103,17 @@ class _OtherRequestScreenState extends State<OtherRequestScreen> {
   }
 
   Future<void> _save() async {
-    if (widget.request == null || _txtController.text.trim().isEmpty) {
-      showMsg(context, 'Please specify the details for the request');
+    if (widget.request == null ||
+        widget.request!.reason.isEmpty ||
+        _txtController.text.trim().isEmpty) {
+      showMsg(context, 'Please specify the details for the change');
       return;
     }
-    widget.request!.reason = _txtController.text.trim();
+    widget.request!.reason =
+        "Mess Menu Change${widget.request!.reason.isNotEmpty && widget.request!.reason != 'Other' ? ": ${widget.request!.reason}" : ''}\n${_txtController.text.trim()}";
     setState(() {
       _loading = true;
     });
-    List<String> approvers = widget.request!.approvers.map((e) => e).toList();
-    widget.request!.approvers.clear();
-    widget.request!.id = DateTime.now().millisecondsSinceEpoch;
-    widget.request!.approvers = approvers;
     await widget.request!.update();
     await widget.request!.fetchApprovers();
     if (context.mounted) {
@@ -137,7 +131,7 @@ class _OtherRequestScreenState extends State<OtherRequestScreen> {
             id: DateTime.now().millisecondsSinceEpoch.toString(),
             from: currentUser.email!,
             createdAt: DateTime.now(),
-            txt: otherRequestMessage(widget.request!),
+            txt: messMenuChangeMessage(widget.request!),
           ),
         ),
       );

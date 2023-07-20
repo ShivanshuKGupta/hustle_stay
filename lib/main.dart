@@ -126,7 +126,7 @@ class HustleStayApp extends ConsumerWidget {
         VehicleRequestScreen.routeName: (context) =>
             const VehicleRequestScreen(),
         MessRequestScreen.routeName: (context) => const MessRequestScreen(),
-        OtherRequestScreen.routeName: (context) => const OtherRequestScreen(),
+        OtherRequestScreen.routeName: (context) => OtherRequestScreen(),
       },
     );
   }

@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/requests/request.dart';
-import 'package:hustle_stay/models/requests/vehicle/vehicle_request.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/firestore_cache_builder.dart';
 import 'package:hustle_stay/tools.dart';
@@ -33,50 +32,72 @@ class _RequestsListState extends State<RequestsList> {
       final data = doc.data();
       final type = data['type'];
       requestTypes.add(type);
-      if (type == 'Vehicle') {
-        return VehicleRequest(requestingUserEmail: data['requestingUserEmail'])
-          ..load(data);
-      }
-      throw "No such type exists: '$type'";
+      return decodeToRequest(data);
     }).toList();
     for (var e in requestTypes) {
-      fetchApprovers(e, src: src);
+      fetchApproversOfRequestType(e, src: src);
     }
     return requests;
   }
 
   /// It returns requests and fetches required approvers as well
   Future<List<Request>> getApproverRequests({Source? src}) async {
-    for (var e in Request.allTypes) {
-      await fetchApprovers(e, src: src);
-    }
-    final List<String> myRequestTypes = [];
-    for (var entry in Request.allApprovers.entries) {
-      if (entry.value.contains(currentUser.email)) {
-        myRequestTypes.add(entry.key);
-      }
-    }
-    if (myRequestTypes.isEmpty) {
-      // This person is neither a approver nor a student
-      // then assuming that this person is a student
-      return await getStudentRequests(src: src);
-    }
+    // Change this to fetch all requests where he is the approver
+    // if he fetched a non integer id then those are definitely types
+    // then fetch all request with those types
+
     final collection = firestore.collection('requests');
-    final response = await collection
-        .where('type', whereIn: myRequestTypes)
+    var response = await collection
+        .where('approvers', arrayContains: currentUser.email)
         .where('status', isEqualTo: RequestStatus.pending.index)
         .get(src == null ? null : GetOptions(source: src));
-    final docs = response.docs;
-    List<Request> requests = docs.map((doc) {
-      final data = doc.data();
-      final type = data['type'];
-      if (type == 'Vehicle') {
-        return VehicleRequest(requestingUserEmail: data['requestingUserEmail'])
-          ..load(data);
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> docs = response.docs;
+    final List<Request> requests = [];
+    final List<String> types = [];
+    for (final doc in docs) {
+      if (int.tryParse(doc.id) == null) {
+        types.add(doc.id);
+      } else {
+        requests.add(decodeToRequest(doc.data()));
       }
-      throw "No such type exists: '$type'";
-    }).toList();
+    }
+    if (types.isNotEmpty) {
+      response = await collection
+          .where('type', whereIn: types)
+          .where('status', isEqualTo: RequestStatus.pending.index)
+          .get(src == null ? null : GetOptions(source: src));
+      docs = response.docs;
+      requests.addAll(docs.map((doc) {
+        final data = doc.data();
+        return decodeToRequest(data);
+      }));
+    }
     return requests;
+    // for (var e in Request.allTypes) {
+    //   await fetchApproversOfRequestType(e, src: src);
+    // }
+    // final List<String> myRequestTypes = [];
+    // for (var entry in Request.allApprovers.entries) {
+    //   if (entry.value.contains(currentUser.email)) {
+    //     myRequestTypes.add(entry.key);
+    //   }
+    // }
+    // if (myRequestTypes.isEmpty) {
+    //   // This person is neither a approver nor a student
+    //   // then assuming that this person is a student
+    //   return await getStudentRequests(src: src);
+    // }
+    // final collection = firestore.collection('requests');
+    // final response = await collection
+    //     .where('type', whereIn: myRequestTypes)
+    //     .where('status', isEqualTo: RequestStatus.pending.index)
+    //     .get(src == null ? null : GetOptions(source: src));
+    // final docs = response.docs;
+    // List<Request> requests = docs.map((doc) {
+    //   final data = doc.data();
+    //   return decodeToRequest(data);
+    // }).toList();
+    // return requests;
   }
 
   @override
