@@ -3,7 +3,8 @@ import 'package:hustle_stay/models/requests/request.dart';
 
 class ChangeRoomRequest extends Request {
   String targetRoomName;
-  ChangeRoomRequest({this.targetRoomName = ''}) {
+  String targetHostel;
+  ChangeRoomRequest({this.targetRoomName = '', this.targetHostel = ''}) {
     super.type = "Change Room";
   }
 
@@ -28,14 +29,15 @@ class ChangeRoomRequest extends Request {
   }
 
   @override
-  void onApprove() {
+  void onApprove() async {
     // TODO: Sani
 
-    // When request for changing the room to [targetRoomName] is accepted
-    // this function will be called
-
-    // Use [targetRoomName] and [requestingUserEmail] to complete this function
-    // and super.reason to get some more info
+    // final user = await fetchUserData(requestingUserEmail, readonly: true);
+    // await changeRoom(requestingUserEmail, user.readonly.hostelName!, user.readonly.roomName!,
+    // targetHostel, targetRoomName, );
+    // requestingUserEmail;
+    // targetHostel;
+    // targetRoomName;
   }
 
   @override

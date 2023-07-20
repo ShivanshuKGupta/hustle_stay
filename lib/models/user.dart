@@ -153,31 +153,36 @@ Future<UserData> fetchUserData(
   String email, {
   Source? src,
   bool keepUptoDate = false,
+  bool readonly = false,
 }) async {
   UserData userData = UserData();
   DocumentSnapshot<Map<String, dynamic>>? response;
-
-  /// Loading editable properties ...
-  try {
-    /// Trying with given config
-    response =
-        await firestore.collection('users').doc("$email/editable/details").get(
-              src == null ? null : GetOptions(source: src),
-            );
-    if (keepUptoDate) {
-      firestore.collection('users').doc("$email/editable/details").get();
-    }
-  } catch (e) {
-    /// If failed then use default configuration
-    if (src == Source.cache) {
+  if (!readonly) {
+    /// Loading editable properties ...
+    try {
+      /// Trying with given config
       response = await firestore
           .collection('users')
           .doc("$email/editable/details")
-          .get();
+          .get(
+            src == null ? null : GetOptions(source: src),
+          );
+      if (keepUptoDate) {
+        firestore.collection('users').doc("$email/editable/details").get();
+      }
+    } catch (e) {
+      /// If failed then use default configuration
+      if (src == Source.cache) {
+        response = await firestore
+            .collection('users')
+            .doc("$email/editable/details")
+            .get();
+      }
     }
+    userData.email = email;
+    userData.load(response?.data() ?? {});
   }
   userData.email = email;
-  userData.load(response?.data() ?? {});
 
   /// Loading readonly properties ...
   try {
