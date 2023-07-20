@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/screens/admin_panel/user_list.dart';
 import 'package:hustle_stay/screens/auth/edit_profile_screen.dart';
-import 'package:hustle_stay/tools.dart';
 import '../../models/common/operation.dart';
 
 class ManageUsers extends StatefulWidget {
@@ -56,7 +55,7 @@ class _ManageUsersState extends State<ManageUsers> {
             childAspectRatio: 1,
           ),
           itemBuilder: (context, index) {
-            final Color cardColor = catList[index].cardColor;
+            final Color cardColor = catList[index].cardColor!;
 
             final LinearGradient gradient = LinearGradient(
               begin: Alignment.topCenter,
@@ -109,7 +108,7 @@ class _ManageUsersState extends State<ManageUsers> {
                       children: [
                         Expanded(
                           child: Icon(
-                            catList[index].icon.icon,
+                            catList[index].icon!.icon,
                             size: screenWidth * 0.3,
                           ),
                         ),

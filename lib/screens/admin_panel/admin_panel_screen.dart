@@ -51,7 +51,7 @@ class _AdminPanelState extends State<AdminPanel> {
             childAspectRatio: 1,
           ),
           itemBuilder: (context, index) {
-            final Color cardColor = catList[index].cardColor;
+            final Color cardColor = catList[index].cardColor!;
 
             final LinearGradient gradient = LinearGradient(
               begin: Alignment.topCenter,
@@ -88,57 +88,54 @@ class _AdminPanelState extends State<AdminPanel> {
                     default:
                   }
                 },
-                child: GlassWidget(
-                  child: Container(
-                    width: gridWidth,
-                    padding: const EdgeInsets.all(1),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16.0),
-                      gradient:
-                          brightness == Brightness.light ? null : gradient,
-                      color: brightness == Brightness.light
-                          ? cardColor.withOpacity(0.2)
-                          : null,
-                      boxShadow: brightness == Brightness.light
-                          ? null
-                          : [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 2,
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Icon(
-                            catList[index].icon.icon,
-                            size: screenWidth * 0.3,
-                          ),
+                child: Container(
+                  width: gridWidth,
+                  padding: const EdgeInsets.all(1),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16.0),
+                    gradient: brightness == Brightness.light ? null : gradient,
+                    color: brightness == Brightness.light
+                        ? cardColor.withOpacity(0.2)
+                        : null,
+                    boxShadow: brightness == Brightness.light
+                        ? null
+                        : [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 2,
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Icon(
+                          catList[index].icon!.icon,
+                          size: screenWidth * 0.3,
                         ),
-                        Divider(
-                          color: brightness == Brightness.light
-                              ? Colors.black
-                              : Colors.white,
-                        ),
-                        Text(
-                          catList[index].operationName,
-                          overflow: TextOverflow.clip,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall!
-                              .copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        Divider(
-                          color: brightness == Brightness.light
-                              ? Colors.black
-                              : Colors.white,
-                        ),
-                      ],
-                    ),
+                      ),
+                      Divider(
+                        color: brightness == Brightness.light
+                            ? Colors.black
+                            : Colors.white,
+                      ),
+                      Text(
+                        catList[index].operationName,
+                        overflow: TextOverflow.clip,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall!
+                            .copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      Divider(
+                        color: brightness == Brightness.light
+                            ? Colors.black
+                            : Colors.white,
+                      ),
+                    ],
                   ),
                 ),
               ),
