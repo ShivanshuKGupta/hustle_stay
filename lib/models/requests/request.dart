@@ -350,12 +350,7 @@ abstract class Request {
 
   void showInfo(BuildContext context, Map<String, dynamic> uiElement,
       Map<String, String> otherDetails) async {
-    final title = reason.split(':')[0];
-    String subtitle = reason.length > title.length + 2
-        ? reason.substring(title.length + 2).trim()
-        : '';
-    final theme = Theme.of(context);
-    final response = await Navigator.of(context).push(
+    Navigator.of(context).push(
       DialogRoute<void>(
         context: context,
         builder: (BuildContext context) => RequestInfo(
