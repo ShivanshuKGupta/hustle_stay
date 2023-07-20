@@ -52,9 +52,9 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
       autoPlay: false,
       effects: const [FadeEffect(begin: 1, end: 0)],
       child: ListTile(
-        onTap: () =>
-            showComplaintChat(context, widget.complaint, showInfo: _showInfo),
-        onLongPress: () => _showInfo(),
+        onTap: () => showComplaintChat(context, widget.complaint,
+            showInfo: _showComplaintInfo),
+        onLongPress: () => _showComplaintInfo(),
         title: Text(widget.complaint.title),
         subtitle: widget.complaint.description == null
             ? null
@@ -157,7 +157,7 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
     return false;
   }
 
-  void _showInfo() {
+  void _showComplaintInfo() {
     final createdAt = DateTime.fromMillisecondsSinceEpoch(widget.complaint.id);
     final DateTime? resolvedAt = widget.complaint.resolvedAt == null
         ? null
@@ -236,7 +236,14 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
                         color: Theme.of(context).colorScheme.primary,
                       ),
                 ),
-                Text(widget.complaint.category ?? 'Other'),
+                Text("${widget.complaint.to}"),
+                Text(
+                  "Scope: ",
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                ),
+                Text(widget.complaint.scope.name),
                 const Divider(),
                 Wrap(
                   alignment: WrapAlignment.spaceBetween,

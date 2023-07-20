@@ -40,7 +40,7 @@ class _Settings {
     final settings = json.decode(str);
     darkMode = settings["darkMode"] ?? false;
     introductionScreenVisited = settings["introductionScreenVisited"] ?? false;
-    currentPage = settings["currentPage"] ?? 0;
+    currentPage = settings["currentPage"] ?? 2;
     complaintsGrouping = (settings["complaintsGrouping"] ?? "category");
     groupBy = (settings["groupBy"] ?? 'Category');
     interval = (settings["interval"] ?? 'Day');

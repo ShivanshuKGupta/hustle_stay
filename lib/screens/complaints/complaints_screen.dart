@@ -42,10 +42,11 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
           ),
         ),
         actions: [
-          IconButton(
-            onPressed: () => navigatorPush(context, const StatisticsPage()),
-            icon: const Icon(Icons.insert_chart_outlined_sharp),
-          ),
+          if (currentUser.readonly.isAdmin)
+            IconButton(
+              onPressed: () => navigatorPush(context, const StatisticsPage()),
+              icon: const Icon(Icons.insert_chart_outlined_sharp),
+            ),
           IconButton(
             onPressed: () => showSortDialog(context, ref),
             icon: const Icon(Icons.compare_arrows_rounded),

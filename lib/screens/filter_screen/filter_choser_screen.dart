@@ -698,11 +698,15 @@ class ComplaineeChooser extends StatelessWidget {
   final void Function(Set<String> chosenUsers) onChange;
   final Set<String> allUsers;
   final Set<String> chosenUsers;
+  final String title;
+  final String helpText;
   const ComplaineeChooser({
     super.key,
     required this.onChange,
     required this.allUsers,
     required this.chosenUsers,
+    this.title = 'Complainees',
+    this.helpText = 'Add a Complainee',
   });
 
   @override
@@ -711,10 +715,10 @@ class ComplaineeChooser extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 8),
-        const _Title('Complainees'),
+        _Title(title),
         const SizedBox(height: 8),
         SelectionVault(
-          helpText: 'Add a Complainee',
+          helpText: helpText,
           onChange: onChange,
           allItems: allUsers,
           chosenItems: chosenUsers,

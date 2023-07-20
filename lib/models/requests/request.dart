@@ -3,7 +3,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
+import 'package:hustle_stay/models/chat/message.dart';
+import 'package:hustle_stay/models/requests/mess/menu_change_request.dart';
+import 'package:hustle_stay/models/requests/other/other_request.dart';
 import 'package:hustle_stay/models/requests/request_info.dart';
+import 'package:hustle_stay/models/requests/vehicle/vehicle_request.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/chat/chat_screen.dart';
 import 'package:hustle_stay/screens/requests/attendance/attendance_request_screen.dart';
@@ -22,7 +26,6 @@ abstract class Request {
   /// [id] also denotes when was the request created,
   /// its id in firestore and
   int id = 0;
-
   late String requestingUserEmail;
 
   /// The status of the request
@@ -35,11 +38,19 @@ abstract class Request {
   DateTime expiryDate = infDate; // infinite time
 
   List<String> get approvers {
-    return allApprovers[type]!;
+    if (type != 'Other') {
+      return allApprovers[type]!;
+    } else {
+      return allApprovers[id.toString()] ?? [];
+    }
   }
 
-  set approvers(value) {
-    allApprovers[type] = value;
+  set approvers(List<String> value) {
+    if (type != 'Other') {
+      allApprovers[type] = value;
+    } else {
+      allApprovers[id.toString()] = value;
+    }
   }
 
   /// Map<RequestTypeName, List<approvers>>
@@ -47,10 +58,6 @@ abstract class Request {
 
   /// This denotes the type of request
   late String type;
-
-  static const List<String> allTypes = [
-    'Vehicle',
-  ];
 
   /// The reason for posting the request
   String reason = "";
@@ -76,6 +83,7 @@ abstract class Request {
       "reason": reason,
       "requestingUserEmail": requestingUserEmail,
       "expiryDate": expiryDate.millisecondsSinceEpoch,
+      if (type == 'Other') 'approvers': approvers,
     };
   }
 
@@ -88,16 +96,43 @@ abstract class Request {
     reason = data['reason'] ?? reason;
     requestingUserEmail = data['requestingUserEmail'] ?? requestingUserEmail;
     expiryDate = DateTime.fromMillisecondsSinceEpoch(data['expiryDate'] ?? 0);
+    if (type == 'Other') {
+      approvers = (data['approvers'] as List<dynamic>)
+          .map((e) => e.toString())
+          .toList();
+    }
   }
 
   Future<void> approve() async {
     status = RequestStatus.approved;
     await update();
+    await addMessage(
+      chatData,
+      MessageData(
+        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        txt:
+            "${currentUser.name ?? currentUser.email} ${status.name} the request at \n${ddmmyyyy(DateTime.now())} ${timeFrom(DateTime.now())}",
+        from: currentUser.email!,
+        createdAt: DateTime.now(),
+        indicative: true,
+      ),
+    );
   }
 
   Future<void> deny() async {
     status = RequestStatus.denied;
     await update();
+    await addMessage(
+      chatData,
+      MessageData(
+        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        txt:
+            "${currentUser.name ?? currentUser.email} ${status.name} the request at \n${ddmmyyyy(DateTime.now())} ${timeFrom(DateTime.now())}",
+        from: currentUser.email!,
+        createdAt: DateTime.now(),
+        indicative: true,
+      ),
+    );
   }
 
   /// This function is when the request is status
@@ -152,20 +187,22 @@ abstract class Request {
 
   /// Use this function to get this request's list of approvers
   Future<List<String>> fetchApprovers({Source? src}) async {
-    final doc = firestore.collection('requests').doc(type);
-    final response =
-        await doc.get(src == null ? null : GetOptions(source: src));
-    final data = response.data()!;
-    approvers =
-        (data['approvers'] as List<dynamic>).map((e) => e.toString()).toList();
-    if (approvers.isEmpty) throw "No approver found for request type: $type";
-    return approvers;
+    if (type != 'Other') {
+      return await fetchApproversOfRequestType(type, src: src);
+    } else {
+      return approvers;
+    }
   }
 
   /// Use this function to update this request's list of approvers
   Future<void> updateApprovers({required List<String> newApprovers}) async {
-    final doc = firestore.collection('requests').doc(type);
-    await doc.set({'approvers': newApprovers});
+    if (type != 'Other') {
+      final doc = firestore.collection('requests').doc(type);
+      await doc.set({'approvers': newApprovers});
+    } else {
+      final doc = firestore.collection('requests').doc(id.toString());
+      await doc.update({'approvers': newApprovers});
+    }
     approvers = newApprovers;
   }
 
@@ -174,19 +211,19 @@ abstract class Request {
       'color': Colors.red,
       'icon': Icons.calendar_month_rounded,
       'route': AttendanceRequestScreen.routeName,
-      'Change Room': {
+      'Change Room': <String, dynamic>{
         'color': Colors.blueAccent,
         'icon': Icons.transfer_within_a_station_rounded,
       },
-      'Swap Room': {
+      'Swap Room': <String, dynamic>{
         'color': Colors.pinkAccent,
         'icon': Icons.transfer_within_a_station_rounded,
       },
-      'Leave Hostel': {
+      'Leave Hostel': <String, dynamic>{
         'color': Colors.indigoAccent,
         'icon': Icons.exit_to_app_rounded,
       },
-      'Return to Hostel': {
+      'Return to Hostel': <String, dynamic>{
         'color': Colors.lightGreenAccent,
         'icon': Icons.keyboard_return_rounded,
       },
@@ -195,7 +232,7 @@ abstract class Request {
       'color': Colors.deepPurpleAccent,
       'icon': Icons.airport_shuttle_rounded,
       'route': VehicleRequestScreen.routeName,
-      'children': {
+      'children': <String, dynamic>{
         'Night Travel': {
           'color': Colors.blue,
           'icon': Icons.nightlight_round,
@@ -223,22 +260,22 @@ abstract class Request {
       'color': Colors.lightBlueAccent,
       'icon': Icons.restaurant_menu_rounded,
       'route': MessRequestScreen.routeName,
-      'Breakfast': {
+      'Menu_Change': <String, dynamic>{
         'color': Colors.pinkAccent,
-        'icon': Icons.local_cafe,
-      },
-      'Lunch': {
-        'color': Colors.deepPurpleAccent,
         'icon': Icons.restaurant,
       },
-      'Snacks': {
-        'color': Colors.cyanAccent,
-        'icon': Icons.fastfood,
-      },
-      'Dinner': {
-        'color': Colors.lightGreenAccent,
-        'icon': Icons.local_dining,
-      },
+      // 'Lunch': <String, dynamic>{
+      //   'color': Colors.deepPurpleAccent,
+      //   'icon': Icons.restaurant,
+      // },
+      // 'Snacks': <String, dynamic>{
+      //   'color': Colors.cyanAccent,
+      //   'icon': Icons.fastfood,
+      // },
+      // 'Dinner': <String, dynamic>{
+      //   'color': Colors.lightGreenAccent,
+      //   'icon': Icons.local_dining,
+      // },
     },
     'Other': {
       'color': Colors.amber,
@@ -365,6 +402,7 @@ abstract class Request {
                   ddmmyyyy(DateTime.fromMillisecondsSinceEpoch(closedAt)),
             'Approvers': approvers.toString(),
             'Reason': reason,
+            if (type == 'Other') 'Approvers': approvers.toString(),
             ...otherDetails,
           },
         ),
@@ -373,8 +411,10 @@ abstract class Request {
   }
 }
 
-/// Fetch approvers of specific request type
-Future<List<String>> fetchApprovers(String requestType, {Source? src}) async {
+/// Fetch approvers of specific request type (type shouldn't be Other)
+Future<List<String>> fetchApproversOfRequestType(String requestType,
+    {Source? src}) async {
+  if (requestType == 'Other') return [];
   final doc = firestore.collection('requests').doc(requestType);
   DocumentSnapshot<Map<String, dynamic>>? response;
   try {
@@ -392,4 +432,18 @@ Future<List<String>> fetchApprovers(String requestType, {Source? src}) async {
     throw "No approver found for request type: $requestType";
   }
   return Request.allApprovers[requestType]!;
+}
+
+Request decodeToRequest(Map<String, dynamic> data) {
+  final type = data['type'];
+  if (type == 'Vehicle') {
+    return VehicleRequest(requestingUserEmail: data['requestingUserEmail'])
+      ..load(data);
+  } else if (type == 'Menu_Change') {
+    return MenuChangeRequest(userEmail: data['requestingUserEmail'])
+      ..load(data);
+  } else if (type == 'Other') {
+    return OtherRequest(userEmail: data['requestingUserEmail'])..load(data);
+  }
+  throw "No such type exists: '$type'";
 }
