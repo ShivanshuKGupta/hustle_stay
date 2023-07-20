@@ -1,17 +1,19 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/screens/admin_panel/manage_hostel.dart';
+import 'package:hustle_stay/screens/hostel/addHostel.dart';
 
 import '../../models/common/operation.dart';
 import '../../models/hostel/hostels.dart';
 
-class ManageHostel extends StatefulWidget {
-  const ManageHostel({super.key});
+class ManageHostelPage extends StatefulWidget {
+  const ManageHostelPage({super.key});
 
   @override
-  State<ManageHostel> createState() => _ManageHostelState();
+  State<ManageHostelPage> createState() => _ManageHostelPageState();
 }
 
-class _ManageHostelState extends State<ManageHostel> {
+class _ManageHostelPageState extends State<ManageHostelPage> {
   List<Operations> setCatList(List<Hostels> list) {
     List<Operations> catList = [
       Operations(
@@ -24,13 +26,14 @@ class _ManageHostelState extends State<ManageHostel> {
         catList.add(Operations(
             operationName: 'Manage ${x.hostelName}',
             cardColor: Colors.cyan,
+            hostel: x,
             icon: const Icon(Icons.add_home_outlined)));
       } else {
         catList.add(Operations(
-          operationName: 'Manage ${x.hostelName}',
-          imgUrl: x.imageUrl,
-          cardColor: Colors.cyan,
-        ));
+            operationName: 'Manage ${x.hostelName}',
+            imgUrl: x.imageUrl,
+            cardColor: Colors.cyan,
+            hostel: x));
       }
     }
     return catList;
@@ -40,7 +43,7 @@ class _ManageHostelState extends State<ManageHostel> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Manage Users & Permissions'),
+        title: const Text('Manage Hostels & Attendance'),
       ),
       body: FutureBuilder(
         future: fetchHostels(),
@@ -86,12 +89,15 @@ class _ManageHostelState extends State<ManageHostel> {
             padding: const EdgeInsets.fromLTRB(2, 2, 8, 8),
             child: GestureDetector(
                 onTap: () {
-                  // Navigator.of(context).push(MaterialPageRoute(
-                  //     builder: (_) =>
-                  //         catList[index].operationName == 'Add new User'
-                  //             ? EditProfile()
-                  //             : UserList(
-                  //                 userType: catList[index].operationName)));
+                  if (catList[index].operationName == 'Add New Hostel') {
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => AddHostelForm()));
+                  } else if (catList[index].hostel != null) {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => ManageHostel(
+                              hostel: catList[index].hostel!,
+                            )));
+                  }
                 },
                 child: Container(
                   width: gridWidth,

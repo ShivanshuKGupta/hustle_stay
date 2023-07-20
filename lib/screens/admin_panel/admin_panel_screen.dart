@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/screens/admin_panel/manage_categories.dart';
-import 'package:hustle_stay/screens/admin_panel/manage_hostel_attendance.dart';
 import 'package:hustle_stay/screens/admin_panel/manage_requests.dart';
 import 'package:hustle_stay/screens/admin_panel/manage_user_permission.dart';
 
 import '../../models/common/operation.dart';
-import '../../tools.dart';
+import 'manage_hostel_attendance.dart';
 
 class AdminPanel extends StatefulWidget {
   const AdminPanel({super.key});
@@ -83,7 +82,7 @@ class _AdminPanelState extends State<AdminPanel> {
                       break;
                     case 'Manage Hostels & Attendance':
                       Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => const ManageHostel()));
+                          builder: (_) => const ManageHostelPage()));
                       break;
                     default:
                   }
