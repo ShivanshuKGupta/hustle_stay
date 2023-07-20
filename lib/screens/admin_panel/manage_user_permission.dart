@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/screens/admin_panel/user_list.dart';
+import 'package:hustle_stay/screens/auth/edit_profile_screen.dart';
+import 'package:hustle_stay/tools.dart';
 import '../../models/common/operation.dart';
 
 class ManageUsers extends StatefulWidget {
@@ -30,7 +32,11 @@ class _ManageUsersState extends State<ManageUsers> {
     Operations(
         cardColor: const Color.fromARGB(255, 146, 0, 146),
         operationName: 'Manage Other Users',
-        icon: const Icon(Icons.all_inbox))
+        icon: const Icon(Icons.all_inbox)),
+    Operations(
+        cardColor: const Color.fromARGB(255, 0, 146, 110),
+        operationName: 'Add new User',
+        icon: const Icon(Icons.person_add_outlined)),
   ];
 
   @override
@@ -55,62 +61,82 @@ class _ManageUsersState extends State<ManageUsers> {
             final LinearGradient gradient = LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                brightness == Brightness.light
-                    ? cardColor.withOpacity(0.4)
-                    : cardColor.withOpacity(0.7),
-                Colors.black,
-              ],
+              colors: brightness == Brightness.light
+                  ? [
+                      cardColor.withOpacity(0.2),
+                      Colors.white,
+                    ]
+                  : [
+                      cardColor.withOpacity(0.7),
+                      Colors.black,
+                    ],
             );
 
             return Padding(
               padding: const EdgeInsets.fromLTRB(2, 2, 8, 8),
               child: GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) =>
-                          UserList(userType: catList[index].operationName)));
-                },
-                child: Container(
-                  width: gridWidth,
-                  padding: const EdgeInsets.all(1),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16.0),
-                    gradient: gradient,
-                    boxShadow: [
-                      BoxShadow(
-                        color: brightness == Brightness.light
-                            ? Colors.black.withOpacity(0.5)
-                            : Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: Icon(
-                          catList[index].icon.icon,
-                          size: screenWidth * 0.3,
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) =>
+                            catList[index].operationName == 'Add new User'
+                                ? EditProfile()
+                                : UserList(
+                                    userType: catList[index].operationName)));
+                  },
+                  child: Container(
+                    width: gridWidth,
+                    padding: const EdgeInsets.all(1),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16.0),
+                      gradient:
+                          brightness == Brightness.light ? null : gradient,
+                      color: brightness == Brightness.light
+                          ? cardColor.withOpacity(0.2)
+                          : null,
+                      boxShadow: brightness == Brightness.light
+                          ? null
+                          : [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Icon(
+                            catList[index].icon.icon,
+                            size: screenWidth * 0.3,
+                          ),
                         ),
-                      ),
-                      const Divider(
-                        color: Colors.white,
-                      ),
-                      Text(
-                        catList[index].operationName,
-                        overflow: TextOverflow.clip,
-                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                            fontWeight: FontWeight.bold, color: Colors.white),
-                      ),
-                      const Divider(color: Colors.white),
-                    ],
-                  ),
-                ),
-              ),
+                        Divider(
+                          color: brightness == Brightness.light
+                              ? Colors.black
+                              : Colors.white,
+                        ),
+                        Text(
+                          catList[index].operationName,
+                          overflow: TextOverflow.clip,
+                          style:
+                              Theme.of(context).textTheme.bodySmall!.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: brightness == Brightness.light
+                                        ? Colors.black
+                                        : Colors.white,
+                                  ),
+                        ),
+                        Divider(
+                          color: brightness == Brightness.light
+                              ? Colors.black
+                              : Colors.white,
+                        ),
+                      ],
+                    ),
+                  )),
             );
           },
           itemCount: catList.length,
