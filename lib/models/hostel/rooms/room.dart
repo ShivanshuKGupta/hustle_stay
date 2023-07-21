@@ -142,13 +142,11 @@ Future<List<RoommateData>> fetchRoommates(String hostelName, String roomName,
 
   for (final x in roommateSnapshot.docs) {
     final data = x.data();
-    final onLeave = data['onLeave'] ?? false;
     final internship = data['onInternship'] ?? false;
     final leaveStartDate = data['leaveStartDate'] as Timestamp?;
     final leaveEndDate = data['leaveEndDate'] as Timestamp?;
     list.add(RoommateData(
       email: data['email'] ?? '',
-      onLeave: onLeave,
       leaveStartDate: leaveStartDate?.toDate(),
       leaveEndDate: leaveEndDate?.toDate(),
       internship: internship,
@@ -290,11 +288,9 @@ Future<bool> changeRoom(String email, String hostelName, String roomName,
             storage.collection('users').doc(email),
             {'roomName': destRoomName, 'hostelName': destHostelName},
             SetOptions(merge: true));
-        print('hi');
         await copyRoommateData(
             email, hostelName, roomName, destHostelName, destRoomName);
         transaction.delete(sourceRef);
-        print('bye');
         return true;
       });
       return true;
@@ -582,4 +578,30 @@ Future<Room> fetchRoomOptions(String hostelName, String value) async {
       numberOfRoommates: data.docs[0].data()['numRoommates'],
       roomName: data.docs[0].id,
       capacity: data.docs[0].data()['capacity']);
+}
+
+Future<RoommateData?> fetchRoommateData(String email,
+    {String? hostelName}) async {
+  if (hostelName == null) {
+    final ref = await storage.collection('users').doc(email).get();
+    if (ref.exists) {
+      hostelName = ref.data()!['hostelName'];
+    } else {
+      return null;
+    }
+  }
+  final ref = await storage
+      .collection('hostels')
+      .doc(hostelName)
+      .collection('Roommates')
+      .doc(email)
+      .get();
+  return ref.exists
+      ? RoommateData(
+          email: email,
+          internship: ref.data()!['onInternship'],
+          leaveEndDate: ref.data()!['leaveEndDate'],
+          leaveStartDate: ref.data()!['leaveStartDate'],
+        )
+      : null;
 }

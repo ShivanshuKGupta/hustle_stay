@@ -32,16 +32,16 @@ class RoommateInfo {
 Future<String> getAttendanceData(RoommateData roommateData, String hostelName,
     String roomName, DateTime date) async {
   final storage = FirebaseFirestore.instance;
-  final documentRef = storage
+  final documentAddRef = storage
       .collection('hostels')
       .doc(hostelName)
       .collection('Roommates')
-      .doc(roommateData.email)
+      .doc(roommateData.email);
+  final documentRef = documentAddRef
       .collection('Attendance')
       .doc(DateFormat('yyyy-MM-dd').format(date));
-  if (roommateData.onLeave != null &&
-      roommateData.onLeave! &&
-      roommateData.leaveStartDate != null &&
+  final batch = storage.batch();
+  if (roommateData.leaveStartDate != null &&
       (roommateData.leaveStartDate!.isBefore(date)) &&
       roommateData.leaveEndDate != null &&
       (roommateData.leaveEndDate!.isAfter(date))) {
@@ -51,13 +51,26 @@ Future<String> getAttendanceData(RoommateData roommateData, String hostelName,
             : 'onLeave';
     await documentRef.set({'status': val}, SetOptions(merge: false));
     return val;
+  } else if (roommateData.leaveStartDate != null &&
+      roommateData.leaveEndDate != null) {
+    batch.set(
+        documentAddRef,
+        {
+          'leaveStartDate': null,
+          'leaveEndDate': null,
+          'onInternship': false,
+        },
+        SetOptions(merge: true));
+    batch.set(documentRef, {'status': 'absent'}, SetOptions(merge: true));
+    await batch.commit();
+    return 'absent';
   }
 
   final documentSnapshot = await documentRef.get();
   if (documentSnapshot.exists) {
     return documentSnapshot['status'];
   } else {
-    await documentRef.set({'status': 'absent'});
+    await documentRef.set({'status': 'absent'}, SetOptions(merge: true));
     return 'absent';
   }
 }
@@ -80,7 +93,6 @@ Future<String> setAttendanceData(String email, String hostelName,
         .doc(DateFormat('yyyy-MM-dd').format(date));
 
     await FirebaseFirestore.instance.runTransaction((transaction) async {
-      final snapshot = await transaction.get(docRef);
       transaction.set(
           docRef,
           {
@@ -470,7 +482,6 @@ Future<List<RoommateInfo>> getFilteredStudents(
 
       if (attendanceDoc.exists) {
         final data = attendanceDoc.data();
-        final onLeave = data['onLeave'] ?? false;
         final internship = data['internship'] ?? false;
 
         final leaveStartDate = data['leaveStartDate'] as Timestamp?;
@@ -480,7 +491,6 @@ Future<List<RoommateInfo>> getFilteredStudents(
           roomName: roommatesQuery.docs[i].data()['roomName'],
           roommateData: RoommateData(
             email: roommatesQuery.docs[i].id,
-            onLeave: onLeave,
             leaveStartDate: leaveStartDate?.toDate(),
             leaveEndDate: leaveEndDate?.toDate(),
             internship: internship,

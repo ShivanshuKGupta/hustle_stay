@@ -90,8 +90,23 @@ Future<bool> deleteHostel(String hostelName) async {
   }
 }
 
-Future<bool> setLeave(String email, String hostelName, String roomName,
-    bool status, bool endleave,
+Future<void> updateLeaveStatus(String email, String hostelName) async {
+  final ref = await FirebaseFirestore.instance
+      .collection('hostels')
+      .doc(hostelName)
+      .collection('Roommates')
+      .doc(email)
+      .get();
+
+  await ref.reference.set(
+      {'onInternship': null, 'leaveStartDate': null, 'leaveEndDate': null},
+      SetOptions(merge: true));
+
+  return;
+}
+
+Future<bool> setLeave(
+    String email, String hostelName, bool status, bool endleave,
     {DateTime? leaveStartDate,
     DateTime? leaveEndDate,
     String? reason,
@@ -105,7 +120,6 @@ Future<bool> setLeave(String email, String hostelName, String roomName,
         .doc(email)
         .get();
     if (endleave) {
-      print('in end leave');
       final startDate = ref.data()!['leaveStartDate'];
       final endDate = ref.data()!['leaveEndDate'];
       final updateLeavepath = await ref.reference
@@ -119,12 +133,9 @@ Future<bool> setLeave(String email, String hostelName, String roomName,
         updateLeaveRef
             .set({'endDate': DateTime.now()}, SetOptions(merge: true));
       }
-      ref.reference.set({
-        'onLeave': false,
-        'onInternship': false,
-        'leaveStartDate': null,
-        'leaveEndDate': null
-      }, SetOptions(merge: true));
+      ref.reference.set(
+          {'onInternship': false, 'leaveStartDate': null, 'leaveEndDate': null},
+          SetOptions(merge: true));
       if (DateTime.now().isBefore(endDate.toDate())) {
         await ref.reference
             .collection('Attendance')
@@ -162,7 +173,6 @@ Future<bool> setLeave(String email, String hostelName, String roomName,
       });
 
       ref.reference.set({
-        'onLeave': !status,
         'onInternship': reason == "Internship",
         'leaveStartDate': leaveStartDate,
         'leaveEndDate': leaveEndDate

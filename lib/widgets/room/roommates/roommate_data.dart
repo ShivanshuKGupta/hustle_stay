@@ -88,14 +88,14 @@ class _RoommateDataWidgetState extends ConsumerState<RoommateDataWidget> {
         .get();
     if (ref.exists) {
       final data = ref.data();
-      final onLeave = data!['onLeave'] ?? false;
+      final internship = data!['onInternship'] ?? false;
       final leaveStartDate = data['leaveStartDate'] as Timestamp?;
       final leaveEndDate = data['leaveEndDate'] as Timestamp?;
       final rData = RoommateData(
         email: ref.id,
-        onLeave: onLeave,
         leaveStartDate: leaveStartDate?.toDate(),
         leaveEndDate: leaveEndDate?.toDate(),
+        internship: internship,
       );
       String resp = await getAttendanceData(
           widget.roommateData ?? rData,
@@ -167,7 +167,10 @@ class _RoommateDataWidgetState extends ConsumerState<RoommateDataWidget> {
                             borderRadius: BorderRadius.circular(20),
                             side: const BorderSide(
                                 color: Colors.black, style: BorderStyle.solid)),
-                        tileColor: (value).withOpacity(0.7),
+                        tileColor:
+                            Theme.of(context).brightness == Brightness.dark
+                                ? value
+                                : (value).withOpacity(0.7),
                         leading: CircleAvatar(
                             radius: 50,
                             child: ClipOval(

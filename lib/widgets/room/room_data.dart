@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import '../../models/attendance.dart';
@@ -49,117 +51,152 @@ class _RoomDataWidgetState extends State<RoomDataWidget> {
   @override
   Widget build(BuildContext context) {
     double widthScreen = MediaQuery.of(context).size.width;
+    final Brightness brightness = Theme.of(context).brightness;
+    int random = Random().nextInt(colorList.length);
+    final Color cardColor = colorList[random];
+    LinearGradient? gradient;
+    gradient = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: brightness == Brightness.light
+          ? [
+              cardColor.withOpacity(0.2),
+              Colors.white,
+            ]
+          : [
+              cardColor.withOpacity(0.7),
+              Colors.black,
+            ],
+    );
     return Container(
       padding: EdgeInsets.all(widthScreen * 0.01),
       child: Card(
         elevation: 3,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(
-                color: Colors.black, style: BorderStyle.solid)),
-        color: (const Color(0xFFE6E6FA)).withOpacity(0.4),
-        child: Padding(
-          padding: const EdgeInsets.all(5),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.roomData.roomName,
-                          style: const TextStyle(
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+                color: brightness == Brightness.light
+                    ? Colors.black
+                    : Colors.white),
+            borderRadius: BorderRadius.circular(16.0),
+            gradient: brightness == Brightness.light ? null : gradient,
+            color: brightness == Brightness.light
+                ? cardColor.withOpacity(0.2)
+                : null,
+            boxShadow: brightness == Brightness.light
+                ? null
+                : [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(5),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.roomData.roomName,
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Capacity: ${widget.roomData.capacity}',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.black54,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (!isDisabled && widget.roomData.numberOfRoommates > 0)
-                    IconButton(
-                      onPressed: isDisabled
-                          ? null
-                          : () async {
-                              final response = await askUser(
-                                context,
-                                'Are you sure to mark everyone ${allPresent ? 'absent' : 'present'} ?',
-                                yes: true,
-                                no: true,
-                              );
-                              if (response == 'yes') {
-                                setState(() {
-                                  isDisabled = true;
-                                });
-                                final resp = await markAllRoommateAttendance(
-                                    widget.hostelName,
-                                    widget.roomData.roomName,
-                                    allPresent ? false : true,
-                                    widget.selectedDate.value);
-                                if (resp && mounted) {
-                                  setState(() {
-                                    allPresent = !allPresent;
-                                    isDisabled = false;
-                                  });
-                                } else if (!resp) {
-                                  showMsg(context,
-                                      'Unable to perform. Try gitagain');
-                                }
-                              }
-                            },
-                      icon:
-                          Icon(allPresent ? Icons.cancel : Icons.check_circle),
-                    ),
-                  if (widget.roomData.capacity >
-                      widget.roomData.numberOfRoommates)
-                    IconButton(
-                      onPressed: () {
-                        Navigator.of(context).pushReplacement(MaterialPageRoute(
-                            builder: (_) => RoommateForm(
-                                  capacity: widget.roomData.capacity,
-                                  hostelName: widget.hostelName,
-                                  roomName: widget.roomData.roomName,
-                                  numRoommates:
-                                      widget.roomData.numberOfRoommates,
-                                )));
-                      },
-                      icon: const Icon(Icons.add),
-                    ),
-                ],
-              ),
-              IconButton(
-                  onPressed: () {
-                    setState(() {
-                      isOpen = !isOpen;
-                    });
-                  },
-                  icon: !isOpen
-                      ? const Icon(Icons.arrow_drop_down_outlined)
-                      : const Icon(Icons.arrow_drop_up_outlined)),
-              if (isOpen)
-                widget.roomData.numberOfRoommates == 0
-                    ? const Center(
-                        child: Text(
-                        "No roommates added yet",
-                        style: TextStyle(color: Colors.black),
-                      ))
-                    : RoommateWidget(
-                        roomData: widget.roomData,
-                        selectedDate: widget.selectedDate,
-                        hostelName: widget.hostelName,
+                          const SizedBox(height: 8),
+                          Text(
+                            'Capacity: ${widget.roomData.capacity}',
+                            style: const TextStyle(
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
                       ),
-            ],
+                    ),
+                    if (!isDisabled && widget.roomData.numberOfRoommates > 0)
+                      IconButton(
+                        onPressed: isDisabled
+                            ? null
+                            : () async {
+                                final response = await askUser(
+                                  context,
+                                  'Are you sure to mark everyone ${allPresent ? 'absent' : 'present'} ?',
+                                  yes: true,
+                                  no: true,
+                                );
+                                if (response == 'yes') {
+                                  setState(() {
+                                    isDisabled = true;
+                                  });
+                                  final resp = await markAllRoommateAttendance(
+                                      widget.hostelName,
+                                      widget.roomData.roomName,
+                                      allPresent ? false : true,
+                                      widget.selectedDate.value);
+                                  if (resp && mounted) {
+                                    setState(() {
+                                      allPresent = !allPresent;
+                                      isDisabled = false;
+                                    });
+                                  } else if (!resp) {
+                                    showMsg(context,
+                                        'Unable to perform. Try gitagain');
+                                  }
+                                }
+                              },
+                        icon: Icon(
+                            allPresent ? Icons.cancel : Icons.check_circle),
+                      ),
+                    if (widget.roomData.capacity >
+                        widget.roomData.numberOfRoommates)
+                      IconButton(
+                        onPressed: () {
+                          Navigator.of(context)
+                              .pushReplacement(MaterialPageRoute(
+                                  builder: (_) => RoommateForm(
+                                        capacity: widget.roomData.capacity,
+                                        hostelName: widget.hostelName,
+                                        roomName: widget.roomData.roomName,
+                                        numRoommates:
+                                            widget.roomData.numberOfRoommates,
+                                      )));
+                        },
+                        icon: const Icon(Icons.add),
+                      ),
+                  ],
+                ),
+                IconButton(
+                    onPressed: () {
+                      setState(() {
+                        isOpen = !isOpen;
+                      });
+                    },
+                    icon: !isOpen
+                        ? const Icon(Icons.arrow_drop_down_outlined)
+                        : const Icon(Icons.arrow_drop_up_outlined)),
+                if (isOpen)
+                  widget.roomData.numberOfRoommates == 0
+                      ? const Center(
+                          child: Text(
+                          "No roommates added yet",
+                          style: TextStyle(color: Colors.black),
+                        ))
+                      : RoommateWidget(
+                          roomData: widget.roomData,
+                          selectedDate: widget.selectedDate,
+                          hostelName: widget.hostelName,
+                        ),
+              ],
+            ),
           ),
         ),
       ),

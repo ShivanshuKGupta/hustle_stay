@@ -95,8 +95,8 @@ class _AttendanceIconState extends State<AttendanceIcon> {
                   no: true,
                 );
                 if (response == "yes") {
-                  bool resp = await setLeave(widget.roommateData.email,
-                      widget.hostelName, widget.roomName, true, true,
+                  bool resp = await setLeave(
+                      widget.roommateData.email, widget.hostelName, true, true,
                       leaveEndDate: DateTime.now());
                   if (resp) {
                     Navigator.of(context).pushReplacement(MaterialPageRoute(

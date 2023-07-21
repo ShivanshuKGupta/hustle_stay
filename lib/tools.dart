@@ -362,6 +362,23 @@ class GlassWidget extends StatelessWidget {
   }
 }
 
+List<Color> colorList = const [
+  Colors.pinkAccent,
+  Colors.purpleAccent,
+  Colors.cyanAccent,
+  Colors.greenAccent,
+  Colors.orangeAccent,
+  Colors.blueAccent,
+  Colors.deepOrangeAccent,
+  Colors.yellowAccent,
+  Colors.tealAccent,
+  Colors.limeAccent,
+  Colors.lightGreenAccent,
+  Colors.indigoAccent,
+  Colors.deepPurpleAccent,
+  Colors.amberAccent
+];
+
 Future<Color> showColorPicker(BuildContext context, Color defaultColor) async {
   Color chosenColor = defaultColor;
   await showDialog(
