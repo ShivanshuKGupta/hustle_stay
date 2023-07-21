@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+import '../../user.dart';
+
 class RoommateData {
   String email;
   bool? onLeave;
@@ -604,4 +606,31 @@ Future<RoommateData?> fetchRoommateData(String email,
           leaveStartDate: ref.data()!['leaveStartDate'],
         )
       : null;
+}
+
+Future<bool> addRommates(
+    List<String> emails, String hostelName, String roomName) async {
+  final batch = storage.batch();
+  final userRef = storage.collection('users');
+  final ref = storage
+      .collection('hostels')
+      .doc(hostelName)
+      .collection('Rooms')
+      .doc(roomName);
+  final roommateRef =
+      storage.collection('hostels').doc(hostelName).collection('Roommates');
+  final countCheck = await ref.get();
+  if (countCheck.data()!['numRoommates'] + emails.length >
+      countCheck.data()!['capacity']) {
+    return false;
+  }
+  batch.set(ref, {'numRoommates': FieldValue.increment(emails.length)},
+      SetOptions(merge: true));
+  for (final x in emails) {
+    batch.set(userRef.doc(x), {'hostelName': hostelName, 'roomName': roomName},
+        SetOptions(merge: true));
+    batch.set(roommateRef.doc(x), {'email': x, 'roomName': roomName});
+  }
+  await batch.commit();
+  return true;
 }

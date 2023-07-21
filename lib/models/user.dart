@@ -475,3 +475,34 @@ Future<List<UserData>> fetchSpecificUsers(String userType) async {
 
   return list;
 }
+
+Future<List<UserData>> fetchNoHostelUsers() async {
+  final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+      .collection('users')
+      .where('type', isEqualTo: 'student')
+      .where('hostelName', isNull: true)
+      .get();
+
+  final List<UserData> list = [];
+
+  // Perform parallel requests using Future.wait to reduce latency
+  await Future.wait(
+    querySnapshot.docs.map(
+      (x) async {
+        final userDataSnapshot =
+            await x.reference.collection('editable').doc('details').get();
+        if (userDataSnapshot.exists) {
+          list.add(
+            UserData(
+              email: x.id,
+              name: userDataSnapshot.data()!['name'],
+              imgUrl: userDataSnapshot.data()!['imgUrl'],
+            ),
+          );
+        }
+      },
+    ),
+  );
+
+  return list;
+}
