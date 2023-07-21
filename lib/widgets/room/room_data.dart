@@ -64,7 +64,7 @@ class _RoomDataWidgetState extends State<RoomDataWidget> {
               Colors.white,
             ]
           : [
-              cardColor.withOpacity(0.7),
+              cardColor.withOpacity(0.4),
               Colors.black,
             ],
     );

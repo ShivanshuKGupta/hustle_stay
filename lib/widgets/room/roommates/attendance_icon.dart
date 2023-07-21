@@ -29,11 +29,14 @@ class AttendanceIcon extends StatefulWidget {
 }
 
 class _AttendanceIconState extends State<AttendanceIcon> {
-  final presentIcon =
-      const Icon(Icons.check_circle_outline, color: Colors.black);
-  final absentIcon = const Icon(Icons.cancel_outlined, color: Colors.black);
+  final presentIcon = const Icon(
+    Icons.check_circle_outline,
+  );
+  final absentIcon = const Icon(
+    Icons.cancel_outlined,
+  );
   String? status;
-  Icon currentIcon = const Icon(Icons.cancel_outlined, color: Colors.black);
+  Icon currentIcon = const Icon(Icons.cancel_outlined);
   bool isRunning = false;
 
   @override
@@ -114,7 +117,10 @@ class _AttendanceIconState extends State<AttendanceIcon> {
                       style: BorderStyle.solid, color: Colors.black)),
               child: Text(
                 "${status![0].toUpperCase()}${status![1]} ${status!.substring(2)}",
-                style: const TextStyle(color: Colors.black),
+                style: TextStyle(
+                    color: Theme.of(context).brightness == Brightness.light
+                        ? Colors.black
+                        : Colors.white),
               ),
             ),
           )

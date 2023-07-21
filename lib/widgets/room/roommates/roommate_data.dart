@@ -144,75 +144,98 @@ class _RoommateDataWidgetState extends ConsumerState<RoommateDataWidget> {
   @override
   Widget build(BuildContext context) {
     double widthScreen = MediaQuery.of(context).size.width;
+    final brightness = Theme.of(context).brightness;
     return isOnScreen
         ? ValueListenableBuilder(
             valueListenable: tileColor!,
-            builder: (context, value, child) => UserBuilder(
-              email: widget.email ?? widget.roommateData!.email,
-              loadingWidget: Padding(
-                padding: const EdgeInsets.all(1),
-                child: Center(
-                  child: circularProgressIndicator(),
-                ),
-              ),
-              builder: (context, user) {
-                return GestureDetector(
-                  onTap: () {
-                    onChangeScreen(user, context);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(2.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? value
-                            : (value).withOpacity(0.5),
-                        border: Border.all(
-                            color: Colors.black, style: BorderStyle.solid),
-                        shape: BoxShape.circle,
-                      ),
-                      child: ListTile(
-                          leading: CircleAvatar(
-                              radius: 50,
-                              child: ClipOval(
-                                child: AspectRatio(
-                                  aspectRatio: 1.0,
-                                  child: user.imgUrl == null
-                                      ? null
-                                      : CachedNetworkImage(
-                                          imageUrl: user.imgUrl!,
-                                          fit: BoxFit.cover,
-                                        ),
-                                ),
-                              )),
-                          title: Text(
-                            user.name ??
-                                widget.email ??
-                                widget.roommateData!.email,
-                            style: const TextStyle(
-                                fontSize: 16, color: Colors.black),
-                          ),
-                          contentPadding: EdgeInsets.all(widthScreen * 0.002),
-                          subtitle: Text(
-                            user.email!.substring(0, 9).toUpperCase(),
-                            style: const TextStyle(
-                                fontSize: 14, color: Colors.black),
-                          ),
-                          trailing: status == null
-                              ? null
-                              : AttendanceIcon(
-                                  tileColor: tileColor,
-                                  roommateData:
-                                      widget.roommateData ?? roommateData!,
-                                  selectedDate: widget.selectedDate,
-                                  roomName: widget.roomName ?? roomName!,
-                                  hostelName: widget.hostelName,
-                                  status: status!)),
-                    ),
+            builder: (context, value, child) {
+              final Color cardColor = value;
+
+              final LinearGradient gradient = LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: brightness == Brightness.light
+                    ? [
+                        cardColor.withOpacity(0.7),
+                        Colors.white,
+                      ]
+                    : [
+                        cardColor.withOpacity(0.5),
+                        Colors.black,
+                      ],
+              );
+              return UserBuilder(
+                email: widget.email ?? widget.roommateData!.email,
+                loadingWidget: Padding(
+                  padding: const EdgeInsets.all(1),
+                  child: Center(
+                    child: circularProgressIndicator(),
                   ),
-                );
-              },
-            ),
+                ),
+                builder: (context, user) {
+                  return GestureDetector(
+                    onTap: () {
+                      onChangeScreen(user, context);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(2.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                            gradient: gradient,
+                            color: brightness == Brightness.light
+                                ? value.withOpacity(0.7)
+                                : null,
+                            borderRadius: BorderRadius.circular(16.0),
+                            border: Border.all(
+                                color: Theme.of(context).brightness ==
+                                        Brightness.light
+                                    ? Colors.black
+                                    : Colors.white)),
+                        child: ListTile(
+                            leading: CircleAvatar(
+                                radius: 50,
+                                child: ClipOval(
+                                  child: AspectRatio(
+                                    aspectRatio: 1.0,
+                                    child: user.imgUrl == null
+                                        ? null
+                                        : CachedNetworkImage(
+                                            imageUrl: user.imgUrl!,
+                                            fit: BoxFit.cover,
+                                          ),
+                                  ),
+                                )),
+                            title: Text(
+                              user.name ??
+                                  widget.email ??
+                                  widget.roommateData!.email,
+                              style: const TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                            contentPadding: EdgeInsets.all(widthScreen * 0.002),
+                            subtitle: Text(
+                              user.email!.substring(0, 9).toUpperCase(),
+                              style: const TextStyle(
+                                fontSize: 14,
+                              ),
+                            ),
+                            trailing: status == null
+                                ? null
+                                : AttendanceIcon(
+                                    tileColor: tileColor,
+                                    roommateData:
+                                        widget.roommateData ?? roommateData!,
+                                    selectedDate: widget.selectedDate,
+                                    roomName: widget.roomName ?? roomName!,
+                                    hostelName: widget.hostelName,
+                                    status: status!)),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
           )
         : Container();
   }
