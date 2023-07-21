@@ -29,11 +29,14 @@ class AttendanceIcon extends StatefulWidget {
 }
 
 class _AttendanceIconState extends State<AttendanceIcon> {
-  final presentIcon =
-      const Icon(Icons.check_circle_outline, color: Colors.black);
-  final absentIcon = const Icon(Icons.cancel_outlined, color: Colors.black);
+  final presentIcon = const Icon(
+    Icons.check_circle_outline,
+  );
+  final absentIcon = const Icon(
+    Icons.cancel_outlined,
+  );
   String? status;
-  Icon currentIcon = const Icon(Icons.cancel_outlined, color: Colors.black);
+  Icon currentIcon = const Icon(Icons.cancel_outlined);
   bool isRunning = false;
 
   @override
@@ -87,31 +90,37 @@ class _AttendanceIconState extends State<AttendanceIcon> {
             padding: const EdgeInsets.all(2.0),
             child: ElevatedButton(
               onPressed: null,
-              onLongPress: () async {
-                final response = await askUser(
-                  context,
-                  'Are you sure to end Leave ?',
-                  yes: true,
-                  no: true,
-                );
-                if (response == "yes") {
-                  bool resp = await setLeave(widget.roommateData.email,
-                      widget.hostelName, widget.roomName, true, true,
-                      leaveEndDate: DateTime.now());
-                  if (resp) {
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(
-                        builder: (_) =>
-                            RoomsScreen(hostelName: widget.hostelName)));
-                  }
-                }
-              },
+              onLongPress: widget.roommateData.leaveEndDate == null
+                  ? () {}
+                  : () async {
+                      final response = await askUser(
+                        context,
+                        'Are you sure to end Leave ?',
+                        yes: true,
+                        no: true,
+                      );
+                      if (response == "yes") {
+                        bool resp = await setLeave(widget.roommateData.email,
+                            widget.hostelName, true, true,
+                            leaveEndDate: DateTime.now());
+                        if (resp) {
+                          Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                  builder: (_) => RoomsScreen(
+                                      hostelName: widget.hostelName)));
+                        }
+                      }
+                    },
               style: ElevatedButton.styleFrom(
                   backgroundColor: widget.tileColor!.value,
                   side: const BorderSide(
                       style: BorderStyle.solid, color: Colors.black)),
               child: Text(
                 "${status![0].toUpperCase()}${status![1]} ${status!.substring(2)}",
-                style: const TextStyle(color: Colors.black),
+                style: TextStyle(
+                    color: Theme.of(context).brightness == Brightness.light
+                        ? Colors.black
+                        : Colors.white),
               ),
             ),
           )

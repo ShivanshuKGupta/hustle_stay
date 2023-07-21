@@ -31,14 +31,33 @@ class _LeaveWidgetState extends State<LeaveWidget> {
   @override
   void initState() {
     super.initState();
-    onLeave = widget.roommateData.onLeave ?? false;
+    onLeave = widget.roommateData.leaveStartDate == null &&
+            widget.roommateData.leaveEndDate == null
+        ? false
+        : true;
+    if (onLeave == true &&
+        DateTime.now().isAfter(widget.roommateData.leaveEndDate!)) {
+      onLeave = false;
+      endLeave();
+    }
     fetchLeavesValues();
+  }
+
+  Future<void> endLeave() async {
+    await updateLeaveStatus(widget.roommateData.email, widget.hostelName);
+    getAttendanceData(widget.roommateData, widget.hostelName, widget.roomName,
+        DateTime.now());
+
+    return;
   }
 
   LeaveData? currentLeave;
   Future<void> fetchLeavesValues() async {
-    LeaveData? cLeave =
-        await fetchCurrentLeave(widget.hostelName, widget.roommateData.email);
+    LeaveData? cLeave;
+    if (onLeave) {
+      cLeave =
+          await fetchCurrentLeave(widget.hostelName, widget.roommateData.email);
+    }
     List<LeaveData> rLeaves =
         await fetchLeaves(widget.hostelName, widget.roommateData.email);
     setState(() {
@@ -119,6 +138,7 @@ class _LeaveWidgetState extends State<LeaveWidget> {
                 no: true,
               );
               if (response == 'yes') {
+                // ignore: use_build_context_synchronously
                 final picked = await showDateRangePicker(
                     context: context,
                     firstDate: currentLeave!.startDate.isAfter(DateTime.now())
@@ -137,15 +157,14 @@ class _LeaveWidgetState extends State<LeaveWidget> {
                     .add(const Duration(days: 1))
                     .subtract(const Duration(microseconds: 1));
 
-                final resp = await setLeave(widget.user.email!,
-                    widget.hostelName, widget.roomName, true, false,
+                final resp = await setLeave(
+                    widget.user.email!, widget.hostelName, true, false,
                     leaveStartDate: newPickedRangeStart,
                     leaveEndDate: newPickedRangeEnd,
                     data: currentLeave);
                 if (resp) {
-                  Navigator.of(context).pushReplacement(MaterialPageRoute(
-                      builder: (_) =>
-                          RoomsScreen(hostelName: widget.hostelName)));
+                  // ignore: use_build_context_synchronously
+                  Navigator.of(context).pop(true);
                 }
               }
             },
@@ -166,7 +185,7 @@ class _LeaveWidgetState extends State<LeaveWidget> {
                     }
                   : () async {
                       bool resp = await setLeave(widget.user.email!,
-                          widget.hostelName, widget.roomName, onLeave, onLeave,
+                          widget.hostelName, onLeave, onLeave,
                           leaveStartDate: onLeave && pickedRangeStart == null
                               ? null
                               : pickedRangeStart,
