@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// A widget which is primarily used to show a [CircularProgressIndicator]
@@ -334,7 +335,7 @@ Future<String?> askUser(
 /// A function to show date in this format
 /// Can have also used intl, but prefered this
 String ddmmyyyy(DateTime dateTime) {
-  return "${dateTime.day}-${dateTime.month}-${dateTime.year}";
+  return DateFormat.yMMMMd().format(dateTime);
 }
 
 /// A function to show time in a certain format

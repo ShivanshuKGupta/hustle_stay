@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import 'package:hustle_stay/models/requests/hostel/change_room_request.dart';
 import 'package:hustle_stay/models/requests/hostel/swap_room_request.dart';
 import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/screens/hostel/rooms/complete_details_screen.dart';
 import 'package:hustle_stay/screens/requests/requests_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
@@ -57,12 +59,48 @@ class AttendanceRequestScreen extends StatelessWidget {
                   children: [
                     GridTileLogo(
                       onTap: () async {
-                        // final request = ChangeRoomRequest(
-                        //     requestingUserEmail: currentUser.email!);
-                        // request.targetHostel = 'Federal';
-                        // request.targetRoomName = 'A6';
-                        // request.reason = "Roommate harasses me 😢";
-                        // await request.update();
+                        await navigatorPush(
+                          context,
+                          CompleteDetails(
+                            hostelName: currentUser.readonly.hostelName ?? '',
+                            roomName: currentUser.readonly.roomName ?? '',
+                            showLeaveData: true,
+                            user: UserData(
+                                email: currentUser.email,
+                                address: currentUser.address,
+                                imgUrl: currentUser.imgUrl,
+                                name: currentUser.name,
+                                phoneNumber: currentUser.phoneNumber),
+                            roommateData:
+                                RoommateData(email: currentUser.email!),
+                          ),
+                        );
+                      },
+                      title: 'Add leave',
+                      icon: const Icon(
+                        Icons.time_to_leave_rounded,
+                        size: 50,
+                      ),
+                      color: Colors.indigoAccent,
+                    ),
+                    GridTileLogo(
+                      onTap: () async {
+                        await navigatorPush(
+                          context,
+                          CompleteDetails(
+                            hostelName: currentUser.readonly.hostelName ?? '',
+                            roomName: currentUser.readonly.roomName ?? '',
+                            showStats: false,
+                            user: UserData(
+                                email: currentUser.email,
+                                address: currentUser.address,
+                                imgUrl: currentUser.imgUrl,
+                                name: currentUser.name,
+                                phoneNumber: currentUser.phoneNumber),
+                            roommateData:
+                                RoommateData(email: currentUser.email!),
+                          ),
+                        );
                       },
                       title: 'Change Room',
                       icon: Icon(
@@ -77,11 +115,22 @@ class AttendanceRequestScreen extends StatelessWidget {
                     ),
                     GridTileLogo(
                       onTap: () async {
-                        // final request = SwapRoomRequest(
-                        //     requestingUserEmail: currentUser.email!);
-                        // request.targetUserEmail = 'cs21b1022@iiitr.ac.in';
-                        // request.reason = "Roommate harasses me 😢";
-                        // await request.update();
+                        await navigatorPush(
+                          context,
+                          CompleteDetails(
+                            hostelName: currentUser.readonly.hostelName ?? '',
+                            roomName: currentUser.readonly.roomName ?? '',
+                            showStats: false,
+                            user: UserData(
+                                email: currentUser.email,
+                                address: currentUser.address,
+                                imgUrl: currentUser.imgUrl,
+                                name: currentUser.name,
+                                phoneNumber: currentUser.phoneNumber),
+                            roommateData:
+                                RoommateData(email: currentUser.email!),
+                          ),
+                        );
                       },
                       title: 'Swap Room',
                       icon: Icon(

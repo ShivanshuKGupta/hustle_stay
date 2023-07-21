@@ -14,16 +14,28 @@ class CompleteDetails extends StatefulWidget {
       required this.hostelName,
       required this.roomName,
       required this.user,
-      required this.roommateData});
+      required this.roommateData,
+      this.showLeaveData = false,
+      this.showStats});
   final String hostelName;
   final String roomName;
   final UserData user;
   final RoommateData roommateData;
+  // Added these variables here
+  final bool showLeaveData;
+  final bool? showStats;
   @override
   State<CompleteDetails> createState() => _CompleteDetailsState();
 }
 
 class _CompleteDetailsState extends State<CompleteDetails> {
+  @override
+  void initState() {
+    super.initState();
+    showLeaveData = widget.showLeaveData;
+    showStats = widget.showStats ?? showStats;
+  }
+
   bool isDeleting = false;
   bool showStats = !currentUser.readonly.isAdmin;
   bool showLeaveData = false;
@@ -45,7 +57,7 @@ class _CompleteDetailsState extends State<CompleteDetails> {
                     showLeaveData = !showLeaveData;
                   });
                 },
-                icon: Icon(Icons.holiday_village),
+                icon: const Icon(Icons.holiday_village),
               ),
             if (!isDeleting)
               IconButton(
