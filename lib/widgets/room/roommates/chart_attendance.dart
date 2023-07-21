@@ -152,21 +152,19 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: widget.email == null
-          ? chartType == 'Line Chart'
-              ? ValueListenableBuilder(
-                  valueListenable: dateRange,
-                  builder: (context, value, child) =>
-                      futureBuilderWidget(valueRange: value),
-                )
-              : ValueListenableBuilder(
-                  valueListenable: widget.selectedDate!,
-                  builder: (context, value, child) =>
-                      futureBuilderWidget(value: value),
-                )
-          : futureBuilderWidget(),
-    );
+    return widget.email == null
+        ? chartType == 'Line Chart'
+            ? ValueListenableBuilder(
+                valueListenable: dateRange,
+                builder: (context, value, child) =>
+                    futureBuilderWidget(valueRange: value),
+              )
+            : ValueListenableBuilder(
+                valueListenable: widget.selectedDate!,
+                builder: (context, value, child) =>
+                    futureBuilderWidget(value: value),
+              )
+        : futureBuilderWidget();
   }
 
   Widget futureBuilderWidget({DateTime? value, DateTimeRange? valueRange}) {
@@ -312,103 +310,105 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
     final layout = MediaQuery.of(context).orientation;
     List<ChartData> chartdata = attendanceData(data);
 
-    return ValueListenableBuilder(
-      valueListenable: isOpen,
-      builder: (context, value, child) => Column(
-        children: [
-          SelectOne(
-            title: 'Select Chart Type',
-            allOptions: widget.email != null
-                ? chartOptions.sublist(0, 2).toSet()
-                : chartOptions.toSet(),
-            selectedOption: chartType,
-            onChange: (value) {
-              setState(() {
-                chartType = value;
-              });
-              return true;
-            },
-          ),
-          SizedBox(
-            height: value
-                ? layout == Orientation.landscape
-                    ? screenWidth * 0.3
-                    : screenWidth * 0.8
-                : layout == Orientation.landscape
-                    ? screenWidth * 0.5
-                    : screenWidth,
-            child: chartType == 'Pie Chart'
-                ? SfCircularChart(
-                    series: <CircularSeries>[
-                      PieSeries<ChartData, String>(
+    return SingleChildScrollView(
+      child: ValueListenableBuilder(
+        valueListenable: isOpen,
+        builder: (context, value, child) => Column(
+          children: [
+            SelectOne(
+              title: 'Select Chart Type',
+              allOptions: widget.email != null
+                  ? chartOptions.sublist(0, 2).toSet()
+                  : chartOptions.toSet(),
+              selectedOption: chartType,
+              onChange: (value) {
+                setState(() {
+                  chartType = value;
+                });
+                return true;
+              },
+            ),
+            SizedBox(
+              height: value
+                  ? layout == Orientation.landscape
+                      ? screenWidth * 0.3
+                      : screenWidth * 0.8
+                  : layout == Orientation.landscape
+                      ? screenWidth * 0.5
+                      : screenWidth,
+              child: chartType == 'Pie Chart'
+                  ? SfCircularChart(
+                      series: <CircularSeries>[
+                        PieSeries<ChartData, String>(
+                            dataSource: chartdata,
+                            pointColorMapper: (ChartData data, _) => data.color,
+                            xValueMapper: (ChartData data, _) => data.category,
+                            yValueMapper: (ChartData data, _) => data.value,
+                            dataLabelSettings: const DataLabelSettings(
+                              isVisible: true,
+                            ),
+                            selectionBehavior: SelectionBehavior(enable: true),
+                            onPointLongPress: (pointInteractionDetails) {
+                              onClickNavigation(
+                                  chartdata[pointInteractionDetails.pointIndex!]
+                                      .category);
+                            },
+                            onPointTap: (pointInteractionDetails) async {
+                              await getHostelRangeAttendanceStatistics(
+                                  widget.hostelName,
+                                  DateTimeRange(
+                                      start: DateTime(2023, 06, 25),
+                                      end: DateTime.now()));
+                            }),
+                      ],
+                      legend: const Legend(
+                        isVisible: true,
+                        isResponsive: true,
+                        position: LegendPosition.bottom,
+                        orientation: LegendItemOrientation.horizontal,
+                        alignment: ChartAlignment.center,
+                        width: "100%",
+                        overflowMode: LegendItemOverflowMode.scroll,
+                      ),
+                      tooltipBehavior: TooltipBehavior(
+                        enable: true,
+                        textStyle: const TextStyle(fontSize: 12),
+                        format: 'point.x: point.y%',
+                      ),
+                      palette: const <Color>[
+                        Colors.green,
+                        Colors.red,
+                        Colors.yellow,
+                        Colors.cyan,
+                      ],
+                      enableMultiSelection: false,
+                    )
+                  : SfCartesianChart(
+                      primaryXAxis: CategoryAxis(
+                          labelStyle:
+                              const TextStyle(fontWeight: FontWeight.bold)),
+                      primaryYAxis: NumericAxis(
+                          labelStyle:
+                              const TextStyle(fontWeight: FontWeight.bold)),
+                      series: <BarSeries<ChartData, String>>[
+                        BarSeries<ChartData, String>(
                           dataSource: chartdata,
-                          pointColorMapper: (ChartData data, _) => data.color,
                           xValueMapper: (ChartData data, _) => data.category,
                           yValueMapper: (ChartData data, _) => data.value,
-                          dataLabelSettings: const DataLabelSettings(
-                            isVisible: true,
-                          ),
-                          selectionBehavior: SelectionBehavior(enable: true),
+                          pointColorMapper: (ChartData data, _) => data.color,
                           onPointLongPress: (pointInteractionDetails) {
                             onClickNavigation(
                                 chartdata[pointInteractionDetails.pointIndex!]
                                     .category);
                           },
-                          onPointTap: (pointInteractionDetails) async {
-                            await getHostelRangeAttendanceStatistics(
-                                widget.hostelName,
-                                DateTimeRange(
-                                    start: DateTime(2023, 06, 25),
-                                    end: DateTime.now()));
-                          }),
-                    ],
-                    legend: const Legend(
-                      isVisible: true,
-                      isResponsive: true,
-                      position: LegendPosition.bottom,
-                      orientation: LegendItemOrientation.horizontal,
-                      alignment: ChartAlignment.center,
-                      width: "100%",
-                      overflowMode: LegendItemOverflowMode.scroll,
+                        ),
+                      ],
                     ),
-                    tooltipBehavior: TooltipBehavior(
-                      enable: true,
-                      textStyle: const TextStyle(fontSize: 12),
-                      format: 'point.x: point.y%',
-                    ),
-                    palette: const <Color>[
-                      Colors.green,
-                      Colors.red,
-                      Colors.yellow,
-                      Colors.cyan,
-                    ],
-                    enableMultiSelection: false,
-                  )
-                : SfCartesianChart(
-                    primaryXAxis: CategoryAxis(
-                        labelStyle:
-                            const TextStyle(fontWeight: FontWeight.bold)),
-                    primaryYAxis: NumericAxis(
-                        labelStyle:
-                            const TextStyle(fontWeight: FontWeight.bold)),
-                    series: <BarSeries<ChartData, String>>[
-                      BarSeries<ChartData, String>(
-                        dataSource: chartdata,
-                        xValueMapper: (ChartData data, _) => data.category,
-                        yValueMapper: (ChartData data, _) => data.value,
-                        pointColorMapper: (ChartData data, _) => data.color,
-                        onPointLongPress: (pointInteractionDetails) {
-                          onClickNavigation(
-                              chartdata[pointInteractionDetails.pointIndex!]
-                                  .category);
-                        },
-                      ),
-                    ],
-                  ),
-          ),
-          const Divider(),
-          StatList(data: data, isOpen: isOpen),
-        ],
+            ),
+            const Divider(),
+            StatList(data: data, isOpen: isOpen),
+          ],
+        ),
       ),
     );
   }
