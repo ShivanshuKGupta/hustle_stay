@@ -4,17 +4,45 @@ import 'package:hustle_stay/tools.dart';
 
 class VehicleRequest extends Request {
   DateTime? dateTime;
+  late String title;
 
-  VehicleRequest({required String requestingUserEmail, this.dateTime}) {
-    super.type = "Vehicle";
-    super.requestingUserEmail = requestingUserEmail;
-  }
+  VehicleRequest({
+    required super.requestingUserEmail,
+    this.dateTime,
+    required this.title,
+  }) : super(
+          type: "Vehicle",
+          uiElement: {
+            'Night_Travel': {
+              'color': Colors.blue,
+              'icon': Icons.nightlight_round,
+              'reasonOptions': [
+                'Train Arrival',
+                'Train Departure',
+              ],
+            },
+            'Hospital_Visit': {
+              'color': Colors.tealAccent,
+              'icon': Icons.local_hospital_rounded,
+              'reasonOptions': [
+                'Fever',
+                'Food Poisoning',
+              ],
+            },
+            'Other': {
+              'color': Colors.lightGreenAccent,
+              'icon': Icons.more_horiz_rounded,
+              'reasonOptions': <String>[],
+            },
+          },
+        );
 
   @override
   Map<String, dynamic> encode() {
     return super.encode()
       ..addAll({
         'dateTime': dateTime!.millisecondsSinceEpoch,
+        'title': title,
       });
   }
 
@@ -22,6 +50,7 @@ class VehicleRequest extends Request {
   void load(Map<String, dynamic> data) {
     super.load(data);
     dateTime = DateTime.fromMillisecondsSinceEpoch(data['dateTime']);
+    title = data['title'];
   }
 
   @override
@@ -38,22 +67,26 @@ class VehicleRequest extends Request {
 
   @override
   Widget widget(BuildContext context) {
-    final title = reason.split(':')[0];
-    final uiElement =
-        Request.uiElements[type]!.map((key, value) => MapEntry(key, value));
-    uiElement['color'] = Request.uiElements[type]!['children'][title]['color'];
-    uiElement['icon'] = Request.uiElements[type]!['children'][title]['icon'];
+    uiElement['color'] = uiElement[title]!['color'];
+    uiElement['icon'] = uiElement[title]!['icon'];
     return super.listWidget(
       context,
       Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (reason.isNotEmpty)
+          Wrap(children: [
             Text(
-              reason,
+              title.replaceAll('_', ' '),
               style: Theme.of(context).textTheme.bodySmall,
             ),
+            const SizedBox(width: 5),
+            if (reason.isNotEmpty)
+              Text(
+                "| $reason",
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+          ]),
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -72,7 +105,6 @@ class VehicleRequest extends Request {
           ),
         ],
       ),
-      uiElement,
       {
         '-': '-',
         'Requested Date': ddmmyyyy(dateTime!),

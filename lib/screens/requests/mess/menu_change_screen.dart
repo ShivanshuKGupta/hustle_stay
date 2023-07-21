@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/requests/mess/menu_change_request.dart';
-import 'package:hustle_stay/models/requests/request.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/chat/chat_screen.dart';
 import 'package:hustle_stay/tools.dart';
@@ -34,9 +33,9 @@ class _MenuChangeRequestScreenState extends State<MenuChangeRequestScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    widget.request ??= MenuChangeRequest(userEmail: currentUser.email!);
-    final Map<String, dynamic> uiElement =
-        Request.uiElements['Mess']!['Menu_Change'];
+    widget.request ??=
+        MenuChangeRequest(requestingUserEmail: currentUser.email!);
+    final Map<String, dynamic> uiElement = widget.request!.uiElement;
     return Scaffold(
       appBar: AppBar(),
       body: Padding(
@@ -125,14 +124,13 @@ class _MenuChangeRequestScreenState extends State<MenuChangeRequestScreen> {
   }
 
   Future<void> _save() async {
-    if (widget.request == null ||
-        widget.request!.reason.isEmpty ||
-        _txtController.text.trim().isEmpty) {
+    _txtController.text = _txtController.text.trim();
+    if (widget.request == null || _txtController.text.isEmpty) {
       showMsg(context, 'Please specify the details for the change');
       return;
     }
     widget.request!.reason =
-        "Mess Menu Change${widget.request!.reason.isNotEmpty && widget.request!.reason != 'Other' ? ": ${widget.request!.reason}" : ''}${day == null ? '' : ' $day'}\n${_txtController.text.trim()}";
+        "${day == null ? '' : ' $day'} ${widget.request!.reason.isEmpty ? '' : widget.request!.reason}\n${_txtController.text}";
     setState(() {
       _loading = true;
     });

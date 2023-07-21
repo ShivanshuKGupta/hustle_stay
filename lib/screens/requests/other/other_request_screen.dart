@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/requests/other/other_request.dart';
-import 'package:hustle_stay/models/requests/request.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/chat/chat_screen.dart';
 import 'package:hustle_stay/screens/filter_screen/filter_choser_screen.dart';
@@ -31,8 +30,8 @@ class _OtherRequestScreenState extends State<OtherRequestScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    widget.request ??= OtherRequest(userEmail: currentUser.email!);
-    final Map<String, dynamic> uiElement = Request.uiElements['Other']!;
+    widget.request ??= OtherRequest(requestingUserEmail: currentUser.email!);
+    final Map<String, dynamic> uiElement = widget.request!.uiElement;
     return Scaffold(
       appBar: AppBar(),
       body: Padding(

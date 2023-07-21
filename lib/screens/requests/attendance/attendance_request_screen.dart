@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/models/hostel/rooms/room.dart';
-import 'package:hustle_stay/models/requests/request.dart';
+import 'package:hustle_stay/models/requests/hostel/change_room_request.dart';
+import 'package:hustle_stay/models/requests/hostel/swap_room_request.dart';
 import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/screens/requests/requests_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
-import 'package:hustle_stay/widgets/room/leave_widget.dart';
 
 class AttendanceRequestScreen extends StatelessWidget {
   static const String routeName = 'AttendanceRequestScreen';
@@ -32,7 +32,7 @@ class AttendanceRequestScreen extends StatelessWidget {
               },
               title: 'Attendance',
               icon: Icon(
-                Request.uiElements['Attendance']!['icon'],
+                requestMainPageElements['Attendance']!['icon'],
                 size: 50,
               ),
               color: theme.colorScheme.background,
@@ -59,60 +59,64 @@ class AttendanceRequestScreen extends StatelessWidget {
                       onTap: () {},
                       title: 'Change Room',
                       icon: Icon(
-                        Request.uiElements['Attendance']!['Change Room']
-                            ['icon'],
+                        ChangeRoomRequest(
+                                requestingUserEmail: currentUser.email!)
+                            .uiElement['icon'],
                         size: 50,
                       ),
-                      color: Request.uiElements['Attendance']!['Change Room']
-                          ['color'],
+                      color: ChangeRoomRequest(
+                              requestingUserEmail: currentUser.email!)
+                          .uiElement['color'],
                     ),
                     GridTileLogo(
                       onTap: () {},
                       title: 'Swap Room',
                       icon: Icon(
-                        Request.uiElements['Attendance']!['Swap Room']['icon'],
+                        SwapRoomRequest(requestingUserEmail: currentUser.email!)
+                            .uiElement['icon'],
                         size: 50,
                       ),
-                      color: Request.uiElements['Attendance']!['Swap Room']
-                          ['color'],
+                      color: SwapRoomRequest(
+                              requestingUserEmail: currentUser.email!)
+                          .uiElement['color'],
                     ),
-                    GridTileLogo(
-                      onTap: () {
-                        navigatorPush(
-                          context,
-                          Scaffold(
-                            appBar: AppBar(),
-                            body: LeaveWidget(
-                              hostelName: currentUser.readonly.hostelName!,
-                              roomName: currentUser.readonly.roomName!,
-                              user: currentUser,
-                              roommateData:
-                                  RoommateData(email: currentUser.email!),
-                            ),
-                          ),
-                        );
-                      },
-                      title: 'Leave Hostel',
-                      icon: Icon(
-                        Request.uiElements['Attendance']!['Leave Hostel']
-                            ['icon'],
-                        size: 50,
-                      ),
-                      color: Request.uiElements['Attendance']!['Leave Hostel']
-                          ['color'],
-                    ),
-                    GridTileLogo(
-                      onTap: () {},
-                      title: 'Return to Hostel',
-                      icon: Icon(
-                        Request.uiElements['Attendance']!['Return to Hostel']
-                            ['icon'],
-                        size: 50,
-                      ),
-                      color:
-                          Request.uiElements['Attendance']!['Return to Hostel']
-                              ['color'],
-                    ),
+                    //     GridTileLogo(
+                    //       onTap: () {
+                    //         navigatorPush(
+                    //           context,
+                    //           Scaffold(
+                    //             appBar: AppBar(),
+                    //             body: LeaveWidget(
+                    //               hostelName: currentUser.readonly.hostelName!,
+                    //               roomName: currentUser.readonly.roomName!,
+                    //               user: currentUser,
+                    //               roommateData:
+                    //                   RoommateData(email: currentUser.email!),
+                    //             ),
+                    //           ),
+                    //         );
+                    //       },
+                    //       title: 'Leave Hostel',
+                    //       icon: Icon(
+                    //         Request.uiElements['Attendance']!['Leave Hostel']
+                    //             ['icon'],
+                    //         size: 50,
+                    //       ),
+                    //       color: Request.uiElements['Attendance']!['Leave Hostel']
+                    //           ['color'],
+                    //     ),
+                    //     GridTileLogo(
+                    //       onTap: () {},
+                    //       title: 'Return to Hostel',
+                    //       icon: Icon(
+                    //         Request.uiElements['Attendance']!['Return to Hostel']
+                    //             ['icon'],
+                    //         size: 50,
+                    //       ),
+                    //       color:
+                    //           Request.uiElements['Attendance']!['Return to Hostel']
+                    //               ['color'],
+                    //     ),
                   ],
                 ),
               ),

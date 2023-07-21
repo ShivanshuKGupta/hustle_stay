@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/models/requests/request.dart';
+import 'package:hustle_stay/screens/requests/requests_screen.dart';
 import 'package:hustle_stay/screens/requests/vehicle/vehicle_request_form_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
@@ -24,7 +24,7 @@ class VehicleRequestScreen extends StatelessWidget {
               },
               title: 'Vehicle',
               icon: Icon(
-                Request.uiElements['Vehicle']!['icon'],
+                requestMainPageElements['Vehicle']!['icon'],
                 size: 50,
               ),
               color: theme.colorScheme.background,
@@ -35,8 +35,29 @@ class VehicleRequestScreen extends StatelessWidget {
                 childAspectRatio: 3 / 2,
                 crossAxisSpacing: 5,
                 mainAxisSpacing: 5,
-                children: (Request.uiElements['Vehicle']!['children']
-                        as Map<String, dynamic>)
+                children: <String, dynamic>{
+                  'Night_Travel': {
+                    'color': Colors.blue,
+                    'icon': Icons.nightlight_round,
+                    'reasonOptions': [
+                      'Train Arrival',
+                      'Train Departure',
+                    ],
+                  },
+                  'Hospital_Visit': {
+                    'color': Colors.tealAccent,
+                    'icon': Icons.local_hospital_rounded,
+                    'reasonOptions': [
+                      'Fever',
+                      'Food Poisoning',
+                    ],
+                  },
+                  'Other': {
+                    'color': Colors.lightGreenAccent,
+                    'icon': Icons.more_horiz_rounded,
+                    'reasonOptions': <String>[],
+                  },
+                }
                     .entries
                     .map(
                       (entry) => GridTileLogo(
@@ -53,7 +74,7 @@ class VehicleRequestScreen extends StatelessWidget {
                             ),
                           );
                         },
-                        title: entry.key,
+                        title: entry.key.replaceAll('_', ' '),
                         icon: Icon(
                           entry.value['icon'],
                           size: 50,

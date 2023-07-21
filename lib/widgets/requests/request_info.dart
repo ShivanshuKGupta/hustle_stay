@@ -4,14 +4,9 @@ import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/tools.dart';
 
 class RequestInfo extends StatefulWidget {
-  final Map<String, dynamic> uiElement;
   final Request request;
   final Map<String, String> details;
-  const RequestInfo(
-      {super.key,
-      required this.uiElement,
-      required this.request,
-      required this.details});
+  const RequestInfo({super.key, required this.request, required this.details});
 
   @override
   State<RequestInfo> createState() => _RequestInfoState();
@@ -20,10 +15,6 @@ class RequestInfo extends StatefulWidget {
 class _RequestInfoState extends State<RequestInfo> {
   @override
   Widget build(BuildContext context) {
-    final title = widget.request.reason.split(':')[0];
-    String subtitle = widget.request.reason.length > title.length + 2
-        ? widget.request.reason.substring(title.length + 2).trim()
-        : '';
     final theme = Theme.of(context);
     return AlertDialog(
       actionsAlignment: MainAxisAlignment.center,
@@ -37,13 +28,13 @@ class _RequestInfoState extends State<RequestInfo> {
       content: LayoutBuilder(
         builder: (ctx, constraints) => Column(
           children: [
-            Icon(widget.uiElement['icon']),
+            Icon(widget.request.uiElement['icon']),
             Text(
-              title,
+              widget.request.type.replaceAll('_', ' '),
               style: theme.textTheme.bodyLarge,
             ),
             Text(
-              subtitle,
+              widget.request.reason,
               style: theme.textTheme.bodySmall,
             ),
             const Divider(),

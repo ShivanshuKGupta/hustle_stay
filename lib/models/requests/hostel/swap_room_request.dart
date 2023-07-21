@@ -3,10 +3,16 @@ import 'package:hustle_stay/models/requests/request.dart';
 import 'package:hustle_stay/tools.dart';
 
 class SwapRoomRequest extends Request {
-  String targetUserEmail;
-  SwapRoomRequest({required this.targetUserEmail}) {
-    super.type = "Swap Room";
-  }
+  String? targetUserEmail;
+  SwapRoomRequest({
+    required super.requestingUserEmail,
+  }) : super(
+          type: 'Swap_Room',
+          uiElement: {
+            'color': Colors.pinkAccent,
+            'icon': Icons.transfer_within_a_station_rounded,
+          },
+        );
 
   @override
   Map<String, dynamic> encode() {
@@ -18,14 +24,13 @@ class SwapRoomRequest extends Request {
   @override
   void load(Map<String, dynamic> data) {
     super.load(data);
-    assert(data['targetUserEmail'] != null);
-    // this request should definitely contain these property
-    targetUserEmail = data['targetUserEmail'];
+    targetUserEmail = data['targetUserEmail']!;
   }
 
   @override
   bool beforeUpdate() {
-    targetUserEmail = targetUserEmail.trim();
+    if (targetUserEmail == null) return false;
+    targetUserEmail = targetUserEmail!.trim();
     String? err = Validate.email(targetUserEmail, required: true);
     if (err != null) throw err;
     return super.beforeUpdate();
@@ -38,7 +43,7 @@ class SwapRoomRequest extends Request {
     // this function will be called
 
     // Use [targetUserEmail] and [requestingUserEmail] to complete this function
-    // and super.reason to get some more info
+    // and reason to get some more info
   }
 
   @override
