@@ -105,8 +105,8 @@ class _UserListState extends State<UserList> {
                     )));
           },
           child: ListTile(
-            shape: CircleBorder(),
-            title: Text(list[index].name!),
+            shape: const CircleBorder(),
+            title: Text(list[index].name ?? list[index].email!),
             subtitle: Text(list[index].readonly.type == 'student'
                 ? list[index].email!.substring(0, 9).toUpperCase()
                 : list[index].email!),

@@ -89,6 +89,8 @@ class _EditProfileState extends State<EditProfile> {
                   TextFormField(
                     key: UniqueKey(),
                     maxLength: 50,
+                    enabled: widget.user.email == null ||
+                        currentUser.readonly.isAdmin,
                     decoration: const InputDecoration(
                       label: Text("Name"),
                     ),

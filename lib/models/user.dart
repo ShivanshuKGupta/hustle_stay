@@ -7,6 +7,7 @@ import 'package:hustle_stay/tools.dart';
 class ReadOnly {
   bool isAdmin = false;
   String type = "student";
+  String? name;
   String? hostelName;
   String? roomName;
 
@@ -15,12 +16,14 @@ class ReadOnly {
     type = data['type'] ?? "student";
     hostelName = data['hostelName'];
     roomName = data['roomName'];
+    name = data['name'];
   }
 
   Map<String, dynamic> encode() {
     return {
       "isAdmin": isAdmin,
       "type": type,
+      "name": name,
       if (type == 'student') "hostelName": hostelName,
       if (type == 'student') "roomName": roomName,
     };
@@ -115,27 +118,37 @@ class MedicalInfo {
 }
 
 class UserData {
-  String? email, name, phoneNumber, address;
+  String? email, phoneNumber, address;
+  String? get name {
+    return readonly.name;
+  }
+
+  set name(String? newName) {
+    readonly.name = newName;
+  }
+
   String? imgUrl;
   ReadOnly readonly = ReadOnly();
   late MedicalInfo medicalInfo;
   UserData.other(
       {this.email,
-      this.name,
+      String? name,
       this.phoneNumber,
       this.address,
       this.imgUrl,
       required this.medicalInfo,
-      required this.readonly});
+      required this.readonly}) {
+    readonly.name = name;
+  }
 
   UserData(
-      {this.email, this.name, this.phoneNumber, this.address, this.imgUrl}) {
+      {this.email, String? name, this.phoneNumber, this.address, this.imgUrl}) {
     medicalInfo = MedicalInfo();
+    readonly.name = name;
   }
 
   Map<String, dynamic> encode() {
     return {
-      "name": name,
       "phoneNumber": phoneNumber,
       "address": address,
       "imgUrl": imgUrl,
@@ -144,7 +157,6 @@ class UserData {
   }
 
   void load(Map<String, dynamic> userData) {
-    name = userData['name'];
     phoneNumber = userData['phoneNumber'];
     address = userData['address'];
     imgUrl = userData['imgUrl'];
@@ -160,6 +172,23 @@ Future<UserData> fetchUserData(
 }) async {
   UserData userData = UserData();
   DocumentSnapshot<Map<String, dynamic>>? response;
+  userData.email = email;
+
+  /// Loading readonly properties ...
+  try {
+    response = await firestore.collection('users').doc(email).get(
+          src == null ? null : GetOptions(source: src),
+        );
+    if (keepUptoDate) {
+      firestore.collection('users').doc(email).get();
+    }
+  } catch (e) {
+    if (src == Source.cache) {
+      response = await firestore.collection('users').doc(email).get();
+    }
+  }
+  userData.readonly.load(response?.data() ?? {});
+
   if (!readonly) {
     /// Loading editable properties ...
     try {
@@ -185,22 +214,6 @@ Future<UserData> fetchUserData(
     userData.email = email;
     userData.load(response?.data() ?? {});
   }
-  userData.email = email;
-
-  /// Loading readonly properties ...
-  try {
-    response = await firestore.collection('users').doc(email).get(
-          src == null ? null : GetOptions(source: src),
-        );
-    if (keepUptoDate) {
-      firestore.collection('users').doc(email).get();
-    }
-  } catch (e) {
-    if (src == Source.cache) {
-      response = await firestore.collection('users').doc(email).get();
-    }
-  }
-  userData.readonly.load(response?.data() ?? {});
   return userData;
 }
 
