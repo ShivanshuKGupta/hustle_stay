@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/requests/request.dart';
+import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/tools.dart';
 
 class SwapRoomRequest extends Request {
@@ -48,7 +49,33 @@ class SwapRoomRequest extends Request {
 
   @override
   Widget widget(context) {
-    // TODO: implement widget
-    throw UnimplementedError();
+    return super.listWidget(
+      context,
+      Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(children: [
+            UserBuilder(
+              email: targetUserEmail!,
+              builder: (ctx, user) => Text(
+                "with ${user.name ?? user.email}",
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
+            const SizedBox(width: 5),
+            if (reason.isNotEmpty)
+              Text(
+                "| $reason",
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+          ]),
+        ],
+      ),
+      {
+        '-': '-',
+        'Swap room with': targetUserEmail!,
+      },
+    );
   }
 }

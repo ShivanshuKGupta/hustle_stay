@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/chat/message.dart';
+import 'package:hustle_stay/models/requests/hostel/change_room_request.dart';
+import 'package:hustle_stay/models/requests/hostel/swap_room_request.dart';
 import 'package:hustle_stay/models/requests/mess/menu_change_request.dart';
 import 'package:hustle_stay/models/requests/other/other_request.dart';
 import 'package:hustle_stay/models/requests/vehicle/vehicle_request.dart';
@@ -385,7 +387,23 @@ abstract class Request {
           title: Text('${type.replaceAll('_', ' ')} Request',
               overflow: TextOverflow.fade),
           trailing: trailing,
-          subtitle: detailWidget,
+          subtitle: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (detailWidget != null) detailWidget,
+              if (currentUser.readonly.type != 'student')
+                UserBuilder(
+                  email: requestingUserEmail,
+                  builder: (ctx, userData) => Text(
+                    userData.name ?? userData.email!,
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color: uiElement['color'],
+                        ),
+                  ),
+                )
+            ],
+          ),
         ),
       ),
     );
@@ -451,6 +469,12 @@ Request decodeToRequest(Map<String, dynamic> data) {
       ..load(data);
   } else if (type == 'Other') {
     return OtherRequest(requestingUserEmail: data['requestingUserEmail'])
+      ..load(data);
+  } else if (type == 'Change_Room') {
+    return ChangeRoomRequest(requestingUserEmail: data['requestingUserEmail'])
+      ..load(data);
+  } else if (type == 'Swap_Room') {
+    return SwapRoomRequest(requestingUserEmail: data['requestingUserEmail'])
       ..load(data);
   }
   throw "No such type exists: '$type'";

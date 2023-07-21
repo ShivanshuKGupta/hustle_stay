@@ -55,7 +55,31 @@ class ChangeRoomRequest extends Request {
 
   @override
   Widget widget(context) {
-    // TODO: implement widget
-    throw UnimplementedError();
+    return super.listWidget(
+      context,
+      Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(children: [
+            Text(
+              "$targetRoomName - $targetHostel",
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(width: 5),
+            if (reason.isNotEmpty)
+              Text(
+                "| $reason",
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+          ]),
+        ],
+      ),
+      {
+        '-': '-',
+        'Requested Hostel Name': targetHostel,
+        'Requested Room Name': targetRoomName,
+      },
+    );
   }
 }

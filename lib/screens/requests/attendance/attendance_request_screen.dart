@@ -56,7 +56,14 @@ class AttendanceRequestScreen extends StatelessWidget {
                   mainAxisSpacing: 5,
                   children: [
                     GridTileLogo(
-                      onTap: () {},
+                      onTap: () async {
+                        // final request = ChangeRoomRequest(
+                        //     requestingUserEmail: currentUser.email!);
+                        // request.targetHostel = 'Federal';
+                        // request.targetRoomName = 'A6';
+                        // request.reason = "Roommate harasses me 😢";
+                        // await request.update();
+                      },
                       title: 'Change Room',
                       icon: Icon(
                         ChangeRoomRequest(
@@ -69,7 +76,13 @@ class AttendanceRequestScreen extends StatelessWidget {
                           .uiElement['color'],
                     ),
                     GridTileLogo(
-                      onTap: () {},
+                      onTap: () async {
+                        // final request = SwapRoomRequest(
+                        //     requestingUserEmail: currentUser.email!);
+                        // request.targetUserEmail = 'cs21b1022@iiitr.ac.in';
+                        // request.reason = "Roommate harasses me 😢";
+                        // await request.update();
+                      },
                       title: 'Swap Room',
                       icon: Icon(
                         SwapRoomRequest(requestingUserEmail: currentUser.email!)

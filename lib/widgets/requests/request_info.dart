@@ -95,8 +95,18 @@ class _RequestInfoState extends State<RequestInfo> {
                   onPressed: () {
                     Navigator.of(context).pop();
                     final request = decodeToRequest(widget.request.encode());
-                    Widget page =
-                        Text('No such request type exists: ${request.type}');
+                    Widget page = Scaffold(
+                      appBar: AppBar(),
+                      body: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'To edit requests of type \'${request.type.replaceAll('_', ' ')}\', you may have to use some other feature in the app.',
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    );
                     if (request is VehicleRequest) {
                       page = VehicleRequestFormScreen(
                         request: request,
