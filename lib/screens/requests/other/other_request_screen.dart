@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/requests/other/other_request.dart';
-import 'package:hustle_stay/models/requests/request.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/chat/chat_screen.dart';
 import 'package:hustle_stay/screens/filter_screen/filter_choser_screen.dart';
@@ -29,10 +28,18 @@ class _OtherRequestScreenState extends State<OtherRequestScreen> {
   bool _loading = false;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.request != null) {
+      _txtController.text = widget.request!.reason;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    widget.request ??= OtherRequest(userEmail: currentUser.email!);
-    final Map<String, dynamic> uiElement = Request.uiElements['Other']!;
+    widget.request ??= OtherRequest(requestingUserEmail: currentUser.email!);
+    final Map<String, dynamic> uiElement = widget.request!.uiElement;
     return Scaffold(
       appBar: AppBar(),
       body: Padding(
@@ -73,13 +80,16 @@ class _OtherRequestScreenState extends State<OtherRequestScreen> {
                   helpText: 'Add a user',
                   allUsers: users.map((e) => e.email!).toSet(),
                   onChange: (users) {
-                    widget.request!.approvers = users.toList();
+                    setState(() {
+                      widget.request!.approvers = users.toList();
+                    });
                   },
                   chosenUsers: widget.request!.approvers.toSet(),
                 ),
               ),
               const SizedBox(height: 20),
               TextFormField(
+                onChanged: (value) => setState(() {}),
                 controller: _txtController,
                 decoration: InputDecoration(
                   hintText: 'Specify the details for the request here',
@@ -94,7 +104,10 @@ class _OtherRequestScreenState extends State<OtherRequestScreen> {
               ),
               const SizedBox(height: 20),
               ElevatedButton.icon(
-                onPressed: _save,
+                onPressed: _txtController.text.trim().isEmpty ||
+                        widget.request!.approvers.isEmpty
+                    ? null
+                    : _save,
                 icon: _loading
                     ? circularProgressIndicator()
                     : const Icon(Icons.done),
@@ -118,7 +131,10 @@ class _OtherRequestScreenState extends State<OtherRequestScreen> {
     });
     List<String> approvers = widget.request!.approvers.map((e) => e).toList();
     widget.request!.approvers.clear();
-    widget.request!.id = DateTime.now().millisecondsSinceEpoch;
+    bool isUpdate = widget.request!.id != 0;
+    if (!isUpdate) {
+      widget.request!.id = DateTime.now().millisecondsSinceEpoch;
+    }
     widget.request!.approvers = approvers;
     await widget.request!.update();
     await widget.request!.fetchApprovers();
@@ -129,18 +145,20 @@ class _OtherRequestScreenState extends State<OtherRequestScreen> {
       while (Navigator.of(context).canPop()) {
         Navigator.of(context).pop(true);
       }
-      navigatorPush(
-        context,
-        ChatScreen(
-          chat: widget.request!.chatData,
-          initialMsg: MessageData(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            from: currentUser.email!,
-            createdAt: DateTime.now(),
-            txt: otherRequestMessage(widget.request!),
+      if (!isUpdate) {
+        navigatorPush(
+          context,
+          ChatScreen(
+            chat: widget.request!.chatData,
+            initialMsg: MessageData(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              from: currentUser.email!,
+              createdAt: DateTime.now(),
+              txt: otherRequestMessage(widget.request!),
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
   }
 }

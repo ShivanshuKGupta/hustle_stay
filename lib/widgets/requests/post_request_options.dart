@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/models/requests/request.dart';
+import 'package:hustle_stay/screens/requests/requests_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
 
@@ -28,7 +28,7 @@ class PostRequestOptions extends StatelessWidget {
           crossAxisSpacing: 5,
           mainAxisSpacing: 5,
           children: [
-            ...Request.uiElements.entries.map(
+            ...requestMainPageElements.entries.map(
               (entry) => GridTileLogo(
                 onTap: () {
                   Navigator.of(context).pushNamed(entry.value['route']);

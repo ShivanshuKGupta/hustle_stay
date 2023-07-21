@@ -9,6 +9,7 @@ class ReadOnly {
   String type = "student";
   String? hostelName;
   String? roomName;
+
   void load(Map<String, dynamic> data) {
     isAdmin = data['isAdmin'] ?? false;
     type = data['type'] ?? "student";
@@ -20,6 +21,8 @@ class ReadOnly {
     return {
       "isAdmin": isAdmin,
       "type": type,
+      if (type == 'student') "hostelName": hostelName,
+      if (type == 'student') "roomName": roomName,
     };
   }
 }

@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/models/requests/mess/menu_change_request.dart';
+import 'package:hustle_stay/models/requests/other/other_request.dart';
 import 'package:hustle_stay/models/requests/request.dart';
+import 'package:hustle_stay/models/requests/vehicle/vehicle_request.dart';
 import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/screens/requests/mess/menu_change_screen.dart';
+import 'package:hustle_stay/screens/requests/other/other_request_screen.dart';
+import 'package:hustle_stay/screens/requests/vehicle/vehicle_request_form_screen.dart';
+import 'package:hustle_stay/screens/requests/vehicle/vehicle_requests_screen.dart';
 import 'package:hustle_stay/tools.dart';
 
 class RequestInfo extends StatefulWidget {
-  final Map<String, dynamic> uiElement;
   final Request request;
   final Map<String, String> details;
-  const RequestInfo(
-      {super.key,
-      required this.uiElement,
-      required this.request,
-      required this.details});
+  const RequestInfo({super.key, required this.request, required this.details});
 
   @override
   State<RequestInfo> createState() => _RequestInfoState();
@@ -20,10 +22,6 @@ class RequestInfo extends StatefulWidget {
 class _RequestInfoState extends State<RequestInfo> {
   @override
   Widget build(BuildContext context) {
-    final title = widget.request.reason.split(':')[0];
-    String subtitle = widget.request.reason.length > title.length + 2
-        ? widget.request.reason.substring(title.length + 2).trim()
-        : '';
     final theme = Theme.of(context);
     return AlertDialog(
       actionsAlignment: MainAxisAlignment.center,
@@ -37,13 +35,13 @@ class _RequestInfoState extends State<RequestInfo> {
       content: LayoutBuilder(
         builder: (ctx, constraints) => Column(
           children: [
-            Icon(widget.uiElement['icon']),
+            Icon(widget.request.uiElement['icon']),
             Text(
-              title,
+              widget.request.type.replaceAll('_', ' '),
               style: theme.textTheme.bodyLarge,
             ),
             Text(
-              subtitle,
+              widget.request.reason,
               style: theme.textTheme.bodySmall,
             ),
             const Divider(),
@@ -91,6 +89,47 @@ class _RequestInfoState extends State<RequestInfo> {
               )
             ]
           : [
+              if (widget.request.requestingUserEmail == currentUser.email &&
+                  widget.request.status == RequestStatus.pending)
+                TextButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    final request = decodeToRequest(widget.request.encode());
+                    Widget page = Scaffold(
+                      appBar: AppBar(),
+                      body: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'To edit requests of type \'${request.type.replaceAll('_', ' ')}\', you may have to use some other feature in the app.',
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    );
+                    if (request is VehicleRequest) {
+                      page = VehicleRequestFormScreen(
+                        request: request,
+                        title: request.title,
+                        icon:
+                            Icon(allVehicleRequestsData[request.title]['icon']),
+                        reasonOptions: allVehicleRequestsData[request.title]
+                            ['reasonOptions'],
+                      );
+                    } else if (request is MenuChangeRequest) {
+                      page = MenuChangeRequestScreen(
+                        request: request,
+                      );
+                    } else if (request is OtherRequest) {
+                      page = OtherRequestScreen(
+                        request: request,
+                      );
+                    }
+                    navigatorPush(context, page);
+                  },
+                  label: const Text('Edit'),
+                  icon: const Icon(Icons.edit_rounded),
+                ),
               if (currentUser.readonly.type == 'student')
                 TextButton.icon(
                   onPressed: () async {

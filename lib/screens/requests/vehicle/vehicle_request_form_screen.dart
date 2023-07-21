@@ -33,9 +33,20 @@ class _VehicleRequestFormScreenState extends State<VehicleRequestFormScreen> {
   bool _loading = false;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.request != null &&
+        !widget.reasonOptions.contains(widget.request!.reason)) {
+      _txtController.text = widget.request!.reason;
+      widget.request!.reason = 'Other';
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    widget.request ??= VehicleRequest(requestingUserEmail: currentUser.email!);
+    widget.request ??= VehicleRequest(
+        requestingUserEmail: currentUser.email!, title: widget.title);
     widget.reasonOptions = widget.reasonOptions.map((e) => e).toList();
     TimeOfDay? time = widget.request!.dateTime == null
         ? null
@@ -56,7 +67,7 @@ class _VehicleRequestFormScreenState extends State<VehicleRequestFormScreen> {
                     onTap: () {
                       Navigator.of(context).pop();
                     },
-                    title: widget.title,
+                    title: widget.title.replaceAll('_', ' '),
                     icon: widget.icon,
                     color: theme.colorScheme.background,
                   ),
@@ -174,16 +185,24 @@ class _VehicleRequestFormScreenState extends State<VehicleRequestFormScreen> {
     if (widget.request!.reason == 'Other' || widget.reasonOptions.isEmpty) {
       widget.request!.reason = _txtController.text.trim();
     }
-    widget.request!.reason =
-        "${widget.title}${widget.request!.reason.isNotEmpty ? ": ${widget.request!.reason}" : ''}";
+    bool isAnUpdate = widget.request!.id != 0;
     setState(() {
       _loading = true;
     });
     final dateTime = widget.request!.dateTime!;
-    await widget.request!.update(
-        chosenExpiryDate:
-            DateTime(dateTime.year, dateTime.month, dateTime.day + 7));
-    await widget.request!.fetchApprovers();
+    try {
+      await widget.request!.update(
+          chosenExpiryDate:
+              DateTime(dateTime.year, dateTime.month, dateTime.day + 7));
+      await widget.request!.fetchApprovers();
+    } catch (e) {
+      if (context.mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
+      return;
+    }
     if (context.mounted) {
       setState(() {
         _loading = false;
@@ -191,18 +210,20 @@ class _VehicleRequestFormScreenState extends State<VehicleRequestFormScreen> {
       while (Navigator.of(context).canPop()) {
         Navigator.of(context).pop(true);
       }
-      navigatorPush(
-        context,
-        ChatScreen(
-          chat: widget.request!.chatData,
-          initialMsg: MessageData(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            from: currentUser.email!,
-            createdAt: DateTime.now(),
-            txt: vanRequestTemplateMessage(widget.request!, widget.title),
+      if (!isAnUpdate) {
+        navigatorPush(
+          context,
+          ChatScreen(
+            chat: widget.request!.chatData,
+            initialMsg: MessageData(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              from: currentUser.email!,
+              createdAt: DateTime.now(),
+              txt: vanRequestTemplateMessage(widget.request!, widget.title),
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
   }
 }

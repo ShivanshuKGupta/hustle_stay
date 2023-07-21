@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/requests/request.dart';
 
 class OtherRequest extends Request {
-  OtherRequest({required String userEmail}) {
-    super.requestingUserEmail = userEmail;
-    super.type = "Other";
-  }
+  OtherRequest({required super.requestingUserEmail})
+      : super(
+          type: 'Other',
+          uiElement: {
+            'color': Colors.amber,
+            'icon': Icons.more_horiz_rounded,
+          },
+        );
 
   @override
   void onApprove() {
@@ -14,8 +18,6 @@ class OtherRequest extends Request {
 
   @override
   Widget widget(BuildContext context) {
-    final Map<String, dynamic> uiElement = Request.uiElements['Other']!
-        .map<String, dynamic>((key, value) => MapEntry(key.toString(), value));
     return super.listWidget(
       context,
       Column(
@@ -29,7 +31,6 @@ class OtherRequest extends Request {
             ),
         ],
       ),
-      uiElement,
       {},
     );
   }

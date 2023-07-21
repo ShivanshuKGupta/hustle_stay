@@ -4,28 +4,34 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/chat/message.dart';
+import 'package:hustle_stay/models/requests/hostel/change_room_request.dart';
+import 'package:hustle_stay/models/requests/hostel/swap_room_request.dart';
 import 'package:hustle_stay/models/requests/mess/menu_change_request.dart';
 import 'package:hustle_stay/models/requests/other/other_request.dart';
-import 'package:hustle_stay/models/requests/request_info.dart';
 import 'package:hustle_stay/models/requests/vehicle/vehicle_request.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/chat/chat_screen.dart';
-import 'package:hustle_stay/screens/requests/attendance/attendance_request_screen.dart';
-import 'package:hustle_stay/screens/requests/mess/mess_request_screen.dart';
-import 'package:hustle_stay/screens/requests/other/other_request_screen.dart';
-import 'package:hustle_stay/screens/requests/vehicle/vehicle_requests_screen.dart';
+import 'package:hustle_stay/tools.dart';
+import 'package:hustle_stay/widgets/requests/request_info.dart';
 import 'package:hustle_stay/widgets/requests/requests_bottom_bar.dart';
-
-import '../../tools.dart';
 
 enum RequestStatus { pending, approved, denied }
 
 final infDate = DateTime.fromMillisecondsSinceEpoch(8640000000000000);
 
 abstract class Request {
+  /// Constructor
+  Request({
+    required this.requestingUserEmail,
+    required this.type,
+    required this.uiElement,
+  });
+
   /// [id] also denotes when was the request created,
   /// its id in firestore and
   int id = 0;
+
+  /// The email id of the user who created this request
   late String requestingUserEmail;
 
   /// The status of the request
@@ -67,7 +73,7 @@ abstract class Request {
     return ChatData(
       owner: requestingUserEmail,
       receivers: approvers,
-      title: type,
+      title: type.replaceAll('_', ' '),
       locked: status != RequestStatus.pending,
       path: 'requests/$id',
     );
@@ -94,6 +100,7 @@ abstract class Request {
     status = RequestStatus.values[data['status'] ?? status.index];
     type = data['type'] ?? type;
     reason = data['reason'] ?? reason;
+    closedAt = data['closedAt'] ?? closedAt;
     requestingUserEmail = data['requestingUserEmail'] ?? requestingUserEmail;
     expiryDate = DateTime.fromMillisecondsSinceEpoch(data['expiryDate'] ?? 0);
     if (type == 'Other') {
@@ -206,83 +213,83 @@ abstract class Request {
     approvers = newApprovers;
   }
 
-  static const Map<String, Map<String, dynamic>> uiElements = {
-    'Attendance': {
-      'color': Colors.red,
-      'icon': Icons.calendar_month_rounded,
-      'route': AttendanceRequestScreen.routeName,
-      'Change Room': <String, dynamic>{
-        'color': Colors.blueAccent,
-        'icon': Icons.transfer_within_a_station_rounded,
-      },
-      'Swap Room': <String, dynamic>{
-        'color': Colors.pinkAccent,
-        'icon': Icons.transfer_within_a_station_rounded,
-      },
-      'Leave Hostel': <String, dynamic>{
-        'color': Colors.indigoAccent,
-        'icon': Icons.exit_to_app_rounded,
-      },
-      'Return to Hostel': <String, dynamic>{
-        'color': Colors.lightGreenAccent,
-        'icon': Icons.keyboard_return_rounded,
-      },
-    },
-    'Vehicle': {
-      'color': Colors.deepPurpleAccent,
-      'icon': Icons.airport_shuttle_rounded,
-      'route': VehicleRequestScreen.routeName,
-      'children': <String, dynamic>{
-        'Night Travel': {
-          'color': Colors.blue,
-          'icon': Icons.nightlight_round,
-          'reasonOptions': [
-            'Train Arrival',
-            'Train Departure',
-          ],
-        },
-        'Hospital Visit': {
-          'color': Colors.tealAccent,
-          'icon': Icons.local_hospital_rounded,
-          'reasonOptions': [
-            'Fever',
-            'Food Poisoning',
-          ],
-        },
-        'Other': {
-          'color': Colors.lightGreenAccent,
-          'icon': Icons.more_horiz_rounded,
-          'reasonOptions': <String>[],
-        },
-      }
-    },
-    'Mess': {
-      'color': Colors.lightBlueAccent,
-      'icon': Icons.restaurant_menu_rounded,
-      'route': MessRequestScreen.routeName,
-      'Menu_Change': <String, dynamic>{
-        'color': Colors.pinkAccent,
-        'icon': Icons.restaurant,
-      },
-      // 'Lunch': <String, dynamic>{
-      //   'color': Colors.deepPurpleAccent,
-      //   'icon': Icons.restaurant,
-      // },
-      // 'Snacks': <String, dynamic>{
-      //   'color': Colors.cyanAccent,
-      //   'icon': Icons.fastfood,
-      // },
-      // 'Dinner': <String, dynamic>{
-      //   'color': Colors.lightGreenAccent,
-      //   'icon': Icons.local_dining,
-      // },
-    },
-    'Other': {
-      'color': Colors.amber,
-      'icon': Icons.more_horiz_rounded,
-      'route': OtherRequestScreen.routeName,
-    },
-  };
+  Map<String, dynamic> uiElement;
+  // 'Attendance': {
+  //   'color': Colors.red,
+  //   'icon': Icons.calendar_month_rounded,
+  //   'route': AttendanceRequestScreen.routeName,
+  //   'Change Room': <String, dynamic>{
+  //     'color': Colors.blueAccent,
+  //     'icon': Icons.transfer_within_a_station_rounded,
+  //   },
+  //   'Swap Room': <String, dynamic>{
+  //     'color': Colors.pinkAccent,
+  //     'icon': Icons.transfer_within_a_station_rounded,
+  //   },
+  // 'Leave Hostel': <String, dynamic>{
+  //   'color': Colors.indigoAccent,
+  //   'icon': Icons.exit_to_app_rounded,
+  // },
+  // 'Return to Hostel': <String, dynamic>{
+  //   'color': Colors.lightGreenAccent,
+  //   'icon': Icons.keyboard_return_rounded,
+  // },
+  // },
+  // 'Vehicle': {
+  //   'color': Colors.deepPurpleAccent,
+  //   'icon': Icons.airport_shuttle_rounded,
+  //   'route': VehicleRequestScreen.routeName,
+  //   'children': <String, dynamic>{
+  //     'Night Travel': {
+  //       'color': Colors.blue,
+  //       'icon': Icons.nightlight_round,
+  //       'reasonOptions': [
+  //         'Train Arrival',
+  //         'Train Departure',
+  //       ],
+  //     },
+  //     'Hospital Visit': {
+  //       'color': Colors.tealAccent,
+  //       'icon': Icons.local_hospital_rounded,
+  //       'reasonOptions': [
+  //         'Fever',
+  //         'Food Poisoning',
+  //       ],
+  //     },
+  //     'Other': {
+  //       'color': Colors.lightGreenAccent,
+  //       'icon': Icons.more_horiz_rounded,
+  //       'reasonOptions': <String>[],
+  //     },
+  //   }
+  // },
+  // 'Mess': {
+  //   'color': Colors.lightBlueAccent,
+  //   'icon': Icons.restaurant_menu_rounded,
+  //   'route': MessRequestScreen.routeName,
+  //   'Menu_Change': <String, dynamic>{
+  //     'color': Colors.pinkAccent,
+  //     'icon': Icons.restaurant,
+  //   },
+  // 'Lunch': <String, dynamic>{
+  //   'color': Colors.deepPurpleAccent,
+  //   'icon': Icons.restaurant,
+  // },
+  // 'Snacks': <String, dynamic>{
+  //   'color': Colors.cyanAccent,
+  //   'icon': Icons.fastfood,
+  // },
+  // 'Dinner': <String, dynamic>{
+  //   'color': Colors.lightGreenAccent,
+  //   'icon': Icons.local_dining,
+  // },
+  // },
+  // 'Other': {
+  //   'color': Colors.amber,
+  //   'icon': Icons.more_horiz_rounded,
+  //   'route': OtherRequestScreen.routeName,
+  // },
+  // };
 
   /// This function returns a custom widget for this type of request
   Widget widget(BuildContext context);
@@ -290,7 +297,7 @@ abstract class Request {
   /// This is the function returns a custom widget for this type of request
   @protected
   Widget listWidget(BuildContext context, Widget? detailWidget,
-      Map<String, dynamic> uiElement, Map<String, String> otherDetails) {
+      Map<String, String> otherDetails) {
     Widget trailing = status == RequestStatus.pending
         ? AnimateIcon(
             onTap: () {
@@ -368,30 +375,45 @@ abstract class Request {
                 bottomBar: (currentUser.readonly.type == 'student')
                     ? null
                     : RequestBottomBar(request: this),
-                showInfo: () => showInfo(context, uiElement, otherDetails),
+                showInfo: () => showInfo(context, otherDetails),
                 chat: chatData,
               ),
             );
           },
           onLongPress: () {
-            showInfo(context, uiElement, otherDetails);
+            showInfo(context, otherDetails);
           },
           leading: Icon(uiElement['icon'], size: 50),
-          title: Text('$type Request', overflow: TextOverflow.fade),
+          title: Text('${type.replaceAll('_', ' ')} Request',
+              overflow: TextOverflow.fade),
           trailing: trailing,
-          subtitle: detailWidget,
+          subtitle: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (detailWidget != null) detailWidget,
+              if (currentUser.readonly.type != 'student')
+                UserBuilder(
+                  email: requestingUserEmail,
+                  builder: (ctx, userData) => Text(
+                    userData.name ?? userData.email!,
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color: uiElement['color'],
+                        ),
+                  ),
+                )
+            ],
+          ),
         ),
       ),
     );
   }
 
-  void showInfo(BuildContext context, Map<String, dynamic> uiElement,
-      Map<String, String> otherDetails) async {
+  void showInfo(BuildContext context, Map<String, String> otherDetails) async {
     Navigator.of(context).push(
       DialogRoute<void>(
         context: context,
         builder: (BuildContext context) => RequestInfo(
-          uiElement: uiElement,
           request: this,
           details: {
             'From': requestingUserEmail,
@@ -420,9 +442,10 @@ Future<List<String>> fetchApproversOfRequestType(String requestType,
   try {
     response = await doc.get(src == null ? null : GetOptions(source: src));
   } catch (e) {
-    if (src == Source.cache) response = await doc.get();
+    if (src == Source.cache) return fetchApproversOfRequestType(requestType);
+    rethrow;
   }
-  if (response!.data() == null && src == Source.cache) {
+  if (response.data() == null && src == Source.cache) {
     response = await doc.get();
   }
   final data = response.data()!;
@@ -437,13 +460,22 @@ Future<List<String>> fetchApproversOfRequestType(String requestType,
 Request decodeToRequest(Map<String, dynamic> data) {
   final type = data['type'];
   if (type == 'Vehicle') {
-    return VehicleRequest(requestingUserEmail: data['requestingUserEmail'])
-      ..load(data);
+    return VehicleRequest(
+      requestingUserEmail: data['requestingUserEmail'],
+      title: data['title'],
+    )..load(data);
   } else if (type == 'Menu_Change') {
-    return MenuChangeRequest(userEmail: data['requestingUserEmail'])
+    return MenuChangeRequest(requestingUserEmail: data['requestingUserEmail'])
       ..load(data);
   } else if (type == 'Other') {
-    return OtherRequest(userEmail: data['requestingUserEmail'])..load(data);
+    return OtherRequest(requestingUserEmail: data['requestingUserEmail'])
+      ..load(data);
+  } else if (type == 'Change_Room') {
+    return ChangeRoomRequest(requestingUserEmail: data['requestingUserEmail'])
+      ..load(data);
+  } else if (type == 'Swap_Room') {
+    return SwapRoomRequest(requestingUserEmail: data['requestingUserEmail'])
+      ..load(data);
   }
   throw "No such type exists: '$type'";
 }

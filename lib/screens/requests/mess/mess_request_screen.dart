@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/models/requests/request.dart';
+import 'package:hustle_stay/models/requests/mess/menu_change_request.dart';
+import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/requests/mess/menu_change_screen.dart';
+import 'package:hustle_stay/screens/requests/requests_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
 
@@ -30,7 +32,7 @@ class MessRequestScreen extends StatelessWidget {
               },
               title: 'Mess',
               icon: Icon(
-                Request.uiElements['Mess']!['icon'],
+                requestMainPageElements['Mess']!['icon'],
                 size: 50,
               ),
               color: theme.colorScheme.background,
@@ -48,10 +50,13 @@ class MessRequestScreen extends StatelessWidget {
                     },
                     title: 'Menu Change',
                     icon: Icon(
-                      Request.uiElements['Mess']!['Menu_Change']['icon'],
+                      MenuChangeRequest(requestingUserEmail: currentUser.email!)
+                          .uiElement['icon'],
                       size: 50,
                     ),
-                    color: Request.uiElements['Mess']!['Menu_Change']['color'],
+                    color: MenuChangeRequest(
+                            requestingUserEmail: currentUser.email!)
+                        .uiElement['color'],
                   ),
                   // GridTileLogo(
                   //   onTap: () {},

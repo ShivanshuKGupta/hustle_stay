@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/requests/mess/menu_change_request.dart';
-import 'package:hustle_stay/models/requests/request.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/chat/chat_screen.dart';
 import 'package:hustle_stay/tools.dart';
@@ -26,17 +25,48 @@ class _MenuChangeRequestScreenState extends State<MenuChangeRequestScreen> {
   final _txtController = TextEditingController();
 
   final List<String> options = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
+  static Set<String> days = {
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+    'Sat',
+    'Sun',
+  };
 
   bool _loading = false;
 
   String? day;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.request != null) {
+      String reason = widget.request!.reason;
+      widget.request!.reason = "";
+      if (reason.length >= 3) {
+        String str = reason.substring(0, 3);
+        if (days.contains(str)) {
+          day = str;
+          reason = reason.substring(str.length + 1);
+        }
+        str = reason.split('\n')[0];
+        if (options.contains(str)) {
+          widget.request!.reason = str;
+          reason = reason.substring(str.length + 1);
+        }
+        _txtController.text = reason;
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    widget.request ??= MenuChangeRequest(userEmail: currentUser.email!);
-    final Map<String, dynamic> uiElement =
-        Request.uiElements['Mess']!['Menu_Change'];
+    widget.request ??=
+        MenuChangeRequest(requestingUserEmail: currentUser.email!);
+    final Map<String, dynamic> uiElement = widget.request!.uiElement;
     return Scaffold(
       appBar: AppBar(),
       body: Padding(
@@ -66,18 +96,14 @@ class _MenuChangeRequestScreenState extends State<MenuChangeRequestScreen> {
               SelectOne(
                 title: 'Which Day?',
                 subtitle: '(optional)',
-                allOptions: const {
-                  'Mon',
-                  'Tue',
-                  'Wed',
-                  'Thu',
-                  'Fri',
-                  'Sat',
-                  'Sun'
-                },
-                selectedOption: day,
+                allOptions: days..add('None'),
+                selectedOption: day ?? 'None',
                 onChange: (value) {
-                  day = value;
+                  if (value == 'None') {
+                    day = null;
+                  } else {
+                    day = value;
+                  }
                   return true;
                 },
               ),
@@ -87,11 +113,15 @@ class _MenuChangeRequestScreenState extends State<MenuChangeRequestScreen> {
                   title: 'Which Meal?',
                   subtitle: '(optional)',
                   allOptions: (options..add('Other')).toSet(),
-                  selectedOption: widget.request!.reason,
+                  selectedOption: widget.request!.reason.isEmpty
+                      ? 'Other'
+                      : widget.request!.reason,
                   onChange: (value) {
-                    setState(() {
+                    if (value == 'Other') {
+                      widget.request!.reason = '';
+                    } else {
                       widget.request!.reason = value;
-                    });
+                    }
                     return true;
                   },
                 ),
@@ -108,10 +138,13 @@ class _MenuChangeRequestScreenState extends State<MenuChangeRequestScreen> {
                 maxLines: null,
                 minLines: 1,
                 keyboardType: TextInputType.multiline,
+                onChanged: (value) {
+                  setState(() {});
+                },
               ),
               const SizedBox(height: 20),
               ElevatedButton.icon(
-                onPressed: _save,
+                onPressed: _txtController.text.trim().isEmpty ? null : _save,
                 icon: _loading
                     ? circularProgressIndicator()
                     : const Icon(Icons.done),
@@ -125,17 +158,22 @@ class _MenuChangeRequestScreenState extends State<MenuChangeRequestScreen> {
   }
 
   Future<void> _save() async {
-    if (widget.request == null ||
-        widget.request!.reason.isEmpty ||
-        _txtController.text.trim().isEmpty) {
+    _txtController.text = _txtController.text.trim();
+    if (widget.request == null || _txtController.text.isEmpty) {
       showMsg(context, 'Please specify the details for the change');
       return;
     }
     widget.request!.reason =
-        "Mess Menu Change${widget.request!.reason.isNotEmpty && widget.request!.reason != 'Other' ? ": ${widget.request!.reason}" : ''}${day == null ? '' : ' $day'}\n${_txtController.text.trim()}";
+        "${day == null ? '' : ' $day'} ${widget.request!.reason.isEmpty ? '' : widget.request!.reason}"
+            .trim();
+    if (widget.request!.reason.isNotEmpty) {
+      widget.request!.reason += "\n";
+    }
+    widget.request!.reason += _txtController.text;
     setState(() {
       _loading = true;
     });
+    bool isUpdate = widget.request!.id != 0;
     await widget.request!.update();
     await widget.request!.fetchApprovers();
     if (context.mounted) {
@@ -145,18 +183,20 @@ class _MenuChangeRequestScreenState extends State<MenuChangeRequestScreen> {
       while (Navigator.of(context).canPop()) {
         Navigator.of(context).pop(true);
       }
-      navigatorPush(
-        context,
-        ChatScreen(
-          chat: widget.request!.chatData,
-          initialMsg: MessageData(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            from: currentUser.email!,
-            createdAt: DateTime.now(),
-            txt: messMenuChangeMessage(widget.request!),
+      if (!isUpdate) {
+        navigatorPush(
+          context,
+          ChatScreen(
+            chat: widget.request!.chatData,
+            initialMsg: MessageData(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              from: currentUser.email!,
+              createdAt: DateTime.now(),
+              txt: messMenuChangeMessage(widget.request!),
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
   }
 }

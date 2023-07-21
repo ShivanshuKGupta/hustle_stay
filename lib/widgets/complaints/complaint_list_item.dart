@@ -236,7 +236,7 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
                         color: Theme.of(context).colorScheme.primary,
                       ),
                 ),
-                Text("${widget.complaint.to}"),
+                Text("${widget.complaint.category}"),
                 Text(
                   "Scope: ",
                   style: Theme.of(context).textTheme.bodySmall!.copyWith(
