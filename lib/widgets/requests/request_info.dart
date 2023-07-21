@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/models/requests/mess/menu_change_request.dart';
+import 'package:hustle_stay/models/requests/other/other_request.dart';
 import 'package:hustle_stay/models/requests/request.dart';
+import 'package:hustle_stay/models/requests/vehicle/vehicle_request.dart';
 import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/screens/requests/mess/menu_change_screen.dart';
+import 'package:hustle_stay/screens/requests/other/other_request_screen.dart';
+import 'package:hustle_stay/screens/requests/vehicle/vehicle_request_form_screen.dart';
+import 'package:hustle_stay/screens/requests/vehicle/vehicle_requests_screen.dart';
 import 'package:hustle_stay/tools.dart';
 
 class RequestInfo extends StatefulWidget {
@@ -82,6 +89,37 @@ class _RequestInfoState extends State<RequestInfo> {
               )
             ]
           : [
+              if (widget.request.requestingUserEmail == currentUser.email &&
+                  widget.request.status == RequestStatus.pending)
+                TextButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    final request = decodeToRequest(widget.request.encode());
+                    Widget page =
+                        Text('No such request type exists: ${request.type}');
+                    if (request is VehicleRequest) {
+                      page = VehicleRequestFormScreen(
+                        request: request,
+                        title: request.title,
+                        icon:
+                            Icon(allVehicleRequestsData[request.title]['icon']),
+                        reasonOptions: allVehicleRequestsData[request.title]
+                            ['reasonOptions'],
+                      );
+                    } else if (request is MenuChangeRequest) {
+                      page = MenuChangeRequestScreen(
+                        request: request,
+                      );
+                    } else if (request is OtherRequest) {
+                      page = OtherRequestScreen(
+                        request: request,
+                      );
+                    }
+                    navigatorPush(context, page);
+                  },
+                  label: const Text('Edit'),
+                  icon: const Icon(Icons.edit_rounded),
+                ),
               if (currentUser.readonly.type == 'student')
                 TextButton.icon(
                   onPressed: () async {

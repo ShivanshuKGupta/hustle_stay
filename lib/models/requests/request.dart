@@ -28,6 +28,8 @@ abstract class Request {
   /// [id] also denotes when was the request created,
   /// its id in firestore and
   int id = 0;
+
+  /// The email id of the user who created this request
   late String requestingUserEmail;
 
   /// The status of the request
@@ -422,9 +424,10 @@ Future<List<String>> fetchApproversOfRequestType(String requestType,
   try {
     response = await doc.get(src == null ? null : GetOptions(source: src));
   } catch (e) {
-    if (src == Source.cache) response = await doc.get();
+    if (src == Source.cache) return fetchApproversOfRequestType(requestType);
+    rethrow;
   }
-  if (response!.data() == null && src == Source.cache) {
+  if (response.data() == null && src == Source.cache) {
     response = await doc.get();
   }
   final data = response.data()!;

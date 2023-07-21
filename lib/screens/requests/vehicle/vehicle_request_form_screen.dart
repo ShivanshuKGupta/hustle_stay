@@ -33,6 +33,16 @@ class _VehicleRequestFormScreenState extends State<VehicleRequestFormScreen> {
   bool _loading = false;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.request != null &&
+        !widget.reasonOptions.contains(widget.request!.reason)) {
+      _txtController.text = widget.request!.reason;
+      widget.request!.reason = 'Other';
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     widget.request ??= VehicleRequest(
@@ -175,6 +185,7 @@ class _VehicleRequestFormScreenState extends State<VehicleRequestFormScreen> {
     if (widget.request!.reason == 'Other' || widget.reasonOptions.isEmpty) {
       widget.request!.reason = _txtController.text.trim();
     }
+    bool isAnUpdate = widget.request!.id != 0;
     setState(() {
       _loading = true;
     });
@@ -199,18 +210,20 @@ class _VehicleRequestFormScreenState extends State<VehicleRequestFormScreen> {
       while (Navigator.of(context).canPop()) {
         Navigator.of(context).pop(true);
       }
-      navigatorPush(
-        context,
-        ChatScreen(
-          chat: widget.request!.chatData,
-          initialMsg: MessageData(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            from: currentUser.email!,
-            createdAt: DateTime.now(),
-            txt: vanRequestTemplateMessage(widget.request!, widget.title),
+      if (!isAnUpdate) {
+        navigatorPush(
+          context,
+          ChatScreen(
+            chat: widget.request!.chatData,
+            initialMsg: MessageData(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              from: currentUser.email!,
+              createdAt: DateTime.now(),
+              txt: vanRequestTemplateMessage(widget.request!, widget.title),
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
   }
 }

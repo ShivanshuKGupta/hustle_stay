@@ -73,31 +73,6 @@ class _RequestsListState extends State<RequestsList> {
       }));
     }
     return requests;
-    // for (var e in Request.allTypes) {
-    //   await fetchApproversOfRequestType(e, src: src);
-    // }
-    // final List<String> myRequestTypes = [];
-    // for (var entry in Request.allApprovers.entries) {
-    //   if (entry.value.contains(currentUser.email)) {
-    //     myRequestTypes.add(entry.key);
-    //   }
-    // }
-    // if (myRequestTypes.isEmpty) {
-    //   // This person is neither a approver nor a student
-    //   // then assuming that this person is a student
-    //   return await getStudentRequests(src: src);
-    // }
-    // final collection = firestore.collection('requests');
-    // final response = await collection
-    //     .where('type', whereIn: myRequestTypes)
-    //     .where('status', isEqualTo: RequestStatus.pending.index)
-    //     .get(src == null ? null : GetOptions(source: src));
-    // final docs = response.docs;
-    // List<Request> requests = docs.map((doc) {
-    //   final data = doc.data();
-    //   return decodeToRequest(data);
-    // }).toList();
-    // return requests;
   }
 
   @override
@@ -106,10 +81,14 @@ class _RequestsListState extends State<RequestsList> {
     final mediaQuery = MediaQuery.of(context);
     return RefreshIndicator(
       onRefresh: () async {
-        if (currentUser.readonly.type == 'student') {
-          await getStudentRequests();
-        } else {
-          await getApproverRequests();
+        try {
+          if (currentUser.readonly.type == 'student') {
+            await getStudentRequests();
+          } else {
+            await getApproverRequests();
+          }
+        } catch (e) {
+          showMsg(context, e.toString());
         }
         setState(() {});
       },
