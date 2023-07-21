@@ -87,24 +87,27 @@ class _AttendanceIconState extends State<AttendanceIcon> {
             padding: const EdgeInsets.all(2.0),
             child: ElevatedButton(
               onPressed: null,
-              onLongPress: () async {
-                final response = await askUser(
-                  context,
-                  'Are you sure to end Leave ?',
-                  yes: true,
-                  no: true,
-                );
-                if (response == "yes") {
-                  bool resp = await setLeave(
-                      widget.roommateData.email, widget.hostelName, true, true,
-                      leaveEndDate: DateTime.now());
-                  if (resp) {
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(
-                        builder: (_) =>
-                            RoomsScreen(hostelName: widget.hostelName)));
-                  }
-                }
-              },
+              onLongPress: widget.roommateData.leaveEndDate == null
+                  ? () {}
+                  : () async {
+                      final response = await askUser(
+                        context,
+                        'Are you sure to end Leave ?',
+                        yes: true,
+                        no: true,
+                      );
+                      if (response == "yes") {
+                        bool resp = await setLeave(widget.roommateData.email,
+                            widget.hostelName, true, true,
+                            leaveEndDate: DateTime.now());
+                        if (resp) {
+                          Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                  builder: (_) => RoomsScreen(
+                                      hostelName: widget.hostelName)));
+                        }
+                      }
+                    },
               style: ElevatedButton.styleFrom(
                   backgroundColor: widget.tileColor!.value,
                   side: const BorderSide(
