@@ -475,58 +475,40 @@ int calculateSimilarity(String a, String b) {
 Future<List<Map<String, String>>> fetchOptions(
     String hostelName, String text, bool isEmail) async {
   List<Map<String, String>> list = [];
-  List<String> listData = [];
 
   if (isEmail) {
     QuerySnapshot<Map<String, dynamic>> snapshot = await storage
         .collection('users')
         .where('hostelName', isEqualTo: hostelName)
         .where(FieldPath.documentId, isGreaterThanOrEqualTo: text)
-        .limit(20)
+        .limit(10)
         .get();
 
     List<Future<void>> snapshotFutures = snapshot.docs.map((element) async {
-      final nameRef =
-          await element.reference.collection('editable').doc('details').get();
-      final name = nameRef.data()!['name'];
       list.add({
-        'name': name,
+        'name': element.data()['name'],
         'email': element.id,
         'leading': element.id,
-        'imageUrl': nameRef.data()!['imgUrl'],
       });
-      listData.add(element.id);
     }).toList();
 
     await Future.wait(snapshotFutures);
   } else {
-    text = capitalizeEachWord(text);
+    text = capitalizeEachWord(text.toLowerCase());
     QuerySnapshot<Map<String, dynamic>> secondSnapshot = await storage
         .collection('users')
         .where('hostelName', isEqualTo: hostelName)
+        .where('name', isGreaterThanOrEqualTo: text)
+        .limit(10)
         .get();
 
-    int x = 0;
     List<Future<void>> secondSnapshotFutures =
         secondSnapshot.docs.map((elementVal) async {
-      if (x < 20) {
-        final elementRef = await elementVal.reference
-            .collection('editable')
-            .where('name', isGreaterThanOrEqualTo: text)
-            .get();
-        if (elementRef.size > 0) {
-          final element = elementRef.docs.first;
-
-          list.add({
-            'name': element.data()['name'],
-            'email': elementVal.id,
-            'leading': element.data()['name'],
-            'imageUrl': element.data()['imgUrl'],
-          });
-          listData.add(element.id);
-          x++;
-        }
-      }
+      list.add({
+        'name': elementVal.data()['name'],
+        'email': elementVal.id,
+        'leading': elementVal.data()['name'],
+      });
     }).toList();
 
     await Future.wait(secondSnapshotFutures);

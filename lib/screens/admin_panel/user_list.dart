@@ -2,7 +2,6 @@ import 'package:animated_icon/animated_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/admin_panel/manage_user.dart';
-import 'package:hustle_stay/screens/auth/edit_profile_screen.dart';
 
 class UserList extends StatefulWidget {
   const UserList({super.key, required this.userType});

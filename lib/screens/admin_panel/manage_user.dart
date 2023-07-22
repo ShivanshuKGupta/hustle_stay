@@ -26,7 +26,7 @@ class _ManageUserState extends State<ManageUser> {
             ? null
             : editPermssions
                 ? const Text('Edit Permissions')
-                : Text('Manage ${widget.user.name}'),
+                : const Text('Manage User'),
         actions: [
           if (widget.edit)
             IconButton(
