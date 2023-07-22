@@ -38,7 +38,6 @@ class _RoomsScreenState extends State<RoomsScreen> {
   bool isOpen = false;
 
   ValueNotifier<DateTime> selectedDate = ValueNotifier(DateTime.now());
-  bool allPresent = false;
   @override
   void initState() {
     // TODO: implement initState
@@ -73,26 +72,24 @@ class _RoomsScreenState extends State<RoomsScreen> {
             IconButton(
               onPressed: () async {
                 final response = await askUser(
-                  context,
-                  'Are you sure to mark everyone ${allPresent ? 'absent' : 'present'} ?',
-                  yes: true,
-                  no: true,
-                );
-                if (response == 'yes') {
+                    context, 'Choose your operation.',
+                    description:
+                        'All the students will be marked based on your operation',
+                    custom: ['Present', 'Absent', 'Cancel']);
+                if (response == 'absent' || response == 'present') {
                   setState(() {
                     isUpdating = true;
                   });
                   final resp = await markAllAttendance(widget.hostelName,
-                      allPresent ? false : true, selectedDate.value);
+                      response != 'Present' ? false : true, selectedDate.value);
                   if (resp && mounted) {
                     setState(() {
-                      allPresent = !allPresent;
                       isUpdating = false;
                     });
                   }
                 }
               },
-              icon: Icon(allPresent ? Icons.cancel : Icons.check_circle),
+              icon: const Icon(Icons.checklist_rtl_outlined),
             ),
           if (!isUpdating)
             IconButton(
