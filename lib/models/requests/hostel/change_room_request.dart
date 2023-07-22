@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/requests/request.dart';
 
+import '../../hostel/rooms/room.dart';
+import '../../user.dart';
+
 class ChangeRoomRequest extends Request {
   String targetRoomName;
   String targetHostel;
@@ -43,14 +46,12 @@ class ChangeRoomRequest extends Request {
 
   @override
   void onApprove() async {
-    // TODO: Sani
-
-    // final user = await fetchUserData(requestingUserEmail, readonly: true);
-    // await changeRoom(requestingUserEmail, user.readonly.hostelName!, user.readonly.roomName!,
-    // targetHostel, targetRoomName, );
-    // requestingUserEmail;
-    // targetHostel;
-    // targetRoomName;
+    final user = await fetchHostelAndRoom(requestingUserEmail);
+    final ref = await changeRoom(requestingUserEmail, user['hostelName']!,
+        user['roomName']!, targetHostel, targetRoomName);
+    if (ref) {
+      return;
+    }
   }
 
   @override

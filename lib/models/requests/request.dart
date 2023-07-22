@@ -124,6 +124,7 @@ abstract class Request {
         indicative: true,
       ),
     );
+    onApprove();
   }
 
   Future<void> deny() async {

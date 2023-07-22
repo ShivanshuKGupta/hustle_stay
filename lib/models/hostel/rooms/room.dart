@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import '../../user.dart';
-
 class RoommateData {
   String email;
   bool? onLeave;
@@ -222,9 +220,13 @@ Future<void> copyRoommateData(String email, String hostelName, String roomName,
   }
 }
 
-Future<bool> changeRoom(String email, String hostelName, String roomName,
-    String destHostelName, String destRoomName, BuildContext context,
-    {Source? source}) async {
+Future<bool> changeRoom(
+  String email,
+  String hostelName,
+  String roomName,
+  String destHostelName,
+  String destRoomName,
+) async {
   try {
     final sourceRoomRef = storage
         .collection('hostels')
@@ -242,8 +244,7 @@ Future<bool> changeRoom(String email, String hostelName, String roomName,
         .doc(destHostelName)
         .collection('Rooms')
         .doc(destRoomName);
-    final destRoomSnapshot = await destRoomLoc
-        .get(source == null ? null : GetOptions(source: source));
+    final destRoomSnapshot = await destRoomLoc.get();
     final capacity = destRoomSnapshot['capacity'];
     final numRoommates = destRoomSnapshot['numRoommates'];
     if (destHostelName == hostelName) {
@@ -261,9 +262,6 @@ Future<bool> changeRoom(String email, String hostelName, String roomName,
           await batch.commit();
           return true;
         } else {
-          ScaffoldMessenger.of(context).clearSnackBars();
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('$destRoomName is filled with its capacity')));
           return false;
         }
       } catch (e) {
@@ -276,8 +274,7 @@ Future<bool> changeRoom(String email, String hostelName, String roomName,
         .collection('Roommates');
 
     if (capacity > numRoommates) {
-      final sData = await sourceRef
-          .get(source == null ? null : GetOptions(source: source));
+      final sData = await sourceRef.get();
       final sourceData = sData.data();
       sourceData!.update('roomName', (value) => destRoomName);
       await storage.runTransaction((transaction) async {
@@ -297,27 +294,27 @@ Future<bool> changeRoom(String email, String hostelName, String roomName,
       });
       return true;
     } else {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$destRoomName is filled with its capacity')));
+      // ScaffoldMessenger.of(context).clearSnackBars();
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //     SnackBar(content: Text('$destRoomName is filled with its capacity')));
       return false;
     }
   } catch (e) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(e.toString())));
+    // ScaffoldMessenger.of(context).clearSnackBars();
+    // ScaffoldMessenger.of(context)
+    //     .showSnackBar(SnackBar(content: Text(e.toString())));
     return false;
   }
 }
 
 Future<bool> swapRoom(
-    String email,
-    String hostelName,
-    String roomName,
-    String destRoommateEmail,
-    String destHostelName,
-    String destRoomName,
-    BuildContext context) async {
+  String email,
+  String hostelName,
+  String roomName,
+  String destRoommateEmail,
+  String destHostelName,
+  String destRoomName,
+) async {
   try {
     await storage.runTransaction((transaction) async {
       final sourceLoc =
@@ -376,16 +373,16 @@ Future<bool> swapRoom(
     });
     return true;
   } catch (e) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(e.toString())));
+    // ScaffoldMessenger.of(context).clearSnackBars();
+    // ScaffoldMessenger.of(context)
+    //     .showSnackBar(SnackBar(content: Text(e.toString())));
     return false;
   }
 }
 
-Future<List<DropdownMenuItem>> fetchRoomNames(String hostelName,
+Future<List<String>> fetchRoomNames(String hostelName,
     {String? roomname, Source? src}) async {
-  List<DropdownMenuItem> list = [];
+  List<String> list = [];
 
   final storageRef = await storage
       .collection('hostels')
@@ -394,22 +391,15 @@ Future<List<DropdownMenuItem>> fetchRoomNames(String hostelName,
       .get(src == null ? null : GetOptions(source: src));
   for (var element in storageRef.docs) {
     if (roomname == null || element.id != roomname) {
-      list.add(DropdownMenuItem(
-        value: element.id,
-        child: Text(
-          element.id,
-          style: const TextStyle(fontSize: 10),
-        ),
-      ));
+      list.add(element.id);
     }
   }
   return list;
 }
 
-Future<List<DropdownMenuItem>> fetchRoommateNames(
-    String hostelName, String roomName,
+Future<List<String>> fetchRoommateNames(String hostelName, String roomName,
     {Source? src}) async {
-  List<DropdownMenuItem> list = [];
+  List<String> list = [];
 
   final storageRef = await storage
       .collection('hostels')
@@ -418,13 +408,7 @@ Future<List<DropdownMenuItem>> fetchRoommateNames(
       .where('roomName', isEqualTo: roomName)
       .get(src == null ? null : GetOptions(source: src));
   for (var element in storageRef.docs) {
-    list.add(DropdownMenuItem(
-      value: element.id,
-      child: Text(
-        element['email'],
-        style: const TextStyle(fontSize: 10),
-      ),
-    ));
+    list.add(element.id);
   }
   return list;
 }

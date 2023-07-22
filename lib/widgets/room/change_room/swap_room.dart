@@ -28,13 +28,13 @@ class SwapRoom extends StatefulWidget {
 class _SwapRoomState extends State<SwapRoom> {
   void _submitForm() async {
     bool resp = await swapRoom(
-        widget.email,
-        widget.hostelName,
-        widget.roomName,
-        widget.destRoommateEmail,
-        widget.destHostelName,
-        widget.destRoomName,
-        context);
+      widget.email,
+      widget.hostelName,
+      widget.roomName,
+      widget.destRoommateEmail,
+      widget.destHostelName,
+      widget.destRoomName,
+    );
     if (!resp && mounted) {
       setState(() {
         isRunning = false;

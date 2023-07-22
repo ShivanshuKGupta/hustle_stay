@@ -3,6 +3,8 @@ import 'package:hustle_stay/models/requests/request.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/tools.dart';
 
+import '../../hostel/rooms/room.dart';
+
 class SwapRoomRequest extends Request {
   String? targetUserEmail;
   SwapRoomRequest({
@@ -38,13 +40,20 @@ class SwapRoomRequest extends Request {
   }
 
   @override
-  void onApprove() {
-    // TODO: Sani
-    // When request for swapping the room is accepted
-    // this function will be called
+  void onApprove() async {
+    final user = await fetchHostelAndRoom(requestingUserEmail);
+    final userToswap = await fetchHostelAndRoom(targetUserEmail!);
 
-    // Use [targetUserEmail] and [requestingUserEmail] to complete this function
-    // and reason to get some more info
+    final ref = await swapRoom(
+        requestingUserEmail,
+        user['hostelName']!,
+        user['roomName']!,
+        targetUserEmail!,
+        userToswap['hostelName']!,
+        userToswap['roomName']!);
+    if (ref) {
+      return;
+    }
   }
 
   @override
