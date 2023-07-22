@@ -473,8 +473,10 @@ int calculateSimilarity(String a, String b) {
 }
 
 Future<List<Map<String, String>>> fetchOptions(
-    String hostelName, String text, bool isEmail) async {
+    String hostelName, String text, bool isEmail,
+    {Source? src}) async {
   List<Map<String, String>> list = [];
+  final textVal = capitalizeEachWord(text.toLowerCase());
 
   if (isEmail) {
     QuerySnapshot<Map<String, dynamic>> snapshot = await storage
@@ -482,7 +484,7 @@ Future<List<Map<String, String>>> fetchOptions(
         .where('hostelName', isEqualTo: hostelName)
         .where(FieldPath.documentId, isGreaterThanOrEqualTo: text)
         .limit(10)
-        .get();
+        .get(src == null ? null : GetOptions(source: src));
 
     List<Future<void>> snapshotFutures = snapshot.docs.map((element) async {
       list.add({
@@ -494,20 +496,30 @@ Future<List<Map<String, String>>> fetchOptions(
 
     await Future.wait(snapshotFutures);
   } else {
-    text = capitalizeEachWord(text.toLowerCase());
     QuerySnapshot<Map<String, dynamic>> snapshot = await storage
         .collection('users')
-        .where('hostelName', isEqualTo: hostelName)
-        .where('name', isGreaterThanOrEqualTo: text)
+        .where('name', isGreaterThanOrEqualTo: textVal)
         .limit(10)
-        .get();
+        .get(src == null ? null : GetOptions(source: src));
 
     List<Future<void>> snapshotFutures = snapshot.docs.map((element) async {
-      list.add({
-        'name': element.data()['name'],
-        'email': element.id,
-        'leading': element.data()['name'],
-      });
+      if (hostelName == element.data()['hostelName']) {
+        if (textVal == element.data()['name']) {
+          list = [
+            {
+              'name': element.data()['name'],
+              'email': element.id,
+              'leading': element.data()['name'],
+            }
+          ];
+          return list;
+        }
+        list.add({
+          'name': element.data()['name'],
+          'email': element.id,
+          'leading': element.data()['name'],
+        });
+      }
     }).toList();
 
     await Future.wait(snapshotFutures);

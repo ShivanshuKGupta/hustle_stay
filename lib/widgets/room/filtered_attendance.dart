@@ -1,4 +1,5 @@
 import 'package:animated_icon/animated_icon.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import 'package:hustle_stay/tools.dart';
@@ -17,7 +18,6 @@ class FilteredRecords extends StatefulWidget {
 
 class _FilteredRecordsState extends State<FilteredRecords> {
   bool isFound = false;
-
   @override
   void didUpdateWidget(covariant FilteredRecords oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -104,10 +104,12 @@ class _FilteredRecordsState extends State<FilteredRecords> {
     );
   }
 
+  ValueNotifier<int> isFirst = ValueNotifier(0);
   Widget filterByNameOrEmail() {
     return ValueListenableBuilder(
       valueListenable: textController!,
       builder: (context, value, child) {
+        isFirst.value++;
         return value == ""
             ? const Center(
                 child: Text('No data'),
@@ -133,7 +135,8 @@ class _FilteredRecordsState extends State<FilteredRecords> {
                   return listOptions(snapshot.data!);
                 },
                 future: fetchOptions(
-                    widget.hostelName, value, filterType == 'email'),
+                    widget.hostelName, value, filterType == 'email',
+                    src: isFirst.value <= 4 ? null : Source.cache),
               );
       },
     );
