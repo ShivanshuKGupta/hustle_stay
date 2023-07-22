@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/main.dart';
+import 'package:hustle_stay/models/category/category.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/state_switch.dart';
 
@@ -20,20 +21,19 @@ class ComplaintData {
   /// resolvedAt dateTime object converted into a string or integer
   int? resolvedAt;
   late Scope scope;
-  late String title;
   late List<String> to;
-  String? imgUrl;
   String? category;
+  String get title {
+    return category ?? 'Other';
+  }
 
   ComplaintData({
     this.description = "",
     required this.from,
     required this.id,
     this.scope = Scope.public,
-    required this.title,
     required this.to,
     this.resolvedAt,
-    this.imgUrl,
     this.category,
   });
 
@@ -42,11 +42,9 @@ class ComplaintData {
       "description": description,
       "from": from,
       "scope": scope.name,
-      "title": title,
       "to": to,
       "resolved": resolvedAt != null,
       "resolvedAt": resolvedAt,
-      "imgUrl": imgUrl,
       "category": category,
       "createdAt": id,
     };
@@ -54,35 +52,31 @@ class ComplaintData {
 
   @override
   String toString() {
-    return "Title: $title\nDescription: $description\nComplainees: $to\nScope: ${scope.name}}\nCategory: $category";
+    return "Description: $description\nComplainees: $to\nScope: ${scope.name}}\nCategory: $category";
   }
 
-  String operator -(ComplaintData oldComplaint) {
+  String operator -(ComplaintData newComplaint) {
     String ans = "";
     bool addAnd = false;
-    if (oldComplaint.title != title) {
-      ans += '\nTitle to \'$title\'';
+    if (newComplaint.description != description) {
+      ans +=
+          '\nDescription from \'$description\' to \'${newComplaint.description}\'';
       addAnd = true;
     }
-    if (oldComplaint.description != description) {
+    if (!equalList(newComplaint.to, to)) {
       ans += (addAnd ? " and " : '');
-      ans += '\nDescription to \'$description\'';
+      ans += '\nComplainees from $to to \'${newComplaint.to}\'';
+      addAnd = true;
     }
-    if (!equalList(oldComplaint.to, to)) {
+    if (newComplaint.scope != scope) {
       ans += (addAnd ? " and " : '');
-      ans += '\nComplainees to $to';
+      ans += '\nScope from ${scope.name} to \'${newComplaint.scope.name}\'';
+      addAnd = true;
     }
-    if (oldComplaint.scope != scope) {
+    if (newComplaint.category != category) {
       ans += (addAnd ? " and " : '');
-      ans += '\nScope to ${scope.name}';
-    }
-    if (oldComplaint.imgUrl != imgUrl) {
-      ans += (addAnd ? " and " : '');
-      ans += '\nImageUrl to $imgUrl';
-    }
-    if (oldComplaint.category != category) {
-      ans += (addAnd ? " and " : '');
-      ans += '\nCategory to $category';
+      ans += '\nCategory from $category to \'${newComplaint.category}\'';
+      addAnd = true;
     }
     return ans;
   }
@@ -93,14 +87,13 @@ class ComplaintData {
     from = complaintData["from"];
     scope = Scope.values
         .firstWhere((element) => element.name == complaintData["scope"]);
-    title = complaintData["title"];
     resolvedAt = complaintData["resolvedAt"];
-    imgUrl = complaintData["imgUrl"];
     category = complaintData["category"];
     to = (complaintData["to"] as List<dynamic>)
         .map((e) => e.toString())
         .toList();
     // Below code was used to correct the data in the db and is no longer needed
+    // if (complaintData['title'] != null) updateComplaint(this);
     // if (complaintData['createdAt'] == null ||
     //     complaintData['createdAt'].runtimeType != int) {
     //   updateComplaint(this);
@@ -126,6 +119,11 @@ bool equalList(List<String> a, List<String> b) {
 
 /// updates an exisiting complaint or will create if complaint does not exists
 Future<void> updateComplaint(ComplaintData complaint) async {
+  if (complaint.id == 0) complaint.id = DateTime.now().millisecondsSinceEpoch;
+  if (complaint.to.isEmpty) {
+    complaint.to =
+        (await fetchCategory(complaint.category ?? 'Other')).defaultReceipient;
+  }
   await firestore.doc('complaints/${complaint.id}').set(complaint.encode());
 }
 

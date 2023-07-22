@@ -28,13 +28,13 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
                   loadingWidget: Center(child: circularProgressIndicator()),
                   id: widget.id!,
                   builder: ((ctx, category) {
-                    return EditCategoryFrom(
+                    return EditCategoryForm(
                       category: category,
                       allRecepients: recepients,
                     );
                   }),
                 )
-              : EditCategoryFrom(
+              : EditCategoryForm(
                   category: Category(''),
                   allRecepients: recepients,
                 );

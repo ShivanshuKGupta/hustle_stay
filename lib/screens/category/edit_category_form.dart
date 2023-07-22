@@ -1,3 +1,5 @@
+// TODO: add a parent string in this form
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -8,17 +10,17 @@ import 'package:hustle_stay/widgets/chat/multi_choser.dart';
 import 'package:hustle_stay/widgets/profile_image.dart';
 
 // ignore: must_be_immutable
-class EditCategoryFrom extends StatefulWidget {
+class EditCategoryForm extends StatefulWidget {
   Category category;
   final List<String> allRecepients;
-  EditCategoryFrom(
+  EditCategoryForm(
       {super.key, required this.category, required this.allRecepients});
 
   @override
-  State<EditCategoryFrom> createState() => _EditCategoryFromState();
+  State<EditCategoryForm> createState() => _EditCategoryFormState();
 }
 
-class _EditCategoryFromState extends State<EditCategoryFrom> {
+class _EditCategoryFormState extends State<EditCategoryForm> {
   final _formKey = GlobalKey<FormState>();
 
   bool _loading = false;
