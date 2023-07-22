@@ -495,23 +495,22 @@ Future<List<Map<String, String>>> fetchOptions(
     await Future.wait(snapshotFutures);
   } else {
     text = capitalizeEachWord(text.toLowerCase());
-    QuerySnapshot<Map<String, dynamic>> secondSnapshot = await storage
+    QuerySnapshot<Map<String, dynamic>> snapshot = await storage
         .collection('users')
         .where('hostelName', isEqualTo: hostelName)
         .where('name', isGreaterThanOrEqualTo: text)
         .limit(10)
         .get();
 
-    List<Future<void>> secondSnapshotFutures =
-        secondSnapshot.docs.map((elementVal) async {
+    List<Future<void>> snapshotFutures = snapshot.docs.map((element) async {
       list.add({
-        'name': elementVal.data()['name'],
-        'email': elementVal.id,
-        'leading': elementVal.data()['name'],
+        'name': element.data()['name'],
+        'email': element.id,
+        'leading': element.data()['name'],
       });
     }).toList();
 
-    await Future.wait(secondSnapshotFutures);
+    await Future.wait(snapshotFutures);
   }
   if (list.isNotEmpty) {
     list.sort((a, b) {

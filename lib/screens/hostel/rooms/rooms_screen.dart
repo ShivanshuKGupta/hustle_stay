@@ -76,7 +76,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
                     description:
                         'All the students will be marked based on your operation',
                     custom: ['Present', 'Absent', 'Cancel']);
-                if (response == 'absent' || response == 'present') {
+                if (response == 'Absent' || response == 'Present') {
                   setState(() {
                     isUpdating = true;
                   });
