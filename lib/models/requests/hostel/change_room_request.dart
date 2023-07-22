@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import 'package:hustle_stay/models/requests/request.dart';
-
-import '../../hostel/rooms/room.dart';
-import '../../user.dart';
+import 'package:hustle_stay/models/user.dart';
 
 class ChangeRoomRequest extends Request {
   String targetRoomName;

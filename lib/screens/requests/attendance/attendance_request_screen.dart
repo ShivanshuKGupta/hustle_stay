@@ -30,7 +30,7 @@ class AttendanceRequestScreen extends StatelessWidget {
         child: Column(
           children: [
             GridTileLogo(
-              onTap: () {
+              onTap: () async {
                 Navigator.of(context).pop();
               },
               title: 'Attendance',
