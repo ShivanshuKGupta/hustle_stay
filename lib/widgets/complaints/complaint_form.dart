@@ -130,21 +130,20 @@ class _ComplaintFormState extends State<ComplaintForm> {
           child: Column(
             children: [
               /// Category Title
-              if (complaint.category != null)
-                CategoryBuilder(
-                  loadingWidget: GridTileLogo(
-                    title: complaint.category!,
-                    icon: const Icon(Icons.category_rounded, size: 50),
-                    color: Theme.of(context).colorScheme.background,
-                  ),
-                  id: complaint.category!,
-                  builder: (ctx, category) => GridTileLogo(
-                    onTap: () => Navigator.of(context).pop(),
-                    title: category.id,
-                    icon: const Icon(Icons.category_rounded, size: 50),
-                    color: Theme.of(context).colorScheme.background,
-                  ),
+              CategoryBuilder(
+                loadingWidget: GridTileLogo(
+                  title: complaint.category ?? 'Other',
+                  icon: const Icon(Icons.category_rounded, size: 50),
+                  color: Theme.of(context).colorScheme.background,
                 ),
+                id: complaint.category ?? 'Other',
+                builder: (ctx, category) => GridTileLogo(
+                  onTap: () => Navigator.of(context).pop(),
+                  title: category.id,
+                  icon: const Icon(Icons.category_rounded, size: 50),
+                  color: Theme.of(context).colorScheme.background,
+                ),
+              ),
 
               // Choose Category
               if (complaint.id != 0) const SizedBox(height: 30),
