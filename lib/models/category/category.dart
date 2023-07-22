@@ -45,7 +45,7 @@ class Category {
       "cooldown": cooldown.inSeconds,
       "color": color.value,
       "logoUrl": logoUrl,
-      "parent": parent,
+      "parent": parent.trim(),
     };
   }
 
