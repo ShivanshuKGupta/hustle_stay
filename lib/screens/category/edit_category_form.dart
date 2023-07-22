@@ -144,7 +144,7 @@ class _EditCategoryFormState extends State<EditCategoryForm> {
                 builder: (ctx, categories) {
                   allParents.addAll(categories.map((e) => e.parent));
                   return SelectOne(
-                    title: 'Select a Parent Category Name',
+                    title: 'Select a Parent Category',
                     subtitle: 'This will be used for grouping categories',
                     allOptions: allParents.map((e) => e).toSet()
                       ..add('+ Create New'),
