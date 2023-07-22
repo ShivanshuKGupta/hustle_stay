@@ -124,7 +124,6 @@ abstract class Request {
         indicative: true,
       ),
     );
-    onApprove();
   }
 
   Future<void> deny() async {
@@ -143,8 +142,10 @@ abstract class Request {
     );
   }
 
-  /// This function is when the request is status
-  void onApprove();
+  /// This function is when the request is approved
+  /// This contains a transaction, so as to make the updation and
+  /// onApprove function run atomically.
+  Future<void> onApprove(Transaction transaction);
 
   /// This function is called every time the request is updated
   /// Do some checks on whether it is possible to update the request or not
@@ -165,10 +166,6 @@ abstract class Request {
       // then set the expiry to 7 days after closedAt
       expiryDate = DateTime(
           closedDateTime.year, closedDateTime.month, closedDateTime.day + 7);
-      // If the request is being approved
-      if (status == RequestStatus.approved) {
-        onApprove();
-      }
     }
 
     return true;
@@ -176,12 +173,24 @@ abstract class Request {
 
   /// Does what it does
   Future<void> update({DateTime? chosenExpiryDate}) async {
-    if (!beforeUpdate()) return;
-    if (chosenExpiryDate != null) {
-      expiryDate = chosenExpiryDate;
-    }
-    final doc = firestore.collection('requests').doc(id.toString());
-    await doc.set(encode());
+    await firestore.runTransaction((transaction) async {
+      // Some checks
+      if (!beforeUpdate()) return;
+
+      // If the request is being approved/denied for the first time
+      if (status != RequestStatus.pending && closedAt == 0) {
+        if (status == RequestStatus.approved) {
+          await onApprove(transaction);
+        }
+      }
+
+      if (chosenExpiryDate != null) expiryDate = chosenExpiryDate;
+
+      final doc = firestore.collection('requests').doc(id.toString());
+
+      // Finally updating the doc
+      transaction.set(doc, encode());
+    });
   }
 
   /// Does what it does

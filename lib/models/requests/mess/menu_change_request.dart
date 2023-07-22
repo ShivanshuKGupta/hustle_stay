@@ -13,7 +13,7 @@ class MenuChangeRequest extends Request {
         );
 
   @override
-  void onApprove() {
+  Future<void> onApprove(transaction) async {
     // TODO: send notifications and email etc.
   }
 
