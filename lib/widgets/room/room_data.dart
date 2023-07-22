@@ -128,33 +128,29 @@ class _RoomDataWidgetState extends State<RoomDataWidget> {
                             ? null
                             : () async {
                                 final response = await askUser(
-                                  context,
-                                  'Are you sure to mark everyone ${allPresent ? 'absent' : 'present'} ?',
-                                  yes: true,
-                                  no: true,
-                                );
-                                if (response == 'yes') {
+                                    context, 'Choose your operation ',
+                                    custom: ['Present', 'Absent', 'Cancel']);
+                                if (response == 'Present' ||
+                                    response == 'Absent') {
                                   setState(() {
                                     isDisabled = true;
                                   });
                                   final resp = await markAllRoommateAttendance(
                                       widget.hostelName,
                                       widget.roomData.roomName,
-                                      allPresent ? false : true,
+                                      response != 'Present' ? false : true,
                                       widget.selectedDate.value);
                                   if (resp && mounted) {
                                     setState(() {
-                                      allPresent = !allPresent;
                                       isDisabled = false;
                                     });
                                   } else if (!resp) {
                                     showMsg(context,
-                                        'Unable to perform. Try gitagain');
+                                        'Unable to perform. Try again');
                                   }
                                 }
                               },
-                        icon: Icon(
-                            allPresent ? Icons.cancel : Icons.check_circle),
+                        icon: Icon(Icons.checklist_rounded),
                       ),
                     if (widget.roomData.capacity >
                         widget.roomData.numberOfRoommates)

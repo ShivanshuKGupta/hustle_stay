@@ -171,8 +171,19 @@ Future<Map<String, String>> fetchHostelAndRoom(String email) async {
     'hostelName': ref.data()!['hostelName'],
     'roomName': ref.data()!['roomName']
   };
-  print(data);
   return data;
+}
+
+Future<bool> modifyPermissions(Map<String, dynamic> data, String email) async {
+  try {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(email)
+        .set({'permissions': data}, SetOptions(merge: true));
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
 
 Future<UserData> fetchUserData(
