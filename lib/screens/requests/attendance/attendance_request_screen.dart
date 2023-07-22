@@ -4,6 +4,7 @@ import 'package:hustle_stay/models/requests/hostel/change_room_request.dart';
 import 'package:hustle_stay/models/requests/hostel/swap_room_request.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/hostel/rooms/complete_details_screen.dart';
+import 'package:hustle_stay/screens/requests/attendance/update_room_request.dart';
 import 'package:hustle_stay/screens/requests/requests_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
@@ -85,22 +86,7 @@ class AttendanceRequestScreen extends StatelessWidget {
                     ),
                     GridTileLogo(
                       onTap: () async {
-                        await navigatorPush(
-                          context,
-                          CompleteDetails(
-                            hostelName: currentUser.readonly.hostelName ?? '',
-                            roomName: currentUser.readonly.roomName ?? '',
-                            showStats: false,
-                            user: UserData(
-                                email: currentUser.email,
-                                address: currentUser.address,
-                                imgUrl: currentUser.imgUrl,
-                                name: currentUser.name,
-                                phoneNumber: currentUser.phoneNumber),
-                            roommateData:
-                                RoommateData(email: currentUser.email!),
-                          ),
-                        );
+                        await navigatorPush(context, const UpdateRoom());
                       },
                       title: 'Change Room',
                       icon: Icon(
@@ -116,21 +102,10 @@ class AttendanceRequestScreen extends StatelessWidget {
                     GridTileLogo(
                       onTap: () async {
                         await navigatorPush(
-                          context,
-                          CompleteDetails(
-                            hostelName: currentUser.readonly.hostelName ?? '',
-                            roomName: currentUser.readonly.roomName ?? '',
-                            showStats: false,
-                            user: UserData(
-                                email: currentUser.email,
-                                address: currentUser.address,
-                                imgUrl: currentUser.imgUrl,
-                                name: currentUser.name,
-                                phoneNumber: currentUser.phoneNumber),
-                            roommateData:
-                                RoommateData(email: currentUser.email!),
-                          ),
-                        );
+                            context,
+                            const UpdateRoom(
+                              isSwap: true,
+                            ));
                       },
                       title: 'Swap Room',
                       icon: Icon(

@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import 'package:hustle_stay/models/user.dart';
+import '../../../widgets/requests/room.dart/update_room.dart';
 import '../../../widgets/room/change_room/change_room.dart';
 
 class ProfileViewScreen extends StatefulWidget {
@@ -126,13 +127,13 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                     ],
                   ),
                   if (dropdownVal != null && dropdownVal == 'Change Room')
-                    ChangeRoomWidget(
+                    UpdateRoomWidget(
                         isSwap: false,
                         email: widget.user.email!,
                         roomName: widget.roomName,
                         hostelName: widget.hostelName),
                   if (dropdownVal != null && dropdownVal == "Swap Room")
-                    ChangeRoomWidget(
+                    UpdateRoomWidget(
                         isSwap: true,
                         email: widget.user.email!,
                         roomName: widget.roomName,

@@ -60,20 +60,14 @@ Future<void> uploadHostel(Hostels hostel) async {
   });
 }
 
-Future<List<DropdownMenuItem>> fetchHostelNames({Source? src}) async {
-  List<DropdownMenuItem> list = [];
+Future<List<String>> fetchHostelNames({Source? src}) async {
+  List<String> list = [];
   final storage = FirebaseFirestore.instance;
   final storageRef = await storage
       .collection('hostels')
       .get(src == null ? null : GetOptions(source: src));
   storageRef.docs.forEach((element) {
-    list.add(DropdownMenuItem(
-      child: Text(
-        element.id,
-        style: TextStyle(fontSize: 10),
-      ),
-      value: element.id,
-    ));
+    list.add(element.id);
   });
   return list;
 }

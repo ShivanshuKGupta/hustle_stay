@@ -164,6 +164,17 @@ class UserData {
   }
 }
 
+Future<Map<String, String>> fetchHostelAndRoom(String email) async {
+  final ref =
+      await FirebaseFirestore.instance.collection('users').doc(email).get();
+  Map<String, String> data = {
+    'hostelName': ref.data()!['hostelName'],
+    'roomName': ref.data()!['roomName']
+  };
+  print(data);
+  return data;
+}
+
 Future<UserData> fetchUserData(
   String email, {
   Source? src,
