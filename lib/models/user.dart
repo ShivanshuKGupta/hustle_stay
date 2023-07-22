@@ -502,7 +502,7 @@ Future<List<UserData>> fetchSpecificUsers(String userType) async {
           email: userRef.docs[i].id,
           address: userData.data()!['address'],
           imgUrl: userData.data()!['imgUrl'],
-          name: userData.data()!['name'],
+          name: userRef.docs[i]['name'],
           medicalInfo: medicalInfo,
           phoneNumber: userData.data()!['phoneNumber'],
           readonly: readOnly,
