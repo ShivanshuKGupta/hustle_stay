@@ -332,6 +332,54 @@ Future<String?> askUser(
   );
 }
 
+Future<String?> promptUser(BuildContext context,
+    {String? question, String? description}) async {
+  String? ans;
+  List<Widget> buttons = [
+    TextButton.icon(
+      label: const Text("Submit"),
+      onPressed: () {
+        Navigator.of(context).pop(ans);
+      },
+      icon: const Icon(Icons.check_rounded),
+    ),
+  ];
+  return await Navigator.push(
+    context,
+    DialogRoute(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (question != null) Text(question),
+            if (description != null)
+              Text(
+                description,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+          ],
+        ),
+        content: TextFormField(
+          onChanged: (value) => ans = value,
+          decoration: InputDecoration(
+            hintText: 'Enter your input here',
+            border: OutlineInputBorder(
+              borderSide: const BorderSide(width: 1),
+              borderRadius: BorderRadius.circular(30),
+            ),
+          ),
+          maxLines: 1,
+          minLines: 1,
+          keyboardType: TextInputType.text,
+        ),
+        actions: buttons,
+        actionsAlignment: MainAxisAlignment.spaceAround,
+      ),
+    ),
+  );
+}
+
 /// A function to show date in this format
 /// Can have also used intl, but prefered this
 String ddmmyyyy(DateTime dateTime) {
@@ -391,25 +439,6 @@ Future<Color> showColorPicker(BuildContext context, Color defaultColor) async {
           pickerColor: defaultColor,
           onColorChanged: (color) => chosenColor = color,
         ),
-        // Use Material color picker:
-        //
-        // child: MaterialPicker(
-        //   pickerColor: pickerColor,
-        //   onColorChanged: changeColor,
-        //   showLabel: true, // only on portrait mode
-        // ),
-        //
-        // Use Block color picker:
-        //
-        // child: BlockPicker(
-        //   pickerColor: currentColor,
-        //   onColorChanged: changeColor,
-        // ),
-        //
-        // child: MultipleChoiceBlockPicker(
-        //   pickerColors: currentColors,
-        //   onColorsChanged: changeColors,
-        // ),
       ),
       actions: <Widget>[
         ElevatedButton.icon(

@@ -1,5 +1,3 @@
-// TODO: add a parent string in this form
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -7,6 +5,7 @@ import 'package:hustle_stay/models/category/category.dart';
 import 'package:hustle_stay/providers/image.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/chat/multi_choser.dart';
+import 'package:hustle_stay/widgets/complaints/select_one.dart';
 import 'package:hustle_stay/widgets/profile_image.dart';
 
 // ignore: must_be_immutable
@@ -139,6 +138,32 @@ class _EditCategoryFormState extends State<EditCategoryForm> {
                   color: widget.category.color,
                 ),
                 label: const Text("Pick a color"),
+              ),
+              const SizedBox(height: 10),
+              CategoriesBuilder(
+                builder: (ctx, categories) {
+                  allParents.addAll(categories.map((e) => e.parent));
+                  return SelectOne(
+                    title: 'Select a Parent Category Name',
+                    subtitle: 'This will be used for grouping categories',
+                    allOptions: allParents.map((e) => e).toSet()
+                      ..add('+ Create New'),
+                    selectedOption: widget.category.parent,
+                    onChange: (value) {
+                      if (value == '+ Create New') {
+                        promptUser(context, question: 'New Parent Category')
+                            .then((value) {
+                          if (value != null) {
+                            setState(() => allParents.add(value));
+                          }
+                        });
+                        return false;
+                      }
+                      widget.category.parent = value;
+                      return true;
+                    },
+                  );
+                },
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,

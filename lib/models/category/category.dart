@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/tools.dart';
 
+Set<String> allParents = {};
+
 class Category {
   String id;
   List<String> defaultReceipient;
@@ -59,6 +61,7 @@ class Category {
     color = Color(data['color'] ?? 0);
     logoUrl = data['logoUrl'];
     parent = data['parent'] ?? parent;
+    allParents.add(parent);
   }
 }
 
