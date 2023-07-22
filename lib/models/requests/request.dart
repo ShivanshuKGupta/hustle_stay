@@ -152,6 +152,11 @@ abstract class Request {
     final String? err = Validate.email(requestingUserEmail, required: true);
     if (err != null) throw err;
 
+    // if the request doesn't have an id
+    if (id == 0) {
+      id = DateTime.now().millisecondsSinceEpoch;
+    }
+
     // if the request is being closed down and the expiry is not set yet
     if (status != RequestStatus.pending && expiryDate == infDate) {
       if (closedAt == 0) closedAt = DateTime.now().millisecondsSinceEpoch;
@@ -159,12 +164,12 @@ abstract class Request {
       // then set the expiry to 7 days after closedAt
       expiryDate = DateTime(
           closedDateTime.year, closedDateTime.month, closedDateTime.day + 7);
+      // If the request is being approved
+      if (status == RequestStatus.approved) {
+        onApprove();
+      }
     }
 
-    // if the request doesn't have an id
-    if (id == 0) {
-      id = DateTime.now().millisecondsSinceEpoch;
-    }
     return true;
   }
 
