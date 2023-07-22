@@ -3,18 +3,28 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/tools.dart';
 
+Set<String> allParents = {};
+
 class Category {
   String id;
   List<String> defaultReceipient;
   List<String> allReceipients;
-  // Higher the number higer is the priority
+
+  /// Higher the number higer is the priority
   int defaultPriority;
-  // cooldown time after which we can add another receipient
+
+  /// cooldown time after which we can add another receipient
   Duration cooldown;
-  // just for UI purposes
+
+  /// just for UI purposes
   Color color;
-  // logo url
+
+  /// logo url
   String? logoUrl;
+
+  /// The parent of this category
+  /// This parent will be used to make this as a sub-category in parent category
+  String parent;
 
   Category(
     this.id, {
@@ -24,6 +34,7 @@ class Category {
     this.color = Colors.blue,
     this.logoUrl,
     this.defaultPriority = 0,
+    this.parent = 'Other',
   });
 
   Map<String, dynamic> encode() {
@@ -34,6 +45,7 @@ class Category {
       "cooldown": cooldown.inSeconds,
       "color": color.value,
       "logoUrl": logoUrl,
+      "parent": parent.trim(),
     };
   }
 
@@ -48,6 +60,8 @@ class Category {
     cooldown = Duration(seconds: data['cooldown'] ?? 0);
     color = Color(data['color'] ?? 0);
     logoUrl = data['logoUrl'];
+    parent = data['parent'] ?? parent;
+    allParents.add(parent);
   }
 }
 
@@ -114,7 +128,7 @@ class CategoriesBuilder extends StatelessWidget {
             return loadingWidget ?? circularProgressIndicator();
           }
           return FutureBuilder(
-            future: fetchAllCategories(src: src),
+            future: fetchAllCategories(src: Source.cache),
             builder: (ctx, snapshot) {
               if (!snapshot.hasData) {
                 // Returning this Widget when nothing has arrived

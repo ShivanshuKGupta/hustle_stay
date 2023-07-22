@@ -8,10 +8,11 @@ import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/complaints/edit_complaints_page.dart';
 import 'package:hustle_stay/screens/drawers/main_drawer.dart';
-import 'package:hustle_stay/screens/filter_screen/stats_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/chat/complaint_template_message.dart';
+import 'package:hustle_stay/widgets/complaints/complaint_category_view.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_category_widget.dart';
+import 'package:hustle_stay/widgets/complaints/complaint_form.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_list_item.dart';
 import 'package:hustle_stay/widgets/settings/section.dart';
 
@@ -25,45 +26,49 @@ class ComplaintsScreen extends ConsumerStatefulWidget {
 class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
   static Source src = Source.serverAndCache;
 
-  SliverAppBar get sliverAppBar => SliverAppBar(
-        elevation: 10,
-        floating: true,
-        pinned: true,
-        expandedHeight: 150,
-        stretch: true,
-        flexibleSpace: FlexibleSpaceBar(
-          title: shaderText(
-            context,
-            title: "Complaints",
-            style: Theme.of(context)
-                .textTheme
-                .titleLarge!
-                .copyWith(fontWeight: FontWeight.bold),
-          ),
-        ),
-        actions: [
-          if (currentUser.readonly.isAdmin)
-            IconButton(
-              onPressed: () => navigatorPush(context, const StatisticsPage()),
-              icon: const Icon(Icons.insert_chart_outlined_sharp),
-            ),
-          IconButton(
-            onPressed: () => showSortDialog(context, ref),
-            icon: const Icon(Icons.compare_arrows_rounded),
-          ),
-          IconButton(
-            onPressed: _addComplaint,
-            icon: const Icon(Icons.add_rounded),
-          ),
-        ],
-      );
+  // SliverAppBar get sliverAppBar => SliverAppBar(
+  //       elevation: 10,
+  //       floating: true,
+  //       pinned: true,
+  //       expandedHeight: 150,
+  //       stretch: true,
+  //       flexibleSpace: FlexibleSpaceBar(
+  //         title: shaderText(
+  //           context,
+  //           title: "Complaints",
+  //           style: Theme.of(context)
+  //               .textTheme
+  //               .titleLarge!
+  //               .copyWith(fontWeight: FontWeight.bold),
+  //         ),
+  //       ),
+  //       actions: [
+  //         if (currentUser.readonly.isAdmin)
+  //           IconButton(
+  //             onPressed: () => navigatorPush(context, const StatisticsPage()),
+  //             icon: const Icon(Icons.insert_chart_outlined_sharp),
+  //           ),
+  //         IconButton(
+  //           onPressed: () => showSortDialog(context, ref),
+  //           icon: const Icon(Icons.compare_arrows_rounded),
+  //         ),
+  //         IconButton(
+  //           onPressed: _addComplaint,
+  //           icon: const Icon(Icons.add_rounded),
+  //         ),
+  //       ],
+  //     );
 
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(settingsProvider);
     final mediaQuery = MediaQuery.of(context);
-    final appBar = sliverAppBar;
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => showSortDialog(context, ref),
+        child: const Icon(Icons.compare_arrows_rounded),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
       backgroundColor: Colors.transparent,
       drawer: const MainDrawer(),
       body: ComplaintsBuilder(
@@ -74,7 +79,6 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
           List<Widget> children =
               calculateUI(settings.complaintsGrouping, complaints);
           return RefreshIndicator(
-            edgeOffset: (appBar.expandedHeight ?? 0) + appBar.toolbarHeight,
             onRefresh: () async {
               try {
                 await fetchAllCategories();
@@ -87,50 +91,42 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
                 setState(() {});
               }
             },
-            child: CustomScrollView(
-              slivers: [
-                appBar,
-                SliverList(
-                  delegate: complaints.isEmpty
-                      ? SliverChildListDelegate(
-                          [
-                            SizedBox(
-                              height: mediaQuery.size.height -
-                                  mediaQuery.viewInsets.top -
-                                  mediaQuery.padding.top -
-                                  mediaQuery.padding.bottom -
-                                  mediaQuery.viewInsets.bottom -
-                                  150,
-                              child: Center(
-                                child: Text(
-                                  'All clear✨',
-                                  style: Theme.of(context).textTheme.titleLarge,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                          ],
-                        )
-                      : SliverChildBuilderDelegate(
-                          (ctx, index) {
-                            if (index == 0) {
-                              return Center(
-                                child: Text(
-                                    "${complaints.length} complaints are pending"),
-                              );
-                            } else if (index == children.length + 1) {
-                              return SizedBox(
-                                height: mediaQuery.padding.bottom,
-                              );
-                            } else {
-                              index--;
-                            }
-                            return children[index];
+            child: ListView.builder(
+              itemBuilder: (ctx, index) {
+                if (index == 0) {
+                  return currentUser.readonly.type == 'student'
+                      ? ComplaintCategoryView(
+                          onTap: (category) {
+                            navigatorPush(
+                              context,
+                              ComplaintForm(category: category),
+                            );
+                            // _addComplaint(category);
                           },
-                          childCount: children.length + 2,
-                        ),
-                ),
-              ],
+                        )
+                      : Container();
+                } else if (index == 1) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 20),
+                    child: shaderText(
+                      context,
+                      title:
+                          '${currentUser.readonly.type == 'student' ? 'Your' : 'Pending'} Complaints',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge!
+                          .copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  );
+                } else if (index == children.length + 2) {
+                  return SizedBox(height: mediaQuery.padding.bottom);
+                } else {
+                  index -= 2;
+                }
+                return children[index];
+              },
+              itemCount: children.length + 3,
             ),
           );
         },
@@ -194,10 +190,10 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
         .toList();
   }
 
-  Future<void> _addComplaint() async {
+  Future<void> _addComplaint(Category category) async {
     ComplaintData? complaint = await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (ctx) => const EditComplaintsPage(),
+        builder: (ctx) => EditComplaintsPage(category: category),
       ),
     );
     if (complaint != null) {
