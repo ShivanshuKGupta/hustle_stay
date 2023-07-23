@@ -143,38 +143,41 @@ Future<bool> markAllAttendance(
     final roommatesRef =
         storage.collection('hostels').doc(hostelName).collection('Roommates');
 
-    QuerySnapshot<Map<String, dynamic>> roommatesQuery;
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> roommateDocs = [];
     if (DateTime(selectedDate.year, selectedDate.month, selectedDate.day) !=
         DateTime(
           DateTime.now().year,
           DateTime.now().month,
           DateTime.now().day,
         )) {
-      roommatesQuery = await roommatesRef.get();
+      final roommatesQuery = await roommatesRef.get();
+      roommateDocs = roommatesQuery.docs;
     } else {
       List<String> leaveMembers = [];
-
-      final roommatesLeaveQuery =
-          await roommatesRef.where('leaveStartDate', isNotEqualTo: null).get();
-
+      final roommatesLeaveQuery = await roommatesRef.get();
       for (final x in roommatesLeaveQuery.docs) {
-        leaveMembers.add(x.id);
-        final attendanceDocRef = x.reference
-            .collection('Attendance')
-            .doc(DateFormat('yyyy-MM-dd').format(selectedDate));
+        final dData = x.data()['leaveEndDate'];
+        if (dData != null && selectedDate.isBefore(dData.toDate())) {
+          print('hi');
+          leaveMembers.add(x.id);
+          final attendanceDocRef = x.reference
+              .collection('Attendance')
+              .doc(DateFormat('yyyy-MM-dd').format(selectedDate));
 
-        if (x.data()['onInternship'] == true) {
-          batch.set(attendanceDocRef, {'status': 'onInternship'});
+          if (x.data()['onInternship'] == true) {
+            batch.set(attendanceDocRef, {'status': 'onInternship'});
+          } else {
+            batch.set(attendanceDocRef, {'status': 'onLeave'});
+          }
         } else {
-          batch.set(attendanceDocRef, {'status': 'onLeave'});
+          print('bye');
+          roommateDocs.add(x);
         }
       }
-      roommatesQuery = await roommatesRef
-          .where(FieldPath.documentId, whereNotIn: leaveMembers)
-          .get();
+      print(roommateDocs.length);
     }
 
-    final attendanceFutures = roommatesQuery.docs.map((x) => x.reference
+    final attendanceFutures = roommateDocs.map((x) => x.reference
         .collection('Attendance')
         .where(FieldPath.documentId,
             isEqualTo: DateFormat('yyyy-MM-dd').format(selectedDate))
@@ -211,7 +214,7 @@ Future<bool> markAllAttendance(
         }
       } else {
         final attendanceDocRef =
-            roommatesQuery.docs[i].reference.collection('Attendance');
+            roommateDocs[i].reference.collection('Attendance');
         batch.set(
           attendanceDocRef.doc(DateFormat('yyyy-MM-dd').format(selectedDate)),
           {'status': statusVal},
