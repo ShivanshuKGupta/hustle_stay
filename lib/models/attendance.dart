@@ -155,7 +155,7 @@ Future<bool> markAllAttendance(
       List<String> leaveMembers = [];
 
       final roommatesLeaveQuery =
-          await roommatesRef.where('onLeave', isEqualTo: true).get();
+          await roommatesRef.where('leaveStartDate', isNotEqualTo: null).get();
 
       for (final x in roommatesLeaveQuery.docs) {
         leaveMembers.add(x.id);
