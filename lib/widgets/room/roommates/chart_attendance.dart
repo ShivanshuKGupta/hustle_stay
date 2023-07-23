@@ -2,7 +2,6 @@ import 'package:animated_icon/animated_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/attendance.dart';
 import 'package:hustle_stay/screens/hostel/rooms/filter_status_data.dart';
-import 'package:hustle_stay/screens/hostel/rooms/range_chart.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../../../screens/hostel/rooms/attendance_stats_student.dart';
@@ -114,7 +113,7 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
     double leave = chartType == 'Bar Chart'
         ? adata['leave']!
         : adata['leave']! / adata['total']! * 100;
-    double internship = chartType == 'barChart'
+    double internship = chartType == 'Bar Chart'
         ? adata['internship']!
         : adata['internship']! / adata['total']! * 100;
     double absent = chartType == 'Bar Chart'
