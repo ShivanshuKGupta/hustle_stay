@@ -94,7 +94,8 @@ class _RequestsListState extends State<RequestsList> {
       },
       child: ListView(
         children: [
-          if (currentUser.readonly.type == 'student')
+          if (currentUser.readonly.type == 'student' ||
+              currentUser.email == 'code_soc@students.iiitr.ac.in')
             const PostRequestOptions(),
           CacheBuilder(
             loadingWidget: Center(
