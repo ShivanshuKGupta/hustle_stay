@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/admin_panel/admin_panel_screen.dart';
-import 'package:hustle_stay/screens/auth/edit_profile_screen.dart';
 import 'package:hustle_stay/screens/category/edit_category_screen.dart';
 import 'package:hustle_stay/screens/complaints/resolved_complaints_screen.dart';
-import 'package:hustle_stay/screens/hostel/addHostel.dart';
+import 'package:hustle_stay/screens/filter_screen/stats_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/settings/current_user_tile.dart';
 
@@ -70,6 +69,18 @@ class MainDrawer extends StatelessWidget {
             navigatorPush(
               context,
               const EditCategoryScreen(),
+            );
+          },
+        ),
+        _drawerTile(
+          context,
+          title: "Complaint Stats",
+          icon: Icons.person_add_rounded,
+          subtitle: "",
+          onTap: () async {
+            navigatorPush(
+              context,
+              const StatisticsPage(),
             );
           },
         ),

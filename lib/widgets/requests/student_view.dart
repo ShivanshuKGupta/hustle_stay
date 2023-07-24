@@ -94,10 +94,22 @@ class _RequestsListState extends State<RequestsList> {
       },
       child: ListView(
         children: [
-          if (currentUser.readonly.type == 'student')
+          if (currentUser.readonly.type == 'student' ||
+              currentUser.email == 'code_soc@students.iiitr.ac.in')
             const PostRequestOptions(),
           CacheBuilder(
+            loadingWidget: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(40.0),
+                child: circularProgressIndicator(),
+              ),
+            ),
             builder: (ctx, data) {
+              data.sort(
+                (a, b) {
+                  return a.id < b.id ? 1 : 0;
+                },
+              );
               final children = data.map((e) => e.widget(context)).toList();
               if (children.isEmpty && currentUser.readonly.type != 'student') {
                 return SizedBox(
@@ -129,7 +141,8 @@ class _RequestsListState extends State<RequestsList> {
                 children.insert(
                   0,
                   Padding(
-                    padding: const EdgeInsets.only(left: 20, top: 15),
+                    padding:
+                        const EdgeInsets.only(left: 20, top: 20, bottom: 5),
                     child: shaderText(
                       context,
                       title:

@@ -1,18 +1,16 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hustle_stay/models/category/category.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/state_switch.dart';
 import 'package:hustle_stay/screens/chat/chat_screen.dart';
-import 'package:hustle_stay/screens/chat/image_preview.dart';
-import 'package:hustle_stay/screens/complaints/edit_complaints_page.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_bottom_bar.dart';
+import 'package:hustle_stay/widgets/complaints/complaint_form.dart';
 
 // ignore: must_be_immutable
 class ComplaintListItem extends ConsumerStatefulWidget {
@@ -55,7 +53,7 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
         onTap: () => showComplaintChat(context, widget.complaint,
             showInfo: _showComplaintInfo),
         onLongPress: () => _showComplaintInfo(),
-        title: Text(widget.complaint.title),
+        title: Text(widget.complaint.title.replaceAll('_', ' ')),
         subtitle: widget.complaint.description == null
             ? null
             : Text(
@@ -63,37 +61,41 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
                 overflow: TextOverflow.fade,
                 maxLines: 4,
               ),
-
-        /// if no image is associated with the complaint
-        /// then I will show the user image who posted that complaint
-        /// if the user doesn't has an image then
-        /// just an info icon
-        leading: widget.complaint.imgUrl == null
-            ? UserBuilder(
-                email: widget.complaint.from,
-                src: Source.cache,
-                builder: (ctx, userData) {
-                  return const InkWell(
-                    child: CircleAvatar(
-                      child: Icon(Icons.info_rounded),
-                    ),
-                  );
-                })
-            : InkWell(
-                child: CircleAvatar(
-                  backgroundImage:
-                      CachedNetworkImageProvider(widget.complaint.imgUrl!),
-                ),
-                onTap: () {
-                  navigatorPush(
-                    context,
-                    ImagePreview(
-                      image: CachedNetworkImage(
-                          imageUrl: widget.complaint.imgUrl!),
-                    ),
-                  );
-                },
-              ),
+        leading: CategoryBuilder(
+          id: widget.complaint.category ?? 'Other',
+          builder: (ctx, category) => CircleAvatar(
+            backgroundColor: category.color.withOpacity(0.2),
+            child: Icon(
+              category.icon ?? Icons.info_rounded,
+            ),
+          ),
+        ),
+        // widget.complaint.imgUrl == null
+        //     ? UserBuilder(
+        //         email: widget.complaint.from,
+        //         src: Source.cache,
+        //         builder: (ctx, userData) {
+        //           return const InkWell(
+        //             child: CircleAvatar(
+        //               child: Icon(Icons.info_rounded),
+        //             ),
+        //           );
+        //         })
+        //     : InkWell(
+        //         child: CircleAvatar(
+        //           backgroundImage:
+        //               CachedNetworkImageProvider(widget.complaint.imgUrl!),
+        //         ),
+        //         onTap: () {
+        //           navigatorPush(
+        //             context,
+        //             ImagePreview(
+        //               image: CachedNetworkImage(
+        //                   imageUrl: widget.complaint.imgUrl!),
+        //             ),
+        //           );
+        //         },
+        //       ),
       ),
     );
   }
@@ -101,7 +103,7 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
   void editMe() async {
     final editedComplaint = await navigatorPush(
       context,
-      EditComplaintsPage(
+      ComplaintForm(
         complaint: widget.complaint,
         deleteMe: deleteMe,
       ),
@@ -110,10 +112,10 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
       if (editedComplaint == "deleted") {
         toggleSwitch(ref, complaintBuilderSwitch);
         // ignore: use_build_context_synchronously
-        Navigator.of(context).pop();
+        // Navigator.of(context).pop();
       } else {
         // ignore: use_build_context_synchronously
-        Navigator.of(context).pop();
+        // Navigator.of(context).pop();
         _controller.animateTo(1);
         Future.delayed(duration, () {
           setState(() {
@@ -172,36 +174,38 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
             contentPadding: const EdgeInsets.only(top: 15, left: 20, right: 20),
             actionsAlignment: MainAxisAlignment.spaceAround,
             title: Text(widget.complaint.title),
-            actions: [
-              IconButton(
-                onPressed: () => editMe(),
-                icon: const Icon(Icons.edit_rounded),
-              ),
-              IconButton(
-                onPressed: () async {
-                  if (await deleteMe() == true) {
-                    // ignore: use_build_context_synchronously
-                    Navigator.of(context).pop();
-                  }
-                },
-                icon: const Icon(Icons.delete_rounded),
-              ),
-            ],
+            actions: (widget.complaint.from != currentUser.email!)
+                ? [const SizedBox(height: 10)]
+                : [
+                    IconButton(
+                      onPressed: () => editMe(),
+                      icon: const Icon(Icons.edit_rounded),
+                    ),
+                    IconButton(
+                      onPressed: () async {
+                        if (await deleteMe() == true) {
+                          // ignore: use_build_context_synchronously
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      icon: const Icon(Icons.delete_rounded),
+                    ),
+                  ],
             content: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (widget.complaint.imgUrl != null)
-                  Align(
-                    alignment: Alignment.topCenter,
-                    child: CachedNetworkImage(
-                      imageUrl: widget.complaint.imgUrl!,
-                    ),
-                  ),
-                const SizedBox(
-                  height: 10,
-                ),
+                // if (widget.complaint.imgUrl != null)
+                //   Align(
+                //     alignment: Alignment.topCenter,
+                //     child: CachedNetworkImage(
+                //       imageUrl: widget.complaint.imgUrl!,
+                //     ),
+                //   ),
+                // const SizedBox(
+                //   height: 10,
+                // ),
                 if (widget.complaint.description != null &&
                     widget.complaint.description!.isNotEmpty)
                   Text(
@@ -250,13 +254,14 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
                   children: [
                     Text(
                       "Created At: ",
-                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
                             color: Theme.of(context).colorScheme.primary,
                           ),
                     ),
                     Text(
                       "${ddmmyyyy(createdAt)} ${timeFrom(createdAt)}",
                       textAlign: TextAlign.right,
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
                 ),

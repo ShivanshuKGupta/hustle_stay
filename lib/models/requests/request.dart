@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/chat/message.dart';
+import 'package:hustle_stay/models/requests/hostel/add_leave_request.dart';
+import 'package:hustle_stay/models/requests/hostel/cancel_leave_request.dart';
 import 'package:hustle_stay/models/requests/hostel/change_room_request.dart';
 import 'package:hustle_stay/models/requests/hostel/swap_room_request.dart';
+import 'package:hustle_stay/models/requests/hostel/update_leave_request.dart';
 import 'package:hustle_stay/models/requests/mess/menu_change_request.dart';
 import 'package:hustle_stay/models/requests/other/other_request.dart';
 import 'package:hustle_stay/models/requests/vehicle/vehicle_request.dart';
@@ -490,6 +493,15 @@ Request decodeToRequest(Map<String, dynamic> data) {
       ..load(data);
   } else if (type == 'Swap_Room') {
     return SwapRoomRequest(requestingUserEmail: data['requestingUserEmail'])
+      ..load(data);
+  } else if (type == 'Add_Leave') {
+    return AddLeaveRequest(requestingUserEmail: data['requestingUserEmail'])
+      ..load(data);
+  } else if (type == 'Update_Leave') {
+    return UpdateLeaveRequest(requestingUserEmail: data['requestingUserEmail'])
+      ..load(data);
+  } else if (type == 'Cancel_Leave') {
+    return CancelLeaveRequest(requestingUserEmail: data['requestingUserEmail'])
       ..load(data);
   }
   throw "No such type exists: '$type'";

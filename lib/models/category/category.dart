@@ -3,37 +3,54 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/tools.dart';
 
+Set<String> allParents = {};
+
+enum Priority { low, medium, high }
+
 class Category {
   String id;
   List<String> defaultReceipient;
   List<String> allReceipients;
-  // Higher the number higer is the priority
-  int defaultPriority;
-  // cooldown time after which we can add another receipient
-  Duration cooldown;
-  // just for UI purposes
+
+  /// Higher the number higer is the priority
+  Priority defaultPriority;
+
+  /// cooldown time after which we can add another receipient
+  // Duration cooldown;
+
+  /// just for UI purposes
   Color color;
-  // logo url
-  String? logoUrl;
+
+  /// logo url
+  IconData icon;
+
+  /// The parent of this category
+  /// This parent will be used to make this as a sub-category in parent category
+  String? parent;
 
   Category(
     this.id, {
     this.defaultReceipient = const [],
     this.allReceipients = const [],
-    this.cooldown = const Duration(seconds: 0),
+    // this.cooldown = const Duration(seconds: 0),
     this.color = Colors.blue,
-    this.logoUrl,
-    this.defaultPriority = 0,
+    this.icon = Icons.category_rounded,
+    this.defaultPriority = Priority.low,
+    this.parent = 'Other',
   });
 
   Map<String, dynamic> encode() {
     return {
-      "defaultReceipient": defaultReceipient,
-      "allReceipients": allReceipients,
-      "defaultPriority": defaultPriority,
-      "cooldown": cooldown.inSeconds,
+      if (defaultReceipient.isNotEmpty) "defaultReceipient": defaultReceipient,
+      if (allReceipients.isNotEmpty) "allReceipients": allReceipients,
+      "defaultPriority": defaultPriority.index,
+      // "cooldown": cooldown.inSeconds,
       "color": color.value,
-      "logoUrl": logoUrl,
+      "icon": {
+        'codePoint': icon.codePoint,
+        'fontFamily': icon.fontFamily,
+      },
+      "parent": parent == null ? null : parent!.trim(),
     };
   }
 
@@ -41,13 +58,39 @@ class Category {
     defaultReceipient = ((data["defaultReceipient"] ?? []) as List<dynamic>)
         .map((e) => e.toString())
         .toList();
+    // defaultReceipient = defaultReceipient.map((e) {
+    //   if (e == 'Attender') {
+    //     return 'attender@iiitr.ac.in';
+    //   } else if (e == 'Alka Chaddha') {
+    //     return 'chiefwarden@iiitr.ac.in';
+    //   }
+    //   return e;
+    // }).toList();
     allReceipients = ((data["allReceipients"] ?? []) as List<dynamic>)
         .map((e) => e.toString())
         .toList();
-    defaultPriority = data['defaultPriority'] ?? 0;
-    cooldown = Duration(seconds: data['cooldown'] ?? 0);
+    // allReceipients = allReceipients.map((e) {
+    //   if (e == 'Attender') {
+    //     return 'attender@iiitr.ac.in';
+    //   } else if (e == 'Alka Chaddha') {
+    //     return 'chiefwarden@iiitr.ac.in';
+    //   }
+    //   return e;
+    // }).toList();
+    defaultPriority = Priority.values[data['defaultPriority'] ?? 0];
+    // cooldown = Duration(seconds: data['cooldown'] ?? 0);
     color = Color(data['color'] ?? 0);
-    logoUrl = data['logoUrl'];
+    if (data['icon'] != null) {
+      icon = IconData(
+        data['icon']!['codePoint'],
+        fontFamily: data['icon']!['fontFamily'],
+      );
+    }
+    parent = data['parent'];
+    if (parent != null) {
+      allParents.add(parent!);
+    }
+    // updateCategory(this);
   }
 }
 
@@ -86,6 +129,10 @@ Future<List<Category>> fetchAllCategories({Source? src}) async {
 }
 
 Future<void> updateCategory(Category category) async {
+  if (category.parent != null) {
+    category.allReceipients = [];
+    category.defaultReceipient = [];
+  }
   await firestore
       .collection('categories')
       .doc(category.id)
@@ -114,7 +161,7 @@ class CategoriesBuilder extends StatelessWidget {
             return loadingWidget ?? circularProgressIndicator();
           }
           return FutureBuilder(
-            future: fetchAllCategories(src: src),
+            future: fetchAllCategories(src: Source.cache),
             builder: (ctx, snapshot) {
               if (!snapshot.hasData) {
                 // Returning this Widget when nothing has arrived

@@ -15,7 +15,7 @@ class _Settings {
 
   /// Complaints Screen Sorting Parameters
   /// used for showing complaints in groups and in a certain order
-  String complaintsGrouping = "category";
+  String complaintsGrouping = "none";
 
   /// The groupBy in Stats of ComplaintsScreen
   String groupBy = 'Category';
@@ -41,7 +41,7 @@ class _Settings {
     darkMode = settings["darkMode"] ?? false;
     introductionScreenVisited = settings["introductionScreenVisited"] ?? false;
     currentPage = settings["currentPage"] ?? 2;
-    complaintsGrouping = (settings["complaintsGrouping"] ?? "category");
+    complaintsGrouping = (settings["complaintsGrouping"] ?? complaintsGrouping);
     groupBy = (settings["groupBy"] ?? 'Category');
     interval = (settings["interval"] ?? 'Day');
   }
