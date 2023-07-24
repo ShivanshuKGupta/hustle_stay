@@ -1,15 +1,13 @@
+import 'package:animated_icon/animated_icon.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/category/category.dart';
-import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
-import 'package:hustle_stay/screens/complaints/edit_complaints_page.dart';
 import 'package:hustle_stay/screens/drawers/main_drawer.dart';
 import 'package:hustle_stay/tools.dart';
-import 'package:hustle_stay/widgets/chat/complaint_template_message.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_category_view.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_category_widget.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_form.dart';
@@ -94,12 +92,15 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
             child: ListView.builder(
               itemBuilder: (ctx, index) {
                 if (index == 0) {
-                  return currentUser.readonly.type == 'student'
+                  return currentUser.readonly.type == 'student' ||
+                          currentUser.email == 'code_soc@students.iiitr.ac.in'
                       ? ComplaintCategoryView(
                           onTap: (category) {
                             navigatorPush(
                               context,
-                              ComplaintForm(category: category),
+                              ComplaintForm(
+                                  category: category,
+                                  afterSubmit: _afterAddComplaint),
                             );
                             // _addComplaint(category);
                           },
@@ -120,7 +121,25 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
                     ),
                   );
                 } else if (index == children.length + 2) {
-                  return SizedBox(height: mediaQuery.padding.bottom);
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: children.isEmpty
+                        ? [
+                            AnimateIcon(
+                              onTap: () {},
+                              iconType: IconType.continueAnimation,
+                              animateIcon: AnimateIcons.cool,
+                            ),
+                            Text(
+                              currentUser.readonly.type == 'student'
+                                  ? 'There aren\'t any Complaints Yet'
+                                  : 'No Pending Complaints Yet',
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                          ]
+                        : [],
+                  );
                 } else {
                   index -= 2;
                 }
@@ -134,24 +153,27 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
     );
   }
 
-  List<Widget> calculateUI(String groupBy, List<ComplaintData> complaints) {
+  List<Widget> calculateUI(
+    String groupBy,
+    List<ComplaintData> complaints,
+  ) {
     if (groupBy != 'none') {
       Map<String, List<ComplaintData>> categoriesMap = {};
       for (var element in complaints) {
-        String category = "";
+        String key = "";
         if (groupBy == 'category') {
-          category = element.category ?? "Other";
+          key = element.category ?? "Other";
         } else if (groupBy == 'scope') {
-          category = element.scope.name;
+          key = element.scope.name;
         } else if (groupBy == 'complainant') {
-          category = element.from;
+          key = element.from;
         } else {
           throw "No matching groupBy field found";
         }
-        if (categoriesMap.containsKey(category)) {
-          categoriesMap[category]!.add(element);
+        if (categoriesMap.containsKey(key)) {
+          categoriesMap[key]!.add(element);
         } else {
-          categoriesMap[category] = [element];
+          categoriesMap[key] = [element];
         }
       }
       return categoriesMap.entries.map(
@@ -190,27 +212,8 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
         .toList();
   }
 
-  Future<void> _addComplaint(Category category) async {
-    ComplaintData? complaint = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (ctx) => EditComplaintsPage(category: category),
-      ),
-    );
-    if (complaint != null) {
-      setState(() {});
-      if (context.mounted) {
-        showComplaintChat(
-          context,
-          complaint,
-          initialMsg: MessageData(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            from: currentUser.email!,
-            createdAt: DateTime.now(),
-            txt: complaintTemplateMessage(complaint),
-          ),
-        );
-      }
-    }
+  Future<void> _afterAddComplaint(ComplaintData complaint) async {
+    setState(() {});
   }
 }
 

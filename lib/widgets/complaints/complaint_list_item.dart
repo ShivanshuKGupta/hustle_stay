@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hustle_stay/models/category/category.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
@@ -60,12 +61,14 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
                 overflow: TextOverflow.fade,
                 maxLines: 4,
               ),
-
-        /// if no image is associated with the complaint
-        /// then I will show the user image who posted that complaint
-        /// if the user doesn't has an image then
-        /// just an info icon
-        leading: const Icon(Icons.info_rounded),
+        leading: CircleAvatar(
+          child: CategoryBuilder(
+            id: widget.complaint.category ?? 'Other',
+            builder: (ctx, category) => Icon(
+              category.icon ?? Icons.info_rounded,
+            ),
+          ),
+        ),
         // widget.complaint.imgUrl == null
         //     ? UserBuilder(
         //         email: widget.complaint.from,
@@ -108,10 +111,10 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
       if (editedComplaint == "deleted") {
         toggleSwitch(ref, complaintBuilderSwitch);
         // ignore: use_build_context_synchronously
-        Navigator.of(context).pop();
+        // Navigator.of(context).pop();
       } else {
         // ignore: use_build_context_synchronously
-        Navigator.of(context).pop();
+        // Navigator.of(context).pop();
         _controller.animateTo(1);
         Future.delayed(duration, () {
           setState(() {

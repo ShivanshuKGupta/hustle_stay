@@ -17,7 +17,7 @@ class GridTileLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Hero(
-      tag: title,
+      tag: title.replaceAll('_', ' '),
       child: GlassWidget(
         radius: 30,
         child: GestureDetector(
@@ -33,7 +33,7 @@ class GridTileLogo extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    title,
+                    title.replaceAll('_', ' '),
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),

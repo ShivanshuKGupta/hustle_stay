@@ -5,35 +5,33 @@ import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
 
 class CategoryList extends StatelessWidget {
   final List<Category> categories;
-  final String title;
-  final Icon icon;
+  final Category category;
   final void Function(Category category) onTap;
   const CategoryList({
     super.key,
     required this.categories,
-    required this.title,
-    required this.icon,
     required this.onTap,
+    required this.category,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: shaderText(context, title: title),
+        title: shaderText(context, title: category.id.replaceAll('_', ' ')),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (title != 'Other')
-                GridTileLogo(
-                  onTap: () => Navigator.of(context).pop(),
-                  title: title,
-                  icon: icon,
-                  color: Theme.of(context).colorScheme.background,
-                ),
+              // if (category.id != 'Other')
+              //   GridTileLogo(
+              //     onTap: () => Navigator.of(context).pop(),
+              //     title: category.id,
+              //     icon: Icon(category.icon, size: 50),
+              //     color: Theme.of(context).colorScheme.background,
+              //   ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: GridView.extent(
@@ -44,11 +42,14 @@ class CategoryList extends StatelessWidget {
                   crossAxisSpacing: 5,
                   mainAxisSpacing: 5,
                   children: [
-                    ...categories.map(
+                    ...(categories.map((e) => e).toList()..add(category)).map(
                       (entry) => GridTileLogo(
                         onTap: () => onTap(entry),
-                        title: entry.id,
-                        icon: const Icon(Icons.category_rounded, size: 50),
+                        title: entry.id == category.id ? 'Other ' : entry.id,
+                        icon: Icon(
+                          entry.icon,
+                          size: 50,
+                        ),
                         color: entry.color,
                       ),
                     ),

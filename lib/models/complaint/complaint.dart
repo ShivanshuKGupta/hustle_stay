@@ -118,13 +118,17 @@ bool equalList(List<String> a, List<String> b) {
 }
 
 /// updates an exisiting complaint or will create if complaint does not exists
-Future<void> updateComplaint(ComplaintData complaint) async {
+Future<ComplaintData> updateComplaint(ComplaintData complaint) async {
   if (complaint.id == 0) complaint.id = DateTime.now().millisecondsSinceEpoch;
   if (complaint.to.isEmpty) {
-    complaint.to =
-        (await fetchCategory(complaint.category ?? 'Other')).defaultReceipient;
+    Category category = await fetchCategory(complaint.category ?? 'Other');
+    while (category.parent != null) {
+      category = await fetchCategory(category.parent!);
+    }
+    complaint.to = category.defaultReceipient;
   }
   await firestore.doc('complaints/${complaint.id}').set(complaint.encode());
+  return complaint;
 }
 
 /// updates an exisiting complaint or will create if complaint does not exists
