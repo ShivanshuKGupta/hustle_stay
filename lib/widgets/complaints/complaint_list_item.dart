@@ -53,7 +53,7 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
         onTap: () => showComplaintChat(context, widget.complaint,
             showInfo: _showComplaintInfo),
         onLongPress: () => _showComplaintInfo(),
-        title: Text(widget.complaint.title),
+        title: Text(widget.complaint.title.replaceAll('_', ' ')),
         subtitle: widget.complaint.description == null
             ? null
             : Text(
@@ -61,10 +61,11 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
                 overflow: TextOverflow.fade,
                 maxLines: 4,
               ),
-        leading: CircleAvatar(
-          child: CategoryBuilder(
-            id: widget.complaint.category ?? 'Other',
-            builder: (ctx, category) => Icon(
+        leading: CategoryBuilder(
+          id: widget.complaint.category ?? 'Other',
+          builder: (ctx, category) => CircleAvatar(
+            backgroundColor: category.color.withOpacity(0.2),
+            child: Icon(
               category.icon ?? Icons.info_rounded,
             ),
           ),

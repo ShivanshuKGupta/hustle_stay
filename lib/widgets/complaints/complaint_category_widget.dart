@@ -48,7 +48,7 @@ class _ComplaintCategoryState extends State<ComplaintCategory> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("${widget.id} Complaints"),
+                        Text("${widget.id.replaceAll('_', ' ')} Complaints"),
                         Icon(expanded
                             ? Icons.keyboard_arrow_up_rounded
                             : Icons.keyboard_arrow_down_rounded),
