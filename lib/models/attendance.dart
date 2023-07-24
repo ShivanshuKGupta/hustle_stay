@@ -278,6 +278,7 @@ Future<Map<String, double>> getAttendanceStatistics(
   double internshipData = 0;
   double presentLateData = 0;
   double total = 0;
+  String todayStatus = '';
 
   final storage = FirebaseFirestore.instance;
   final docsAttendanceRef = await storage
@@ -289,6 +290,9 @@ Future<Map<String, double>> getAttendanceStatistics(
       .get();
   total = docsAttendanceRef.docs.length.toDouble();
   for (final docs in docsAttendanceRef.docs) {
+    if (docs.id == DateFormat('yyyy-MM-dd').format(DateTime.now())) {
+      todayStatus = docs['status'];
+    }
     if (range == null ||
         (DateFormat('yyyy-MM-dd')
                     .format(range.start)
@@ -535,7 +539,8 @@ Future<LeaveData?> fetchCurrentLeave(String hostelName, String email) async {
   }
 }
 
-Future<List<LeaveData>> fetchLeaves(String hostelName, String email) async {
+Future<List<LeaveData>> fetchLeaves(String hostelName, String email,
+    {bool? getAll}) async {
   final refR = await storage
       .collection('hostels')
       .doc(hostelName)
@@ -550,7 +555,7 @@ Future<List<LeaveData>> fetchLeaves(String hostelName, String email) async {
 
   QuerySnapshot<Map<String, dynamic>> ref;
 
-  if (onLeave == true) {
+  if (onLeave == true && getAll != true) {
     ref =
         await leavesRef.where('startDate', isNotEqualTo: leaveStartDate).get();
   } else {

@@ -1,5 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/models/attendance.dart';
+import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/tools.dart';
+import 'package:intl/intl.dart';
 
 class RoommateData {
   String email;
@@ -610,4 +614,49 @@ Future<bool> addRommates(
   }
   await batch.commit();
   return true;
+}
+
+Future<Map<String, dynamic>?> getUserAttendanceRecord(String email,
+    {bool isCurrentUser = false, String? hostelName}) async {
+  Map<String, dynamic> list = {};
+  if (!isCurrentUser) {
+    if (currentUser.readonly.hostelName != null) {
+      hostelName = currentUser.readonly.hostelName;
+    } else {
+      return null;
+    }
+  } else if (hostelName == null) {
+    final ref = await storage.collection('users').doc(email).get();
+    if (ref.exists) {
+      hostelName = ref.data()!['hostelName'];
+      if (hostelName == null) {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  }
+  final attendanceStat = await getAttendanceStatistics(email, hostelName!);
+  list['statistics'] = attendanceStat;
+  var dataRef = await storage
+      .collection('hostels')
+      .doc(hostelName)
+      .collection('Roommates')
+      .doc(email)
+      .get();
+  String status = 'noData';
+  if (dataRef.exists) {
+    final dData = dataRef.data()!['leaveEndDate'];
+    if (dData != null && (DateTime.now().isBefore(dData.toDate()))) {
+      status = dataRef.data()!['onInternship'] ? 'onInternship' : 'onLeave';
+    } else {
+      dataRef = await dataRef.reference
+          .collection('Attendance')
+          .doc(DateFormat('yyyy-MM-dd').format(DateTime.now()))
+          .get();
+    }
+  }
+  list['todayStatus'] = dataRef.exists ? dataRef.data()!['status'] : status;
+
+  return list;
 }
