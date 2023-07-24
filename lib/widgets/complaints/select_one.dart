@@ -8,6 +8,7 @@ class SelectOne<T> extends StatefulWidget {
   final bool Function(T chosenOption) onChange;
   final String? title;
   final String? subtitle;
+  bool expanded;
   SelectOne({
     super.key,
     required this.allOptions,
@@ -15,6 +16,7 @@ class SelectOne<T> extends StatefulWidget {
     required this.onChange,
     this.title,
     this.subtitle,
+    this.expanded = false,
   });
 
   @override
@@ -22,8 +24,6 @@ class SelectOne<T> extends StatefulWidget {
 }
 
 class _SelectOneState<T> extends State<SelectOne<T>> {
-  bool expanded = false;
-
   @override
   Widget build(BuildContext context) {
     final Wrap body = Wrap(
@@ -70,17 +70,17 @@ class _SelectOneState<T> extends State<SelectOne<T>> {
                 IconButton(
                   onPressed: () {
                     setState(() {
-                      expanded = !expanded;
+                      widget.expanded = !widget.expanded;
                     });
                   },
-                  icon: Icon(expanded
+                  icon: Icon(widget.expanded
                       ? Icons.keyboard_arrow_up_rounded
                       : Icons.keyboard_arrow_down_rounded),
                 ),
               ],
             ),
           ),
-        if (expanded)
+        if (widget.expanded)
           body
         else
           SingleChildScrollView(

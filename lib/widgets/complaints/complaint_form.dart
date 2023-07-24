@@ -5,7 +5,7 @@ import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/tools.dart';
-import 'package:hustle_stay/widgets/chat/complaint_template_message.dart';
+import 'package:hustle_stay/widgets/chat/template_messages.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_list_item.dart';
 import 'package:hustle_stay/widgets/complaints/select_one.dart';
 import 'package:hustle_stay/widgets/complaints/selection_vault.dart';
@@ -14,12 +14,14 @@ import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
 class ComplaintForm extends StatefulWidget {
   final ComplaintData? complaint;
   final Category? category;
+  final Future<void> Function(ComplaintData complaint)? afterSubmit;
   final Future<void> Function()? deleteMe;
   const ComplaintForm({
     super.key,
     this.complaint,
     this.category,
     this.deleteMe,
+    this.afterSubmit,
   });
 
   @override
@@ -64,7 +66,7 @@ class _ComplaintFormState extends State<ComplaintForm> {
     setState(() {
       _loading = true;
     });
-    await updateComplaint(complaint);
+    complaint = await updateComplaint(complaint);
     if (context.mounted) {
       setState(() {
         _loading = false;
@@ -72,7 +74,7 @@ class _ComplaintFormState extends State<ComplaintForm> {
     }
     if (context.mounted) {
       while (Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(complaint);
       }
     }
     if (!isNew) {
@@ -98,7 +100,7 @@ class _ComplaintFormState extends State<ComplaintForm> {
       }
     } else {
       if (context.mounted) {
-        showComplaintChat(
+        await showComplaintChat(
           context,
           complaint,
           initialMsg: MessageData(
@@ -109,6 +111,9 @@ class _ComplaintFormState extends State<ComplaintForm> {
           ),
         );
       }
+    }
+    if (widget.afterSubmit != null) {
+      widget.afterSubmit!(complaint);
     }
   }
 
@@ -133,14 +138,19 @@ class _ComplaintFormState extends State<ComplaintForm> {
               CategoryBuilder(
                 loadingWidget: GridTileLogo(
                   title: complaint.category ?? 'Other',
-                  icon: const Icon(Icons.category_rounded, size: 50),
+                  icon: Icon(
+                    widget.category != null
+                        ? widget.category!.icon
+                        : Icons.category_rounded,
+                    size: 50,
+                  ),
                   color: Theme.of(context).colorScheme.background,
                 ),
                 id: complaint.category ?? 'Other',
                 builder: (ctx, category) => GridTileLogo(
                   onTap: () => Navigator.of(context).pop(),
                   title: category.id,
-                  icon: const Icon(Icons.category_rounded, size: 50),
+                  icon: Icon(category.icon ?? Icons.category_rounded, size: 50),
                   color: Theme.of(context).colorScheme.background,
                 ),
               ),
@@ -207,7 +217,7 @@ class _ComplaintFormState extends State<ComplaintForm> {
               if (complaint.category == 'Other' || complaint.category == null)
                 UsersBuilder(
                   builder: (ctx, users) => SelectionVault(
-                    allItems: users.map((e) => e.name ?? e.email!).toSet(),
+                    allItems: users.map((e) => e.email!).toSet(),
                     onChange: (users) {
                       setState(() {
                         complaint.to = users.toList();

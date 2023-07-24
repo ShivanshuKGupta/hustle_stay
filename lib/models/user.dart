@@ -429,36 +429,6 @@ class UsersBuilder extends StatelessWidget {
   }
 }
 
-/// A widget used to display widget using UserData
-/// This will change according to the userData
-// ignore: must_be_immutable
-class ComplaineeBuilder extends StatelessWidget {
-  final Widget Function(BuildContext ctx, List<UserData> complainees) builder;
-  final Widget? loadingWidget;
-  ComplaineeBuilder({
-    super.key,
-    required this.builder,
-    this.loadingWidget,
-  });
-
-  UserData userData = UserData();
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: fetchComplainees(),
-      builder: (ctx, snapshot) {
-        if (!snapshot.hasData) {
-          // Returning this Widget when nothing has arrived
-          return loadingWidget ?? circularProgressIndicator();
-        }
-        // Returning this widget when data arrives from server
-        return builder(ctx, snapshot.data!);
-      },
-    );
-  }
-}
-
 Future<List<UserData>> fetchSpecificUsers(String userType) async {
   final List<UserData> list = [];
 

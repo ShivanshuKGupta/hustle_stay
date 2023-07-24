@@ -34,11 +34,17 @@ class ComplaintCategoryView extends StatelessWidget {
           child: CategoriesBuilder(
             builder: (ctx, categories) {
               Map<String, List<Category>> groups = {};
+              Map<String, Category> parents = {};
               for (var category in categories) {
-                if (groups[category.parent] == null) {
-                  groups[category.parent] = [];
+                if (category.parent == null) {
+                  allParents.add(category.id);
+                  parents[category.id] = category;
+                } else {
+                  if (groups[category.parent!] == null) {
+                    groups[category.parent!] = [];
+                  }
+                  groups[category.parent!]!.add(category);
                 }
-                groups[category.parent]!.add(category);
               }
               return GridView.extent(
                 physics: const NeverScrollableScrollPhysics(),
@@ -48,22 +54,32 @@ class ComplaintCategoryView extends StatelessWidget {
                 crossAxisSpacing: 5,
                 mainAxisSpacing: 5,
                 children: [
-                  ...groups.entries.map(
+                  ...parents.entries.map(
                     (entry) => GridTileLogo(
                       onTap: () {
-                        navigatorPush(
-                          context,
-                          CategoryList(
-                            onTap: onTap,
-                            categories: groups[entry.key]!,
-                            title: entry.key,
-                            icon: const Icon(Icons.category_rounded, size: 50),
-                          ),
-                        );
+                        if (groups[entry.key] == null ||
+                            groups[entry.key]!.isEmpty) {
+                          onTap(parents[entry.key]!);
+                        } else {
+                          navigatorPush(
+                            context,
+                            CategoryList(
+                              onTap: onTap,
+                              categories: groups[entry.key] ?? [],
+                              category: parents[entry.key]!,
+                            ),
+                          );
+                        }
                       },
                       title: entry.key,
-                      icon: const Icon(Icons.category_rounded, size: 50),
-                      color: Colors.blue,
+                      icon: Icon(
+                          parents[entry.key] != null
+                              ? parents[entry.key]!.icon
+                              : Icons.category_rounded,
+                          size: 50),
+                      color: parents[entry.key] != null
+                          ? parents[entry.key]!.color
+                          : Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ],
