@@ -100,7 +100,7 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
     setState(() {});
   }
 
-  List<ChartData> attendanceData(Map<String, double> adata) {
+  List<ChartData> attendanceData(Map<String, dynamic> adata) {
     double sum = adata['present']! +
         adata['absent']! +
         adata['internship']! +
@@ -303,7 +303,7 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
   }
 
   ValueNotifier<bool> isOpen = ValueNotifier(false);
-  Widget pieBarChartWidget(Map<String, double> data) {
+  Widget pieBarChartWidget(Map<String, dynamic> data) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     final layout = MediaQuery.of(context).orientation;
@@ -520,7 +520,7 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
 
 class StatList extends StatefulWidget {
   const StatList({super.key, required this.data, required this.isOpen});
-  final Map<String, double> data;
+  final Map<String, dynamic> data;
   final ValueNotifier<bool> isOpen;
 
   @override

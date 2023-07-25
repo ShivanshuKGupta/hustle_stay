@@ -54,6 +54,7 @@ dependencies:
   flutter_colorpicker: ^1.0.3
   syncfusion_flutter_charts: ^22.1.37
   rive: ^0.7.16
+  table_calendar: ^3.0.9
 
 dev_dependencies:
   flutter_test:
