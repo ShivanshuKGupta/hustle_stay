@@ -262,7 +262,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         CircleAvatar(
-                            radius: screenWidth * 0.05,
+                            radius: screenWidth * 0.14,
                             child: ClipOval(
                               child: AspectRatio(
                                 aspectRatio: 1.0,
