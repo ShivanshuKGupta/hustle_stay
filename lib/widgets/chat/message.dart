@@ -117,12 +117,26 @@ class Message extends StatelessWidget {
               right: 0,
               bottom: 0,
               child: Padding(
-                padding: const EdgeInsets.only(right: 5.0, bottom: 2),
-                child: Text(
-                  timeFrom(msg.createdAt),
-                  style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                padding: const EdgeInsets.only(bottom: 2),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      timeFrom(msg.createdAt),
+                      style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                    ),
+                    const SizedBox(width: 4),
+                    if (msgAlignment)
+                      Icon(
+                        msg.readBy.containsAll(chat.receivers)
+                            ? Icons.done_all_rounded
+                            : Icons.done_rounded,
                         color: Theme.of(context).colorScheme.primary,
+                        size: 15,
                       ),
+                  ],
                 ),
               ),
             )
@@ -198,6 +212,23 @@ class Message extends StatelessWidget {
                   ),
                   Text(
                     "${ddmmyyyy(msg.createdAt)} | ${timeFrom(msg.createdAt)}",
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Read By:",
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        // color: Theme.of(context).colorScheme.primary,
+                        ),
+                  ),
+                  Text(
+                    msg.readBy.toString(),
                     style: Theme.of(context).textTheme.bodySmall!.copyWith(
                           color: Theme.of(context).colorScheme.primary,
                         ),
@@ -329,7 +360,8 @@ class Message extends StatelessWidget {
   }
 
   Future<void> copyMsg(context) async {
-    await Clipboard.setData(ClipboardData(text: msg.txt));
+    await Clipboard.setData(
+        ClipboardData(text: msg.txt.replaceAll('\n\n', '\n')));
     if (context.mounted) {
       Navigator.of(context).pop();
       showMsg(context, "Copied");

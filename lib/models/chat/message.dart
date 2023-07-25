@@ -1,4 +1,5 @@
 import 'package:hustle_stay/main.dart';
+import 'package:hustle_stay/models/user/user.dart';
 
 import 'chat.dart';
 
@@ -18,6 +19,8 @@ class MessageData {
   /// Modified At
   DateTime? modifiedAt;
 
+  Set<String> readBy = {};
+
   /// These indicative messages are used to indicate
   /// that something has happened in the chat
   /// like the inclusion of someone in the chat
@@ -31,7 +34,6 @@ class MessageData {
     required this.createdAt,
     this.indicative = false,
     this.modifiedAt,
-    // TODO: add another field readBy
   });
 
   Map<String, dynamic> encode() {
@@ -41,6 +43,7 @@ class MessageData {
       "indicative": indicative,
       "createdAt": createdAt.millisecondsSinceEpoch,
       if (modifiedAt != null) "modifiedAt": modifiedAt!.millisecondsSinceEpoch,
+      "readBy": readBy.toList()
     };
   }
 
@@ -52,7 +55,17 @@ class MessageData {
     modifiedAt = data["modifiedAt"] == null
         ? null
         : DateTime.fromMillisecondsSinceEpoch(data["modifiedAt"]);
+    readBy = ((data['readBy'] ?? []) as List<dynamic>)
+        .map((e) => e.toString())
+        .toSet();
   }
+}
+
+Future<void> addMeInReadBy(ChatData chat, MessageData msg) async {
+  final chatMessages = firestore.doc(chat.path).collection("chat");
+  await chatMessages
+      .doc(msg.id)
+      .update({'readBy': msg.readBy..add(currentUser.email!)});
 }
 
 Future<void> addMessage(ChatData chat, MessageData msg) async {

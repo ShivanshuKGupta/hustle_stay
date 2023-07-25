@@ -430,7 +430,7 @@ class RequestItem extends StatelessWidget {
               showMsg(context, 'This request is yet to be approved.');
             },
             iconType: IconType.continueAnimation,
-            animateIcon: AnimateIcons.hourglass,
+            animateIcon: AnimateIcons.clock,
           )
         : IconButton(
             onPressed: () {

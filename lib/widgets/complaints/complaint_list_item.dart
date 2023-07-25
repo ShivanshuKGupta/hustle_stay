@@ -1,3 +1,4 @@
+import 'package:animated_icon/animated_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +7,7 @@ import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user/user.dart';
+import 'package:hustle_stay/providers/firestore_cache_builder.dart';
 import 'package:hustle_stay/providers/state_switch.dart';
 import 'package:hustle_stay/screens/chat/chat_screen.dart';
 import 'package:hustle_stay/tools.dart';
@@ -50,8 +52,11 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
       autoPlay: false,
       effects: const [FadeEffect(begin: 1, end: 0)],
       child: ListTile(
-        onTap: () => showComplaintChat(context, widget.complaint,
-            showInfo: _showComplaintInfo),
+        onTap: () async {
+          await showComplaintChat(context, widget.complaint,
+              showInfo: _showComplaintInfo);
+          setState(() {});
+        },
         onLongPress: () => _showComplaintInfo(),
         title: Text(widget.complaint.title.replaceAll('_', ' ')),
         subtitle: widget.complaint.description == null
@@ -63,11 +68,35 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
               ),
         leading: CategoryBuilder(
           id: widget.complaint.category ?? 'Other',
-          builder: (ctx, category) => CircleAvatar(
-            backgroundColor: category.color.withOpacity(0.2),
-            child: Icon(
-              category.icon,
-            ),
+          builder: (ctx, category) => Stack(
+            children: [
+              Positioned(
+                right: 0,
+                top: 0,
+                child: CacheBuilder(
+                    builder: (ctx, msg) {
+                      if (msg == null ||
+                          msg.readBy.contains(currentUser.email!)) {
+                        return Container();
+                      }
+                      return AnimateIcon(
+                        height: 15,
+                        width: 15,
+                        color: Colors.red,
+                        onTap: () {},
+                        iconType: IconType.continueAnimation,
+                        animateIcon: AnimateIcons.bell,
+                      );
+                    },
+                    provider: widget.complaint.fetchLastMessage),
+              ),
+              CircleAvatar(
+                backgroundColor: category.color.withOpacity(0.2),
+                child: Icon(
+                  category.icon,
+                ),
+              ),
+            ],
           ),
         ),
         // widget.complaint.imgUrl == null
