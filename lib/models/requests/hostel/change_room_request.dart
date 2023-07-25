@@ -45,6 +45,8 @@ class ChangeRoomRequest extends Request {
 
   @override
   Future<void> onApprove(transaction) async {
+    print('entered onApprove');
+
     /// TODO: Sani | make use of this transaction to do things atomically
     /// using it will ensure that approving is done atomically
     final user = await fetchHostelAndRoom(requestingUserEmail);

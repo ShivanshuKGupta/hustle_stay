@@ -87,7 +87,7 @@ Future<bool> deleteHostel(String hostelName) async {
 Future<void> updateLeaveStatus(String email, String hostelName) async {
   final ref = await FirebaseFirestore.instance
       .collection('hostels')
-      .doc(hostelName)
+      .doc('hostelMates')
       .collection('Roommates')
       .doc(email)
       .get();
@@ -109,7 +109,7 @@ Future<bool> setLeave(
   try {
     final ref = await FirebaseFirestore.instance
         .collection('hostels')
-        .doc(hostelName)
+        .doc('hostelMates')
         .collection('Roommates')
         .doc(email)
         .get();

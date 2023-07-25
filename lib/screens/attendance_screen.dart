@@ -1,19 +1,20 @@
+import 'package:animated_icon/animated_icon.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:hustle_stay/screens/hostel/rooms/rooms_screen.dart';
-// import 'package:hustle_stay/models/hostels.dart';
-// import 'package:hustle_stay/screens/addHostel.dart';
-
-import '../models/hostel/hostels.dart';
-import '../tools.dart';
-import 'hostel/rooms/add_rooms.dart';
+import 'package:hustle_stay/models/hostel/rooms/room.dart';
+import 'package:hustle_stay/models/user.dart';
 // import 'package:hustle_stay/models/user.dart';
 
 final _firebase = FirebaseAuth.instance;
 
 class AttendanceScreen extends StatefulWidget {
-  const AttendanceScreen({super.key});
+  const AttendanceScreen(
+      {super.key, this.email, this.hostelName, this.userdata});
+  final String? email;
+  final String? hostelName;
+  final UserData? userdata;
 
   @override
   State<AttendanceScreen> createState() => _AttendanceScreenState();
@@ -24,105 +25,151 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder(
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: SizedBox(
+              width: double.infinity,
+              height: double.infinity,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  AnimateIcon(
+                    onTap: () {},
+                    iconType: IconType.continueAnimation,
+                    animateIcon: AnimateIcons.loading1,
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                  const Text('Loading...')
+                ],
+              ),
+            ),
+          );
+        }
+        if (!snapshot.hasData && snapshot.error != null) {
+          return Center(
+            child: SizedBox(
+              width: double.infinity,
+              height: double.infinity,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  AnimateIcon(
+                    onTap: () {},
+                    iconType: IconType.continueAnimation,
+                    animateIcon: AnimateIcons.error,
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                  const Text('No data available')
+                ],
+              ),
+            ),
+          );
+        }
+
+        return Container();
+      },
+      future: getUserAttendanceRecord(widget.email ?? currentUser.email!,
+          hostelName: widget.hostelName,
+          isCurrentUser: widget.email == null ? true : false),
+    );
+  }
+
+  Widget attendanceWidget(Map<String, dynamic> data) {
+    final screenWidth = MediaQuery.of(context).size.height;
+    Color tileColor = Colors.white;
+    String currentStatus = '';
+    switch (data['statistics']['todayStatus']) {
+      case 'present':
+        tileColor = Colors.greenAccent;
+        currentStatus = 'Present';
+        break;
+      case 'absent':
+        tileColor = Colors.redAccent;
+        currentStatus = 'Absent';
+        break;
+      case 'onLeave':
+        tileColor = Colors.cyanAccent;
+        currentStatus = 'On Leave';
+        break;
+      case 'presentLate':
+        tileColor = Colors.yellowAccent;
+        currentStatus = 'Late';
+        break;
+      case 'onInternship':
+        tileColor = Colors.orangeAccent;
+        currentStatus = 'on Internship';
+        break;
+      default:
+        tileColor = Colors.deepOrangeAccent;
+        currentStatus = 'Not Marked Yet';
+    }
     return RefreshIndicator(
       onRefresh: () async {
         setState(() {});
       },
-      child: FutureBuilder(
-        future: fetchHostels(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: circularProgressIndicator(
-                height: null,
-                width: null,
-              ),
-            );
-          }
-          if (!snapshot.hasData) {
-            return Center(
-              child: Text('No Hostel added yet!'),
-            );
-          }
-
-          return ListView.builder(
-            itemBuilder: (context, index) {
-              Hostels hostel = snapshot.data![index];
-              String? imageUrl = hostel.imageUrl;
-              return InkWell(
-                onTap: () => {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => RoomsScreen(
-                            hostelName: hostel.hostelName,
-                          )))
-                },
-                child: Card(
-                  elevation: 6,
-                  child: Column(
-                    children: [
-                      Image.network(
-                        imageUrl,
-                        loadingBuilder: (BuildContext context, Widget child,
-                            ImageChunkEvent? loadingProgress) {
-                          if (loadingProgress == null) {
-                            // Image is fully loaded
-                            return child;
-                          }
-                          return Container(
-                            width: double.infinity,
-                            height: 200,
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes !=
-                                        null
-                                    ? loadingProgress.cumulativeBytesLoaded /
-                                        loadingProgress.expectedTotalBytes!
-                                    : null,
-                              ),
-                            ),
-                          );
-                        },
-                        errorBuilder: (BuildContext context, Object error,
-                            StackTrace? stackTrace) {
-                          return Text('Failed to load image');
-                        },
-                        width: double.infinity,
-                        height: 200,
-                        fit: BoxFit.cover,
-                      ),
-                      Row(
-                        children: [
-                          Column(
-                            children: [
-                              Text(
-                                hostel.hostelName,
-                                style: Theme.of(context).textTheme.bodyLarge,
-                              ),
-                              SizedBox(height: 2),
-                              Text("${hostel.hostelType} Hostel",
-                                  style: Theme.of(context).textTheme.bodySmall)
-                            ],
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              height: MediaQuery.of(context).size.height * 0.3,
+              color: tileColor, // You can change the color based on the status
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircleAvatar(
+                        radius: 50,
+                        child: ClipOval(
+                          child: AspectRatio(
+                            aspectRatio: 1.0,
+                            // child: widget.userdata != null
+                            //     ? widget.userdata!.imgUrl
+                            //     : currentUser.imgUrl == null
+                            //         ? const Icon(Icons.person)
+                            //         : CachedNetworkImage(
+                            //             imageUrl: currentUser.imgUrl!,
+                            //             fit: BoxFit.cover,
+                            //           ),
                           ),
-                          Container(
-                            alignment: AlignmentDirectional.bottomEnd,
-                            child: TextButton.icon(
-                                onPressed: () => Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                        builder: (_) => AddRoom(
-                                            hostelName: hostel.hostelName))),
-                                icon: Icon(Icons.add),
-                                label: Text("Add Room")),
-                          )
-                        ],
-                      )
-                    ],
-                  ),
+                        )),
+                    const SizedBox(height: 10),
+                    Text(
+                      currentStatus, // Replace with status (e.g., 'Absent', 'On Campus', etc.)
+                      style: TextStyle(fontSize: 20, color: Colors.white),
+                    ),
+                    // Add any other designing elements as required (e.g., student's name, ID, etc.)
+                  ],
                 ),
-              );
-            },
-            itemCount: snapshot.data!.length,
-          );
-        },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Add your statistics widgets here, like pie chart, bar chart, data, etc.
+                  // For example:
+                  Container(
+                    width: 200,
+                    height: 200,
+                    child:
+                        Placeholder(), // Replace Placeholder with your actual chart widget
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    'Attendance Statistics', // Add chart title or any other text here
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -63,7 +63,7 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
           });
           return;
         }
-        final loc = storage.collection('hostels').doc(widget.hostelName);
+        final loc = storage.collection('hostels').doc('hostelMates');
 
         await loc.collection('Roommates').doc(roommateEmail).set({
           'email': roommateEmail,
@@ -76,7 +76,9 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
           ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Error occured in updation')));
         });
-        await loc
+        await storage
+            .collection('hostels')
+            .doc(widget.hostelName)
             .collection('Rooms')
             .doc(widget.roomName)
             .update({'numRoommates': FieldValue.increment(1)});
