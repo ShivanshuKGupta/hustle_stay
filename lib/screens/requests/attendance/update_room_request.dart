@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/widgets/requests/room.dart/update_room.dart';
 
 class UpdateRoom extends StatefulWidget {
-  UpdateRoom({super.key, this.isSwap = false, this.hostelName, this.roomName});
-  bool isSwap;
+  const UpdateRoom(
+      {super.key, this.isSwap = false, this.hostelName, this.roomName});
+  final bool isSwap;
   final String? hostelName;
   final String? roomName;
 
@@ -13,22 +14,31 @@ class UpdateRoom extends StatefulWidget {
 
 class _UpdateRoomState extends State<UpdateRoom> {
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    isSwap = widget.isSwap;
+  }
+
+  bool isSwap = false;
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            Text(widget.isSwap ? 'Swap Room Request' : 'Change Room Request'),
+        title: Text(isSwap ? 'Swap Room Request' : 'Change Room Request'),
         actions: [
           IconButton(
             icon: Icon(Icons.reply_all_outlined),
             onPressed: () {
-              widget.isSwap = !widget.isSwap;
+              setState(() {
+                isSwap = !isSwap;
+              });
             },
           )
         ],
       ),
       body: UpdateRoomWidget(
-        isSwap: widget.isSwap,
+        isSwap: isSwap,
         hostelName: widget.hostelName,
         roomName: widget.roomName,
       ),
