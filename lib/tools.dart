@@ -45,6 +45,20 @@ SizedBox circularProgressIndicator({
   );
 }
 
+extension StringExtensions on String {
+  String toPascalCase() {
+    if (isEmpty) return this;
+
+    // Split the string by whitespace and capitalize the first letter of each word
+    return split(' ').map((word) {
+      if (word.isNotEmpty) {
+        return '${word[0].toUpperCase()}${word.substring(1)}';
+      }
+      return '';
+    }).join();
+  }
+}
+
 /// a widget which works like a clickable link
 /// can be used to open a [url]
 /// or can be used to initaite a call to [phone]

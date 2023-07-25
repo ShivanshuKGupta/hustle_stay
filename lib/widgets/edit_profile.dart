@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user/medical_info.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/image.dart';
+import 'package:hustle_stay/screens/admin_panel/permission.dart';
 import 'package:hustle_stay/tools.dart';
+import 'package:hustle_stay/widgets/loading_elevated_button.dart';
 import 'package:hustle_stay/widgets/profile_image.dart';
 import 'package:hustle_stay/widgets/settings/section.dart';
 
@@ -13,14 +15,13 @@ class EditProfileWidget extends StatefulWidget {
     this.user = user ?? UserData();
   }
 
-  late final UserData user;
+  late UserData user;
   @override
   State<EditProfileWidget> createState() => _EditProfileWidgetState();
 }
 
 class _EditProfileWidgetState extends State<EditProfileWidget> {
   final _formKey = GlobalKey<FormState>();
-  bool _loading = false;
 
   File? img;
 
@@ -28,22 +29,12 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
-    setState(() {
-      _loading = true;
-    });
-    try {
-      widget.user.imgUrl = img != null
-          ? await uploadImage(
-              context, img, widget.user.email!, "profile-image.jpg")
-          : widget.user.imgUrl;
-      await updateUserData(widget.user);
-      Navigator.of(context).pop(true); // to show that a change was done
-    } catch (e) {
-      showMsg(context, e.toString());
-    }
-    setState(() {
-      _loading = false;
-    });
+    widget.user.imgUrl = img != null
+        ? await uploadImage(
+            context, img, widget.user.email!, "profile-image.jpg")
+        : widget.user.imgUrl;
+    await updateUserData(widget.user);
+    Navigator.of(context).pop(true); // to show that a change was done
   }
 
   @override
@@ -71,7 +62,6 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
               Section(title: 'Personal Information', children: [
                 if (widget.user.email == null)
                   TextFormField(
-                    key: UniqueKey(),
                     maxLength: 50,
                     enabled: widget.user.email == null,
                     decoration: const InputDecoration(
@@ -102,7 +92,6 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                   },
                 ),
                 TextFormField(
-                  key: UniqueKey(),
                   keyboardType: TextInputType.phone,
                   decoration: const InputDecoration(
                     label: Text("Phone Number"),
@@ -116,7 +105,6 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                   },
                 ),
                 TextFormField(
-                  key: UniqueKey(),
                   maxLength: 200,
                   keyboardType: TextInputType.streetAddress,
                   decoration: const InputDecoration(
@@ -132,7 +120,6 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                 ),
                 if (currentUser.readonly.isAdmin)
                   DropdownButtonFormField(
-                      key: UniqueKey(),
                       decoration: const InputDecoration(label: Text('Type')),
                       value: widget.user.readonly.type,
                       items: ['attender', 'warden', 'student', 'other', "club"]
@@ -149,7 +136,6 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                 if (widget.user.email != currentUser.email &&
                     currentUser.readonly.isAdmin)
                   DropdownButtonFormField(
-                      key: UniqueKey(),
                       decoration: const InputDecoration(label: Text('Admin')),
                       value: widget.user.readonly.isAdmin,
                       items: [true, false]
@@ -166,7 +152,6 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
               ]),
               Section(title: 'Medical Information', children: [
                 TextFormField(
-                  key: UniqueKey(),
                   keyboardType: TextInputType.phone,
                   decoration: const InputDecoration(
                     label: Text("Emergency Phone Number"),
@@ -183,7 +168,6 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                   children: [
                     Expanded(
                       child: DropdownButtonFormField(
-                        key: UniqueKey(),
                         decoration:
                             const InputDecoration(label: Text('Blood Group')),
                         value: widget.user.medicalInfo.bloodGroup,
@@ -202,7 +186,6 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                     ),
                     Expanded(
                       child: DropdownButtonFormField(
-                        key: UniqueKey(),
                         decoration: const InputDecoration(
                           label: Text('RH Blood Type'),
                         ),
@@ -223,7 +206,6 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                   ],
                 ),
                 TextFormField(
-                  key: UniqueKey(),
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
                     label: Text("Height"),
@@ -240,7 +222,6 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                   },
                 ),
                 TextFormField(
-                  key: UniqueKey(),
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
                     label: Text("Weight"),
@@ -257,7 +238,6 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                   },
                 ),
                 DropdownButtonFormField(
-                  key: UniqueKey(),
                   decoration: const InputDecoration(
                     label: Text('Sex'),
                   ),
@@ -275,7 +255,6 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                   },
                 ),
                 DropdownButtonFormField(
-                  key: UniqueKey(),
                   decoration:
                       const InputDecoration(label: Text('Organ Donor?')),
                   value: widget.user.medicalInfo.organDonor,
@@ -318,7 +297,6 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
               ]),
               Section(title: 'Health Information', children: [
                 TextFormField(
-                  key: UniqueKey(),
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
                   decoration: const InputDecoration(
@@ -333,7 +311,6 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                   },
                 ),
                 TextFormField(
-                  key: UniqueKey(),
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
                   decoration: const InputDecoration(
@@ -348,7 +325,6 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                   },
                 ),
                 TextFormField(
-                  key: UniqueKey(),
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
                   decoration: const InputDecoration(
@@ -363,7 +339,6 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                   },
                 ),
                 TextFormField(
-                  key: UniqueKey(),
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
                   decoration: const InputDecoration(
@@ -378,28 +353,60 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                   },
                 ),
               ]),
+              if (currentUser.readonly.isAdmin)
+                Section(
+                  title: 'Permissions',
+                  children: [
+                    PermissionWidget(
+                      user: widget.user,
+                      type: 'Attendance',
+                      expanded: false,
+                      showSaveButton: false,
+                      onChange: (crud) =>
+                          widget.user.readonly.permissions.attendance = crud,
+                    ),
+                    PermissionWidget(
+                      user: widget.user,
+                      type: 'categories',
+                      expanded: false,
+                      showSaveButton: false,
+                      onChange: (crud) =>
+                          widget.user.readonly.permissions.categories = crud,
+                    ),
+                    PermissionWidget(
+                      user: widget.user,
+                      type: 'users',
+                      expanded: false,
+                      showSaveButton: false,
+                      onChange: (crud) =>
+                          widget.user.readonly.permissions.users = crud,
+                    ),
+                    PermissionWidget(
+                      user: widget.user,
+                      type: 'approvers',
+                      expanded: false,
+                      showSaveButton: false,
+                      onChange: (crud) =>
+                          widget.user.readonly.permissions.approvers = crud,
+                    ),
+                  ],
+                ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  ElevatedButton.icon(
-                    onPressed: _loading
-                        ? null
-                        : () {
-                            save(context);
-                          },
-                    icon: _loading
-                        ? circularProgressIndicator()
-                        : Icon(
-                            widget.user.email == null
-                                ? Icons.person_add_rounded
-                                : Icons.save_rounded,
-                          ),
+                  LoadingElevatedButton(
+                    onPressed: () async {
+                      await save(context);
+                    },
+                    icon: Icon(
+                      widget.user.email == null
+                          ? Icons.person_add_rounded
+                          : Icons.save_rounded,
+                    ),
                     label: Text(widget.user.email == null ? 'Add' : 'Save'),
                   ),
                   TextButton.icon(
-                    onPressed: () {
-                      _formKey.currentState!.reset();
-                    },
+                    onPressed: () => _formKey.currentState!.reset,
                     icon: const Icon(Icons.refresh),
                     label: const Text('Reset'),
                   ),

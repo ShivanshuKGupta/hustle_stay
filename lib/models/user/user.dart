@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/user/medical_info.dart';
-import 'package:hustle_stay/models/user/permissions.dart';
 import 'package:hustle_stay/models/user/readonly_prop.dart';
 import 'package:hustle_stay/tools.dart';
 
@@ -17,8 +16,6 @@ class UserData {
     readonly.name = newName;
   }
 
-  late Permissions permissions;
-
   String? imgUrl;
   ReadOnly readonly = ReadOnly();
   late MedicalInfo medicalInfo;
@@ -31,7 +28,6 @@ class UserData {
       required this.medicalInfo,
       required this.readonly}) {
     readonly.name = name;
-    permissions = Permissions();
   }
 
   UserData({
@@ -42,7 +38,6 @@ class UserData {
     this.imgUrl,
   }) {
     medicalInfo = MedicalInfo();
-    permissions = Permissions();
     readonly.name = name;
   }
 
@@ -52,7 +47,6 @@ class UserData {
       "address": address,
       "imgUrl": imgUrl,
       "medicalInfo": medicalInfo.encode(),
-      "permissions": permissions.encode(),
     };
   }
 
@@ -61,7 +55,6 @@ class UserData {
     address = userData['address'];
     imgUrl = userData['imgUrl'];
     medicalInfo.load(userData['medicalInfo'] ?? {});
-    permissions.load(userData['permissions'] ?? {});
   }
 }
 

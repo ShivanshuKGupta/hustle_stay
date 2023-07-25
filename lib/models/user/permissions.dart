@@ -1,4 +1,38 @@
 class CRUD {
+  static const Set<String> values = {'create', 'read', 'update', 'delete'};
+
+  bool? operator [](String property) {
+    switch (property.toLowerCase()) {
+      case 'create':
+        return create;
+      case 'read':
+        return read;
+      case 'update':
+        return update;
+      case 'delete':
+        return delete;
+    }
+    throw 'No such property exists: \'$property\'';
+  }
+
+  void operator []=(String property, bool? value) {
+    switch (property.toLowerCase()) {
+      case 'create':
+        create = value;
+        return;
+      case 'read':
+        read = value;
+        return;
+      case 'update':
+        update = value;
+        return;
+      case 'delete':
+        delete = value;
+        return;
+    }
+    throw 'No such property exists: \'$property\'';
+  }
+
   bool? create, read, update, delete;
   CRUD({
     this.create,
@@ -25,15 +59,36 @@ class CRUD {
 }
 
 class Permissions {
-  CRUD? attendance, categories, users, approvers;
-  Permissions({this.attendance, this.categories, this.users, this.approvers});
+  late CRUD attendance, categories, users, approvers;
+
+  CRUD? operator [](String property) {
+    switch (property.toLowerCase()) {
+      case 'attendance':
+        return attendance;
+      case 'categories':
+        return categories;
+      case 'users':
+        return users;
+      case 'approvers':
+        return approvers;
+    }
+    throw 'No such property exists: \'$property\'';
+  }
+
+  Permissions(
+      {CRUD? attendance, CRUD? categories, CRUD? users, CRUD? approvers}) {
+    this.attendance = attendance ?? CRUD();
+    this.categories = categories ?? CRUD();
+    this.users = users ?? CRUD();
+    this.approvers = approvers ?? CRUD();
+  }
 
   Map<String, Map<String, bool>> encode() {
     return {
-      if (attendance != null) 'attendance': attendance!.encode(),
-      if (categories != null) 'categories': categories!.encode(),
-      if (users != null) 'users': users!.encode(),
-      if (approvers != null) 'approvers': approvers!.encode(),
+      'attendance': attendance.encode(),
+      'categories': categories.encode(),
+      'users': users.encode(),
+      'approvers': approvers.encode(),
     };
   }
 

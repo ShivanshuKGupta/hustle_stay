@@ -63,7 +63,7 @@ class _EditPermissionsState extends State<EditPermissions> {
             child: GestureDetector(
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => Permission(
+                      builder: (_) => PermissionsPage(
                           email: widget.email,
                           type: catList[index].operationName)));
                 },
