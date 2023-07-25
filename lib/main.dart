@@ -65,6 +65,9 @@ void main() async {
   if (auth.currentUser != null) {
     currentUser = await fetchUserData(auth.currentUser!.email!);
   }
+  // TODO: remove this
+  // For Some corrections in users data
+  // await fetchUsers();
   runApp(const ProviderScope(child: HustleStayApp()));
 }
 

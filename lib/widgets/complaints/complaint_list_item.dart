@@ -174,23 +174,25 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
             contentPadding: const EdgeInsets.only(top: 15, left: 20, right: 20),
             actionsAlignment: MainAxisAlignment.spaceAround,
             title: Text(widget.complaint.title),
-            actions: (widget.complaint.from != currentUser.email!)
-                ? [const SizedBox(height: 10)]
-                : [
-                    IconButton(
-                      onPressed: () => editMe(),
-                      icon: const Icon(Icons.edit_rounded),
-                    ),
-                    IconButton(
-                      onPressed: () async {
-                        if (await deleteMe() == true) {
-                          // ignore: use_build_context_synchronously
-                          Navigator.of(context).pop();
-                        }
-                      },
-                      icon: const Icon(Icons.delete_rounded),
-                    ),
-                  ],
+            actions: [
+              if (currentUser.email == widget.complaint.from ||
+                  currentUser.readonly.permissions.complaints.update == true)
+                IconButton(
+                  onPressed: () => editMe(),
+                  icon: const Icon(Icons.edit_rounded),
+                ),
+              if (currentUser.email == widget.complaint.from ||
+                  currentUser.readonly.permissions.complaints.delete == true)
+                IconButton(
+                  onPressed: () async {
+                    if (await deleteMe() == true) {
+                      // ignore: use_build_context_synchronously
+                      Navigator.of(context).pop();
+                    }
+                  },
+                  icon: const Icon(Icons.delete_rounded),
+                ),
+            ],
             content: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,

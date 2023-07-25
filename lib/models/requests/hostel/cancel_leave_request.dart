@@ -20,7 +20,6 @@ class CancelLeaveRequest extends Request {
   @override
   Widget widget(context) {
     return super.listWidget(
-      context,
       Column(
         children: [
           Wrap(children: [

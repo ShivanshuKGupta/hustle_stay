@@ -70,7 +70,6 @@ class VehicleRequest extends Request {
     uiElement['color'] = uiElement[title]!['color'];
     uiElement['icon'] = uiElement[title]!['icon'];
     return super.listWidget(
-      context,
       Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

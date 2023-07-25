@@ -320,116 +320,14 @@ abstract class Request {
 
   /// This is the function returns a custom widget for this type of request
   @protected
-  Widget listWidget(BuildContext context, Widget? detailWidget,
-      Map<String, String> otherDetails) {
-    Widget trailing = status == RequestStatus.pending
-        ? AnimateIcon(
-            onTap: () {
-              showMsg(context, 'This request is yet to be approved.');
-            },
-            iconType: IconType.continueAnimation,
-            animateIcon: AnimateIcons.hourglass,
-          )
-        : IconButton(
-            onPressed: () {
-              showMsg(context, 'This request is ${status.name}.');
-            },
-            icon: Icon(
-              status == RequestStatus.approved
-                  ? Icons.check_circle_outline_rounded
-                  : Icons.cancel_outlined,
-              color: status == RequestStatus.approved
-                  ? Colors.greenAccent
-                  : Colors.redAccent,
-            ),
-          );
-    if (currentUser.readonly.type != 'student' &&
-        status == RequestStatus.pending) {
-      // TODO: Remove shortcircuiting
-      trailing = Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            onPressed: () async {
-              final response = await askUser(
-                context,
-                'Do you want to approve this $type request?',
-                yes: true,
-                no: true,
-              );
-              if (response == 'yes') {
-                approve();
-              }
-            },
-            icon: const Icon(
-              Icons.check_rounded,
-              color: Colors.green,
-            ),
-          ),
-          IconButton(
-            onPressed: () async {
-              final response = await askUser(
-                context,
-                'Do you want to deny this $type request?',
-                yes: true,
-                no: true,
-              );
-              if (response == 'yes') {
-                deny();
-              }
-            },
-            icon: const Icon(
-              Icons.close,
-              color: Colors.red,
-            ),
-          ),
-        ],
-      );
-    }
-    return GlassWidget(
-      radius: 30,
-      child: Container(
-        color: uiElement['color'].withOpacity(0.2),
-        child: ListTile(
-          contentPadding: const EdgeInsets.only(left: 10),
-          onTap: () {
-            navigatorPush(
-              context,
-              ChatScreen(
-                bottomBar: (currentUser.readonly.type == 'student')
-                    ? null
-                    : RequestBottomBar(request: this),
-                showInfo: () => showInfo(context, otherDetails),
-                chat: chatData,
-              ),
-            );
-          },
-          onLongPress: () {
-            showInfo(context, otherDetails);
-          },
-          leading: Icon(uiElement['icon'], size: 50),
-          title: Text('${type.replaceAll('_', ' ')} Request',
-              overflow: TextOverflow.fade),
-          trailing: trailing,
-          subtitle: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (detailWidget != null) detailWidget,
-              if (currentUser.readonly.type != 'student')
-                UserBuilder(
-                  email: requestingUserEmail,
-                  builder: (ctx, userData) => Text(
-                    userData.name ?? userData.email!,
-                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                          color: uiElement['color'],
-                        ),
-                  ),
-                )
-            ],
-          ),
-        ),
-      ),
+  Widget listWidget(
+    Widget? detailWidget,
+    Map<String, String> otherDetails,
+  ) {
+    return RequestItem(
+      request: this,
+      otherDetails: otherDetails,
+      detailWidget: detailWidget,
     );
   }
 
@@ -511,4 +409,129 @@ Request decodeToRequest(Map<String, dynamic> data) {
       ..load(data);
   }
   throw "No such type exists: '$type'";
+}
+
+class RequestItem extends StatelessWidget {
+  final Request request;
+  final Widget? detailWidget;
+  final Map<String, String> otherDetails;
+  const RequestItem(
+      {super.key,
+      required this.request,
+      this.detailWidget,
+      required this.otherDetails});
+
+  @override
+  Widget build(BuildContext context) {
+    Widget trailing = request.status == RequestStatus.pending
+        ? AnimateIcon(
+            color: Theme.of(context).colorScheme.primary,
+            onTap: () {
+              showMsg(context, 'This request is yet to be approved.');
+            },
+            iconType: IconType.continueAnimation,
+            animateIcon: AnimateIcons.hourglass,
+          )
+        : IconButton(
+            onPressed: () {
+              showMsg(context, 'This request is ${request.status.name}.');
+            },
+            icon: Icon(
+              request.status == RequestStatus.approved
+                  ? Icons.check_circle_outline_rounded
+                  : Icons.cancel_outlined,
+              color: request.status == RequestStatus.approved
+                  ? Colors.greenAccent
+                  : Colors.redAccent,
+            ),
+          );
+    if (currentUser.readonly.type != 'student' &&
+        request.status == RequestStatus.pending) {
+      // TODO: Remove shortcircuiting
+      trailing = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            onPressed: () async {
+              final response = await askUser(
+                context,
+                'Do you want to approve this ${request.type} request?',
+                yes: true,
+                no: true,
+              );
+              if (response == 'yes') {
+                request.approve();
+              }
+            },
+            icon: const Icon(
+              Icons.check_rounded,
+              color: Colors.green,
+            ),
+          ),
+          IconButton(
+            onPressed: () async {
+              final response = await askUser(
+                context,
+                'Do you want to deny this ${request.type} request?',
+                yes: true,
+                no: true,
+              );
+              if (response == 'yes') {
+                request.deny();
+              }
+            },
+            icon: const Icon(
+              Icons.close,
+              color: Colors.red,
+            ),
+          ),
+        ],
+      );
+    }
+    return GlassWidget(
+      radius: 30,
+      child: Container(
+        color: request.uiElement['color'].withOpacity(0.2),
+        child: ListTile(
+          contentPadding: const EdgeInsets.only(left: 10),
+          onTap: () {
+            navigatorPush(
+              context,
+              ChatScreen(
+                bottomBar: (currentUser.readonly.type == 'student')
+                    ? null
+                    : RequestBottomBar(request: request),
+                showInfo: () => request.showInfo(context, otherDetails),
+                chat: request.chatData,
+              ),
+            );
+          },
+          onLongPress: () {
+            request.showInfo(context, otherDetails);
+          },
+          leading: Icon(request.uiElement['icon'], size: 50),
+          title: Text('${request.type.replaceAll('_', ' ')} Request',
+              overflow: TextOverflow.fade),
+          trailing: trailing,
+          subtitle: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (detailWidget != null) detailWidget!,
+              if (currentUser.readonly.type != 'student')
+                UserBuilder(
+                  email: request.requestingUserEmail,
+                  builder: (ctx, userData) => Text(
+                    userData.name ?? userData.email!,
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color: request.uiElement['color'],
+                        ),
+                  ),
+                )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

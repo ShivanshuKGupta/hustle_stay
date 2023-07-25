@@ -82,127 +82,123 @@ class _RequestInfoState extends State<RequestInfo> {
           ],
         ),
       ),
-      actions: (widget.request.status != RequestStatus.pending)
-          ? [
-              const SizedBox(
-                height: 10,
-              )
-            ]
-          : [
-              if (widget.request.requestingUserEmail == currentUser.email &&
-                  widget.request.status == RequestStatus.pending)
-                TextButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    final request = decodeToRequest(widget.request.encode());
-                    Widget page = Scaffold(
-                      appBar: AppBar(),
-                      body: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'To edit requests of type \'${request.type.replaceAll('_', ' ')}\', you may have to use some other feature in the app.',
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    );
-                    if (request is VehicleRequest) {
-                      page = VehicleRequestFormScreen(
-                        request: request,
-                        title: request.title,
-                        icon:
-                            Icon(allVehicleRequestsData[request.title]['icon']),
-                        reasonOptions: allVehicleRequestsData[request.title]
-                            ['reasonOptions'],
-                      );
-                    } else if (request is MenuChangeRequest) {
-                      page = MenuChangeRequestScreen(
-                        request: request,
-                      );
-                    } else if (request is OtherRequest) {
-                      page = OtherRequestScreen(
-                        request: request,
-                      );
-                    }
-                    navigatorPush(context, page);
-                  },
-                  label: const Text('Edit'),
-                  icon: const Icon(Icons.edit_rounded),
+      actions: [
+        if ((widget.request.requestingUserEmail == currentUser.email &&
+                widget.request.status == RequestStatus.pending) ||
+            currentUser.readonly.permissions.requests.update == true)
+          TextButton.icon(
+            onPressed: () {
+              Navigator.of(context).pop();
+              final request = decodeToRequest(widget.request.encode());
+              Widget page = Scaffold(
+                appBar: AppBar(),
+                body: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'To edit requests of type \'${request.type.replaceAll('_', ' ')}\', you may have to use some other feature in the app.',
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
-              if (currentUser.readonly.type == 'student')
-                TextButton.icon(
-                  onPressed: () async {
-                    final response = await askUser(
-                        context, 'Do you really want to withdraw this request?',
-                        yes: true, no: true);
-                    if (response == 'yes') {
-                      try {
-                        await widget.request.delete();
-                      } catch (e) {
-                        if (context.mounted) {
-                          showMsg(context, e.toString());
-                        }
-                        return;
-                      }
-                      if (context.mounted) {
-                        Navigator.of(context).pop(true);
-                      }
-                    }
-                  },
-                  icon: const Icon(Icons.close_rounded),
-                  label: const Text('Withdraw'),
-                  style: TextButton.styleFrom(foregroundColor: Colors.red),
-                ),
-              if (currentUser.readonly.type != 'student')
-                TextButton.icon(
-                  onPressed: () async {
-                    final response = await askUser(
-                        context, 'Do you really want to approve this request?',
-                        yes: true, no: true);
-                    if (response == 'yes') {
-                      try {
-                        await widget.request.approve();
-                      } catch (e) {
-                        if (context.mounted) {
-                          showMsg(context, e.toString());
-                        }
-                        return;
-                      }
-                      if (context.mounted) {
-                        Navigator.of(context).pop(true);
-                      }
-                    }
-                  },
-                  icon: const Icon(Icons.check_rounded),
-                  label: const Text('Accept'),
-                  style: TextButton.styleFrom(foregroundColor: Colors.green),
-                ),
-              if (currentUser.readonly.type != 'student')
-                TextButton.icon(
-                  onPressed: () async {
-                    final response = await askUser(
-                        context, 'Do you really want to deny this request?',
-                        yes: true, no: true);
-                    if (response == 'yes') {
-                      try {
-                        await widget.request.deny();
-                      } catch (e) {
-                        if (context.mounted) {
-                          showMsg(context, e.toString());
-                        }
-                        return;
-                      }
-                      if (context.mounted) {
-                        Navigator.of(context).pop(true);
-                      }
-                    }
-                  },
-                  icon: const Icon(Icons.close_rounded),
-                  label: const Text('Deny'),
-                  style: TextButton.styleFrom(foregroundColor: Colors.red),
-                )
-            ],
+              );
+              if (request is VehicleRequest) {
+                page = VehicleRequestFormScreen(
+                  request: request,
+                  title: request.title,
+                  icon: Icon(allVehicleRequestsData[request.title]['icon']),
+                  reasonOptions: allVehicleRequestsData[request.title]
+                      ['reasonOptions'],
+                );
+              } else if (request is MenuChangeRequest) {
+                page = MenuChangeRequestScreen(
+                  request: request,
+                );
+              } else if (request is OtherRequest) {
+                page = OtherRequestScreen(
+                  request: request,
+                );
+              }
+              navigatorPush(context, page);
+            },
+            label: const Text('Edit'),
+            icon: const Icon(Icons.edit_rounded),
+          ),
+        if ((widget.request.requestingUserEmail == currentUser.email &&
+                widget.request.status == RequestStatus.pending) ||
+            currentUser.readonly.permissions.requests.delete == true)
+          TextButton.icon(
+            onPressed: () async {
+              final response = await askUser(
+                  context, 'Do you really want to withdraw this request?',
+                  yes: true, no: true);
+              if (response == 'yes') {
+                try {
+                  await widget.request.delete();
+                } catch (e) {
+                  if (context.mounted) {
+                    showMsg(context, e.toString());
+                  }
+                  return;
+                }
+                if (context.mounted) {
+                  Navigator.of(context).pop(true);
+                }
+              }
+            },
+            icon: const Icon(Icons.close_rounded),
+            label: const Text('Withdraw'),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+          ),
+        if (currentUser.readonly.type != 'student')
+          TextButton.icon(
+            onPressed: () async {
+              final response = await askUser(
+                  context, 'Do you really want to approve this request?',
+                  yes: true, no: true);
+              if (response == 'yes') {
+                try {
+                  await widget.request.approve();
+                } catch (e) {
+                  if (context.mounted) {
+                    showMsg(context, e.toString());
+                  }
+                  return;
+                }
+                if (context.mounted) {
+                  Navigator.of(context).pop(true);
+                }
+              }
+            },
+            icon: const Icon(Icons.check_rounded),
+            label: const Text('Accept'),
+            style: TextButton.styleFrom(foregroundColor: Colors.green),
+          ),
+        if (currentUser.readonly.type != 'student')
+          TextButton.icon(
+            onPressed: () async {
+              final response = await askUser(
+                  context, 'Do you really want to deny this request?',
+                  yes: true, no: true);
+              if (response == 'yes') {
+                try {
+                  await widget.request.deny();
+                } catch (e) {
+                  if (context.mounted) {
+                    showMsg(context, e.toString());
+                  }
+                  return;
+                }
+                if (context.mounted) {
+                  Navigator.of(context).pop(true);
+                }
+              }
+            },
+            icon: const Icon(Icons.close_rounded),
+            label: const Text('Deny'),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+          )
+      ],
     );
   }
 }
