@@ -4,6 +4,7 @@ import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
+import 'package:hustle_stay/screens/attendance_screen.dart';
 import 'package:hustle_stay/screens/complaints/complaints_screen.dart';
 import 'package:hustle_stay/screens/hostel/hostel_screen.dart';
 import 'package:hustle_stay/screens/hostel/rooms/complete_details_screen.dart';
@@ -28,6 +29,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         PageController(initialPage: ref.read(settingsProvider).currentPage);
   }
 
+// CompleteDetails(
+//               hostelName: currentUser.readonly.hostelName ?? '',
+//               roomName: currentUser.readonly.roomName ?? '',
+//               user: UserData(
+//                   email: currentUser.email,
+//                   address: currentUser.address,
+//                   imgUrl: currentUser.imgUrl,
+//                   name: currentUser.name,
+//                   phoneNumber: currentUser.phoneNumber),
+//               roommateData: RoommateData(email: currentUser.email!))
   @override
   Widget build(BuildContext context) {
     final settings = ref.read(settingsProvider);
@@ -36,16 +47,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     int i = 0;
     List<Widget> bodyList = [
       currentUser.readonly.type == 'student'
-          ? CompleteDetails(
-              hostelName: currentUser.readonly.hostelName ?? '',
-              roomName: currentUser.readonly.roomName ?? '',
-              user: UserData(
-                  email: currentUser.email,
-                  address: currentUser.address,
-                  imgUrl: currentUser.imgUrl,
-                  name: currentUser.name,
-                  phoneNumber: currentUser.phoneNumber),
-              roommateData: RoommateData(email: currentUser.email!))
+          ? AttendanceScreen()
           : const HostelScreen(),
       const ComplaintsScreen(),
       const Center(

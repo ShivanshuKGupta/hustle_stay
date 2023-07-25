@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/models/user.dart';
 import 'package:intl/intl.dart';
 
 import 'hostel/rooms/room.dart';
@@ -273,7 +274,7 @@ Future<bool> markAllRoommateAttendance(String hostelName, String roomName,
   }
 }
 
-Future<Map<String, double>> getAttendanceStatistics(
+Future<Map<String, dynamic>> getAttendanceStatistics(
     String email, String hostelName,
     {DateTimeRange? range, Source? source}) async {
   double presentData = 0;
@@ -324,13 +325,14 @@ Future<Map<String, double>> getAttendanceStatistics(
       }
     }
   }
-  Map<String, double> attendanceStats = {
+  Map<String, dynamic> attendanceStats = {
     'present': presentData,
     'absent': absentData,
     'leave': leaveData,
     'internship': internshipData,
     'presentLate': presentLateData,
     'total': total,
+    'todayStatus': todayStatus,
   };
 
   return attendanceStats;
@@ -576,4 +578,24 @@ Future<List<LeaveData>> fetchLeaves(String hostelName, String email,
 
   // print('leave list: $list');
   return list;
+}
+
+Future<Map<DateTime, String>> getAttendanceRecord(String? email) async {
+  final ref = await storage
+      .collection('hostels')
+      .doc('hostelMates')
+      .collection('Roommates')
+      .doc(email ?? currentUser.email)
+      .collection('Attendance')
+      .get();
+  Map<DateTime, String> data = {};
+  for (final x in ref.docs) {
+    List<String> dateComponents = x.id.split('-');
+
+    int year = int.parse(dateComponents[0]);
+    int month = int.parse(dateComponents[1]);
+    int day = int.parse(dateComponents[2]);
+    data[DateTime(year, month, day)] = x['status'];
+  }
+  return data;
 }
