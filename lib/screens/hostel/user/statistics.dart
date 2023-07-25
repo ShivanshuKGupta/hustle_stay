@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/widgets/room/roommates/chart_attendance.dart';
+
+import '../../../models/user/user.dart';
 
 class StatisticsUser extends StatefulWidget {
   const StatisticsUser({super.key});
