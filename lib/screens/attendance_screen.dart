@@ -6,6 +6,8 @@ import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import 'package:hustle_stay/models/user.dart';
 import 'package:hustle_stay/screens/hostel/hostel_screen.dart';
 import 'package:hustle_stay/screens/hostel/user/attendance_records.dart';
+import 'package:hustle_stay/screens/hostel/user/statistics.dart';
+import 'package:hustle_stay/screens/requests/attendance/update_room_request.dart';
 import 'package:intl/intl.dart';
 
 import '../models/common/operation.dart';
@@ -363,8 +365,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                                 builder: (_) => AttendanceRecord()));
                             break;
                           case 'Statistics and Analytics':
-                            // Navigator.of(context).push(MaterialPageRoute(
-                            //     builder: (_) =>const ));
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (_) => const StatisticsUser()));
                             break;
                           case 'View Leaves':
                             Navigator.of(context).push(MaterialPageRoute(
@@ -372,7 +374,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                             break;
                           case 'Change/Swap Room':
                             Navigator.of(context).push(MaterialPageRoute(
-                                builder: (_) => const HostelScreen()));
+                                builder: (_) => const UpdateRoom()));
                             break;
                           default:
                         }

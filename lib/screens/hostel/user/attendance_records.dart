@@ -108,26 +108,19 @@ class _AttendanceRecordState extends State<AttendanceRecord> {
               final date =
                   DateTime(_selectedDate.year, _selectedDate.month, day);
 
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedDate = date;
-                  });
-                },
-                child: Container(
-                  alignment: Alignment.center,
-                  decoration: day <= 0
-                      ? null
-                      : BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: _getAttendanceStatusColor(data[date]) ??
-                              Colors.grey,
-                        ),
-                  child: Text(
-                    day <= 0 ? "" : day.toString(),
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
+              return Container(
+                alignment: Alignment.center,
+                decoration: day <= 0
+                    ? null
+                    : BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: _getAttendanceStatusColor(data[date]) ??
+                            Colors.grey,
+                      ),
+                child: Text(
+                  day <= 0 ? "" : day.toString(),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               );
@@ -143,7 +136,7 @@ class _AttendanceRecordState extends State<AttendanceRecord> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         IconButton(
-          icon: Icon(Icons.chevron_left),
+          icon: const Icon(Icons.chevron_left),
           onPressed: () {
             setState(() {
               _selectedDate = _previousMonth(_selectedDate);
@@ -151,11 +144,11 @@ class _AttendanceRecordState extends State<AttendanceRecord> {
           },
         ),
         Text(
-          '${_getMonthName(_selectedDate.month)} ${_selectedDate.year}',
+          '${monthVal(_selectedDate.month)} ${_selectedDate.year}',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         IconButton(
-          icon: Icon(Icons.chevron_right),
+          icon: const Icon(Icons.chevron_right),
           onPressed: () {
             setState(() {
               _selectedDate = _nextMonth(_selectedDate);
@@ -182,7 +175,7 @@ class _AttendanceRecordState extends State<AttendanceRecord> {
     return DateTime(date.year, date.month + 1, date.day);
   }
 
-  String _getMonthName(int month) {
+  String monthVal(int idx) {
     final months = [
       'January',
       'February',
@@ -197,6 +190,6 @@ class _AttendanceRecordState extends State<AttendanceRecord> {
       'November',
       'December'
     ];
-    return months[month - 1];
+    return months[idx - 1];
   }
 }
