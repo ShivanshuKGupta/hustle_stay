@@ -25,13 +25,14 @@ class _UpdateRoomState extends State<UpdateRoom> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            Text(widget.isSwap ? 'Swap Room Request' : 'Change Room Request'),
+        title: Text(isSwap ? 'Swap Room Request' : 'Change Room Request'),
         actions: [
           IconButton(
             icon: Icon(Icons.reply_all_outlined),
             onPressed: () {
-              isSwap = !isSwap;
+              setState(() {
+                isSwap = !isSwap;
+              });
             },
           )
         ],

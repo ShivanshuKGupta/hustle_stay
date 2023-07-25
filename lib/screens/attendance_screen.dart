@@ -9,6 +9,7 @@ import '../models/common/operation.dart';
 import '../models/user/user.dart';
 import 'hostel/hostel_screen.dart';
 import 'hostel/user/attendance_records.dart';
+import 'hostel/user/leave_screen.dart';
 import 'hostel/user/statistics.dart';
 // import 'package:hustle_stay/models/user.dart';
 
@@ -158,7 +159,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: screenWidth,
             height:
                 screenWidth >= 800 ? screenheight * 0.6 : screenheight * 0.45,
             padding: EdgeInsets.all(screenWidth >= 800 ? 1 : 5),
@@ -362,7 +362,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         switch (catList[index].operationName) {
                           case 'View Attendance Records':
                             Navigator.of(context).push(MaterialPageRoute(
-                                builder: (_) => AttendanceRecord()));
+                                builder: (_) => const AttendanceRecord()));
                             break;
                           case 'Statistics and Analytics':
                             Navigator.of(context).push(MaterialPageRoute(
@@ -370,11 +370,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                             break;
                           case 'View Leaves':
                             Navigator.of(context).push(MaterialPageRoute(
-                                builder: (_) => const HostelScreen()));
+                                builder: (_) => const LeaveScreen()));
                             break;
                           case 'Change/Swap Room':
                             Navigator.of(context).push(MaterialPageRoute(
-                                builder: (_) => UpdateRoom()));
+                                builder: (_) => const UpdateRoom()));
                             break;
                           default:
                         }

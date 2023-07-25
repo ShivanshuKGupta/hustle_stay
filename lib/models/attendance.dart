@@ -560,7 +560,9 @@ Future<List<LeaveData>> fetchLeaves(String hostelName, String email,
   final leaveStartDate = refR.data()!['leaveStartDate'];
   final onLeave = refR.data()!['onLeave'];
 
-  final leavesRef = refR.reference.collection('Leaves');
+  final leavesRef = refR.reference
+      .collection('Leaves')
+      .orderBy('startDate', descending: true);
 
   QuerySnapshot<Map<String, dynamic>> ref;
 
