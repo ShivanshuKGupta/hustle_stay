@@ -105,6 +105,9 @@ Future<UserData> fetchUserData(
   }
   userData.readonly.load(response?.data() ?? {});
 
+// Some correction
+  // firestore.collection('users').doc(email).set(userData.readonly.encode());
+
   if (!readonly) {
     /// Loading editable properties ...
     try {

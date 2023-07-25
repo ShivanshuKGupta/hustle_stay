@@ -60,7 +60,6 @@ class ChangeRoomRequest extends Request {
   @override
   Widget widget(context) {
     return super.listWidget(
-      context,
       Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

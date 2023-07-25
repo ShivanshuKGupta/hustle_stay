@@ -66,7 +66,17 @@ class _ComplaintFormState extends State<ComplaintForm> {
     setState(() {
       _loading = true;
     });
-    complaint = await updateComplaint(complaint);
+    try {
+      complaint = await updateComplaint(complaint);
+    } catch (e) {
+      showMsg(context, e.toString());
+      if (context.mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
+      return;
+    }
     if (context.mounted) {
       setState(() {
         _loading = false;
