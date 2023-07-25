@@ -5,7 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/auth/auth_screen.dart';
 import 'package:hustle_stay/screens/home_screen.dart';

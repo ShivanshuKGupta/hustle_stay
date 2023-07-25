@@ -6,7 +6,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import 'package:hustle_stay/screens/hostel/rooms/rooms_screen.dart';
 
-import '../../../models/user.dart';
+import '../../../models/user/user.dart';
 import '../../../tools.dart';
 
 class RoommateForm extends ConsumerStatefulWidget {

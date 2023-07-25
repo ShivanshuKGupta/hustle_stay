@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/category/category.dart';
-import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/choose_icon.dart';
 import 'package:hustle_stay/widgets/complaints/select_one.dart';

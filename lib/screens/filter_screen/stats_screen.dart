@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
-import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/complaints/complaints_screen.dart';
 import 'package:hustle_stay/screens/filter_screen/filter_choser_screen.dart';
@@ -126,7 +126,7 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                   onRefresh: () async {
                     try {
                       await _complaintsProvider();
-                      await fetchAllUserEmails();
+                      await fetchAllUserReadonlyProperties();
                       await fetchComplainees();
                       await fetchAllCategories();
                       if (context.mounted) {

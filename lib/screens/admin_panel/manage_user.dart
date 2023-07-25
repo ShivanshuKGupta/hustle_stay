@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/widgets/edit_profile.dart';
 
-import '../../models/user.dart';
+import '../../models/user/user.dart';
 import '../../widgets/edit_permission.dart';
 
 class ManageUser extends StatefulWidget {

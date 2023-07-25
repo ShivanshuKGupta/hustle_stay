@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/screens/admin_panel/admin_panel_screen.dart';
 import 'package:hustle_stay/screens/category/edit_category_screen.dart';
 import 'package:hustle_stay/screens/complaints/resolved_complaints_screen.dart';

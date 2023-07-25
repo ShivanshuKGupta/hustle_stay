@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/hostel/rooms/room.dart';
-import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/models/user/user.dart';
 import '../../../widgets/requests/room.dart/update_room.dart';
 import '../../../widgets/room/change_room/change_room.dart';
 

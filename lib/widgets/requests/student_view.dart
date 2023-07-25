@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/requests/request.dart';
-import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/firestore_cache_builder.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/requests/post_request_options.dart';

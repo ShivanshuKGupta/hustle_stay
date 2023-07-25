@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/chat/call_choser.dart';
 import 'package:url_launcher/url_launcher.dart';

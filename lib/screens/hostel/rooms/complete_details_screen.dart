@@ -5,7 +5,7 @@ import 'package:hustle_stay/widgets/room/leave_widget.dart';
 import 'package:hustle_stay/widgets/room/roommates/chart_attendance.dart';
 
 import '../../../models/hostel/rooms/room.dart';
-import '../../../models/user.dart';
+import '../../../models/user/user.dart';
 import '../../../tools.dart';
 
 class CompleteDetails extends StatefulWidget {

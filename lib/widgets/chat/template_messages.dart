@@ -2,7 +2,7 @@ import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/requests/mess/menu_change_request.dart';
 import 'package:hustle_stay/models/requests/other/other_request.dart';
 import 'package:hustle_stay/models/requests/vehicle/vehicle_request.dart';
-import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/tools.dart';
 
 String complaintTemplateMessage(ComplaintData complaint) {

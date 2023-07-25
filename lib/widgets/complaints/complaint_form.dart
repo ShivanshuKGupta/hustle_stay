@@ -3,7 +3,7 @@ import 'package:hustle_stay/models/category/category.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
-import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/chat/template_messages.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_list_item.dart';

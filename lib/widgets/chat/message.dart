@@ -7,7 +7,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/chat/message.dart';
-import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/image.dart';
 import 'package:hustle_stay/screens/chat/image_preview.dart';
 import 'package:hustle_stay/tools.dart';

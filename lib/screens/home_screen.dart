@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:hustle_stay/models/hostel/rooms/room.dart';
-import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/complaints/complaints_screen.dart';
 import 'package:hustle_stay/screens/hostel/hostel_screen.dart';

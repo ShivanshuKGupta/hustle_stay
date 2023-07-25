@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../models/attendance.dart';
 import '../../models/hostel/hostels.dart';
 import '../../models/hostel/rooms/room.dart';
-import '../../models/user.dart';
+import '../../models/user/user.dart';
 import '../../screens/hostel/rooms/rooms_screen.dart';
 import '../../tools.dart';
 

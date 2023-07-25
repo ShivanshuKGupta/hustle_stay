@@ -2,120 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
+import 'package:hustle_stay/models/user/medical_info.dart';
+import 'package:hustle_stay/models/user/permissions.dart';
+import 'package:hustle_stay/models/user/readonly_prop.dart';
 import 'package:hustle_stay/tools.dart';
-
-class ReadOnly {
-  bool isAdmin = false;
-  String type = "student";
-  String? name;
-  String? hostelName;
-  String? roomName;
-
-  void load(Map<String, dynamic> data) {
-    isAdmin = data['isAdmin'] ?? false;
-    type = data['type'] ?? "student";
-    hostelName = data['hostelName'];
-    roomName = data['roomName'];
-    name = data['name'];
-  }
-
-  Map<String, dynamic> encode() {
-    return {
-      "isAdmin": isAdmin,
-      "type": type,
-      "name": name,
-      if (type == 'student') "hostelName": hostelName,
-      if (type == 'student') "roomName": roomName,
-    };
-  }
-}
-
-enum BloodGroup {
-  O,
-  A,
-  B,
-  // ignore: constant_identifier_names
-  AB,
-}
-
-enum RhBloodType {
-  positive,
-  negative,
-}
-
-enum Sex {
-  male,
-  female,
-}
-
-class MedicalInfo {
-  String? phoneNumber; // Emergency Phone Number
-  BloodGroup? bloodGroup; // BloodGroup like O,A etc.
-  RhBloodType? rhBloodType; // BloodGroup like O,A etc.
-  int? height, weight;
-  Sex? sex; // Male/Female
-  bool? organDonor; // Yes/No
-  DateTime? dob; // Date of Birth
-  /// Health Conditions
-  String? allergies; // Allergies (if any)
-  String? medicalConditions; // Medical Conditions (if any)
-  String? medications; // Medication (if any)
-  String? remarks; // Additional Info
-  MedicalInfo({
-    this.phoneNumber,
-    this.bloodGroup,
-    this.dob,
-    this.height,
-    this.organDonor,
-    this.sex,
-    this.weight,
-    this.rhBloodType,
-    this.allergies,
-    this.medicalConditions,
-    this.medications,
-    this.remarks,
-  });
-
-  Map<String, dynamic> encode() {
-    return {
-      "phoneNumber": phoneNumber,
-      "allergies": allergies,
-      "medicalConditions": medicalConditions,
-      "medications": medications,
-      "remarks": remarks,
-      if (bloodGroup != null) "bloodGroup": bloodGroup!.index,
-      if (dob != null) "dob": dob!.millisecondsSinceEpoch.toString(),
-      "height": height,
-      "organDonor": organDonor,
-      if (sex != null) "sex": sex!.index,
-      if (rhBloodType != null) "rhBloodType": rhBloodType!.index,
-      "weight": weight,
-    };
-  }
-
-  void load(Map<String, dynamic> data) {
-    phoneNumber = data['phoneNumber'];
-    allergies = data['allergies'];
-    medicalConditions = data['medicalConditions'];
-    medications = data['medications'];
-    remarks = data['remarks'];
-    bloodGroup = data['bloodGroup'] != null
-        ? BloodGroup.values[data['bloodGroup']]
-        : null;
-    dob = data['dob'] != null
-        ? DateTime.fromMillisecondsSinceEpoch(
-            int.parse(data['dob']),
-          )
-        : null;
-    height = data['height'];
-    organDonor = data['organDonor'];
-    sex = data['sex'] != null ? Sex.values[data['sex']] : null;
-    rhBloodType = data['rhBloodType'] != null
-        ? RhBloodType.values[data['rhBloodType']]
-        : null;
-    weight = data['weight'];
-  }
-}
 
 class UserData {
   String? email, phoneNumber, address;
@@ -126,6 +16,8 @@ class UserData {
   set name(String? newName) {
     readonly.name = newName;
   }
+
+  late Permissions permissions;
 
   String? imgUrl;
   ReadOnly readonly = ReadOnly();
@@ -139,11 +31,18 @@ class UserData {
       required this.medicalInfo,
       required this.readonly}) {
     readonly.name = name;
+    permissions = Permissions();
   }
 
-  UserData(
-      {this.email, String? name, this.phoneNumber, this.address, this.imgUrl}) {
+  UserData({
+    this.email,
+    String? name,
+    this.phoneNumber,
+    this.address,
+    this.imgUrl,
+  }) {
     medicalInfo = MedicalInfo();
+    permissions = Permissions();
     readonly.name = name;
   }
 
@@ -153,6 +52,7 @@ class UserData {
       "address": address,
       "imgUrl": imgUrl,
       "medicalInfo": medicalInfo.encode(),
+      "permissions": permissions.encode(),
     };
   }
 
@@ -161,6 +61,7 @@ class UserData {
     address = userData['address'];
     imgUrl = userData['imgUrl'];
     medicalInfo.load(userData['medicalInfo'] ?? {});
+    permissions.load(userData['permissions'] ?? {});
   }
 }
 
@@ -254,7 +155,7 @@ Future<List<UserData>> fetchUsers({List<String>? emails, Source? src}) async {
 }
 
 /// This only fetches readonly properties
-Future<List<UserData>> fetchAllUserEmails({Source? src}) async {
+Future<List<UserData>> fetchAllUserReadonlyProperties({Source? src}) async {
   final docs = (await firestore.collection('users').get(
             src == null ? null : GetOptions(source: src),
           ))
@@ -396,7 +297,7 @@ class UsersBuilder extends StatelessWidget {
       future: provider != null
           ? provider!(src: src)
           : (emails == null
-              ? fetchAllUserEmails(src: src)
+              ? fetchAllUserReadonlyProperties(src: src)
               : fetchUsers(emails: emails, src: src)),
       builder: (ctx, snapshot) {
         if (snapshot.hasError && src == Source.cache) {
@@ -410,7 +311,7 @@ class UsersBuilder extends StatelessWidget {
             future: provider != null
                 ? provider!(src: Source.cache)
                 : (emails == null
-                    ? fetchAllUserEmails(src: Source.cache)
+                    ? fetchAllUserReadonlyProperties(src: Source.cache)
                     : fetchUsers(emails: emails, src: Source.cache)),
             builder: (ctx, snapshot) {
               if (!snapshot.hasData) {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/models/user/user.dart';
 
 class UserTile extends StatelessWidget {
   final String email;

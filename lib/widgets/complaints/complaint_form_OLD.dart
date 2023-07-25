@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/category/category.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
-import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/chat/multi_choser.dart';
 

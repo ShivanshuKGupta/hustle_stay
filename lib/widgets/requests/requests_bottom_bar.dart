@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/requests/request.dart';
-import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/tools.dart';
 
 class RequestBottomBar extends StatelessWidget {

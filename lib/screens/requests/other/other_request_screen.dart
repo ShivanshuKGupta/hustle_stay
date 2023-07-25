@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/requests/other/other_request.dart';
-import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/screens/chat/chat_screen.dart';
 import 'package:hustle_stay/screens/filter_screen/filter_choser_screen.dart';
 import 'package:hustle_stay/tools.dart';

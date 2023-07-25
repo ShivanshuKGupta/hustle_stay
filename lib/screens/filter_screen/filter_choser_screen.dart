@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/category/category.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
-import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/filter_screen/select_one_tile.dart';
 import 'package:hustle_stay/tools.dart';
@@ -133,7 +133,7 @@ class _FilterChooserScreenState extends ConsumerState<FilterChooserScreen> {
       body: RefreshIndicator(
         onRefresh: () async {
           /// Updating all cached information
-          await fetchAllUserEmails();
+          await fetchAllUserReadonlyProperties();
           await fetchAllCategories();
           await fetchComplainees();
         },

@@ -1,7 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/models/user/medical_info.dart';
+import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/image.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/profile_image.dart';

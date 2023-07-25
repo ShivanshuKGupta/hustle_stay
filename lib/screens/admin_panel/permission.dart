@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import '../../models/user.dart';
+import '../../models/user/user.dart';
 
 class Permission extends StatefulWidget {
   const Permission({super.key, required this.email, required this.type});
@@ -87,7 +87,7 @@ class _PermissionState extends State<Permission> {
                               } else if (mounted) {
                                 ScaffoldMessenger.of(context).clearSnackBars();
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
+                                    const SnackBar(
                                         content: Text(
                                             'Operation failed.Try again')));
                               }

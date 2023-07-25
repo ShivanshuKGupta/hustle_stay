@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
-import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/state_switch.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/chat/multi_choser.dart';

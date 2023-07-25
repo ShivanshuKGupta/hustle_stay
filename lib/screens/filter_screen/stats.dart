@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/pair.dart';
-import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/models/user/user.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class Stats extends StatefulWidget {

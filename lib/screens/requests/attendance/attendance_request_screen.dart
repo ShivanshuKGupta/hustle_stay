@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import 'package:hustle_stay/models/requests/hostel/change_room_request.dart';
 import 'package:hustle_stay/models/requests/hostel/swap_room_request.dart';
-import 'package:hustle_stay/models/user.dart';
+import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/screens/hostel/rooms/complete_details_screen.dart';
 import 'package:hustle_stay/screens/requests/attendance/update_room_request.dart';
 import 'package:hustle_stay/screens/requests/requests_screen.dart';
