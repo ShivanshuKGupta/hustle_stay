@@ -86,7 +86,7 @@ class AttendanceRequestScreen extends StatelessWidget {
                     ),
                     GridTileLogo(
                       onTap: () async {
-                        await navigatorPush(context, const UpdateRoom());
+                        await navigatorPush(context, UpdateRoom());
                       },
                       title: 'Change Room',
                       icon: Icon(
@@ -103,7 +103,7 @@ class AttendanceRequestScreen extends StatelessWidget {
                       onTap: () async {
                         await navigatorPush(
                             context,
-                            const UpdateRoom(
+                            UpdateRoom(
                               isSwap: true,
                             ));
                       },

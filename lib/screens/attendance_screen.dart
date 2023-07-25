@@ -260,6 +260,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     )
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         CircleAvatar(
                             radius: 50,
@@ -374,7 +375,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                             break;
                           case 'Change/Swap Room':
                             Navigator.of(context).push(MaterialPageRoute(
-                                builder: (_) => const UpdateRoom()));
+                                builder: (_) => UpdateRoom()));
                             break;
                           default:
                         }
