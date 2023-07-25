@@ -33,6 +33,7 @@ class _MessageInputFieldState extends State<MessageInputField> {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
     _msgTxtBox.text = "";
+    txt = txt.replaceAll('\n', '\n\n');
     try {
       await widget.onSubmit(
         MessageData(
@@ -345,7 +346,7 @@ class _MessageInputFieldState extends State<MessageInputField> {
   void makeTitle() {
     if (_msgTxtBox.selection.end - _msgTxtBox.selection.start > 0) {
       _msgTxtBox.text =
-          "${_msgTxtBox.selection.textBefore(_msgTxtBox.text)}\n\n# ${_msgTxtBox.selection.textInside(_msgTxtBox.text)}\n\n${_msgTxtBox.selection.textAfter(_msgTxtBox.text)}";
+          "${_msgTxtBox.selection.textBefore(_msgTxtBox.text)}\n# ${_msgTxtBox.selection.textInside(_msgTxtBox.text)}\n${_msgTxtBox.selection.textAfter(_msgTxtBox.text)}";
     }
   }
 
@@ -425,12 +426,12 @@ class _MessageInputFieldState extends State<MessageInputField> {
   void addHrLine() {
     var cursorPos = _msgTxtBox.selection.base.offset;
     if (cursorPos == -1) {
-      _msgTxtBox.text = "---\n\n";
+      _msgTxtBox.text = "---\n";
       return;
     }
     String prefixText = _msgTxtBox.text.substring(0, cursorPos);
     String suffixText = _msgTxtBox.text.substring(cursorPos);
-    String iCode = '\n\n---\n\n';
+    String iCode = '\n---\n';
     int length = iCode.length;
     _msgTxtBox.text = prefixText + iCode + suffixText;
 
