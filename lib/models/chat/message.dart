@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/user/user.dart';
 
@@ -66,6 +67,18 @@ Future<void> addMeInReadBy(ChatData chat, MessageData msg) async {
   await chatMessages
       .doc(msg.id)
       .update({'readBy': msg.readBy..add(currentUser.email!)});
+}
+
+Future<MessageData?> fetchLastMessage(String path, {Source? src}) async {
+  final response = await firestore
+      .collection('$path/chat')
+      .orderBy('createdAt', descending: true)
+      .limit(1)
+      .get(src == null ? null : GetOptions(source: src));
+  for (final doc in response.docs) {
+    return MessageData.load(doc.id, doc.data());
+  }
+  return null;
 }
 
 Future<void> addMessage(ChatData chat, MessageData msg) async {

@@ -130,7 +130,8 @@ class Message extends StatelessWidget {
                     const SizedBox(width: 4),
                     if (msgAlignment)
                       Icon(
-                        msg.readBy.containsAll(chat.receivers)
+                        msg.readBy.containsAll(chat.receivers) &&
+                                msg.readBy.contains(chat.owner)
                             ? Icons.done_all_rounded
                             : Icons.done_rounded,
                         color: Theme.of(context).colorScheme.primary,
@@ -176,84 +177,122 @@ class Message extends StatelessWidget {
           scrollable: true,
           actionsPadding: const EdgeInsets.only(bottom: 15, top: 10),
           contentPadding: const EdgeInsets.only(top: 15, left: 20, right: 20),
-          content: Column(
-            children: [
-              MarkdownBody(
-                data: msg.txt,
-                imageBuilder: (uri, title, alt) =>
-                    imageBuilder(uri, msg.id, title: title, alt: alt),
-              ),
-              const Divider(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "From:",
-                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                        // color: Theme.of(context).colorScheme.primary,
-                        ),
-                  ),
-                  Text(
-                    msg.from,
-                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Created At:",
-                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                        // color: Theme.of(context).colorScheme.primary,
-                        ),
-                  ),
-                  Text(
-                    "${ddmmyyyy(msg.createdAt)} | ${timeFrom(msg.createdAt)}",
-                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Read By:",
-                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                        // color: Theme.of(context).colorScheme.primary,
-                        ),
-                  ),
-                  Text(
-                    msg.readBy.toString(),
-                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                  ),
-                ],
-              ),
-              if (msg.modifiedAt != null)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Modified At:",
-                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                          // color: Theme.of(context).colorScheme.primary,
-                          ),
-                    ),
-                    Text(
-                      "${ddmmyyyy(msg.modifiedAt!)} | ${timeFrom(msg.modifiedAt!)}",
-                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                    ),
-                  ],
+          content: LayoutBuilder(
+            builder: (ctx, constraints) => Column(
+              children: [
+                MarkdownBody(
+                  data: msg.txt,
+                  imageBuilder: (uri, title, alt) =>
+                      imageBuilder(uri, msg.id, title: title, alt: alt),
                 ),
-            ],
+                const Divider(),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: SizedBox(
+                    width: constraints.maxWidth,
+                    child: Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "From:",
+                          style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                              // color: Theme.of(context).colorScheme.primary,
+                              ),
+                        ),
+                        Text(
+                          msg.from,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall!
+                              .copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: SizedBox(
+                    width: constraints.maxWidth,
+                    child: Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Created At:",
+                          style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                              // color: Theme.of(context).colorScheme.primary,
+                              ),
+                        ),
+                        Text(
+                          "${ddmmyyyy(msg.createdAt)} | ${timeFrom(msg.createdAt)}",
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall!
+                              .copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: SizedBox(
+                    width: constraints.maxWidth,
+                    child: Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Read By:",
+                          style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                              // color: Theme.of(context).colorScheme.primary,
+                              ),
+                        ),
+                        Text(
+                          msg.readBy.toString(),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall!
+                              .copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                if (msg.modifiedAt != null)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: SizedBox(
+                      width: constraints.maxWidth,
+                      child: Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Modified At:",
+                            style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                // color: Theme.of(context).colorScheme.primary,
+                                ),
+                          ),
+                          Text(
+                            "${ddmmyyyy(msg.modifiedAt!)} | ${timeFrom(msg.modifiedAt!)}",
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall!
+                                .copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
           actions: [
             IconButton(

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/category/category.dart';
-import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/state_switch.dart';
 
@@ -107,18 +106,6 @@ class ComplaintData {
     //   updateComplaint(this);
     // }
     // --------------
-  }
-
-  Future<MessageData?> fetchLastMessage({Source? src}) async {
-    final response = await firestore
-        .collection('complaints/$id/chat')
-        .orderBy('createdAt', descending: true)
-        .limit(1)
-        .get(src == null ? null : GetOptions(source: src));
-    for (final doc in response.docs) {
-      return MessageData.load(doc.id, doc.data());
-    }
-    return null;
   }
 }
 

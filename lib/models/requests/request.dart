@@ -13,6 +13,7 @@ import 'package:hustle_stay/models/requests/mess/menu_change_request.dart';
 import 'package:hustle_stay/models/requests/other/other_request.dart';
 import 'package:hustle_stay/models/requests/vehicle/vehicle_request.dart';
 import 'package:hustle_stay/models/user/user.dart';
+import 'package:hustle_stay/providers/firestore_cache_builder.dart';
 import 'package:hustle_stay/screens/chat/chat_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/requests/request_info.dart';
@@ -411,7 +412,7 @@ Request decodeToRequest(Map<String, dynamic> data) {
   throw "No such type exists: '$type'";
 }
 
-class RequestItem extends StatelessWidget {
+class RequestItem extends StatefulWidget {
   final Request request;
   final Widget? detailWidget;
   final Map<String, String> otherDetails;
@@ -422,31 +423,37 @@ class RequestItem extends StatelessWidget {
       required this.otherDetails});
 
   @override
+  State<RequestItem> createState() => _RequestItemState();
+}
+
+class _RequestItemState extends State<RequestItem> {
+  @override
   Widget build(BuildContext context) {
-    Widget trailing = request.status == RequestStatus.pending
+    Widget trailing = widget.request.status == RequestStatus.pending
         ? AnimateIcon(
             color: Theme.of(context).colorScheme.primary,
             onTap: () {
               showMsg(context, 'This request is yet to be approved.');
             },
             iconType: IconType.continueAnimation,
-            animateIcon: AnimateIcons.clock,
+            animateIcon: AnimateIcons.hourglass,
           )
         : IconButton(
             onPressed: () {
-              showMsg(context, 'This request is ${request.status.name}.');
+              showMsg(
+                  context, 'This request is ${widget.request.status.name}.');
             },
             icon: Icon(
-              request.status == RequestStatus.approved
+              widget.request.status == RequestStatus.approved
                   ? Icons.check_circle_outline_rounded
                   : Icons.cancel_outlined,
-              color: request.status == RequestStatus.approved
+              color: widget.request.status == RequestStatus.approved
                   ? Colors.greenAccent
                   : Colors.redAccent,
             ),
           );
     if (currentUser.readonly.type != 'student' &&
-        request.status == RequestStatus.pending) {
+        widget.request.status == RequestStatus.pending) {
       // TODO: Remove shortcircuiting
       trailing = Row(
         mainAxisSize: MainAxisSize.min,
@@ -455,12 +462,12 @@ class RequestItem extends StatelessWidget {
             onPressed: () async {
               final response = await askUser(
                 context,
-                'Do you want to approve this ${request.type} request?',
+                'Do you want to approve this ${widget.request.type} request?',
                 yes: true,
                 no: true,
               );
               if (response == 'yes') {
-                request.approve();
+                widget.request.approve();
               }
             },
             icon: const Icon(
@@ -472,12 +479,12 @@ class RequestItem extends StatelessWidget {
             onPressed: () async {
               final response = await askUser(
                 context,
-                'Do you want to deny this ${request.type} request?',
+                'Do you want to deny this ${widget.request.type} request?',
                 yes: true,
                 no: true,
               );
               if (response == 'yes') {
-                request.deny();
+                widget.request.deny();
               }
             },
             icon: const Icon(
@@ -491,40 +498,78 @@ class RequestItem extends StatelessWidget {
     return GlassWidget(
       radius: 30,
       child: Container(
-        color: request.uiElement['color'].withOpacity(0.2),
+        color: widget.request.uiElement['color'].withOpacity(0.2),
         child: ListTile(
           contentPadding: const EdgeInsets.only(left: 10),
-          onTap: () {
-            navigatorPush(
+          onTap: () async {
+            await navigatorPush(
               context,
               ChatScreen(
                 bottomBar: (currentUser.readonly.type == 'student')
                     ? null
-                    : RequestBottomBar(request: request),
-                showInfo: () => request.showInfo(context, otherDetails),
-                chat: request.chatData,
+                    : RequestBottomBar(request: widget.request),
+                showInfo: () =>
+                    widget.request.showInfo(context, widget.otherDetails),
+                chat: widget.request.chatData,
               ),
             );
+            setState(() {});
           },
           onLongPress: () {
-            request.showInfo(context, otherDetails);
+            widget.request.showInfo(context, widget.otherDetails);
           },
-          leading: Icon(request.uiElement['icon'], size: 50),
-          title: Text('${request.type.replaceAll('_', ' ')} Request',
+          leading: Stack(
+            children: [
+              Icon(widget.request.uiElement['icon'], size: 50),
+              Positioned(
+                right: 0,
+                child: CacheBuilder(
+                    loadingWidget: AnimateIcon(
+                      height: 15,
+                      width: 15,
+                      color: Colors.blue.withOpacity(0.1),
+                      onTap: () {},
+                      iconType: IconType.continueAnimation,
+                      animateIcon: AnimateIcons.loading7,
+                    ),
+                    builder: (ctx, msg) {
+                      if (msg == null ||
+                          msg.readBy.contains(currentUser.email!)) {
+                        return Container();
+                      }
+                      return AnimateIcon(
+                        height: 15,
+                        width: 15,
+                        color: Colors.red,
+                        onTap: () {},
+                        iconType: IconType.continueAnimation,
+                        animateIcon: AnimateIcons.bell,
+                      );
+                    },
+                    provider: ({Source? src}) async {
+                      return await fetchLastMessage(
+                        "requests/${widget.request.id}",
+                        // src: src,
+                      );
+                    }),
+              ),
+            ],
+          ),
+          title: Text('${widget.request.type.replaceAll('_', ' ')} Request',
               overflow: TextOverflow.fade),
           trailing: trailing,
           subtitle: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (detailWidget != null) detailWidget!,
+              if (widget.detailWidget != null) widget.detailWidget!,
               if (currentUser.readonly.type != 'student')
                 UserBuilder(
-                  email: request.requestingUserEmail,
+                  email: widget.request.requestingUserEmail,
                   builder: (ctx, userData) => Text(
                     userData.name ?? userData.email!,
                     style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                          color: request.uiElement['color'],
+                          color: widget.request.uiElement['color'],
                         ),
                   ),
                 )

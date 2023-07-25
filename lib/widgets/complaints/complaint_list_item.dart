@@ -1,4 +1,5 @@
 import 'package:animated_icon/animated_icon.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -74,6 +75,14 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
                 right: 0,
                 top: 0,
                 child: CacheBuilder(
+                    loadingWidget: AnimateIcon(
+                      height: 15,
+                      width: 15,
+                      color: Colors.blue.withOpacity(0.1),
+                      onTap: () {},
+                      iconType: IconType.continueAnimation,
+                      animateIcon: AnimateIcons.loading7,
+                    ),
                     builder: (ctx, msg) {
                       if (msg == null ||
                           msg.readBy.contains(currentUser.email!)) {
@@ -88,7 +97,12 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
                         animateIcon: AnimateIcons.bell,
                       );
                     },
-                    provider: widget.complaint.fetchLastMessage),
+                    provider: ({Source? src}) async {
+                      return await fetchLastMessage(
+                        "complaints/${widget.complaint.id}",
+                        // src: src,
+                      );
+                    }),
               ),
               CircleAvatar(
                 backgroundColor: category.color.withOpacity(0.2),

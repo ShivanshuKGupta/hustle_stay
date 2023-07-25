@@ -36,7 +36,7 @@ class CacheBuilder<content> extends StatelessWidget {
           return FutureBuilder(
             future: provider(src: Source.cache),
             builder: (ctx, snapshot) {
-              if (!snapshot.hasData) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
                 // Returning this Widget when nothing has arrived
                 return loadingWidget ?? circularProgressIndicator();
               }
