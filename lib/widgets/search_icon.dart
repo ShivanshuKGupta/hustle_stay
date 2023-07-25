@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/tools.dart';
 
+// ignore: must_be_immutable
 class SearchIconWidget extends StatefulWidget {
   IconData? icon;
   final void Function(IconData icon) onChange;

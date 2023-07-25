@@ -162,15 +162,6 @@ abstract class Request {
       id = DateTime.now().millisecondsSinceEpoch;
     }
 
-    // if the request is being closed down and the expiry is not set yet
-    if (status != RequestStatus.pending && expiryDate == infDate) {
-      if (closedAt == 0) closedAt = DateTime.now().millisecondsSinceEpoch;
-      final closedDateTime = DateTime.fromMillisecondsSinceEpoch(closedAt);
-      // then set the expiry to 7 days after closedAt
-      expiryDate = DateTime(
-          closedDateTime.year, closedDateTime.month, closedDateTime.day + 7);
-    }
-
     return true;
   }
 
@@ -180,14 +171,29 @@ abstract class Request {
       // Some checks
       if (!beforeUpdate()) return;
 
-      // If the request is being approved/denied for the first time
-      if (status != RequestStatus.pending && closedAt == 0) {
-        if (status == RequestStatus.approved) {
-          await onApprove(transaction);
+      // if the request is being closed down or is already closed
+      if (status != RequestStatus.pending) {
+        // If closed at is not set yet (first time being closed)
+        if (closedAt == 0) {
+          closedAt = DateTime.now().millisecondsSinceEpoch;
+          if (status == RequestStatus.approved) {
+            await onApprove(transaction);
+          }
+        }
+
+        // if expiry date is not set yet
+        if (expiryDate == infDate) {
+          final closedDateTime = DateTime.fromMillisecondsSinceEpoch(closedAt);
+          // setting the expiry to 7 days after closedAt
+          expiryDate = DateTime(closedDateTime.year, closedDateTime.month,
+              closedDateTime.day + 7);
         }
       }
 
-      if (chosenExpiryDate != null) expiryDate = chosenExpiryDate;
+      // If a custom expiry date is specified
+      if (chosenExpiryDate != null) {
+        expiryDate = chosenExpiryDate;
+      }
 
       final doc = firestore.collection('requests').doc(id.toString());
 

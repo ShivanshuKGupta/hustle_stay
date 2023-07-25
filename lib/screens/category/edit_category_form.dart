@@ -7,6 +7,7 @@ import 'package:hustle_stay/widgets/complaints/select_one.dart';
 import 'package:hustle_stay/widgets/complaints/selection_vault.dart';
 import 'package:hustle_stay/widgets/loading_elevated_button.dart';
 
+// ignore: must_be_immutable
 class EditCategoryForm extends StatefulWidget {
   Category? category;
   EditCategoryForm({super.key, this.category});

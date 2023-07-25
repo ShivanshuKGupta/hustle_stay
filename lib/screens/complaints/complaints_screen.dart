@@ -60,7 +60,6 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(settingsProvider);
-    final mediaQuery = MediaQuery.of(context);
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () => showSortDialog(context, ref),

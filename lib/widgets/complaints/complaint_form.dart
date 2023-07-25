@@ -150,7 +150,7 @@ class _ComplaintFormState extends State<ComplaintForm> {
                 builder: (ctx, category) => GridTileLogo(
                   onTap: () => Navigator.of(context).pop(),
                   title: category.id,
-                  icon: Icon(category.icon ?? Icons.category_rounded, size: 50),
+                  icon: Icon(category.icon, size: 50),
                   color: Theme.of(context).colorScheme.background,
                 ),
               ),

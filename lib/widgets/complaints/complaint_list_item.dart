@@ -66,7 +66,7 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
           builder: (ctx, category) => CircleAvatar(
             backgroundColor: category.color.withOpacity(0.2),
             child: Icon(
-              category.icon ?? Icons.info_rounded,
+              category.icon,
             ),
           ),
         ),
