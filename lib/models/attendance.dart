@@ -34,7 +34,7 @@ Future<String> getAttendanceData(RoommateData roommateData, String hostelName,
   final storage = FirebaseFirestore.instance;
   final documentAddRef = storage
       .collection('hostels')
-      .doc(hostelName)
+      .doc('hostelMates')
       .collection('Roommates')
       .doc(roommateData.email);
   final documentRef = documentAddRef
@@ -86,7 +86,7 @@ Future<String> setAttendanceData(String email, String hostelName,
             : 'present';
     final docRef = FirebaseFirestore.instance
         .collection('hostels')
-        .doc(hostelName)
+        .doc('hostelMates')
         .collection('Roommates')
         .doc(email)
         .collection('Attendance')
@@ -115,7 +115,7 @@ Future<List<DateTime>> fetchAttendanceByStudent(
 
   final attendanceDataRef = await storage
       .collection('hostels')
-      .doc(hostelName)
+      .doc('hostelMates')
       .collection('Roommates')
       .doc(email)
       .collection('Attendance')
@@ -140,8 +140,11 @@ Future<bool> markAllAttendance(
     final statusVal = status ? 'present' : 'absent';
     final storage = FirebaseFirestore.instance;
     final batch = storage.batch();
-    final roommatesRef =
-        storage.collection('hostels').doc(hostelName).collection('Roommates');
+    final roommatesRef = storage
+        .collection('hostels')
+        .doc('hostelMates')
+        .collection('Roommates')
+        .where('hostelName', isEqualTo: hostelName);
 
     List<QueryDocumentSnapshot<Map<String, dynamic>>> roommateDocs = [];
     if (DateTime(selectedDate.year, selectedDate.month, selectedDate.day) !=
@@ -236,8 +239,9 @@ Future<bool> markAllRoommateAttendance(String hostelName, String roomName,
     final storage = FirebaseFirestore.instance;
     final docsRoommatesRef = await storage
         .collection('hostels')
-        .doc(hostelName)
+        .doc('hostelMates')
         .collection('Roommates')
+        .where('hostelName', isEqualTo: hostelName)
         .where('roomName', isEqualTo: roomName)
         .get();
     final batch = storage.batch();
@@ -283,7 +287,7 @@ Future<Map<String, double>> getAttendanceStatistics(
   final storage = FirebaseFirestore.instance;
   final docsAttendanceRef = await storage
       .collection('hostels')
-      .doc(hostelName)
+      .doc('hostelMates')
       .collection('Roommates')
       .doc(email)
       .collection('Attendance')
@@ -340,8 +344,9 @@ Future<Map<String, double>> getHostelAttendanceStatistics(
 
   final roommatesQuery = await storage
       .collection('hostels')
-      .doc(hostelName)
+      .doc('hostelMates')
       .collection('Roommates')
+      .where('hostelName', isEqualTo: hostelName)
       .get(source == null ? null : GetOptions(source: source));
   total = roommatesQuery.docs.length.toDouble();
   final List<Future<DocumentSnapshot<Map<String, dynamic>>>> attendanceFutures =
@@ -405,8 +410,9 @@ Future<Map<String, Map<String, int>>> getHostelRangeAttendanceStatistics(
 
   final roommatesQuery = await storage
       .collection('hostels')
-      .doc(hostelName)
+      .doc('hostelMates')
       .collection('Roommates')
+      .where('hostelName', isEqualTo: hostelName)
       .get(source == null ? null : GetOptions(source: source));
   total = roommatesQuery.docs.length.toDouble();
   final List<Future<QuerySnapshot<Map<String, dynamic>>>> attendanceFutures =
@@ -457,8 +463,9 @@ Future<List<RoommateInfo>> getFilteredStudents(
 
   final QuerySnapshot<Map<String, dynamic>> roommatesQuery = await storage
       .collection('hostels')
-      .doc(hostelName)
+      .doc('hostelMates')
       .collection('Roommates')
+      .where('hostelName', isEqualTo: hostelName)
       .get(source == null ? null : GetOptions(source: source));
 
   final List<Future<QuerySnapshot<Map<String, dynamic>>>> attendanceFutures =
@@ -513,7 +520,7 @@ Future<List<RoommateInfo>> getFilteredStudents(
 Future<LeaveData?> fetchCurrentLeave(String hostelName, String email) async {
   final refR = await storage
       .collection('hostels')
-      .doc(hostelName)
+      .doc('hostelMates')
       .collection('Roommates')
       .doc(email)
       .get();
@@ -543,7 +550,7 @@ Future<List<LeaveData>> fetchLeaves(String hostelName, String email,
     {bool? getAll}) async {
   final refR = await storage
       .collection('hostels')
-      .doc(hostelName)
+      .doc('hostelMates')
       .collection('Roommates')
       .doc(email)
       .get();

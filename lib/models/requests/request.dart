@@ -148,7 +148,7 @@ abstract class Request {
   /// This function is when the request is approved
   /// This contains a transaction, so as to make the updation and
   /// onApprove function run atomically.
-  Future<void> onApprove(Transaction transaction);
+  Future<void> onApprove(Transaction? transaction);
 
   /// This function is called every time the request is updated
   /// Do some checks on whether it is possible to update the request or not

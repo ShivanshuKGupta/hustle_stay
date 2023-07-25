@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import 'package:hustle_stay/screens/hostel/rooms/rooms_screen.dart';
 
 import '../../models/common/operation.dart';
