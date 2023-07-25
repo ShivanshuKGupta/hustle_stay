@@ -45,9 +45,11 @@ class CategoryList extends StatelessWidget {
                     ...(categories.map((e) => e).toList()..add(category)).map(
                       (entry) => GridTileLogo(
                         onTap: () => onTap(entry),
-                        title: entry.id == category.id ? 'Other ' : entry.id,
+                        title: entry.id == category.id ? 'Other' : entry.id,
                         icon: Icon(
-                          entry.icon,
+                          entry.id == category.id
+                              ? Icons.more_horiz_rounded
+                              : entry.icon,
                           size: 50,
                         ),
                         color: entry.color,

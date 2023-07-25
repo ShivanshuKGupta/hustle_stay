@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/category/category.dart';
-import 'package:hustle_stay/screens/category/catgeory_grid.dart';
+import 'package:hustle_stay/screens/category/category_grid.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
 

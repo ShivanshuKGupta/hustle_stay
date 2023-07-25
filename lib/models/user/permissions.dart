@@ -59,7 +59,7 @@ class CRUD {
 }
 
 class Permissions {
-  late CRUD attendance, categories, users, approvers;
+  late CRUD attendance, categories, users, approvers, complaints;
 
   CRUD? operator [](String property) {
     switch (property.toLowerCase()) {
@@ -71,16 +71,24 @@ class Permissions {
         return users;
       case 'approvers':
         return approvers;
+      case 'complaints':
+        return complaints;
     }
     throw 'No such property exists: \'$property\'';
   }
 
-  Permissions(
-      {CRUD? attendance, CRUD? categories, CRUD? users, CRUD? approvers}) {
+  Permissions({
+    CRUD? attendance,
+    CRUD? categories,
+    CRUD? users,
+    CRUD? approvers,
+    CRUD? complaints,
+  }) {
     this.attendance = attendance ?? CRUD();
     this.categories = categories ?? CRUD();
     this.users = users ?? CRUD();
     this.approvers = approvers ?? CRUD();
+    this.complaints = complaints ?? CRUD();
   }
 
   Map<String, Map<String, bool>> encode() {
@@ -89,6 +97,7 @@ class Permissions {
       'categories': categories.encode(),
       'users': users.encode(),
       'approvers': approvers.encode(),
+      'complaints': complaints.encode(),
     };
   }
 
@@ -104,6 +113,9 @@ class Permissions {
     }
     if (data['approvers'] != null) {
       approvers = CRUD()..load(data['approvers']!);
+    }
+    if (data['complaints'] != null) {
+      complaints = CRUD()..load(data['complaints']!);
     }
   }
 }

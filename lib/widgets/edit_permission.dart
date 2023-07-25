@@ -29,6 +29,10 @@ class _EditPermissionsState extends State<EditPermissions> {
         cardColor: const Color.fromARGB(255, 0, 146, 69),
         operationName: 'Approvers',
         icon: const Icon(Icons.person_2_outlined)),
+    Operations(
+        cardColor: const Color.fromARGB(255, 14, 212, 196),
+        operationName: 'Complaints',
+        icon: const Icon(Icons.info_rounded)),
   ];
   @override
   Widget build(BuildContext context) {

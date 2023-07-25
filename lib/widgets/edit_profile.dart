@@ -375,6 +375,14 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                     ),
                     PermissionWidget(
                       user: widget.user,
+                      type: 'complaints',
+                      expanded: false,
+                      showSaveButton: false,
+                      onChange: (crud) =>
+                          widget.user.readonly.permissions.complaints = crud,
+                    ),
+                    PermissionWidget(
+                      user: widget.user,
                       type: 'users',
                       expanded: false,
                       showSaveButton: false,

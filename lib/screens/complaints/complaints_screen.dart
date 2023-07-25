@@ -24,39 +24,6 @@ class ComplaintsScreen extends ConsumerStatefulWidget {
 class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
   static Source src = Source.serverAndCache;
 
-  // SliverAppBar get sliverAppBar => SliverAppBar(
-  //       elevation: 10,
-  //       floating: true,
-  //       pinned: true,
-  //       expandedHeight: 150,
-  //       stretch: true,
-  //       flexibleSpace: FlexibleSpaceBar(
-  //         title: shaderText(
-  //           context,
-  //           title: "Complaints",
-  //           style: Theme.of(context)
-  //               .textTheme
-  //               .titleLarge!
-  //               .copyWith(fontWeight: FontWeight.bold),
-  //         ),
-  //       ),
-  //       actions: [
-  //         if (currentUser.readonly.isAdmin)
-  //           IconButton(
-  //             onPressed: () => navigatorPush(context, const StatisticsPage()),
-  //             icon: const Icon(Icons.insert_chart_outlined_sharp),
-  //           ),
-  //         IconButton(
-  //           onPressed: () => showSortDialog(context, ref),
-  //           icon: const Icon(Icons.compare_arrows_rounded),
-  //         ),
-  //         IconButton(
-  //           onPressed: _addComplaint,
-  //           icon: const Icon(Icons.add_rounded),
-  //         ),
-  //       ],
-  //     );
-
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(settingsProvider);
@@ -91,8 +58,8 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
             child: ListView.builder(
               itemBuilder: (ctx, index) {
                 if (index == 0) {
-                  return currentUser.readonly.type == 'student' ||
-                          currentUser.email == 'code_soc@students.iiitr.ac.in'
+                  return currentUser.readonly.permissions.complaints.create ==
+                          true
                       ? ComplaintCategoryView(
                           onTap: (category) {
                             navigatorPush(
@@ -276,88 +243,6 @@ class _SortDialogBoxState extends State<SortDialogBox> {
               widget.groupBy = value ?? "none";
             });
           },
-          // ),
-          // DropdownButton(
-          //   hint: const Text('Sort Groups by'),
-          //   borderRadius: BorderRadius.circular(20),
-          //   icon: const Icon(Icons.sort_rounded),
-          //   value: parameters.sortGroupsBy,
-          //   items: const [
-          //     DropdownMenuItem(
-          //       value: 'time',
-          //       child: Text('Date Created'),
-          //     ),
-          //     DropdownMenuItem(
-          //       value: 'priority',
-          //       child: Text('Category'),
-          //     ),
-          //     DropdownMenuItem(
-          //       value: 'alpha',
-          //       child: Text('Alphabetical'),
-          //     ),
-          //   ],
-          //   onChanged: (value) {
-          //     parameters.sortEntriesBy = value ?? "time";
-          //   },
-          // ),
-          // DropdownButton(
-          //   hint: const Text('Order'),
-          //   borderRadius: BorderRadius.circular(20),
-          //   icon: const Icon(Icons.sort_rounded),
-          //   value: parameters.groupOrdering.index,
-          //   items: Order.values
-          //       .map(
-          //         (e) => DropdownMenuItem(
-          //           value: e.index,
-          //           child: Text(e.name),
-          //         ),
-          //       )
-          //       .toList(),
-          //   onChanged: (value) {
-          //     parameters.groupOrdering = Order.values[value ?? 1];
-          //   },
-          // ),
-          // DropdownButton(
-          //   hint: const Text('Sort Entries by'),
-          //   borderRadius: BorderRadius.circular(20),
-          //   icon: const Icon(Icons.sort_rounded),
-          //   value: parameters.sortEntriesBy,
-          //   items: const [
-          //     DropdownMenuItem(
-          //       value: 'time',
-          //       child: Text('Date Created'),
-          //     ),
-          //     DropdownMenuItem(
-          //       value: 'priority',
-          //       child: Text('Category'),
-          //     ),
-          //     DropdownMenuItem(
-          //       value: 'alpha',
-          //       child: Text('Alphabetical'),
-          //     ),
-          //   ],
-          //   onChanged: (value) {
-          //     parameters.sortEntriesBy = value ?? "time";
-          //   },
-          // ),
-          // DropdownButton(
-          //   hint: const Text('Order'),
-          //   borderRadius: BorderRadius.circular(20),
-          //   icon: const Icon(Icons.sort_rounded),
-          //   value: parameters.entriesOrdering.index,
-          //   items: Order.values
-          //       .map(
-          //         (e) => DropdownMenuItem(
-          //           value: e.index,
-          //           child: Text(e.name),
-          //         ),
-          //       )
-          //       .toList(),
-          //   onChanged: (value) {
-          //     parameters.entriesOrdering = Order.values[value ?? 1];
-          //   },
-          // ),
-          // ],
         ),
         ElevatedButton.icon(
           onPressed: () {
