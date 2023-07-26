@@ -79,6 +79,10 @@ class HustleStayApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // the settings object
     final settings = ref.watch(settingsProvider);
+    if (settings.autoDarkMode == true) {
+      settings.darkMode =
+          MediaQuery.of(context).platformBrightness == Brightness.dark;
+    }
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,

@@ -7,6 +7,9 @@ class _Settings {
   /// whether dark mode is on
   bool darkMode = false;
 
+  /// Whether the app should automatically swicth between dark and light modes
+  bool autoDarkMode = true;
+
   /// the last visited page
   int currentPage = 2;
 
@@ -32,6 +35,7 @@ class _Settings {
       "complaintsGrouping": complaintsGrouping,
       "groupBy": groupBy,
       "interval": interval,
+      "autoDarkMode": autoDarkMode,
     });
   }
 
@@ -39,6 +43,7 @@ class _Settings {
   void load(String str) {
     final settings = json.decode(str);
     darkMode = settings["darkMode"] ?? false;
+    autoDarkMode = settings["autoDarkMode"] ?? autoDarkMode;
     introductionScreenVisited = settings["introductionScreenVisited"] ?? false;
     currentPage = settings["currentPage"] ?? 2;
     complaintsGrouping = (settings["complaintsGrouping"] ?? complaintsGrouping);

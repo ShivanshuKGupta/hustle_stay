@@ -24,13 +24,26 @@ class HomeScreen extends ConsumerWidget {
         actions: [
           IconButton(
             onPressed: () {
-              settings.darkMode = !settings.darkMode;
+              if (settings.autoDarkMode) {
+                settings.autoDarkMode = false;
+                settings.darkMode =
+                    !(MediaQuery.of(context).platformBrightness ==
+                        Brightness.dark);
+              } else {
+                if (MediaQuery.of(context).platformBrightness ==
+                    (settings.darkMode ? Brightness.dark : Brightness.light)) {
+                  settings.autoDarkMode = true;
+                }
+                settings.darkMode = !settings.darkMode;
+              }
               settingsClass.notifyListeners();
             },
             icon: Icon(
-              !settings.darkMode
-                  ? Icons.light_mode_rounded
-                  : Icons.dark_mode_rounded,
+              settings.autoDarkMode
+                  ? Icons.brightness_auto_rounded
+                  : !settings.darkMode
+                      ? Icons.light_mode_rounded
+                      : Icons.dark_mode_rounded,
             ),
           ),
         ],
