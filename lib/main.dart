@@ -8,8 +8,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/auth/auth_screen.dart';
-import 'package:hustle_stay/screens/home_screen.dart';
 import 'package:hustle_stay/screens/intro/intro_screen.dart';
+import 'package:hustle_stay/screens/main_screen.dart';
 import 'package:hustle_stay/screens/requests/attendance/attendance_request_screen.dart';
 import 'package:hustle_stay/screens/requests/mess/mess_request_screen.dart';
 import 'package:hustle_stay/screens/requests/other/other_request_screen.dart';
@@ -115,7 +115,7 @@ class HustleStayApp extends ConsumerWidget {
             ? StreamBuilder(
                 stream: auth.authStateChanges(),
                 builder: (ctx, user) {
-                  return user.hasData ? const HomeScreen() : const AuthScreen();
+                  return user.hasData ? const MainScreen() : const AuthScreen();
                 },
               )
             : IntroScreen(

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/user/medical_info.dart';
 import 'package:hustle_stay/models/user/readonly_prop.dart';
+import 'package:hustle_stay/screens/profile/profile_preview.dart';
 import 'package:hustle_stay/tools.dart';
 
 class UserData {
@@ -410,4 +411,21 @@ Future<List<UserData>> fetchNoHostelUsers() async {
   );
 
   return list;
+}
+
+Future showUserPreview(BuildContext context, UserData user) {
+  return Navigator.of(context).push(
+    DialogRoute(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        contentPadding: const EdgeInsets.only(
+          top: 40,
+          bottom: 20,
+          right: 10,
+          left: 10,
+        ),
+        content: ProfilePreview(user: user),
+      ),
+    ),
+  );
 }

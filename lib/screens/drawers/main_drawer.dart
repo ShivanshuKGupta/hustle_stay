@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/models/user/user.dart';
-import 'package:hustle_stay/screens/admin_panel/admin_panel_screen.dart';
 import 'package:hustle_stay/screens/category/edit_category_screen.dart';
 import 'package:hustle_stay/screens/complaints/resolved_complaints_screen.dart';
-import 'package:hustle_stay/screens/filter_screen/stats_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/settings/current_user_tile.dart';
 
@@ -35,19 +32,6 @@ class MainDrawer extends StatelessWidget {
       children: [
         const CurrentUserTile(),
         const Divider(),
-
-        if (currentUser.readonly.isAdmin)
-          _drawerTile(
-            context,
-            title: "Admin Panel",
-            subtitle: "Manage Operations",
-            icon: Icons.admin_panel_settings_sharp,
-            onTap: () {
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (_) => const AdminPanel()));
-            },
-          ),
-
         _drawerTile(
           context,
           title: "Resolved Complaints",
@@ -72,48 +56,6 @@ class MainDrawer extends StatelessWidget {
             );
           },
         ),
-        _drawerTile(
-          context,
-          title: "Complaint Stats",
-          icon: Icons.person_add_rounded,
-          subtitle: "",
-          onTap: () async {
-            navigatorPush(
-              context,
-              const StatisticsPage(),
-            );
-          },
-        ),
-        // _drawerTile(
-        //   context,
-        //   title: "Complaint",
-        //   icon: Icons.question_answer_rounded,
-        //   subtitle: "View/Post Complaints",
-        //   onTap: () {
-        //     Navigator.of(context).push(
-        //         MaterialPageRoute(builder: (ctx) => const ComplaintsScreen()));
-        //   },
-        // ),
-        // _drawerTile(
-        //   context,
-        //   title: "Vehicle Request",
-        //   icon: Icons.airport_shuttle_rounded,
-        //   subtitle: "Make/Manage Vehicle Requests",
-        //   onTap: () {
-        //     // TODO: Add a Vehicle Request screen
-        //     showMsg(context, "TODO: Add a Vehicle Request screen");
-        //   },
-        // ),
-        // _drawerTile(
-        //   context,
-        //   title: "Settings",
-        //   icon: Icons.settings_rounded,
-        //   subtitle: "Customize the app to your needs",
-        //   onTap: () {
-        //     Navigator.of(context).push(
-        //         MaterialPageRoute(builder: (ctx) => const SettingsScreen()));
-        //   },
-        // ),
         _drawerTile(
           context,
           title: "How to use?",

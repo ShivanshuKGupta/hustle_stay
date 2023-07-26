@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/attendance_screen.dart';
 import 'package:hustle_stay/screens/complaints/complaints_screen.dart';
+import 'package:hustle_stay/screens/home_screen/home_screen.dart';
 import 'package:hustle_stay/screens/hostel/hostel_screen.dart';
-import 'package:hustle_stay/screens/hostel/rooms/complete_details_screen.dart';
 import 'package:hustle_stay/screens/requests/requests_screen.dart';
 import 'package:hustle_stay/screens/settings/settings_screen.dart';
 import 'package:hustle_stay/tools.dart';
 
-class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({super.key});
+class MainScreen extends ConsumerStatefulWidget {
+  const MainScreen({super.key});
 
   @override
-  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<MainScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<MainScreen> {
   late PageController _pageController;
 
   @override
@@ -47,12 +46,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     int i = 0;
     List<Widget> bodyList = [
       currentUser.readonly.type == 'student'
-          ? AttendanceScreen()
+          ? const AttendanceScreen()
           : const HostelScreen(),
       const ComplaintsScreen(),
-      const Center(
-        child: Text('Home Screen'),
-      ),
+      HomeScreen(pageChanger: _switchPage),
       const RequestsScreen(),
       const SettingsScreen(),
     ];
@@ -74,11 +71,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   if ((settings.currentPage - value).abs() > 1) {
                     _pageController.jumpToPage(value);
                   } else {
-                    _pageController.animateToPage(
-                      value,
-                      curve: Curves.decelerate,
-                      duration: const Duration(milliseconds: 500),
-                    );
+                    _switchPage(value);
                   }
                 },
                 gap: 8,
@@ -136,5 +129,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         )
         // bodyList[settings.currentPage],
         );
+  }
+
+  void _switchPage(int value) {
+    _pageController.animateToPage(
+      value,
+      curve: Curves.decelerate,
+      duration: const Duration(milliseconds: 500),
+    );
   }
 }

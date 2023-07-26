@@ -1,56 +1,38 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/user/user.dart';
-import 'package:hustle_stay/providers/image.dart';
-import 'package:hustle_stay/tools.dart';
+import 'package:hustle_stay/providers/settings.dart';
+import 'package:hustle_stay/widgets/edit_profile.dart';
 
-import '../../widgets/edit_profile.dart';
+class EditProfile extends ConsumerWidget {
+  late final UserData user;
 
-class EditProfile extends StatefulWidget {
   EditProfile({super.key, UserData? user}) {
     this.user = user ?? UserData();
   }
 
-  late final UserData user;
   @override
-  State<EditProfile> createState() => _EditProfileState();
-}
-
-class _EditProfileState extends State<EditProfile> {
-  final _formKey = GlobalKey<FormState>();
-  bool _loading = false;
-
-  File? img;
-
-  Future<void> save(context) async {
-    FocusScope.of(context).unfocus();
-    if (!_formKey.currentState!.validate()) return;
-    _formKey.currentState!.save();
-    setState(() {
-      _loading = true;
-    });
-    try {
-      widget.user.imgUrl = img != null
-          ? await uploadImage(
-              context, img, widget.user.email!, "profile-image.jpg")
-          : widget.user.imgUrl;
-      await updateUserData(widget.user);
-      Navigator.of(context).pop(true); // to show that a change was done
-    } catch (e) {
-      showMsg(context, e.toString());
-    }
-    setState(() {
-      _loading = false;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
     return Scaffold(
-        appBar: AppBar(),
-        body: EditProfileWidget(
-          user: widget.user,
-        ));
+      appBar: AppBar(
+        actions: [
+          if (user.email == currentUser.email)
+            IconButton(
+              onPressed: () async {
+                while (Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop();
+                }
+                ref.read(settingsProvider.notifier).clearSettings();
+                auth.signOut();
+              },
+              icon: const Icon(Icons.logout_rounded),
+            ),
+        ],
+      ),
+      body: EditProfileWidget(
+        user: user,
+      ),
+    );
   }
 }

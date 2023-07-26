@@ -1,5 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/chat/message.dart';
+import 'package:hustle_stay/models/user/user.dart';
+import 'package:hustle_stay/screens/chat/chat_screen.dart';
+import 'package:hustle_stay/tools.dart';
 
 class ChatData {
   String title;
@@ -29,4 +33,22 @@ Future<ChatData> fetchChatData(ChatData chat) async {
   chat.messages =
       response.docs.map((e) => MessageData.load(e.id, e.data())).toList();
   return chat;
+}
+
+showChat(
+  BuildContext context, {
+  required String id,
+  required List<String> emails,
+}) {
+  return navigatorPush(
+    context,
+    ChatScreen(
+      chat: ChatData(
+        owner: currentUser.email!,
+        receivers: emails,
+        title: id,
+        path: 'chats/$id',
+      ),
+    ),
+  );
 }

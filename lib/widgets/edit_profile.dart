@@ -46,11 +46,14 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
           padding: const EdgeInsets.all(15.0),
           child: Column(
             children: [
-              ProfileImage(
-                url: widget.user.imgUrl,
-                onChanged: (value) {
-                  img = value;
-                },
+              Hero(
+                tag: 'profile-image',
+                child: ProfileImage(
+                  url: widget.user.imgUrl,
+                  onChanged: (value) {
+                    img = value;
+                  },
+                ),
               ),
               Text(
                 widget.user.email ?? "",

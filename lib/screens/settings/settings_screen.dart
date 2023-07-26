@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
-import 'package:hustle_stay/screens/drawers/main_drawer.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/settings/current_user_tile.dart';
 import 'package:hustle_stay/widgets/settings/section.dart';
@@ -53,16 +52,6 @@ class SettingsScreen extends ConsumerWidget {
                 Navigator.of(context).pop();
               }
               settingsClass.clearSettings();
-              // final token = await FirebaseMessaging.instance.getToken();
-              // final delRef = await FirebaseFirestore.instance
-              //     .collection('userTokens')
-              //     .doc(currentUser.email)
-              //     .collection('Tokens')
-              //     .where('token', isEqualTo: token)
-              //     .get();
-              // delRef.docs.forEach((element) async {
-              //   await element.reference.delete();
-              // });
               auth.signOut();
             },
           ),
@@ -74,7 +63,6 @@ class SettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: shaderText(context, title: 'Settings'),
       ),
-      drawer: const MainDrawer(),
       body: SingleChildScrollView(
         child: Column(
           children: [

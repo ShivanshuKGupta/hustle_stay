@@ -86,14 +86,19 @@ class Message extends StatelessWidget {
                       email: msg.from,
                       src: Source.cache,
                       builder: (context, userData) {
-                        return Text(
-                          userData.name ?? userData.email!,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall!
-                              .copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
+                        return GestureDetector(
+                          onTap: () {
+                            showUserPreview(context, userData);
+                          },
+                          child: Text(
+                            userData.name ?? userData.email!,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall!
+                                .copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                          ),
                         );
                       },
                     ),

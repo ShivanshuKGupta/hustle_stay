@@ -41,13 +41,13 @@ class _EditCategoryFormState extends State<EditCategoryForm> {
       return;
     }
     if (isParent) {
-      if (widget.category!.allReceipients.isEmpty) {
-        showMsg(context,
-            'Please select atleast one receipient for all receipients');
+      if (widget.category!.allrecipients.isEmpty) {
+        showMsg(
+            context, 'Please select atleast one receipient for all recipients');
         return;
       }
       if (widget.category!.defaultReceipient.isEmpty) {
-        showMsg(context, 'Please select atleast one default receipients');
+        showMsg(context, 'Please select atleast one default recipients');
         return;
       }
     }
@@ -96,18 +96,18 @@ class _EditCategoryFormState extends State<EditCategoryForm> {
             UsersBuilder(
               provider: fetchComplainees,
               builder: (ctx, complainees) => SelectionVault(
-                helpText: 'All Possible Receipients',
+                helpText: 'All Possible recipients',
                 allItems: complainees.map((e) => e.email!).toSet(),
                 onChange: (users) => setState(
-                    () => widget.category!.allReceipients = users.toList()),
-                chosenItems: widget.category!.allReceipients.toSet(),
+                    () => widget.category!.allrecipients = users.toList()),
+                chosenItems: widget.category!.allrecipients.toSet(),
               ),
             ),
           if (isParent) const SizedBox(height: 20),
           if (isParent)
             SelectionVault(
-              helpText: 'Default Receipients',
-              allItems: widget.category!.allReceipients.toSet(),
+              helpText: 'Default recipients',
+              allItems: widget.category!.allrecipients.toSet(),
               onChange: (users) => setState(
                   () => widget.category!.defaultReceipient = users.toList()),
               chosenItems: widget.category!.defaultReceipient.toSet(),
@@ -183,7 +183,7 @@ class _EditCategoryFormState extends State<EditCategoryForm> {
               LoadingElevatedButton(
                 enabled: !(_idController.text.trim().isEmpty ||
                     (isParent &&
-                        (widget.category!.allReceipients.isEmpty ||
+                        (widget.category!.allrecipients.isEmpty ||
                             widget.category!.defaultReceipient.isEmpty))),
                 onPressed: _save,
                 icon: const Icon(Icons.check_rounded),
@@ -278,23 +278,23 @@ class _EditCategoryFormState extends State<EditCategoryForm> {
 //               MultiChooser(
 //                 hintTxt: "Select a receipient",
 //                 allOptions: widget.allRecepients,
-//                 chosenOptions: widget.category.allReceipients,
+//                 chosenOptions: widget.category.allrecipients,
 //                 onUpdate: (value) {
 //                   setState(() {
-//                     widget.category.allReceipients = value;
+//                     widget.category.allrecipients = value;
 //                   });
 //                 },
-//                 label: 'All Receipients',
+//                 label: 'All recipients',
 //               ),
 //               MultiChooser(
 //                 hintTxt: "Select a receipient",
 //                 key: UniqueKey(),
-//                 allOptions: widget.category.allReceipients,
+//                 allOptions: widget.category.allrecipients,
 //                 chosenOptions: widget.category.defaultReceipient,
 //                 onUpdate: (value) {
 //                   widget.category.defaultReceipient = value;
 //                 },
-//                 label: 'Default Receipients',
+//                 label: 'Default recipients',
 //               ),
 //               TextFormField(
 //                 key: UniqueKey(),

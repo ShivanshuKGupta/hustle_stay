@@ -10,7 +10,7 @@ enum Priority { low, medium, high }
 class Category {
   String id;
   List<String> defaultReceipient;
-  List<String> allReceipients;
+  List<String> allrecipients;
 
   /// Higher the number higer is the priority
   Priority defaultPriority;
@@ -31,7 +31,7 @@ class Category {
   Category(
     this.id, {
     this.defaultReceipient = const [],
-    this.allReceipients = const [],
+    this.allrecipients = const [],
     // this.cooldown = const Duration(seconds: 0),
     this.color = Colors.blue,
     this.icon = Icons.category_rounded,
@@ -42,7 +42,7 @@ class Category {
   Map<String, dynamic> encode() {
     return {
       if (defaultReceipient.isNotEmpty) "defaultReceipient": defaultReceipient,
-      if (allReceipients.isNotEmpty) "allReceipients": allReceipients,
+      if (allrecipients.isNotEmpty) "allrecipients": allrecipients,
       "defaultPriority": defaultPriority.index,
       // "cooldown": cooldown.inSeconds,
       "color": color.value,
@@ -66,10 +66,10 @@ class Category {
     //   }
     //   return e;
     // }).toList();
-    allReceipients = ((data["allReceipients"] ?? []) as List<dynamic>)
+    allrecipients = ((data["allrecipients"] ?? []) as List<dynamic>)
         .map((e) => e.toString())
         .toList();
-    // allReceipients = allReceipients.map((e) {
+    // allrecipients = allrecipients.map((e) {
     //   if (e == 'Attender') {
     //     return 'attender@iiitr.ac.in';
     //   } else if (e == 'Alka Chaddha') {
@@ -130,7 +130,7 @@ Future<List<Category>> fetchAllCategories({Source? src}) async {
 
 Future<void> updateCategory(Category category) async {
   if (category.parent != null) {
-    category.allReceipients = [];
+    category.allrecipients = [];
     category.defaultReceipient = [];
   }
   await firestore

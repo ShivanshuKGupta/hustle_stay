@@ -1,15 +1,16 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/screens/home_screen.dart';
+import 'package:hustle_stay/screens/main_screen.dart';
+
 // import 'package:hustle_stay/models/hostels.dart';
 import '../../tools.dart';
 import '../../widgets/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 
 class AddHostelForm extends StatefulWidget {
-  AddHostelForm();
+  const AddHostelForm({super.key});
 
   @override
   _AddHostelFormState createState() => _AddHostelFormState();
@@ -23,11 +24,11 @@ class _AddHostelFormState extends State<AddHostelForm> {
     final storageRef = FirebaseStorage.instance
         .ref()
         .child('hostel_images')
-        .child('${hostelName}.jpg');
+        .child('$hostelName.jpg');
 
     await storageRef.putFile(_selectedImage!);
     final imageUrl = await storageRef.getDownloadURL();
-    await store.collection('hostels').doc('$hostelName').set({
+    await store.collection('hostels').doc(hostelName).set({
       "hostelName": hostelName,
       "hostelType": hostelType,
       "numberOfRooms": 0,
@@ -37,7 +38,7 @@ class _AddHostelFormState extends State<AddHostelForm> {
     });
 
     Navigator.of(context)
-        .pushReplacement(MaterialPageRoute(builder: (_) => HomeScreen()));
+        .pushReplacement(MaterialPageRoute(builder: (_) => const MainScreen()));
   }
 
   File? _selectedImage;
@@ -57,15 +58,15 @@ class _AddHostelFormState extends State<AddHostelForm> {
   }
 
   List<DropdownMenuItem<String>> dropdownItems = [
-    DropdownMenuItem(
+    const DropdownMenuItem(
       value: 'Boys',
       child: Text('Boys'),
     ),
-    DropdownMenuItem(
+    const DropdownMenuItem(
       value: 'Girls',
       child: Text('Girls'),
     ),
-    DropdownMenuItem(
+    const DropdownMenuItem(
       value: 'Co-Ed',
       child: Text('Co-Ed'),
     ),
@@ -90,11 +91,11 @@ class _AddHostelFormState extends State<AddHostelForm> {
       ),
       body: SingleChildScrollView(
         child: Container(
-          padding: EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(20.0),
           child: Form(
             key: _formKey,
             child: Container(
-              padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+              padding: const EdgeInsets.fromLTRB(5, 5, 5, 5),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -104,7 +105,8 @@ class _AddHostelFormState extends State<AddHostelForm> {
                     },
                   ),
                   TextFormField(
-                    decoration: InputDecoration(label: Text('Hostel Name')),
+                    decoration:
+                        const InputDecoration(label: Text('Hostel Name')),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter the hostel name.';
@@ -115,10 +117,10 @@ class _AddHostelFormState extends State<AddHostelForm> {
                       hostelName = value!;
                     },
                   ),
-                  SizedBox(height: 10.0),
+                  const SizedBox(height: 10.0),
                   DropdownButtonFormField(
                     decoration:
-                        InputDecoration(label: const Text('Hostel Type')),
+                        const InputDecoration(label: Text('Hostel Type')),
                     items: dropdownItems,
                     value: 'Boys',
                     onChanged: (value) {
@@ -133,9 +135,9 @@ class _AddHostelFormState extends State<AddHostelForm> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 10.0),
+                  const SizedBox(height: 10.0),
                   TextFormField(
-                    decoration: InputDecoration(labelText: 'Capacity'),
+                    decoration: const InputDecoration(labelText: 'Capacity'),
                     keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -150,10 +152,10 @@ class _AddHostelFormState extends State<AddHostelForm> {
                       capacity = int.parse(value!);
                     },
                   ),
-                  SizedBox(height: 10.0),
+                  const SizedBox(height: 10.0),
                   TextFormField(
-                    decoration:
-                        InputDecoration(labelText: 'Number of Floors/Blocks'),
+                    decoration: const InputDecoration(
+                        labelText: 'Number of Floors/Blocks'),
                     keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -168,10 +170,10 @@ class _AddHostelFormState extends State<AddHostelForm> {
                       numberOfFloorsorBlocks = int.parse(value!);
                     },
                   ),
-                  SizedBox(height: 20.0),
+                  const SizedBox(height: 20.0),
                   ElevatedButton(
                     onPressed: _submitForm,
-                    child: Text(
+                    child: const Text(
                       'Add Hostel',
                       style: TextStyle(fontSize: 16.0),
                     ),
