@@ -91,7 +91,9 @@ class _AttendanceIconState extends State<AttendanceIcon> {
             child: ElevatedButton(
               onPressed: null,
               onLongPress: widget.roommateData.leaveEndDate == null
-                  ? () {}
+                  ? () {
+                      print('hi');
+                    }
                   : () async {
                       final response = await askUser(
                         context,

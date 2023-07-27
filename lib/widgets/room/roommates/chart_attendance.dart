@@ -53,7 +53,7 @@ class DataPoint {
 }
 
 class _AttendancePieChartState extends State<AttendancePieChart> {
-  void onClickNavigation(String category) {
+  void onClickNavigation(String category, {List<String>? students}) {
     switch (category) {
       case 'Leave':
         category = 'onLeave';
@@ -68,12 +68,14 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
         category = category.toLowerCase();
     }
     if (widget.email == null && widget.selectedDate != null) {
+      print('gere');
       Navigator.of(context)
           .push(MaterialPageRoute(
               builder: (_) => FilterStudents(
                   status: category,
                   hostelName: widget.hostelName,
-                  date: widget.selectedDate!.value)))
+                  date: widget.selectedDate!.value,
+                  students: students)))
           .then((value) {
         if (mounted) {
           setState(() {});
@@ -339,26 +341,24 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
                   ? SfCircularChart(
                       series: <CircularSeries>[
                         PieSeries<ChartData, String>(
-                            dataSource: chartdata,
-                            pointColorMapper: (ChartData data, _) => data.color,
-                            xValueMapper: (ChartData data, _) => data.category,
-                            yValueMapper: (ChartData data, _) => data.value,
-                            dataLabelSettings: const DataLabelSettings(
-                              isVisible: true,
-                            ),
-                            selectionBehavior: SelectionBehavior(enable: true),
-                            onPointLongPress: (pointInteractionDetails) {
-                              onClickNavigation(
-                                  chartdata[pointInteractionDetails.pointIndex!]
-                                      .category);
-                            },
-                            onPointTap: (pointInteractionDetails) async {
-                              await getHostelRangeAttendanceStatistics(
-                                  widget.hostelName,
-                                  DateTimeRange(
-                                      start: DateTime(2023, 06, 25),
-                                      end: DateTime.now()));
-                            }),
+                          dataSource: chartdata,
+                          pointColorMapper: (ChartData data, _) => data.color,
+                          xValueMapper: (ChartData data, _) => data.category,
+                          yValueMapper: (ChartData data, _) => data.value,
+                          dataLabelSettings: const DataLabelSettings(
+                            isVisible: true,
+                          ),
+                          selectionBehavior: SelectionBehavior(enable: true),
+                          onPointLongPress: (pointInteractionDetails) {
+                            String cat =
+                                chartdata[pointInteractionDetails.pointIndex!]
+                                    .category;
+                            onClickNavigation(cat,
+                                students: cat == 'Not Taken'
+                                    ? data['notMarked']
+                                    : null);
+                          },
+                        ),
                       ],
                       legend: const Legend(
                         isVisible: true,

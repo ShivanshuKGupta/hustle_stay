@@ -39,8 +39,7 @@ class _RoommateDataWidgetState extends ConsumerState<RoommateDataWidget> {
   @override
   void didUpdateWidget(covariant RoommateDataWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.email != null && widget.roommateData == null ||
-        widget.roomName == null) {
+    if (widget.email != null && widget.roommateData == null) {
       getRoommateData(widget.email!, widget.hostelName);
     } else if (widget.isNeeded == null || widget.isNeeded == true) {
       _getAttendanceData();

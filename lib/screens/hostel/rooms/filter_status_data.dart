@@ -1,7 +1,7 @@
 import 'package:animated_icon/animated_icon.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/attendance.dart';
+import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import 'package:hustle_stay/widgets/room/roommates/roommate_data.dart';
 
 class FilterStudents extends StatefulWidget {
@@ -9,77 +9,90 @@ class FilterStudents extends StatefulWidget {
       {super.key,
       required this.status,
       required this.hostelName,
-      required this.date});
+      required this.date,
+      this.students});
   final String status;
   final String hostelName;
   final DateTime date;
+  final List<String>? students;
 
   @override
   State<FilterStudents> createState() => _FilterStudentsState();
 }
 
 class _FilterStudentsState extends State<FilterStudents> {
-  
-  ValueNotifier<List<RoommateInfo>>? list = ValueNotifier([]);
+  @override
+  void initState() {
+    super.initState();
+    if (widget.students != null) {
+      print('yha bhi phuch gya');
+      widget.students!.forEach((element) {
+        list!.value
+            .add(RoommateInfo(roommateData: RoommateData(email: element)));
+      });
+    }
+  }
 
-  
+  ValueNotifier<List<RoommateInfo>>? list = ValueNotifier([]);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Filtered Students'),
       ),
-      body: FutureBuilder(
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: SizedBox(
-                width: double.infinity,
-                height: double.infinity,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    AnimateIcon(
-                      onTap: () {},
-                      iconType: IconType.continueAnimation,
-                      animateIcon: AnimateIcons.loading1,
-                      color: Theme.of(context).colorScheme.secondary,
+      body: widget.students != null
+          ? listStudents()
+          : FutureBuilder(
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: double.infinity,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          AnimateIcon(
+                            onTap: () {},
+                            iconType: IconType.continueAnimation,
+                            animateIcon: AnimateIcons.loading1,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                          const Text('Loading...')
+                        ],
+                      ),
                     ),
-                    const Text('Loading...')
-                  ],
-                ),
-              ),
-            );
-          }
-          if (!snapshot.hasData && snapshot.error != null) {
-            return Center(
-              child: SizedBox(
-                width: double.infinity,
-                height: double.infinity,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    AnimateIcon(
-                      onTap: () {},
-                      iconType: IconType.continueAnimation,
-                      animateIcon: AnimateIcons.error,
-                      color: Theme.of(context).colorScheme.secondary,
+                  );
+                }
+                if (!snapshot.hasData && snapshot.error != null) {
+                  return Center(
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: double.infinity,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          AnimateIcon(
+                            onTap: () {},
+                            iconType: IconType.continueAnimation,
+                            animateIcon: AnimateIcons.error,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                          const Text('No data available')
+                        ],
+                      ),
                     ),
-                    const Text('No data available')
-                  ],
-                ),
-              ),
-            );
-          }
+                  );
+                }
 
-          list!.value = snapshot.data!;
-          return listStudents();
-        },
-        future:
-            getFilteredStudents(widget.status, widget.date, widget.hostelName),
-      ),
+                list!.value = snapshot.data!;
+                return listStudents();
+              },
+              future: getFilteredStudents(
+                  widget.status, widget.date, widget.hostelName),
+            ),
     );
   }
 
@@ -94,7 +107,7 @@ class _FilterStudentsState extends State<FilterStudents> {
             roomName: list!.value[index].roomName,
             hostelName: widget.hostelName,
             status: widget.status,
-            isNeeded: false,
+            isNeeded: widget.students != null,
           );
         },
         itemCount: list!.value.length,

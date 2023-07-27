@@ -22,10 +22,10 @@ class LeaveData {
 
 class RoommateInfo {
   final RoommateData roommateData;
-  final String roomName;
+  final String? roomName;
 
   RoommateInfo({
-    required this.roomName,
+    this.roomName,
     required this.roommateData,
   });
 }
@@ -338,7 +338,7 @@ Future<Map<String, dynamic>> getAttendanceStatistics(
   return attendanceStats;
 }
 
-Future<Map<String, double>> getHostelAttendanceStatistics(
+Future<Map<String, dynamic>> getHostelAttendanceStatistics(
     String hostelName, DateTime date,
     {Source? source}) async {
   final storage = FirebaseFirestore.instance;
@@ -353,8 +353,9 @@ Future<Map<String, double>> getHostelAttendanceStatistics(
   total = roommatesQuery.docs.length.toDouble();
   final List<Future<DocumentSnapshot<Map<String, dynamic>>>> attendanceFutures =
       [];
-
+  List<String> unMarkedStudents = [];
   for (final x in roommatesQuery.docs) {
+    unMarkedStudents.add(x.id);
     final attendanceRef = x.reference
         .collection('Attendance')
         .doc(DateFormat('yyyy-MM-dd').format(date));
@@ -373,6 +374,7 @@ Future<Map<String, double>> getHostelAttendanceStatistics(
 
   for (final attendanceSnapshot in attendanceSnapshots) {
     if (attendanceSnapshot.exists) {
+      unMarkedStudents.remove(attendanceSnapshot.reference.parent.parent!.id);
       switch (attendanceSnapshot['status']) {
         case 'present':
           present += 1;
@@ -391,14 +393,14 @@ Future<Map<String, double>> getHostelAttendanceStatistics(
       }
     }
   }
-
   final attendanceStats = {
     'present': present,
     'presentLate': presentLate,
     'absent': absent,
     'leave': leave,
     'internship': internship,
-    'total': total
+    'total': total,
+    'notMarked': unMarkedStudents,
   };
 
   return attendanceStats;
