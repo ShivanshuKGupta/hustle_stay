@@ -18,7 +18,11 @@ class EditProfile extends ConsumerWidget {
       appBar: AppBar(
         actions: [
           if (user.email == currentUser.email)
-            IconButton(
+            ElevatedButton.icon(
+              label: const Text('Sign Out'),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
               onPressed: () async {
                 while (Navigator.of(context).canPop()) {
                   Navigator.of(context).pop();

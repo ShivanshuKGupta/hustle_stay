@@ -14,6 +14,7 @@ class IntroComplaints extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           AnimateIcon(
+            color: Theme.of(context).colorScheme.primary,
             animateIcon: AnimateIcons.chatMessage,
             iconType: IconType.continueAnimation,
             onTap: () {},

@@ -11,7 +11,10 @@ class IntroApp extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.asset('assets/transparent.png'),
+          Image.asset(
+            'assets/transparent.png',
+            color: Theme.of(context).colorScheme.primary,
+          ),
           const SizedBox(
             height: 20,
           ),

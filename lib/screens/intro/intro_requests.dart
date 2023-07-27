@@ -14,6 +14,7 @@ class IntroRequests extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           AnimateIcon(
+            color: Theme.of(context).colorScheme.primary,
             animateIcon: AnimateIcons.confused,
             iconType: IconType.continueAnimation,
             onTap: () {},

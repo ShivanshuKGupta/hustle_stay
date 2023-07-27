@@ -25,8 +25,10 @@ class ChatsScreen extends StatelessWidget {
             String? title = data['title'];
             if (title == null) {
               if (receipeints.length == 2) {
-                title = receipeints
-                    .firstWhere((element) => element != currentUser.email);
+                title = receipeints.firstWhere(
+                  (element) => element != currentUser.email,
+                  orElse: () => currentUser.email!,
+                );
               } else {
                 title = doc.id;
               }

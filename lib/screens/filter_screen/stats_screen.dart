@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/main.dart';
+import 'package:hustle_stay/models/category/category.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
@@ -11,8 +12,6 @@ import 'package:hustle_stay/screens/filter_screen/stats.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/complaints/complaints_list_view.dart';
 import 'package:hustle_stay/widgets/complaints/select_one.dart';
-
-import '../../models/category/category.dart';
 
 // ignore: must_be_immutable
 class StatisticsPage extends ConsumerStatefulWidget {

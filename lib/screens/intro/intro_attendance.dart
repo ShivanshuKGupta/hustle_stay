@@ -14,6 +14,7 @@ class IntroAttendance extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           AnimateIcon(
+            color: Theme.of(context).colorScheme.primary,
             animateIcon: AnimateIcons.calendarTear,
             iconType: IconType.continueAnimation,
             onTap: () {},

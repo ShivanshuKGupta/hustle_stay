@@ -25,13 +25,13 @@ class CategoryList extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // if (category.id != 'Other')
-              //   GridTileLogo(
-              //     onTap: () => Navigator.of(context).pop(),
-              //     title: category.id,
-              //     icon: Icon(category.icon, size: 50),
-              //     color: Theme.of(context).colorScheme.background,
-              //   ),
+              if (category.id != 'Other')
+                GridTileLogo(
+                  onTap: () => Navigator.of(context).pop(),
+                  title: category.id,
+                  icon: Icon(category.icon, size: 50),
+                  color: Theme.of(context).colorScheme.background,
+                ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: GridView.extent(

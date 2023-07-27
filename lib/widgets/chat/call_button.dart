@@ -37,12 +37,21 @@ class CallButton extends StatelessWidget {
         }
         return IconButton(
           icon: const Icon(Icons.call_rounded),
-          onPressed: () {
+          onPressed: () async {
             if (users.length == 1) {
-              final String url = "tel:+91${users[0].phoneNumber}";
-              launchUrl(Uri.parse(url));
+              final String url = "tel:${users[0].phoneNumber}";
+              if (await askUser(context,
+                      'Do you want to call ${users[0].name ?? users[0].email} (${users[0].phoneNumber})?',
+                      yes: true, cancel: true) ==
+                  'yes') {
+                if (context.mounted) {
+                  showMsg(context,
+                      'Calling ${users[0].name ?? users[0].email} (${users[0].phoneNumber})');
+                }
+                await launchUrl(Uri.parse(url));
+              }
             } else {
-              Navigator.of(context).push(
+              await Navigator.of(context).push(
                 DialogRoute(
                   context: context,
                   builder: (ctx) => CallChoser(phoneNumbers: users),

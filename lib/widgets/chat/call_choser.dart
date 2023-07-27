@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user/user.dart';
+import 'package:hustle_stay/tools.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class CallChoser extends StatefulWidget {
@@ -45,6 +46,9 @@ class _CallChoserState extends State<CallChoser> {
         IconButton(
             onPressed: () {
               launchUrl(Uri.parse("tel:+91$phone"));
+              final user = widget.phoneNumbers
+                  .firstWhere((element) => element.phoneNumber == phone);
+              showMsg(context, 'Calling ${user.name ?? user.email}');
             },
             icon: const Icon(Icons.call_rounded))
       ],
