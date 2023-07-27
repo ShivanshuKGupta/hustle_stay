@@ -579,7 +579,7 @@ class _StatListState extends State<StatList> {
               ),
               ListTile(
                 title: const Text('Late'),
-                leading: const Icon(Icons.all_inbox),
+                leading: const Icon(Icons.watch_later),
                 trailing: Text(
                   (widget.data['presentLate']!).toStringAsFixed(0),
                   style: Theme.of(context).textTheme.bodyLarge,
@@ -587,7 +587,7 @@ class _StatListState extends State<StatList> {
               ),
               ListTile(
                 title: const Text('Not Taken Yet'),
-                leading: const Icon(Icons.all_inbox),
+                leading: const Icon(Icons.hourglass_empty),
                 trailing: Text(
                   ((widget.data['total']! -
                           (widget.data['present']! +
