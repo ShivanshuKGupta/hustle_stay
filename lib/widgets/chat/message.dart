@@ -103,19 +103,38 @@ class Message extends StatelessWidget {
                       },
                     ),
                   ),
-                MarkdownBody(
-                  fitContent: true,
-                  data: msg.txt,
-                  selectable: true,
-                  onTapText: () => showMsgInfo(context, msg),
-                  onTapLink: (text, href, title) {
-                    if (href != null) launchUrl(Uri.parse(href));
-                  },
-                  imageBuilder: (uri, title, alt) => imageBuilder(uri, msg.id),
-                ),
-                const SizedBox(
-                  height: 20,
-                )
+                if (msg.deletedAt == null)
+                  MarkdownBody(
+                    fitContent: true,
+                    data: msg.txt,
+                    selectable: true,
+                    onTapText: () => showMsgInfo(context, msg),
+                    onTapLink: (text, href, title) {
+                      if (href != null) launchUrl(Uri.parse(href));
+                    },
+                    imageBuilder: (uri, title, alt) =>
+                        imageBuilder(uri, msg.id),
+                  )
+                else
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.not_interested_rounded,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        msg.from == currentUser.email
+                            ? 'You deleted this message.'
+                            : 'This message was deleted.',
+                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                              fontStyle: FontStyle.italic,
+                            ),
+                      ),
+                    ],
+                  ),
+                const SizedBox(height: 20)
               ],
             ),
             Positioned(
@@ -157,7 +176,7 @@ class Message extends StatelessWidget {
   }
 
   showMsgInfo(context, MessageData msg) {
-    if (!isImage(msg)) {
+    if (!isImage(msg) || msg.deletedAt != null) {
       showInfo(context, msg);
     } else {
       String url = msg.txt.split('(').last;
@@ -296,6 +315,34 @@ class Message extends StatelessWidget {
                       ),
                     ),
                   ),
+                if (msg.deletedAt != null)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: SizedBox(
+                      width: constraints.maxWidth,
+                      child: Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Deleted At:",
+                            style:
+                                Theme.of(context).textTheme.bodySmall!.copyWith(
+                                      color: Colors.red,
+                                    ),
+                          ),
+                          Text(
+                            "${ddmmyyyy(msg.deletedAt!)} | ${timeFrom(msg.deletedAt!)}",
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall!
+                                .copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -305,7 +352,7 @@ class Message extends StatelessWidget {
               onPressed: () => copyMsg(context),
               icon: const Icon(Icons.copy_rounded),
             ),
-            if (msg.from == currentUser.email)
+            if (msg.from == currentUser.email && msg.deletedAt == null)
               IconButton(
                 iconSize: 30,
                 onPressed: () async {
@@ -319,7 +366,11 @@ class Message extends StatelessWidget {
               IconButton(
                 iconSize: 30,
                 onPressed: () => delMsg(context),
-                icon: const Icon(Icons.delete_rounded),
+                icon: Icon(
+                  msg.deletedAt == null
+                      ? Icons.delete_rounded
+                      : Icons.restore_from_trash_rounded,
+                ),
               ),
           ],
         ),
@@ -349,7 +400,10 @@ class Message extends StatelessWidget {
           );
         },
         errorWidget: (context, url, error) {
-          return const Icon(Icons.error_outline_rounded);
+          return const Icon(
+            Icons.image_not_supported_rounded,
+            color: Colors.red,
+          );
         },
       ),
     );
@@ -358,7 +412,7 @@ class Message extends StatelessWidget {
   Future<void> delMsg(BuildContext context) async {
     final String? res = await askUser(
       context,
-      "Do you really wish to delete this msg?",
+      "Do you really wish to ${msg.deletedAt == null ? 'delete' : 'restore'} this msg?",
       yes: true,
       no: true,
     );
@@ -372,29 +426,33 @@ class Message extends StatelessWidget {
         return;
       }
       if (context.mounted) {
-        showMsg(context, "Message Deleted Successfully");
+        showMsg(context,
+            "Message ${msg.deletedAt != null ? 'Deleted' : 'Restored'} Successfully");
       }
-      try {
-        bool isImg = isImage(msg);
-        if (isImg && context.mounted) {
-          String? ans = await askUser(
-            context,
-            "Do you want to delete the image from cloud as well?",
-            yes: true,
-            no: true,
-          );
-          if (ans == "yes") {
-            String url = msg.txt.split('(').last;
-            url = url.substring(0, url.length - 1);
-            await storage.refFromURL(url).delete();
-            if (context.mounted) {
-              showMsg(context, "Image was deleted successfully from the cloud");
+      if (msg.deletedAt != null) {
+        try {
+          bool isImg = isImage(msg);
+          if (isImg && context.mounted) {
+            String? ans = await askUser(
+              context,
+              "Do you want to delete the image from cloud as well?",
+              yes: true,
+              no: true,
+            );
+            if (ans == "yes") {
+              String url = msg.txt.split('(').last;
+              url = url.substring(0, url.length - 1);
+              await storage.refFromURL(url).delete();
+              if (context.mounted) {
+                showMsg(
+                    context, "Image was deleted successfully from the cloud");
+              }
             }
           }
-        }
-      } catch (e) {
-        if (context.mounted) {
-          showMsg(context, e.toString());
+        } catch (e) {
+          if (context.mounted) {
+            showMsg(context, e.toString());
+          }
         }
       }
       if (context.mounted) {

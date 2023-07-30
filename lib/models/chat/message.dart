@@ -20,6 +20,7 @@ class MessageData {
   /// Modified At
   DateTime? modifiedAt;
 
+  /// Set of emails who have read this msg
   Set<String> readBy = {};
 
   /// These indicative messages are used to indicate
@@ -28,6 +29,9 @@ class MessageData {
   /// can only be created but not deleted
   late bool indicative;
 
+  /// This flag represents whether the msg is deleted or not?
+  DateTime? deletedAt;
+
   MessageData({
     required this.id,
     required this.txt,
@@ -35,6 +39,7 @@ class MessageData {
     required this.createdAt,
     this.indicative = false,
     this.modifiedAt,
+    this.deletedAt,
   });
 
   Map<String, dynamic> encode() {
@@ -43,6 +48,7 @@ class MessageData {
       "from": from,
       "indicative": indicative,
       "createdAt": createdAt.millisecondsSinceEpoch,
+      "deletedAt": deletedAt == null ? null : deletedAt!.millisecondsSinceEpoch,
       if (modifiedAt != null) "modifiedAt": modifiedAt!.millisecondsSinceEpoch,
       "readBy": readBy.toList()
     };
@@ -52,6 +58,9 @@ class MessageData {
     txt = data["txt"];
     from = data["from"];
     createdAt = DateTime.fromMillisecondsSinceEpoch(data["createdAt"]);
+    deletedAt = data["deletedAt"] == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(data["deletedAt"]!);
     indicative = data["indicative"] ?? false;
     modifiedAt = data["modifiedAt"] == null
         ? null
@@ -89,6 +98,14 @@ Future<void> addMessage(ChatData chat, MessageData msg) async {
 }
 
 Future<void> deleteMessage(ChatData chat, MessageData msg) async {
+  if (msg.deletedAt == null) {
+    msg.deletedAt = DateTime.now();
+  } else {
+    msg.deletedAt = null;
+  }
   final chatMessages = firestore.doc(chat.path).collection("chat");
-  await chatMessages.doc(msg.id).delete();
+  await chatMessages.doc(msg.id).update({
+    'deletedAt':
+        msg.deletedAt == null ? null : msg.deletedAt!.millisecondsSinceEpoch
+  });
 }

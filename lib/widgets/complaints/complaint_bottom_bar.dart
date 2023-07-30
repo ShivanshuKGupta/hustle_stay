@@ -184,7 +184,11 @@ class ComplaintBottomBar extends ConsumerWidget {
       no: true,
     );
     if (response == 'yes') {
-      complaint.resolvedAt = DateTime.now().millisecondsSinceEpoch;
+      if (complaint.resolvedAt == null) {
+        complaint.resolvedAt = DateTime.now().millisecondsSinceEpoch;
+      } else {
+        complaint.resolvedAt = null;
+      }
       updateComplaint(complaint);
       await addMessage(
         ChatData(

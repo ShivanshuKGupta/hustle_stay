@@ -27,15 +27,17 @@ class ProfilePreview extends StatelessWidget {
       children: [
         GestureDetector(
           onTap: () {
-            navigatorPush(
-              context,
-              ImagePreview(
-                image: Hero(
-                  tag: 'profile-image',
-                  child: CachedNetworkImage(imageUrl: user.imgUrl!),
+            if (user.imgUrl != null) {
+              navigatorPush(
+                context,
+                ImagePreview(
+                  image: Hero(
+                    tag: 'profile-image',
+                    child: CachedNetworkImage(imageUrl: user.imgUrl!),
+                  ),
                 ),
-              ),
-            );
+              );
+            }
           },
           child: Hero(
             tag: 'profile-image',
@@ -53,24 +55,35 @@ class ProfilePreview extends StatelessWidget {
             ),
           ),
         ),
-        GestureDetector(
-          onTap: () {
-            if (user.email == currentUser.email ||
-                currentUser.readonly.permissions.users.update == true) {
-              navigatorPush(context, EditProfile(user: user));
-            }
-          },
+        InkWell(
+          onTap: (user.email == currentUser.email ||
+                  currentUser.readonly.permissions.users.update == true)
+              ? () {
+                  navigatorPush(context, EditProfile(user: user));
+                }
+              : null,
           child: Padding(
             padding: const EdgeInsets.all(15.0),
-            child: shaderText(
-              context,
-              title: user.name ?? user.email!,
-              colors: [
-                Colors.deepPurpleAccent,
-                Colors.indigo,
-                Colors.blue,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                shaderText(
+                  context,
+                  title: user.name ?? user.email!,
+                  colors: [
+                    Colors.deepPurpleAccent,
+                    Colors.indigo,
+                    Colors.blue,
+                  ],
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                Text(
+                  user.email!,
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                ),
               ],
-              style: Theme.of(context).textTheme.titleLarge,
             ),
           ),
         ),
