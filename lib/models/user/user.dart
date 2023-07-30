@@ -205,9 +205,7 @@ Future<void> updateUserData(UserData userData) async {
 
 /// This function is responsible for logging user in
 Future<void> login(String email, String password) async {
-  UserCredential userCredential;
-  userCredential =
-      await auth.signInWithEmailAndPassword(email: email, password: password);
+  await auth.signInWithEmailAndPassword(email: email, password: password);
   // final token = FirebaseMessaging.instance.getToken();
   // await FirebaseFirestore.instance
   //     .collection('userTokens')
@@ -215,8 +213,6 @@ Future<void> login(String email, String password) async {
   //     .collection('Tokens')
   //     .doc()
   //     .set({'token': token});
-
-  currentUser = await fetchUserData(userCredential.user!.email!);
 }
 
 var currentUser = UserData();
