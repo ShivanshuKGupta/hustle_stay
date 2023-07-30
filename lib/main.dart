@@ -104,10 +104,11 @@ class HustleStayApp extends ConsumerWidget {
                 stream: auth.authStateChanges(),
                 builder: (ctx, user) {
                   if (user.hasData) {
-                    return auth.currentUser != null
+                    return currentUser.email != null
                         ? const MainScreen()
                         : UserBuilder(
                             email: user.data!.email!,
+                            src: Source.server,
                             loadingWidget: Scaffold(
                               body: Center(
                                 child: Column(

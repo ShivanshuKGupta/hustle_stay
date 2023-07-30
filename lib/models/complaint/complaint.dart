@@ -27,6 +27,9 @@ class ComplaintData {
     return category ?? 'Other';
   }
 
+  /// DateTime of deletion
+  DateTime? deletedAt;
+
   ComplaintData({
     this.description = "",
     required this.from,
@@ -34,6 +37,7 @@ class ComplaintData {
     this.scope = Scope.public,
     required this.to,
     this.resolvedAt,
+    this.deletedAt,
     this.category,
   });
 
@@ -45,6 +49,7 @@ class ComplaintData {
       "to": to,
       "resolved": resolvedAt != null,
       "resolvedAt": resolvedAt,
+      "deletedAt": deletedAt,
       "category": category,
       "createdAt": id,
     };
@@ -88,12 +93,13 @@ class ComplaintData {
     scope = Scope.values
         .firstWhere((element) => element.name == complaintData["scope"]);
     resolvedAt = complaintData["resolvedAt"];
+    deletedAt = complaintData["deletedAt"];
     category = complaintData["category"];
     to = (complaintData["to"] as List<dynamic>)
         .map((e) => e.toString())
         .toList();
     // Below code was used to correct the data in the db and is no longer needed
-    // if (complaintData['title'] != null) updateComplaint(this);
+    // if (complaintData['deletedAt'] == null) updateComplaint(this);
     // if (complaintData['createdAt'] == null ||
     //     complaintData['createdAt'].runtimeType != int) {
     //   updateComplaint(this);
@@ -133,6 +139,7 @@ Future<ComplaintData> updateComplaint(ComplaintData complaint) async {
 
 /// updates an exisiting complaint or will create if complaint does not exists
 Future<void> deleteComplaint({ComplaintData? complaint, int? id}) async {
+  // TODO: hehehehehhehehehehehehehehehehehehehhehehehehhehehehehehhehehehe
   assert(complaint != null || id != null);
   await firestore.doc('complaints/${id ?? complaint!.id}').delete();
 }
@@ -154,6 +161,7 @@ Future<List<ComplaintData>> fetchComplaints(
       .collection('complaints')
       .where('scope', isEqualTo: 'public')
       .where('resolved', isEqualTo: resolved)
+      .where('deletedAt', isNull: true)
       .get(src != null ? GetOptions(source: src) : null);
   List<ComplaintData> ans = publicComplaints.docs
       .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
@@ -164,6 +172,7 @@ Future<List<ComplaintData>> fetchComplaints(
       .where('from', isEqualTo: currentUser.email)
       .where('scope', isEqualTo: 'private')
       .where('resolved', isEqualTo: resolved)
+      .where('deletedAt', isNull: true)
       .get(src != null ? GetOptions(source: src) : null);
   ans += myComplaints.docs
       .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
@@ -174,6 +183,7 @@ Future<List<ComplaintData>> fetchComplaints(
       .where('to', arrayContains: currentUser.email)
       .where('scope', isEqualTo: 'private')
       .where('resolved', isEqualTo: resolved)
+      .where('deletedAt', isNull: true)
       .get(src != null ? GetOptions(source: src) : null);
   ans += includedComplaints.docs
       .map((e) => ComplaintData.load(int.parse(e.id), e.data()))

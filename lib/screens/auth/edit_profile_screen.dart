@@ -27,6 +27,7 @@ class EditProfile extends ConsumerWidget {
                 while (Navigator.of(context).canPop()) {
                   Navigator.of(context).pop();
                 }
+                currentUser = UserData();
                 ref.read(settingsProvider.notifier).clearSettings();
                 auth.signOut();
               },
