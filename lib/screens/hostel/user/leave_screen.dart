@@ -101,7 +101,7 @@ class _LeaveScreenState extends State<LeaveScreen> {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  'End Date: ${data[index].startDate}',
+                  'End Date: ${data[index].endDate}',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
