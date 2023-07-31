@@ -401,7 +401,7 @@ Future<List<UserData>> fetchNoHostelUsers() async {
           list.add(
             UserData(
               email: x.id,
-              name: userDataSnapshot.data()!['name'],
+              name: x['name'],
               imgUrl: userDataSnapshot.data()!['imgUrl'],
             ),
           );
