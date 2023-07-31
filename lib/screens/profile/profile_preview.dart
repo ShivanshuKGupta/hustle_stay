@@ -50,7 +50,7 @@ class ProfilePreview extends StatelessWidget {
                   ? null
                   : const Icon(
                       Icons.person_rounded,
-                      size: 30,
+                      size: 50,
                     ),
             ),
           ),

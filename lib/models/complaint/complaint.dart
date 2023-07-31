@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/category/category.dart';
+import 'package:hustle_stay/models/chat/chat.dart';
+import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/state_switch.dart';
+import 'package:hustle_stay/tools.dart';
 
 enum Scope {
   public,
@@ -27,6 +30,9 @@ class ComplaintData {
     return category ?? 'Other';
   }
 
+  /// DateTime of deletion
+  DateTime? deletedAt;
+
   ComplaintData({
     this.description = "",
     required this.from,
@@ -34,6 +40,7 @@ class ComplaintData {
     this.scope = Scope.public,
     required this.to,
     this.resolvedAt,
+    this.deletedAt,
     this.category,
   });
 
@@ -45,6 +52,7 @@ class ComplaintData {
       "to": to,
       "resolved": resolvedAt != null,
       "resolvedAt": resolvedAt,
+      "deletedAt": deletedAt,
       "category": category,
       "createdAt": id,
     };
@@ -88,12 +96,13 @@ class ComplaintData {
     scope = Scope.values
         .firstWhere((element) => element.name == complaintData["scope"]);
     resolvedAt = complaintData["resolvedAt"];
+    deletedAt = complaintData["deletedAt"];
     category = complaintData["category"];
     to = (complaintData["to"] as List<dynamic>)
         .map((e) => e.toString())
         .toList();
     // Below code was used to correct the data in the db and is no longer needed
-    // if (complaintData['title'] != null) updateComplaint(this);
+    // if (complaintData['deletedAt'] == null) updateComplaint(this);
     // if (complaintData['createdAt'] == null ||
     //     complaintData['createdAt'].runtimeType != int) {
     //   updateComplaint(this);
@@ -132,9 +141,29 @@ Future<ComplaintData> updateComplaint(ComplaintData complaint) async {
 }
 
 /// updates an exisiting complaint or will create if complaint does not exists
-Future<void> deleteComplaint({ComplaintData? complaint, int? id}) async {
-  assert(complaint != null || id != null);
-  await firestore.doc('complaints/${id ?? complaint!.id}').delete();
+Future<void> deleteComplaint(ComplaintData complaint) async {
+  final bool isDeleted = complaint.deletedAt != null;
+  final now = DateTime.now();
+  await firestore
+      .doc('complaints/${complaint.id}')
+      .update({'deletedAt': isDeleted ? null : now.millisecondsSinceEpoch});
+  await addMessage(
+    ChatData(
+      path: "complaints/${complaint.id}",
+      owner: complaint.from,
+      receivers: complaint.to,
+      title: complaint.title,
+      description: complaint.description,
+    ),
+    MessageData(
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      txt:
+          "${currentUser.name ?? currentUser.email} ${isDeleted ? 'restored' : 'deleted'} the complaint at ${ddmmyyyy(now)} ${timeFrom(now)}",
+      from: currentUser.email!,
+      createdAt: DateTime.now(),
+      indicative: true,
+    ),
+  );
 }
 
 /// fetches a complaint of given ID
@@ -154,6 +183,7 @@ Future<List<ComplaintData>> fetchComplaints(
       .collection('complaints')
       .where('scope', isEqualTo: 'public')
       .where('resolved', isEqualTo: resolved)
+      .where('deletedAt', isNull: true)
       .get(src != null ? GetOptions(source: src) : null);
   List<ComplaintData> ans = publicComplaints.docs
       .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
@@ -164,6 +194,7 @@ Future<List<ComplaintData>> fetchComplaints(
       .where('from', isEqualTo: currentUser.email)
       .where('scope', isEqualTo: 'private')
       .where('resolved', isEqualTo: resolved)
+      .where('deletedAt', isNull: true)
       .get(src != null ? GetOptions(source: src) : null);
   ans += myComplaints.docs
       .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
@@ -174,6 +205,7 @@ Future<List<ComplaintData>> fetchComplaints(
       .where('to', arrayContains: currentUser.email)
       .where('scope', isEqualTo: 'private')
       .where('resolved', isEqualTo: resolved)
+      .where('deletedAt', isNull: true)
       .get(src != null ? GetOptions(source: src) : null);
   ans += includedComplaints.docs
       .map((e) => ComplaintData.load(int.parse(e.id), e.data()))

@@ -113,32 +113,6 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
             ],
           ),
         ),
-        // widget.complaint.imgUrl == null
-        //     ? UserBuilder(
-        //         email: widget.complaint.from,
-        //         src: Source.cache,
-        //         builder: (ctx, userData) {
-        //           return const InkWell(
-        //             child: CircleAvatar(
-        //               child: Icon(Icons.info_rounded),
-        //             ),
-        //           );
-        //         })
-        //     : InkWell(
-        //         child: CircleAvatar(
-        //           backgroundImage:
-        //               CachedNetworkImageProvider(widget.complaint.imgUrl!),
-        //         ),
-        //         onTap: () {
-        //           navigatorPush(
-        //             context,
-        //             ImagePreview(
-        //               image: CachedNetworkImage(
-        //                   imageUrl: widget.complaint.imgUrl!),
-        //             ),
-        //           );
-        //         },
-        //       ),
       ),
     );
   }
@@ -187,7 +161,7 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
       no: true,
     );
     if (response == 'yes') {
-      await deleteComplaint(complaint: widget.complaint);
+      await deleteComplaint(widget.complaint);
       _controller.animateTo(1);
       Future.delayed(duration, () {
         Future.delayed(duration, () {
@@ -233,7 +207,11 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
                       Navigator.of(context).pop();
                     }
                   },
-                  icon: const Icon(Icons.delete_rounded),
+                  icon: Icon(
+                    widget.complaint.deletedAt == null
+                        ? Icons.delete_rounded
+                        : Icons.restore_from_trash_rounded,
+                  ),
                 ),
             ],
             content: Column(
@@ -241,16 +219,6 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // if (widget.complaint.imgUrl != null)
-                //   Align(
-                //     alignment: Alignment.topCenter,
-                //     child: CachedNetworkImage(
-                //       imageUrl: widget.complaint.imgUrl!,
-                //     ),
-                //   ),
-                // const SizedBox(
-                //   height: 10,
-                // ),
                 if (widget.complaint.description != null &&
                     widget.complaint.description!.isNotEmpty)
                   Text(
@@ -322,6 +290,22 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
                       ),
                       Text(
                         "${ddmmyyyy(resolvedAt!)} ${timeFrom(resolvedAt)}",
+                        textAlign: TextAlign.right,
+                      ),
+                    ],
+                  ),
+                if (widget.complaint.deletedAt != null)
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Deleted At: ",
+                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                              color: Colors.red,
+                            ),
+                      ),
+                      Text(
+                        "${ddmmyyyy(widget.complaint.deletedAt!)} ${timeFrom(widget.complaint.deletedAt!)}",
                         textAlign: TextAlign.right,
                       ),
                     ],

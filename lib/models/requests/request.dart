@@ -93,6 +93,7 @@ abstract class Request {
       "reason": reason,
       "requestingUserEmail": requestingUserEmail,
       "expiryDate": expiryDate.millisecondsSinceEpoch,
+      "closedAt": closedAt,
       if (type == 'Other') 'approvers': approvers,
     };
   }

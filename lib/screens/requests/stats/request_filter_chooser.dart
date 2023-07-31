@@ -1,24 +1,27 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hustle_stay/models/category/category.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
+import 'package:hustle_stay/models/requests/request.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/filter_screen/select_one_tile.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/complaints/selection_vault.dart';
+import 'package:hustle_stay/widgets/select_many.dart';
 
-class FilterChooserScreen extends ConsumerStatefulWidget {
+class RequestsFilterChooserScreen extends ConsumerStatefulWidget {
   final Map<String, dynamic> filters;
-  const FilterChooserScreen({super.key, required this.filters});
+  const RequestsFilterChooserScreen({super.key, required this.filters});
 
   @override
-  ConsumerState<FilterChooserScreen> createState() =>
-      _FilterChooserScreenState();
+  ConsumerState<RequestsFilterChooserScreen> createState() =>
+      _RequestsFilterChooserScreenState();
 }
 
-class _FilterChooserScreenState extends ConsumerState<FilterChooserScreen> {
+class _RequestsFilterChooserScreenState
+    extends ConsumerState<RequestsFilterChooserScreen> {
   @override
   Widget build(BuildContext context) {
     final settingsClass = ref.read(settingsProvider.notifier);
@@ -27,44 +30,63 @@ class _FilterChooserScreenState extends ConsumerState<FilterChooserScreen> {
           dateRange: widget.filters['createdWithin'],
           onChange: (dateRange) {
             widget.filters['createdWithin'] = dateRange;
-            settingsClass.saveSettings();
           }),
-      ResolvedChoose(
-          resolved: widget.filters['resolved'],
-          onChange: (resolved) {
-            setState(() {
-              widget.filters['resolved'] = resolved;
-            });
-            settingsClass.saveSettings();
-          }),
-      if (widget.filters['resolved'] == true)
-        ResolvedWithin(
-            dateRange: widget.filters['resolvedWithin'],
-            onChange: (dateRange) {
-              widget.filters['resolvedWithin'] = dateRange;
-              settingsClass.saveSettings();
-            }),
-      ScopeChooser(
-          scope: widget.filters['scope'],
-          onChange: (scope) {
-            widget.filters['scope'] = scope;
-            settingsClass.saveSettings();
-          }),
-      CategoriesBuilder(
-        src: Source.cache,
-        loadingWidget: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: circularProgressIndicator(),
+      Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 8),
+          const _Title('Status'),
+          SelectMany(
+            selectedOptions: ((widget.filters['status'] ?? <RequestStatus>{})
+                    as Set<RequestStatus>)
+                .map((e) => e.name.toPascalCase())
+                .toSet(),
+            onChange: (statusNames) {
+              print(statusNames);
+              setState(() {
+                widget.filters['status'] = RequestStatus.values
+                    .where((element) =>
+                        statusNames.contains(element.name.toPascalCase()))
+                    .toSet();
+              });
+            },
+            allOptions:
+                RequestStatus.values.map((e) => e.name.toPascalCase()).toSet(),
           ),
-        ),
-        builder: (ctx, categories) => CategoryChooser(
-            onChange: ((chosenCategories) {
-              widget.filters['categories'] = chosenCategories;
-              settingsClass.saveSettings();
-            }),
-            allCategories: categories.map((e) => e.id).toSet(),
-            chosenCategories: widget.filters['categories'] ?? {}),
+        ],
+      ),
+      if (widget.filters['status'] != null &&
+          (widget.filters['status'] as Set<RequestStatus>).isNotEmpty &&
+          !(widget.filters['status'] as Set<RequestStatus>)
+              .contains(RequestStatus.pending))
+        ClosedWithin(
+          dateRange: widget.filters['closedWithin'],
+          onChange: (dateRange) {
+            widget.filters['closedWithin'] = dateRange;
+          },
+        ).animate().slideY(begin: -1, end: 0),
+      SelectMany(
+        title: 'Category',
+        style: Theme.of(context)
+            .textTheme
+            .titleMedium!
+            .copyWith(fontWeight: FontWeight.bold),
+        padding: EdgeInsets.zero,
+        allOptions: const {
+          'Vehicle',
+          'Menu_Change',
+          'Other',
+          'Change_Room',
+          'Swap_Room',
+          'Add_Leave',
+          'Update_Leave',
+          'Cancel_Leave',
+        },
+        selectedOptions: widget.filters['categories'] ?? <String>{},
+        onChange: (chosenOptions) {
+          widget.filters['categories'] = chosenOptions;
+        },
       ),
       UsersBuilder(
         src: Source.cache,
@@ -86,14 +108,14 @@ class _FilterChooserScreenState extends ConsumerState<FilterChooserScreen> {
               .toSet();
           students.add('code_soc@students.iiitr.ac.in');
 
-          return ComplainantChooser(
+          return RequestersChooser(
             hostels: hostels,
             allUsers: students,
             onChange: (users) {
-              widget.filters['complainants'] = users.map((e) => e).toSet();
+              widget.filters['requesters'] = users.map((e) => e).toSet();
               settingsClass.saveSettings();
             },
-            chosenUsers: widget.filters['complainants'] ?? {},
+            chosenUsers: widget.filters['requesters'] ?? {},
           );
         },
       ),
@@ -106,13 +128,13 @@ class _FilterChooserScreenState extends ConsumerState<FilterChooserScreen> {
             child: circularProgressIndicator(),
           ),
         ),
-        builder: (ctx, users) => ComplaineeChooser(
+        builder: (ctx, users) => ApproversChooser(
           allUsers: users.map((e) => e.email!).toSet(),
           onChange: (users) {
-            widget.filters['complainees'] = users;
+            widget.filters['approvers'] = users;
             settingsClass.saveSettings();
           },
-          chosenUsers: widget.filters['complainees'] ?? {},
+          chosenUsers: widget.filters['approvers'] ?? {},
         ),
       ),
     ];
@@ -134,7 +156,6 @@ class _FilterChooserScreenState extends ConsumerState<FilterChooserScreen> {
         onRefresh: () async {
           /// Updating all cached information
           await fetchAllUserReadonlyProperties();
-          await fetchAllCategories();
           await fetchComplainees();
         },
         child: ListView.separated(
@@ -336,20 +357,20 @@ class _CreatedWithinState extends State<CreatedWithin> {
 }
 
 // ignore: must_be_immutable
-class ResolvedWithin extends StatefulWidget {
+class ClosedWithin extends StatefulWidget {
   final void Function(DateTimeRange? dateRange) onChange;
   DateTimeRange? dateRange;
-  ResolvedWithin({
+  ClosedWithin({
     super.key,
     required this.onChange,
     this.dateRange,
   });
 
   @override
-  State<ResolvedWithin> createState() => _ResolvedWithinState();
+  State<ClosedWithin> createState() => _ClosedWithinState();
 }
 
-class _ResolvedWithinState extends State<ResolvedWithin> {
+class _ClosedWithinState extends State<ClosedWithin> {
   bool expanded = false;
   @override
   Widget build(BuildContext context) {
@@ -468,7 +489,7 @@ class _ResolvedWithinState extends State<ResolvedWithin> {
     final children = [
       Row(
         children: [
-          const _Title('Resolved within'),
+          const _Title('Closed within'),
           IconButton(
             onPressed: () {
               setState(() {
@@ -568,75 +589,12 @@ class _ScopeChooserState extends State<ScopeChooser> {
 }
 
 // ignore: must_be_immutable
-class ResolvedChoose extends StatefulWidget {
-  bool? resolved;
-  final void Function(bool? resolved) onChange;
-  ResolvedChoose({super.key, this.resolved, required this.onChange});
-
-  @override
-  State<ResolvedChoose> createState() => _ResolvedChooseState();
-}
-
-class _ResolvedChooseState extends State<ResolvedChoose> {
-  @override
-  Widget build(BuildContext context) {
-    /// The items in this filter
-    final items = [
-      SelectOneTile(
-        label: 'Resolved',
-        isSelected: widget.resolved == true || widget.resolved == null,
-        onPressed: () {
-          setState(() {
-            if (widget.resolved == true) widget.resolved = null;
-            widget.resolved = widget.resolved == false ? null : false;
-          });
-          widget.onChange(widget.resolved);
-        },
-      ),
-      SelectOneTile(
-        label: 'Pending',
-        isSelected: widget.resolved == false || widget.resolved == null,
-        onPressed: () {
-          setState(() {
-            if (widget.resolved == false) widget.resolved = null;
-            widget.resolved = widget.resolved == true ? null : true;
-          });
-          widget.onChange(widget.resolved);
-        },
-      ),
-    ];
-
-    final children = [
-      const SizedBox(height: 8),
-      const _Title('Status'),
-      const SizedBox(height: 8),
-      SizedBox(
-        height: 40,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          separatorBuilder: (ctx, index) => const SizedBox(width: 5),
-          itemBuilder: (ctx, index) => items[index],
-          itemCount: items.length,
-        ),
-      ),
-    ];
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: children,
-    );
-  }
-}
-
-// ignore: must_be_immutable
-class ComplainantChooser extends StatefulWidget {
+class RequestersChooser extends StatefulWidget {
   final void Function(Set<String> chosenUsers) onChange;
   final Set<String> allUsers;
   Set<String> chosenUsers;
   final Map<String, Set<String>> hostels;
-  ComplainantChooser({
+  RequestersChooser({
     super.key,
     required this.onChange,
     required this.allUsers,
@@ -645,10 +603,10 @@ class ComplainantChooser extends StatefulWidget {
   });
 
   @override
-  State<ComplainantChooser> createState() => _ComplainantChooserState();
+  State<RequestersChooser> createState() => _RequestersChooserState();
 }
 
-class _ComplainantChooserState extends State<ComplainantChooser> {
+class _RequestersChooserState extends State<RequestersChooser> {
   @override
   Widget build(BuildContext context) {
     final keys = widget.hostels.keys.toList();
@@ -656,10 +614,10 @@ class _ComplainantChooserState extends State<ComplainantChooser> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 8),
-        const _Title('Complainants'),
+        const _Title('Requesters'),
         const SizedBox(height: 8),
         SelectionVault(
-          helpText: 'Add a Complainant',
+          helpText: 'Add a Requester',
           onChange: (users) {
             widget.chosenUsers = users;
             widget.onChange(users);
@@ -694,19 +652,19 @@ class _ComplainantChooserState extends State<ComplainantChooser> {
   }
 }
 
-class ComplaineeChooser extends StatelessWidget {
+class ApproversChooser extends StatelessWidget {
   final void Function(Set<String> chosenUsers) onChange;
   final Set<String> allUsers;
   final Set<String> chosenUsers;
   final String title;
   final String helpText;
-  const ComplaineeChooser({
+  const ApproversChooser({
     super.key,
     required this.onChange,
     required this.allUsers,
     required this.chosenUsers,
-    this.title = 'Complainees',
-    this.helpText = 'Add a Complainee',
+    this.title = 'Approvers',
+    this.helpText = 'Add a Approver',
   });
 
   @override

@@ -14,6 +14,7 @@ import 'package:hustle_stay/screens/requests/attendance/attendance_request_scree
 import 'package:hustle_stay/screens/requests/mess/mess_request_screen.dart';
 import 'package:hustle_stay/screens/requests/other/other_request_screen.dart';
 import 'package:hustle_stay/screens/requests/vehicle/vehicle_requests_screen.dart';
+import 'package:hustle_stay/tools.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'firebase_options.dart';
@@ -65,9 +66,6 @@ void main() async {
   if (auth.currentUser != null) {
     currentUser = await fetchUserData(auth.currentUser!.email!);
   }
-  // TODO: remove this
-  // For Some corrections in users data
-  // await fetchUsers();
   runApp(const ProviderScope(child: HustleStayApp()));
 }
 
@@ -98,28 +96,37 @@ class HustleStayApp extends ConsumerWidget {
           displayColor: settings.darkMode ? Colors.white : Colors.black,
         ),
       ),
-
-      /// The app switches from Auth Screen to HomeScreen
-      /// according to auth state
-      // home: settings.introductionScreenVisited
-      //     ? StreamBuilder(
-      //         stream: auth.authStateChanges(),
-      //         builder: (ctx, user) {
-      //           return user.hasData ? const HomeScreen() : const AuthScreen();
-      //         },
-      //       )
-      //     : IntroScreen(
-      //         done: () {
-      //           settings.introductionScreenVisited = true;
-      //           ref.read(settingsProvider.notifier).notifyListeners();
-      //         },
-      //       ),
       routes: {
+        /// The app switches from Auth Screen to HomeScreen
+        /// according to auth state
         '/': (context) => settings.introductionScreenVisited
             ? StreamBuilder(
                 stream: auth.authStateChanges(),
                 builder: (ctx, user) {
-                  return user.hasData ? const MainScreen() : const AuthScreen();
+                  if (user.hasData) {
+                    return currentUser.email != null
+                        ? const MainScreen()
+                        : UserBuilder(
+                            email: user.data!.email!,
+                            src: Source.server,
+                            loadingWidget: Scaffold(
+                              body: Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    circularProgressIndicator(),
+                                    const Text('Fetching user details'),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            builder: (context, user) {
+                              currentUser = user;
+                              return const MainScreen();
+                            },
+                          );
+                  }
+                  return const AuthScreen();
                 },
               )
             : IntroScreen(

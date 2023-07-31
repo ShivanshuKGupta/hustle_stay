@@ -9,7 +9,13 @@ import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/requests/post_request_options.dart';
 
 class RequestsList extends StatefulWidget {
-  const RequestsList({super.key});
+  final List<Request> requests;
+  final bool showPostRequestOptions;
+  const RequestsList({
+    super.key,
+    this.requests = const [],
+    this.showPostRequestOptions = true,
+  });
 
   @override
   State<RequestsList> createState() => _RequestsListState();
@@ -82,10 +88,12 @@ class _RequestsListState extends State<RequestsList> {
     return RefreshIndicator(
       onRefresh: () async {
         try {
-          if (currentUser.readonly.type == 'student') {
-            await getStudentRequests();
-          } else {
-            await getApproverRequests();
+          if (widget.requests.isEmpty) {
+            if (currentUser.readonly.type == 'student') {
+              await getStudentRequests();
+            } else {
+              await getApproverRequests();
+            }
           }
         } catch (e) {
           showMsg(context, e.toString());
@@ -94,7 +102,8 @@ class _RequestsListState extends State<RequestsList> {
       },
       child: ListView(
         children: [
-          if (currentUser.readonly.permissions.requests.create == true)
+          if (currentUser.readonly.permissions.requests.create == true &&
+              widget.showPostRequestOptions)
             const PostRequestOptions(),
           CacheBuilder(
             loadingWidget: Center(
@@ -166,9 +175,11 @@ class _RequestsListState extends State<RequestsList> {
                 },
               );
             },
-            provider: currentUser.readonly.type == 'student'
-                ? getStudentRequests
-                : getApproverRequests,
+            provider: widget.requests.isEmpty
+                ? (currentUser.readonly.type == 'student'
+                    ? getStudentRequests
+                    : getApproverRequests)
+                : ({src}) async => widget.requests,
           ),
         ],
       ),

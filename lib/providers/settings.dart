@@ -23,6 +23,9 @@ class _Settings {
   /// The groupBy in Stats of ComplaintsScreen
   String groupBy = 'Category';
 
+  /// The groupBy in Stats of Requests
+  String requestsGroupBy = 'Category';
+
   /// The groupBy in Stats of ComplaintsScreen
   String interval = 'Day';
 
@@ -34,6 +37,7 @@ class _Settings {
       "introductionScreenVisited": introductionScreenVisited,
       "complaintsGrouping": complaintsGrouping,
       "groupBy": groupBy,
+      "requestsGroupBy": requestsGroupBy,
       "interval": interval,
       "autoDarkMode": autoDarkMode,
     });
@@ -48,6 +52,7 @@ class _Settings {
     currentPage = settings["currentPage"] ?? 2;
     complaintsGrouping = (settings["complaintsGrouping"] ?? complaintsGrouping);
     groupBy = (settings["groupBy"] ?? 'Category');
+    requestsGroupBy = (settings["requestsGroupBy"] ?? 'Category');
     interval = (settings["interval"] ?? 'Day');
   }
 }
