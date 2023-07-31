@@ -9,6 +9,8 @@ class SelectMany<T> extends StatefulWidget {
   final String? title;
   final String? subtitle;
   bool expanded;
+  TextStyle? style;
+  EdgeInsets? padding;
   SelectMany({
     super.key,
     required this.allOptions,
@@ -16,6 +18,8 @@ class SelectMany<T> extends StatefulWidget {
     required this.onChange,
     this.title,
     this.subtitle,
+    this.style,
+    this.padding,
     this.expanded = false,
   });
 
@@ -54,7 +58,8 @@ class _SelectManyState<T> extends State<SelectMany<T>> {
       children: [
         if (widget.title != null)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            padding:
+                widget.padding ?? const EdgeInsets.symmetric(horizontal: 10.0),
             child: Row(
               children: [
                 Column(
@@ -63,7 +68,8 @@ class _SelectManyState<T> extends State<SelectMany<T>> {
                   children: [
                     Text(
                       widget.title!,
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      style:
+                          widget.style ?? Theme.of(context).textTheme.bodyLarge,
                     ),
                     if (widget.subtitle != null)
                       Text(

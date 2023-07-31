@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/category/category.dart';
+import 'package:hustle_stay/models/chat/chat.dart';
+import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/state_switch.dart';
+import 'package:hustle_stay/tools.dart';
 
 enum Scope {
   public,
@@ -138,10 +141,29 @@ Future<ComplaintData> updateComplaint(ComplaintData complaint) async {
 }
 
 /// updates an exisiting complaint or will create if complaint does not exists
-Future<void> deleteComplaint({ComplaintData? complaint, int? id}) async {
-  // TODO: hehehehehhehehehehehehehehehehehehehhehehehehhehehehehehhehehehe
-  assert(complaint != null || id != null);
-  await firestore.doc('complaints/${id ?? complaint!.id}').delete();
+Future<void> deleteComplaint(ComplaintData complaint) async {
+  final bool isDeleted = complaint.deletedAt != null;
+  final now = DateTime.now();
+  await firestore
+      .doc('complaints/${complaint.id}')
+      .update({'deletedAt': isDeleted ? null : now.millisecondsSinceEpoch});
+  await addMessage(
+    ChatData(
+      path: "complaints/${complaint.id}",
+      owner: complaint.from,
+      receivers: complaint.to,
+      title: complaint.title,
+      description: complaint.description,
+    ),
+    MessageData(
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      txt:
+          "${currentUser.name ?? currentUser.email} ${isDeleted ? 'restored' : 'deleted'} the complaint at ${ddmmyyyy(now)} ${timeFrom(now)}",
+      from: currentUser.email!,
+      createdAt: DateTime.now(),
+      indicative: true,
+    ),
+  );
 }
 
 /// fetches a complaint of given ID

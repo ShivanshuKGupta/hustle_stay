@@ -7,6 +7,7 @@ import 'package:hustle_stay/screens/chat/private_chats.dart';
 import 'package:hustle_stay/screens/drawers/main_drawer.dart';
 import 'package:hustle_stay/screens/filter_screen/stats_screen.dart';
 import 'package:hustle_stay/screens/profile/profile_preview.dart';
+import 'package:hustle_stay/screens/requests/stats/requests_stats_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
 
@@ -130,6 +131,18 @@ class HomeScreen extends ConsumerWidget {
                       color: Colors.indigoAccent,
                       onTap: () {
                         navigatorPush(context, const StatisticsPage());
+                      },
+                    ),
+                  if (currentUser.readonly.permissions.requests.read == true)
+                    GridTileLogo(
+                      title: 'Requests Stats',
+                      icon: const Icon(
+                        Icons.stacked_bar_chart_rounded,
+                        size: 50,
+                      ),
+                      color: Colors.brown,
+                      onTap: () {
+                        navigatorPush(context, const RequestsStatisticsPage());
                       },
                     ),
                   GridTileLogo(
