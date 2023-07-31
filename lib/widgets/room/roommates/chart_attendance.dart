@@ -53,7 +53,7 @@ class DataPoint {
 }
 
 class _AttendancePieChartState extends State<AttendancePieChart> {
-  void onClickNavigation(String category) {
+  void onClickNavigation(String category, {List<RoommateInfo>? students}) {
     switch (category) {
       case 'Leave':
         category = 'onLeave';
@@ -73,7 +73,8 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
               builder: (_) => FilterStudents(
                   status: category,
                   hostelName: widget.hostelName,
-                  date: widget.selectedDate!.value)))
+                  date: widget.selectedDate!.value,
+                  students: students)))
           .then((value) {
         if (mounted) {
           setState(() {});
@@ -339,26 +340,24 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
                   ? SfCircularChart(
                       series: <CircularSeries>[
                         PieSeries<ChartData, String>(
-                            dataSource: chartdata,
-                            pointColorMapper: (ChartData data, _) => data.color,
-                            xValueMapper: (ChartData data, _) => data.category,
-                            yValueMapper: (ChartData data, _) => data.value,
-                            dataLabelSettings: const DataLabelSettings(
-                              isVisible: true,
-                            ),
-                            selectionBehavior: SelectionBehavior(enable: true),
-                            onPointLongPress: (pointInteractionDetails) {
-                              onClickNavigation(
-                                  chartdata[pointInteractionDetails.pointIndex!]
-                                      .category);
-                            },
-                            onPointTap: (pointInteractionDetails) async {
-                              await getHostelRangeAttendanceStatistics(
-                                  widget.hostelName,
-                                  DateTimeRange(
-                                      start: DateTime(2023, 06, 25),
-                                      end: DateTime.now()));
-                            }),
+                          dataSource: chartdata,
+                          pointColorMapper: (ChartData data, _) => data.color,
+                          xValueMapper: (ChartData data, _) => data.category,
+                          yValueMapper: (ChartData data, _) => data.value,
+                          dataLabelSettings: const DataLabelSettings(
+                            isVisible: true,
+                          ),
+                          selectionBehavior: SelectionBehavior(enable: true),
+                          onPointLongPress: (pointInteractionDetails) {
+                            String cat =
+                                chartdata[pointInteractionDetails.pointIndex!]
+                                    .category;
+                            onClickNavigation(cat,
+                                students: cat == 'Not Taken'
+                                    ? data['notMarked']
+                                    : null);
+                          },
+                        ),
                       ],
                       legend: const Legend(
                         isVisible: true,
@@ -579,7 +578,7 @@ class _StatListState extends State<StatList> {
               ),
               ListTile(
                 title: const Text('Late'),
-                leading: const Icon(Icons.all_inbox),
+                leading: const Icon(Icons.watch_later),
                 trailing: Text(
                   (widget.data['presentLate']!).toStringAsFixed(0),
                   style: Theme.of(context).textTheme.bodyLarge,
@@ -587,7 +586,7 @@ class _StatListState extends State<StatList> {
               ),
               ListTile(
                 title: const Text('Not Taken Yet'),
-                leading: const Icon(Icons.all_inbox),
+                leading: const Icon(Icons.hourglass_empty),
                 trailing: Text(
                   ((widget.data['total']! -
                           (widget.data['present']! +

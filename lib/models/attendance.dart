@@ -22,16 +22,16 @@ class LeaveData {
 
 class RoommateInfo {
   final RoommateData roommateData;
-  final String roomName;
+  final String? roomName;
 
   RoommateInfo({
-    required this.roomName,
+    this.roomName,
     required this.roommateData,
   });
 }
 
-Future<String> getAttendanceData(RoommateData roommateData, String hostelName,
-    String roomName, DateTime date) async {
+Future<String> getAttendanceData(
+    RoommateData roommateData, String hostelName, DateTime date) async {
   final storage = FirebaseFirestore.instance;
   final documentAddRef = storage
       .collection('hostels')
@@ -77,7 +77,7 @@ Future<String> getAttendanceData(RoommateData roommateData, String hostelName,
 }
 
 Future<String> setAttendanceData(String email, String hostelName,
-    String roomName, DateTime date, String status) async {
+    String? roomName, DateTime date, String status) async {
   try {
     String statusVal = (status == 'present' || status == 'presentLate')
         ? 'absent'
@@ -338,7 +338,7 @@ Future<Map<String, dynamic>> getAttendanceStatistics(
   return attendanceStats;
 }
 
-Future<Map<String, double>> getHostelAttendanceStatistics(
+Future<Map<String, dynamic>> getHostelAttendanceStatistics(
     String hostelName, DateTime date,
     {Source? source}) async {
   final storage = FirebaseFirestore.instance;
@@ -353,7 +353,7 @@ Future<Map<String, double>> getHostelAttendanceStatistics(
   total = roommatesQuery.docs.length.toDouble();
   final List<Future<DocumentSnapshot<Map<String, dynamic>>>> attendanceFutures =
       [];
-
+  List<RoommateInfo> unMarkedStudents = [];
   for (final x in roommatesQuery.docs) {
     final attendanceRef = x.reference
         .collection('Attendance')
@@ -389,16 +389,25 @@ Future<Map<String, double>> getHostelAttendanceStatistics(
         default:
           internship += 1;
       }
+    } else {
+      final roomNameDRef =
+          await attendanceSnapshot.reference.parent.parent!.get();
+      unMarkedStudents.add(RoommateInfo(
+          roomName: roomNameDRef.data()!['roomName'],
+          roommateData: RoommateData(
+              email: attendanceSnapshot.reference.parent.parent!.id,
+              leaveEndDate: null,
+              leaveStartDate: null)));
     }
   }
-
   final attendanceStats = {
     'present': present,
     'presentLate': presentLate,
     'absent': absent,
     'leave': leave,
     'internship': internship,
-    'total': total
+    'total': total,
+    'notMarked': unMarkedStudents,
   };
 
   return attendanceStats;

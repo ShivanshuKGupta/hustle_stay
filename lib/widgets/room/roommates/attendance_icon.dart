@@ -11,7 +11,7 @@ class AttendanceIcon extends StatefulWidget {
     Key? key,
     required this.roommateData,
     required this.selectedDate,
-    required this.roomName,
+    this.roomName,
     required this.hostelName,
     required this.status,
     this.tileColor,
@@ -20,7 +20,7 @@ class AttendanceIcon extends StatefulWidget {
   final RoommateData roommateData;
   final DateTime selectedDate;
   final String hostelName;
-  final String roomName;
+  final String? roomName;
   final String status;
   final ValueNotifier<Color>? tileColor;
 
@@ -52,7 +52,6 @@ class _AttendanceIconState extends State<AttendanceIcon> {
     String resp = await getAttendanceData(
       widget.roommateData,
       widget.hostelName,
-      widget.roomName,
       widget.selectedDate,
     );
     if (mounted) {
@@ -91,7 +90,9 @@ class _AttendanceIconState extends State<AttendanceIcon> {
             child: ElevatedButton(
               onPressed: null,
               onLongPress: widget.roommateData.leaveEndDate == null
-                  ? () {}
+                  ? () {
+                      print('hi');
+                    }
                   : () async {
                       final response = await askUser(
                         context,
