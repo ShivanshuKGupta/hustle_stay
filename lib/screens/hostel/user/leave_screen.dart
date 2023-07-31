@@ -41,7 +41,7 @@ class _LeaveScreenState extends State<LeaveScreen> {
               ),
             );
           }
-          if (!snapshot.hasData && snapshot.error != null) {
+          if (!snapshot.hasData || snapshot.error != null) {
             return Center(
               child: SizedBox(
                 width: double.infinity,
