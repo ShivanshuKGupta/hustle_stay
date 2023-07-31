@@ -53,7 +53,7 @@ class DataPoint {
 }
 
 class _AttendancePieChartState extends State<AttendancePieChart> {
-  void onClickNavigation(String category, {List<String>? students}) {
+  void onClickNavigation(String category, {List<RoommateInfo>? students}) {
     switch (category) {
       case 'Leave':
         category = 'onLeave';
@@ -68,7 +68,6 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
         category = category.toLowerCase();
     }
     if (widget.email == null && widget.selectedDate != null) {
-      print('gere');
       Navigator.of(context)
           .push(MaterialPageRoute(
               builder: (_) => FilterStudents(

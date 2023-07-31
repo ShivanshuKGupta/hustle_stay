@@ -1,7 +1,6 @@
 import 'package:animated_icon/animated_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/attendance.dart';
-import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import 'package:hustle_stay/widgets/room/roommates/roommate_data.dart';
 
 class FilterStudents extends StatefulWidget {
@@ -14,25 +13,13 @@ class FilterStudents extends StatefulWidget {
   final String status;
   final String hostelName;
   final DateTime date;
-  final List<String>? students;
+  final List<RoommateInfo>? students;
 
   @override
   State<FilterStudents> createState() => _FilterStudentsState();
 }
 
 class _FilterStudentsState extends State<FilterStudents> {
-  @override
-  void initState() {
-    super.initState();
-    if (widget.students != null) {
-      print('yha bhi phuch gya');
-      widget.students!.forEach((element) {
-        list!.value
-            .add(RoommateInfo(roommateData: RoommateData(email: element)));
-      });
-    }
-  }
-
   ValueNotifier<List<RoommateInfo>>? list = ValueNotifier([]);
   @override
   Widget build(BuildContext context) {
@@ -41,7 +28,7 @@ class _FilterStudentsState extends State<FilterStudents> {
         title: const Text('Filtered Students'),
       ),
       body: widget.students != null
-          ? listStudents()
+          ? listNotMarkedStudents(widget.students!)
           : FutureBuilder(
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -97,21 +84,40 @@ class _FilterStudentsState extends State<FilterStudents> {
   }
 
   Widget listStudents() {
-    return ValueListenableBuilder(
-      valueListenable: list!,
-      builder: (context, value, child) => ListView.builder(
-        itemBuilder: (context, index) {
-          return RoommateDataWidget(
-            roommateData: list!.value[index].roommateData,
-            selectedDate: widget.date,
-            roomName: list!.value[index].roomName,
-            hostelName: widget.hostelName,
-            status: widget.status,
-            isNeeded: widget.students != null,
-          );
-        },
-        itemCount: list!.value.length,
-      ),
-    );
+    return list!.value != []
+        ? ValueListenableBuilder(
+            valueListenable: list!,
+            builder: (context, value, child) => ListView.builder(
+                  itemBuilder: (context, index) {
+                    return RoommateDataWidget(
+                      roommateData: list!.value[index].roommateData,
+                      selectedDate: widget.date,
+                      roomName: list!.value[index].roomName,
+                      hostelName: widget.hostelName,
+                      status: widget.status,
+                      isNeeded: widget.students != null,
+                    );
+                  },
+                  itemCount: list!.value.length,
+                ))
+        : Container();
+  }
+
+  Widget listNotMarkedStudents(List<RoommateInfo> list) {
+    return list != []
+        ? ListView.builder(
+            itemBuilder: (context, index) {
+              return RoommateDataWidget(
+                roommateData: list[index].roommateData,
+                selectedDate: widget.date,
+                roomName: list[index].roomName,
+                hostelName: widget.hostelName,
+                status: widget.status,
+                isNeeded: widget.students != null,
+              );
+            },
+            itemCount: list.length,
+          )
+        : Container();
   }
 }

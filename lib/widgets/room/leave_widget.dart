@@ -45,8 +45,7 @@ class _LeaveWidgetState extends State<LeaveWidget> {
 
   Future<void> endLeave() async {
     await updateLeaveStatus(widget.roommateData.email, widget.hostelName);
-    getAttendanceData(widget.roommateData, widget.hostelName, widget.roomName,
-        DateTime.now());
+    getAttendanceData(widget.roommateData, widget.hostelName, DateTime.now());
 
     return;
   }

@@ -68,7 +68,7 @@ class _RoommateDataWidgetState extends ConsumerState<RoommateDataWidget> {
   String? status;
   Future<void> _getAttendanceData() async {
     String resp = await getAttendanceData(widget.roommateData ?? roommateData!,
-        widget.hostelName, widget.roomName ?? roomName!, widget.selectedDate);
+        widget.hostelName, widget.selectedDate);
     if (mounted) {
       setState(() {
         status = resp;
@@ -97,10 +97,7 @@ class _RoommateDataWidgetState extends ConsumerState<RoommateDataWidget> {
         internship: internship,
       );
       String resp = await getAttendanceData(
-          widget.roommateData ?? rData,
-          widget.hostelName,
-          widget.roomName ?? data['roomName'],
-          widget.selectedDate);
+          widget.roommateData ?? rData, widget.hostelName, widget.selectedDate);
       if (mounted) {
         setState(() {
           status = resp;

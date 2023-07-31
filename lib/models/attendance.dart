@@ -30,8 +30,8 @@ class RoommateInfo {
   });
 }
 
-Future<String> getAttendanceData(RoommateData roommateData, String hostelName,
-    String roomName, DateTime date) async {
+Future<String> getAttendanceData(
+    RoommateData roommateData, String hostelName, DateTime date) async {
   final storage = FirebaseFirestore.instance;
   final documentAddRef = storage
       .collection('hostels')
@@ -77,7 +77,7 @@ Future<String> getAttendanceData(RoommateData roommateData, String hostelName,
 }
 
 Future<String> setAttendanceData(String email, String hostelName,
-    String roomName, DateTime date, String status) async {
+    String? roomName, DateTime date, String status) async {
   try {
     String statusVal = (status == 'present' || status == 'presentLate')
         ? 'absent'
@@ -353,9 +353,8 @@ Future<Map<String, dynamic>> getHostelAttendanceStatistics(
   total = roommatesQuery.docs.length.toDouble();
   final List<Future<DocumentSnapshot<Map<String, dynamic>>>> attendanceFutures =
       [];
-  List<String> unMarkedStudents = [];
+  List<RoommateInfo> unMarkedStudents = [];
   for (final x in roommatesQuery.docs) {
-    unMarkedStudents.add(x.id);
     final attendanceRef = x.reference
         .collection('Attendance')
         .doc(DateFormat('yyyy-MM-dd').format(date));
@@ -374,7 +373,6 @@ Future<Map<String, dynamic>> getHostelAttendanceStatistics(
 
   for (final attendanceSnapshot in attendanceSnapshots) {
     if (attendanceSnapshot.exists) {
-      unMarkedStudents.remove(attendanceSnapshot.reference.parent.parent!.id);
       switch (attendanceSnapshot['status']) {
         case 'present':
           present += 1;
@@ -391,6 +389,15 @@ Future<Map<String, dynamic>> getHostelAttendanceStatistics(
         default:
           internship += 1;
       }
+    } else {
+      final roomNameDRef =
+          await attendanceSnapshot.reference.parent.parent!.get();
+      unMarkedStudents.add(RoommateInfo(
+          roomName: roomNameDRef.data()!['roomName'],
+          roommateData: RoommateData(
+              email: attendanceSnapshot.reference.parent.parent!.id,
+              leaveEndDate: null,
+              leaveStartDate: null)));
     }
   }
   final attendanceStats = {
