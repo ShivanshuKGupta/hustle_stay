@@ -187,6 +187,8 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
         docs.map((doc) => ComplaintData.load(int.parse(doc.id), doc.data()));
     final DateTimeRange? createdWithin = filters['createdWithin'];
     final bool? resolved = filters['resolved'];
+    // final bool? deleted = filters['deleted'];
+    // final DateTimeRange? deletedWithin = filters['deletedWithin'];
     final DateTimeRange? resolvedWithin = filters['resolvedWithin'];
     final Scope? scope = filters['scope'];
     final Set<String> categories = filters['categories'] ?? {};
@@ -215,6 +217,16 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
             ans.where((complaint) => resolved ^ (complaint.resolvedAt == null));
       }
     }
+    // if (deleted != null) {
+    //   if (deleted == true && deletedWithin != null) {
+    //     ans = ans.where((complaint) =>
+    //         complaint.deletedAt != null &&
+    //         complaint.deletedAt!.compareTo(deletedWithin.start) >= 0 &&
+    //         complaint.deletedAt!.compareTo(deletedWithin.end) <= 0);
+    //   } else {
+    //     ans = ans.where((complaint) => deleted ^ (complaint.deletedAt == null));
+    //   }
+    // }
     if (scope != null) {
       ans = ans.where((complaint) => complaint.scope == scope);
     }

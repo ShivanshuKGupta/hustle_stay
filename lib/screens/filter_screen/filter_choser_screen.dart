@@ -50,6 +50,19 @@ class _FilterChooserScreenState extends ConsumerState<FilterChooserScreen> {
             widget.filters['scope'] = scope;
             settingsClass.saveSettings();
           }),
+      // SelectOne<String>(
+      //   title: 'Deleted?',
+      //   allOptions: const {'True', 'False', 'Any'},
+      //   onChange: (chosenOption) {
+      //     widget.filters['deleted'] = chosenOption == 'Any'
+      //         ? null
+      //         : (chosenOption[0] == 'D' ? true : false);
+      //     return true;
+      //   },
+      //   selectedOption: (widget.filters['deleted'] == null
+      //       ? 'Any'
+      //       : (widget.filters['deleted'] ? 'True' : 'False')),
+      // ),
       CategoriesBuilder(
         src: Source.cache,
         loadingWidget: Center(

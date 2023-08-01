@@ -96,7 +96,9 @@ class ComplaintData {
     scope = Scope.values
         .firstWhere((element) => element.name == complaintData["scope"]);
     resolvedAt = complaintData["resolvedAt"];
-    deletedAt = complaintData["deletedAt"];
+    deletedAt = complaintData["deletedAt"] == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(complaintData["deletedAt"]);
     category = complaintData["category"];
     to = (complaintData["to"] as List<dynamic>)
         .map((e) => e.toString())

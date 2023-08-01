@@ -64,24 +64,29 @@ class ProfilePreview extends StatelessWidget {
               : null,
           child: Padding(
             padding: const EdgeInsets.all(15.0),
-            child: Column(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                shaderText(
-                  context,
-                  title: user.name ?? user.email!,
-                  colors: [
-                    Colors.deepPurpleAccent,
-                    Colors.indigo,
-                    Colors.blue,
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    shaderText(
+                      context,
+                      title: user.name ?? user.email!,
+                      colors: [
+                        Colors.deepPurpleAccent,
+                        Colors.indigo,
+                        Colors.blue,
+                      ],
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    Text(
+                      user.email!,
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                    ),
                   ],
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                Text(
-                  user.email!,
-                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
                 ),
               ],
             ),

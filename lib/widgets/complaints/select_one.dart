@@ -44,50 +44,58 @@ class _SelectOneState<T> extends State<SelectOne<T>> {
               ))
           .toList(),
     );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (widget.title != null)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            child: Row(
-              children: [
-                Column(
+    return SizedBox(
+      width: MediaQuery.of(context).size.width,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (widget.title != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      widget.title!,
-                      style: Theme.of(context).textTheme.bodyLarge,
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.title!,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        if (widget.subtitle != null)
+                          Text(
+                            widget.subtitle!,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                      ],
                     ),
-                    if (widget.subtitle != null)
-                      Text(
-                        widget.subtitle!,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          widget.expanded = !widget.expanded;
+                        });
+                      },
+                      icon: Icon(widget.expanded
+                          ? Icons.keyboard_arrow_up_rounded
+                          : Icons.keyboard_arrow_down_rounded),
+                    ),
                   ],
                 ),
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      widget.expanded = !widget.expanded;
-                    });
-                  },
-                  icon: Icon(widget.expanded
-                      ? Icons.keyboard_arrow_up_rounded
-                      : Icons.keyboard_arrow_down_rounded),
-                ),
-              ],
+              ),
             ),
-          ),
-        if (widget.expanded)
-          body
-        else
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: body,
-          ),
-      ],
+          if (widget.expanded)
+            body
+          else
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: body,
+            ),
+        ],
+      ),
     );
   }
 }

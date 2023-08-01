@@ -47,6 +47,9 @@ abstract class Request {
   /// The date after which the request will disappear from the UI
   DateTime expiryDate = infDate; // infinite time
 
+  /// Deleted At
+  DateTime? deletedAt;
+
   List<String> get approvers {
     if (type != 'Other') {
       return allApprovers[type]!;
@@ -93,6 +96,7 @@ abstract class Request {
       "reason": reason,
       "requestingUserEmail": requestingUserEmail,
       "expiryDate": expiryDate.millisecondsSinceEpoch,
+      "deletedAt": deletedAt == null ? null : deletedAt!.millisecondsSinceEpoch,
       "closedAt": closedAt,
       if (type == 'Other') 'approvers': approvers,
     };
@@ -108,6 +112,9 @@ abstract class Request {
     closedAt = data['closedAt'] ?? closedAt;
     requestingUserEmail = data['requestingUserEmail'] ?? requestingUserEmail;
     expiryDate = DateTime.fromMillisecondsSinceEpoch(data['expiryDate'] ?? 0);
+    deletedAt = data['deletedAt'] == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(data['deletedAt']);
     if (type == 'Other') {
       approvers = (data['approvers'] as List<dynamic>)
           .map((e) => e.toString())

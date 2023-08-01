@@ -11,7 +11,7 @@ class _Settings {
   bool autoDarkMode = true;
 
   /// the last visited page
-  int currentPage = 2;
+  int currentPage = 3;
 
   /// Introduction screen visisted
   bool introductionScreenVisited = false;

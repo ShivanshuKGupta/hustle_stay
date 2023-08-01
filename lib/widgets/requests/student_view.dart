@@ -48,10 +48,6 @@ class _RequestsListState extends State<RequestsList> {
 
   /// It returns requests and fetches required approvers as well
   Future<List<Request>> getApproverRequests({Source? src}) async {
-    // Change this to fetch all requests where he is the approver
-    // if he fetched a non integer id then those are definitely types
-    // then fetch all request with those types
-
     final collection = firestore.collection('requests');
     var response = await collection
         .where('approvers', arrayContains: currentUser.email)
@@ -132,6 +128,7 @@ class _RequestsListState extends State<RequestsList> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         AnimateIcon(
+                          color: Theme.of(context).colorScheme.primary,
                           onTap: () {},
                           iconType: IconType.continueAnimation,
                           animateIcon: AnimateIcons.cool,

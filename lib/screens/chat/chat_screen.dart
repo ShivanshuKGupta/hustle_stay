@@ -67,8 +67,20 @@ class ChatScreen extends StatelessWidget {
                 ),
               )
             else
-              const SizedBox(
-                height: 15,
+              Padding(
+                padding: const EdgeInsets.only(
+                  bottom: 15,
+                  top: 5,
+                  left: 10,
+                  right: 10,
+                ),
+                child: Text(
+                  'This chat is locked.\nContact administrator if this is a mistake.',
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        fontStyle: FontStyle.italic,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
               ),
           ],
         ),

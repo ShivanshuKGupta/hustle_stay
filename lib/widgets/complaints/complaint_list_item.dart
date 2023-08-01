@@ -100,7 +100,7 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
                     provider: ({Source? src}) async {
                       return await fetchLastMessage(
                         "complaints/${widget.complaint.id}",
-                        // src: src,
+                        src: src,
                       );
                     }),
               ),
@@ -331,7 +331,7 @@ Future<void> showComplaintChat(BuildContext context, ComplaintData complaint,
         complaint: complaint,
       ),
       chat: ChatData(
-        locked: complaint.resolvedAt != null,
+        locked: complaint.resolvedAt != null || complaint.deletedAt != null,
         path: "complaints/${complaint.id}",
         owner: complaint.from,
         receivers: complaint.to,

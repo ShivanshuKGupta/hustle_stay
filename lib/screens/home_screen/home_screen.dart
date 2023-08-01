@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/user/user.dart';
-import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/admin_panel/admin_panel_screen.dart';
 import 'package:hustle_stay/screens/chat/private_chats.dart';
 import 'package:hustle_stay/screens/drawers/main_drawer.dart';
@@ -10,44 +8,18 @@ import 'package:hustle_stay/screens/profile/profile_preview.dart';
 import 'package:hustle_stay/screens/requests/stats/requests_stats_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
+import 'package:hustle_stay/widgets/settings/dark_light_mode_icon_button.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends StatelessWidget {
   final void Function(int value) pageChanger;
   const HomeScreen({required this.pageChanger, super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(settingsProvider);
-    final settingsClass = ref.read(settingsProvider.notifier);
+  Widget build(BuildContext context) {
     return Scaffold(
       // backgroundColor: Colors.blue,
       appBar: AppBar(
-        actions: [
-          IconButton(
-            onPressed: () {
-              if (settings.autoDarkMode) {
-                settings.autoDarkMode = false;
-                settings.darkMode =
-                    !(MediaQuery.of(context).platformBrightness ==
-                        Brightness.dark);
-              } else {
-                if (MediaQuery.of(context).platformBrightness ==
-                    (settings.darkMode ? Brightness.dark : Brightness.light)) {
-                  settings.autoDarkMode = true;
-                }
-                settings.darkMode = !settings.darkMode;
-              }
-              settingsClass.notifyListeners();
-            },
-            icon: Icon(
-              settings.autoDarkMode
-                  ? Icons.brightness_auto_rounded
-                  : !settings.darkMode
-                      ? Icons.light_mode_rounded
-                      : Icons.dark_mode_rounded,
-            ),
-          ),
-        ],
+        actions: const [DarkLightModeIconButton()],
         // backgroundColor: Colors.transparent,
       ),
       drawer: const MainDrawer(),
