@@ -14,50 +14,53 @@ class ChatsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Your Chats'),
       ),
-      body: CacheBuilder(builder: (ctx, docs) {
-        return ListView.builder(
-          itemBuilder: (context, index) {
-            final doc = docs[index];
-            final data = doc.data();
-            final receipeints = (data['recipients'] as List<dynamic>)
-                .map((e) => e.toString())
-                .toList();
-            String? title = data['title'];
-            if (title == null) {
-              if (receipeints.length == 2) {
-                title = receipeints.firstWhere(
-                  (element) => element != currentUser.email,
-                  orElse: () => currentUser.email!,
-                );
-              } else {
-                title = doc.id;
+      body: CacheBuilder(
+        builder: (ctx, docs) {
+          return ListView.builder(
+            itemBuilder: (context, index) {
+              final doc = docs[index];
+              final data = doc.data();
+              final receipeints = (data['recipients'] as List<dynamic>)
+                  .map((e) => e.toString())
+                  .toList();
+              String? title = data['title'];
+              if (title == null) {
+                if (receipeints.length == 2) {
+                  title = receipeints.firstWhere(
+                    (element) => element != currentUser.email,
+                    orElse: () => currentUser.email!,
+                  );
+                } else {
+                  title = doc.id;
+                }
               }
-            }
-            return ListTile(
-              title: Text(title),
-              subtitle: Text(
-                data['recipients'].toString(),
-                overflow: TextOverflow.fade,
-                style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-              ),
-              onTap: () => showChat(
-                context,
-                id: doc.id,
-                emails: receipeints,
-              ),
-            );
-          },
-          itemCount: docs.length,
-        );
-      }, provider: ({Source? src}) async {
-        return (await firestore
-                .collection('chats')
-                .where('recipients', arrayContains: currentUser.email!)
-                .get(src == null ? null : GetOptions(source: src)))
-            .docs;
-      }),
+              return ListTile(
+                title: Text(title),
+                subtitle: Text(
+                  data['recipients'].toString(),
+                  overflow: TextOverflow.fade,
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                ),
+                onTap: () => showChat(
+                  context,
+                  id: doc.id,
+                  emails: receipeints,
+                ),
+              );
+            },
+            itemCount: docs.length,
+          );
+        },
+        provider: ({Source? src}) async {
+          return (await firestore
+                  .collection('chats')
+                  .where('recipients', arrayContains: currentUser.email!)
+                  .get(src == null ? null : GetOptions(source: src)))
+              .docs;
+        },
+      ),
     );
   }
 }

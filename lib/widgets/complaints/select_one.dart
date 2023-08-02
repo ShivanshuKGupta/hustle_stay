@@ -4,6 +4,7 @@ import 'package:hustle_stay/screens/filter_screen/select_one_tile.dart';
 // ignore: must_be_immutable
 class SelectOne<T> extends StatefulWidget {
   final Set<T> allOptions;
+  final Set<T> disabledOptions;
   T? selectedOption;
   final bool Function(T chosenOption) onChange;
   final String? title;
@@ -12,6 +13,7 @@ class SelectOne<T> extends StatefulWidget {
   SelectOne({
     super.key,
     required this.allOptions,
+    this.disabledOptions = const {},
     this.selectedOption,
     required this.onChange,
     this.title,
@@ -32,6 +34,7 @@ class _SelectOneState<T> extends State<SelectOne<T>> {
       spacing: 5,
       children: widget.allOptions
           .map((e) => SelectOneTile(
+                enabled: widget.disabledOptions.contains(e.toString()),
                 label: e.toString(),
                 isSelected: widget.selectedOption == e,
                 onPressed: () {

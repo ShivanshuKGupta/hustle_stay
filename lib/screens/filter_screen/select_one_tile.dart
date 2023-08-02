@@ -4,11 +4,13 @@ class SelectOneTile extends StatelessWidget {
   final bool isSelected;
   final void Function() onPressed;
   final String label;
+  final bool enabled;
   const SelectOneTile({
     super.key,
     required this.isSelected,
     required this.onPressed,
     required this.label,
+    this.enabled = true,
   });
   @override
   Widget build(BuildContext context) {
@@ -22,7 +24,7 @@ class SelectOneTile extends StatelessWidget {
               side: BorderSide(color: theme.colorScheme.primary),
             )
           : null,
-      onPressed: onPressed,
+      onPressed: enabled ? onPressed : null,
       label: Text(label),
     );
   }
