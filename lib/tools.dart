@@ -57,7 +57,7 @@ extension StringExtensions on String {
         return '${word[0].toUpperCase()}${word.substring(1)}';
       }
       return '';
-    }).join();
+    }).join(' ');
   }
 }
 

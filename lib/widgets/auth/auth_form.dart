@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/tools.dart';
 
@@ -16,7 +17,8 @@ class AuthForm extends StatefulWidget {
 }
 
 class _AuthFormState extends State<AuthForm> {
-  String _email = "code_soc@students.iiitr.ac.in", _password = "123456";
+  String _email = kDebugMode ? "code_soc@students.iiitr.ac.in" : '',
+      _password = kDebugMode ? "123456" : '';
 
   /// TODO: remove the above default values when moving to production
 

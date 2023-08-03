@@ -3,7 +3,6 @@ import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/screens/about/about_screen.dart';
 import 'package:hustle_stay/screens/admin_panel/admin_panel_screen.dart';
 import 'package:hustle_stay/screens/chat/private_chats.dart';
-import 'package:hustle_stay/screens/complaints/resolved_complaints_screen.dart';
 import 'package:hustle_stay/screens/filter_screen/stats_screen.dart';
 import 'package:hustle_stay/screens/help/help_screen.dart';
 import 'package:hustle_stay/screens/profile/profile_preview.dart';
@@ -44,19 +43,6 @@ class SettingsScreen extends StatelessWidget {
           navigatorPush(context, const ChatsScreen());
         },
       ),
-      ListTile(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(50),
-        ),
-        leading: const Icon(Icons.restore_outlined),
-        title: const Text('Resolved Complaints'),
-        subtitle: const Text('View your all your resolved complaints here'),
-        tileColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-        onTap: () {
-          navigatorPush(context, ResolvedComplaintsScreen());
-        },
-      ),
-
       if (currentUser.readonly.isAdmin)
         ListTile(
           shape: RoundedRectangleBorder(
@@ -127,6 +113,18 @@ class SettingsScreen extends StatelessWidget {
               icon: const Icon(Icons.warning_amber_rounded),
               label: const Text('Medical Emergency'),
             ),
+// LoadingElevatedButton(
+//     icon: const Icon(Icons.airport_shuttle_rounded),
+//     label: const Text('Ask for vehicle permission too.'),
+//     onPressed: () async {
+//       VehicleRequest request = VehicleRequest(
+//         requestingUserEmail: currentUser.email!,
+//         title: 'Night_Travel',
+//         dateTime: DateTime.now(),
+//       );
+//       request.reason = "Ghar jana hai mujhe 😭";
+//       await request.update();
+//     })
           ],
         ),
       ),
@@ -156,70 +154,3 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 }
-
-// class SettingsScreen extends ConsumerWidget {
-//   const SettingsScreen({super.key});
-
-//   @override
-//   Widget build(BuildContext context, WidgetRef ref) {
-//     final settingsClass = ref.read(settingsProvider.notifier);
-//     const duration = Duration(milliseconds: 300);
-//     final widgetList = [
-//       Column(
-//         children: [
-//           SwitchListTile(
-//             value: false,
-//             title: const Text('Notifications[Not Available]'),
-//             subtitle: Text(
-//               'Receive notifications even when the app is closed',
-//               style: TextStyle(color: Theme.of(context).colorScheme.primary),
-//             ),
-//             isThreeLine: true,
-//             onChanged: null,
-//           ),
-//           ListTile(
-//             title: Text(
-//               'Sign Out',
-//               style: Theme.of(context).textTheme.titleMedium!.copyWith(
-//                     color: Colors.red,
-//                   ),
-//             ),
-//             onTap: () async {
-//               while (Navigator.of(context).canPop()) {
-//                 Navigator.of(context).pop();
-//               }
-//               settingsClass.clearSettings();
-//               auth.signOut();
-//             },
-//           ),
-//         ],
-//       ),
-//     ];
-
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: shaderText(context, title: 'Settings'),
-//       ),
-//       body: SingleChildScrollView(
-//         child: Column(
-//           children: [
-//             if (currentUser.email != null) const CurrentUserTile(),
-//             const Divider().animate().scaleX(
-//                 duration: duration * 2,
-//                 curve: Curves.decelerate,
-//                 begin: 0,
-//                 end: 1),
-//             Section(
-//               title: "App Settings",
-//               children: widgetList.animate().fade(duration: duration).slideX(
-//                   curve: Curves.decelerate,
-//                   begin: 1,
-//                   end: 0,
-//                   duration: duration),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }

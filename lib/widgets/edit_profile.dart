@@ -33,6 +33,9 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
         ? await uploadImage(
             context, img, widget.user.email!, "profile-image.jpg")
         : widget.user.imgUrl;
+    widget.user.name = widget.user.name == null
+        ? null
+        : widget.user.name!.trim().toPascalCase();
     await updateUserData(widget.user);
     Navigator.of(context).pop(true); // to show that a change was done
   }
