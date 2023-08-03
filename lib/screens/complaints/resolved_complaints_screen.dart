@@ -19,7 +19,6 @@ class ResolvedComplaintsScreen extends StatelessWidget {
       ),
       body: ScrollBuilder(
         scrollController: scrollController,
-        interval: 2,
         loader: (context, start, interval) async {
           final complaints = await fetchResolvedComplaints(
             savePoint: savePoint,
@@ -45,17 +44,22 @@ Future<List<ComplaintData>> fetchResolvedComplaints({
   Query<Map<String, dynamic>> publicComplaints =
       firestore.collection('complaints').where('scope', isEqualTo: 'public');
 
-  QuerySnapshot<Map<String, dynamic>> response = await publicComplaints
+  publicComplaints = publicComplaints
       .where('resolved', isEqualTo: true)
       .where('deletedAt', isNull: true)
-      .orderBy('resolvedAt')
+      .orderBy('resolvedAt');
+  if (savePoint['publicComplaints'] != null) {
+    publicComplaints =
+        publicComplaints.startAfterDocument(savePoint['publicComplaints']!);
+  }
+  QuerySnapshot<Map<String, dynamic>> response = await publicComplaints
       .limit(limit)
       .get(src == null ? null : GetOptions(source: src));
   List<ComplaintData> ans = response.docs
       .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
       .toList();
   if (response.docs.isNotEmpty) {
-    savePoint['publicComplaintsLastDoc'] = response.docs.last;
+    savePoint['publicComplaints'] = response.docs.last;
   }
 
   // Fetching Private Complaints made by the user itself
@@ -64,17 +68,22 @@ Future<List<ComplaintData>> fetchResolvedComplaints({
       .where('from', isEqualTo: currentUser.email)
       .where('scope', isEqualTo: 'private');
 
-  response = await myComplaints
+  myComplaints = myComplaints
       .where('resolved', isEqualTo: true)
       .where('deletedAt', isNull: true)
-      .orderBy('resolvedAt')
+      .orderBy('resolvedAt');
+
+  if (savePoint['myComplaints'] != null) {
+    myComplaints = myComplaints.startAfterDocument(savePoint['myComplaints']!);
+  }
+  response = await myComplaints
       .limit(limit)
       .get(src == null ? null : GetOptions(source: src));
   ans += response.docs
       .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
       .toList();
   if (response.docs.isNotEmpty) {
-    savePoint['privateComplaintsLastDoc'] = response.docs.last;
+    savePoint['myComplaints'] = response.docs.last;
   }
 
   // Fetching all complaints in which the user is included
@@ -83,17 +92,23 @@ Future<List<ComplaintData>> fetchResolvedComplaints({
       .where('to', arrayContains: currentUser.email)
       .where('scope', isEqualTo: 'private');
 
-  response = await includedComplaints
+  includedComplaints = includedComplaints
       .where('resolved', isEqualTo: true)
       .where('deletedAt', isNull: true)
-      .orderBy('resolvedAt')
+      .orderBy('resolvedAt');
+
+  if (savePoint['includedComplaints'] != null) {
+    includedComplaints =
+        includedComplaints.startAfterDocument(savePoint['includedComplaints']!);
+  }
+  response = await includedComplaints
       .limit(limit)
       .get(src == null ? null : GetOptions(source: src));
   ans += response.docs
       .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
       .toList();
   if (response.docs.isNotEmpty) {
-    savePoint['includedComplaintsLastDoc'] = response.docs.last;
+    savePoint['includedComplaints'] = response.docs.last;
   }
 
   ans.sort((a, b) => (a.resolvedAt! < b.resolvedAt!) ? 1 : 0);
