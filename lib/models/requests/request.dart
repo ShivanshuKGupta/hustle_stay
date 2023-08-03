@@ -248,82 +248,6 @@ abstract class Request {
   }
 
   Map<String, dynamic> uiElement;
-  // 'Attendance': {
-  //   'color': Colors.red,
-  //   'icon': Icons.calendar_month_rounded,
-  //   'route': AttendanceRequestScreen.routeName,
-  //   'Change Room': <String, dynamic>{
-  //     'color': Colors.blueAccent,
-  //     'icon': Icons.transfer_within_a_station_rounded,
-  //   },
-  //   'Swap Room': <String, dynamic>{
-  //     'color': Colors.pinkAccent,
-  //     'icon': Icons.transfer_within_a_station_rounded,
-  //   },
-  // 'Leave Hostel': <String, dynamic>{
-  //   'color': Colors.indigoAccent,
-  //   'icon': Icons.exit_to_app_rounded,
-  // },
-  // 'Return to Hostel': <String, dynamic>{
-  //   'color': Colors.lightGreenAccent,
-  //   'icon': Icons.keyboard_return_rounded,
-  // },
-  // },
-  // 'Vehicle': {
-  //   'color': Colors.deepPurpleAccent,
-  //   'icon': Icons.airport_shuttle_rounded,
-  //   'route': VehicleRequestScreen.routeName,
-  //   'children': <String, dynamic>{
-  //     'Night Travel': {
-  //       'color': Colors.blue,
-  //       'icon': Icons.nightlight_round,
-  //       'reasonOptions': [
-  //         'Train Arrival',
-  //         'Train Departure',
-  //       ],
-  //     },
-  //     'Hospital Visit': {
-  //       'color': Colors.tealAccent,
-  //       'icon': Icons.local_hospital_rounded,
-  //       'reasonOptions': [
-  //         'Fever',
-  //         'Food Poisoning',
-  //       ],
-  //     },
-  //     'Other': {
-  //       'color': Colors.lightGreenAccent,
-  //       'icon': Icons.more_horiz_rounded,
-  //       'reasonOptions': <String>[],
-  //     },
-  //   }
-  // },
-  // 'Mess': {
-  //   'color': Colors.lightBlueAccent,
-  //   'icon': Icons.restaurant_menu_rounded,
-  //   'route': MessRequestScreen.routeName,
-  //   'Menu_Change': <String, dynamic>{
-  //     'color': Colors.pinkAccent,
-  //     'icon': Icons.restaurant,
-  //   },
-  // 'Lunch': <String, dynamic>{
-  //   'color': Colors.deepPurpleAccent,
-  //   'icon': Icons.restaurant,
-  // },
-  // 'Snacks': <String, dynamic>{
-  //   'color': Colors.cyanAccent,
-  //   'icon': Icons.fastfood,
-  // },
-  // 'Dinner': <String, dynamic>{
-  //   'color': Colors.lightGreenAccent,
-  //   'icon': Icons.local_dining,
-  // },
-  // },
-  // 'Other': {
-  //   'color': Colors.amber,
-  //   'icon': Icons.more_horiz_rounded,
-  //   'route': OtherRequestScreen.routeName,
-  // },
-  // };
 
   /// This function returns a custom widget for this type of request
   Widget widget(BuildContext context);
@@ -342,6 +266,7 @@ abstract class Request {
   }
 
   void showInfo(BuildContext context, Map<String, String> otherDetails) async {
+    DateTime closedDateTime = DateTime.fromMillisecondsSinceEpoch(closedAt);
     Navigator.of(context).push(
       DialogRoute<void>(
         context: context,
@@ -353,7 +278,7 @@ abstract class Request {
             'Status': status.name,
             if (status != RequestStatus.pending)
               'Closed at':
-                  ddmmyyyy(DateTime.fromMillisecondsSinceEpoch(closedAt)),
+                  "${ddmmyyyy(closedDateTime)} ${timeFrom(closedDateTime)}",
             'Approvers': approvers.toString(),
             'Reason': reason,
             if (type == 'Other') 'Approvers': approvers.toString(),

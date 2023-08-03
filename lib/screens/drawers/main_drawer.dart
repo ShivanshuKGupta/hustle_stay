@@ -40,7 +40,7 @@ class MainDrawer extends StatelessWidget {
           onTap: () async {
             navigatorPush(
               context,
-              const ResolvedComplaintsScreen(),
+              ResolvedComplaintsScreen(),
             );
           },
         ),

@@ -29,6 +29,8 @@ class _ScrollBuilderState extends State<ScrollBuilder> {
   bool showLoadMore = true;
   bool initialized = false;
 
+  bool showRetry = false;
+
   @override
   void initState() {
     super.initState();
@@ -42,7 +44,8 @@ class _ScrollBuilderState extends State<ScrollBuilder> {
       if (context.mounted) {
         showMsg(context, error.toString());
         setState(() {
-          initialized = false;
+          showRetry = true;
+          initialized = true;
         });
       }
     });
@@ -60,20 +63,32 @@ class _ScrollBuilderState extends State<ScrollBuilder> {
             itemCount: items.length + 1,
             itemBuilder: (context, index) {
               if (index == items.length) {
-                if (widget.automaticLoading) {
-                  _loadMore(index);
-                  return widget.loadingWidget ?? circularProgressIndicator();
-                }
                 if (!showLoadMore) {
                   return Container();
                 }
-                return LoadingElevatedButton(
-                  icon: const Icon(Icons.refresh_rounded),
-                  label: const Text('Load more'),
-                  errorHandler: (err) {
-                    // show retry button
-                  },
-                  onPressed: () async => await _loadMore(index),
+                if (widget.automaticLoading && !showRetry) {
+                  _loadMore(index);
+                  return widget.loadingWidget ??
+                      Center(child: circularProgressIndicator());
+                }
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    LoadingElevatedButton(
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: Text(showRetry ? 'Retry' : 'Load more'),
+                      errorHandler: (err) {
+                        if (context.mounted) {
+                          setState(() {
+                            showRetry = true;
+                          });
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                          foregroundColor: showRetry ? Colors.red : null),
+                      onPressed: () async => await _loadMore(index),
+                    ),
+                  ],
                 );
               }
               return items[index];
@@ -82,8 +97,23 @@ class _ScrollBuilderState extends State<ScrollBuilder> {
   }
 
   Future<void> _loadMore(int start) async {
-    final newItems = await widget.loader(context, start, widget.interval);
-    if (newItems.length < widget.interval) showLoadMore = false;
+    Iterable<Widget> newItems = [];
+    showRetry = false;
+    try {
+      newItems = await widget.loader(context, start, widget.interval);
+    } catch (e) {
+      if (context.mounted) {
+        showMsg(context, e.toString());
+        setState(() {
+          showRetry = true;
+          initialized = true;
+        });
+      }
+      return;
+    }
+    if (newItems.length < widget.interval) {
+      showLoadMore = false;
+    }
     if (context.mounted) {
       setState(() {
         items.addAll(newItems);

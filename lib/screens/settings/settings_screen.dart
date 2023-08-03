@@ -53,7 +53,7 @@ class SettingsScreen extends StatelessWidget {
         subtitle: const Text('View your all your resolved complaints here'),
         tileColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
         onTap: () {
-          navigatorPush(context, const ResolvedComplaintsScreen());
+          navigatorPush(context, ResolvedComplaintsScreen());
         },
       ),
 

@@ -5,7 +5,6 @@ import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/category/category.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/chat/message.dart';
-import 'package:hustle_stay/models/requests/request.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/state_switch.dart';
 import 'package:hustle_stay/tools.dart';
@@ -51,7 +50,6 @@ class ComplaintData {
       "from": from,
       "scope": scope.name,
       "to": to,
-      "resolved": resolvedAt != null,
       "resolvedAt": resolvedAt,
       "deletedAt": deletedAt,
       "category": category,
@@ -114,7 +112,7 @@ class ComplaintData {
     //     complaintData["resolvedAt"].runtimeType != int) {
     //   updateComplaint(this);
     // }
-    // if (complaintData["resolved"] == null) {
+
     //   updateComplaint(this);
     // }
     // --------------
@@ -181,15 +179,11 @@ Future<ComplaintData> fetchComplaint(int id) async {
 /// fetches all complaints
 Future<List<ComplaintData>> fetchComplaints({
   Source? src,
-  bool resolved = false,
-  int startID = infDateMillisec,
-  int? limit,
 }) async {
   // Fetching all public complaints
   final publicComplaints = await firestore
       .collection('complaints')
       .where('scope', isEqualTo: 'public')
-      .where('resolved', isEqualTo: resolved)
       .where('deletedAt', isNull: true)
       .get(src != null ? GetOptions(source: src) : null);
   List<ComplaintData> ans = publicComplaints.docs
@@ -200,7 +194,6 @@ Future<List<ComplaintData>> fetchComplaints({
       .collection('complaints')
       .where('from', isEqualTo: currentUser.email)
       .where('scope', isEqualTo: 'private')
-      .where('resolved', isEqualTo: resolved)
       .where('deletedAt', isNull: true)
       .get(src != null ? GetOptions(source: src) : null);
   ans += myComplaints.docs
@@ -211,7 +204,6 @@ Future<List<ComplaintData>> fetchComplaints({
       .collection('complaints')
       .where('to', arrayContains: currentUser.email)
       .where('scope', isEqualTo: 'private')
-      .where('resolved', isEqualTo: resolved)
       .where('deletedAt', isNull: true)
       .get(src != null ? GetOptions(source: src) : null);
   ans += includedComplaints.docs

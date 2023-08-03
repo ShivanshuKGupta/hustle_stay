@@ -54,7 +54,7 @@ class _RequestsListState extends State<RequestsList> {
             builder: (ctx, data) {
               data.sort(
                 (a, b) {
-                  return a.id < b.id ? 1 : 0;
+                  return a.id > b.id ? 1 : 0;
                 },
               );
               final children = data.map((e) => e.widget(context)).toList();

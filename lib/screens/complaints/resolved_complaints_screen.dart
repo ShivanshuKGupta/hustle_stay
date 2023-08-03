@@ -1,12 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
+import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_list_item.dart';
 import 'package:hustle_stay/widgets/scroll_builder.dart/scroll_builder.dart';
 
 class ResolvedComplaintsScreen extends StatelessWidget {
   final ScrollController? scrollController;
-  const ResolvedComplaintsScreen({super.key, this.scrollController});
+  ResolvedComplaintsScreen({super.key, this.scrollController});
 
+  final Map<String, DocumentSnapshot> savePoint = {};
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,11 +19,10 @@ class ResolvedComplaintsScreen extends StatelessWidget {
       ),
       body: ScrollBuilder(
         scrollController: scrollController,
-        interval: 20,
+        interval: 2,
         loader: (context, start, interval) async {
-          final complaints = await fetchComplaints(
-            resolved: true,
-            startID: start,
+          final complaints = await fetchResolvedComplaints(
+            savePoint: savePoint,
             limit: interval,
           );
           return complaints.map(
@@ -30,32 +33,69 @@ class ResolvedComplaintsScreen extends StatelessWidget {
         },
       ),
     );
-    // return Scaffold(
-    //   appBar: AppBar(title: const Text('Resolved Complaints')),
-    //   body: CacheBuilder(
-    //     src: Source.cache,
-    //     provider: ({src}) => fetchComplaints(resolved: true, src: src),
-    //     builder: (ctx, complaints) {
-    //       return complaints.isEmpty
-    //           ? Center(
-    //               child: Text(
-    //                 'All clear✨',
-    //                 style: Theme.of(context).textTheme.titleLarge,
-    //                 textAlign: TextAlign.center,
-    //               ),
-    //             )
-    //           : ListView.builder(
-    //               controller: scrollController,
-    //               itemBuilder: (ctx, index) {
-    //                 final complaint = complaints[index];
-    //                 return ComplaintListItem(
-    //                   complaint: complaint,
-    //                 );
-    //               },
-    //               itemCount: complaints.length,
-    //             );
-    //     },
-    //   ),
-    // );
   }
+}
+
+Future<List<ComplaintData>> fetchResolvedComplaints({
+  required Map<String, DocumentSnapshot> savePoint,
+  required int limit,
+  Source? src,
+}) async {
+  // Fetching all public complaints
+  Query<Map<String, dynamic>> publicComplaints =
+      firestore.collection('complaints').where('scope', isEqualTo: 'public');
+
+  QuerySnapshot<Map<String, dynamic>> response = await publicComplaints
+      .where('resolved', isEqualTo: true)
+      .where('deletedAt', isNull: true)
+      .orderBy('resolvedAt')
+      .limit(limit)
+      .get(src == null ? null : GetOptions(source: src));
+  List<ComplaintData> ans = response.docs
+      .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
+      .toList();
+  if (response.docs.isNotEmpty) {
+    savePoint['publicComplaintsLastDoc'] = response.docs.last;
+  }
+
+  // Fetching Private Complaints made by the user itself
+  Query<Map<String, dynamic>> myComplaints = firestore
+      .collection('complaints')
+      .where('from', isEqualTo: currentUser.email)
+      .where('scope', isEqualTo: 'private');
+
+  response = await myComplaints
+      .where('resolved', isEqualTo: true)
+      .where('deletedAt', isNull: true)
+      .orderBy('resolvedAt')
+      .limit(limit)
+      .get(src == null ? null : GetOptions(source: src));
+  ans += response.docs
+      .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
+      .toList();
+  if (response.docs.isNotEmpty) {
+    savePoint['privateComplaintsLastDoc'] = response.docs.last;
+  }
+
+  // Fetching all complaints in which the user is included
+  Query<Map<String, dynamic>> includedComplaints = firestore
+      .collection('complaints')
+      .where('to', arrayContains: currentUser.email)
+      .where('scope', isEqualTo: 'private');
+
+  response = await includedComplaints
+      .where('resolved', isEqualTo: true)
+      .where('deletedAt', isNull: true)
+      .orderBy('resolvedAt')
+      .limit(limit)
+      .get(src == null ? null : GetOptions(source: src));
+  ans += response.docs
+      .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
+      .toList();
+  if (response.docs.isNotEmpty) {
+    savePoint['includedComplaintsLastDoc'] = response.docs.last;
+  }
+
+  ans.sort((a, b) => (a.resolvedAt! < b.resolvedAt!) ? 1 : 0);
+  return ans;
 }
