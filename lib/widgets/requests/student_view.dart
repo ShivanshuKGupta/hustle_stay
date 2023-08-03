@@ -1,7 +1,5 @@
 import 'package:animated_icon/animated_icon.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/requests/request.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/firestore_cache_builder.dart';
@@ -22,61 +20,6 @@ class RequestsList extends StatefulWidget {
 }
 
 class _RequestsListState extends State<RequestsList> {
-  /// It returns requests and fetches required approvers as well
-  Future<List<Request>> getStudentRequests({Source? src}) async {
-    final collection = firestore.collection('requests');
-    final response = await collection
-        .where('requestingUserEmail', isEqualTo: currentUser.email)
-        .where(
-          'expiryDate',
-          isGreaterThan: DateTime.now().millisecondsSinceEpoch,
-        )
-        .get(src == null ? null : GetOptions(source: src));
-    final docs = response.docs;
-    Set<String> requestTypes = {};
-    List<Request> requests = docs.map((doc) {
-      final data = doc.data();
-      final type = data['type'];
-      requestTypes.add(type);
-      return decodeToRequest(data);
-    }).toList();
-    for (var e in requestTypes) {
-      fetchApproversOfRequestType(e, src: src);
-    }
-    return requests;
-  }
-
-  /// It returns requests and fetches required approvers as well
-  Future<List<Request>> getApproverRequests({Source? src}) async {
-    final collection = firestore.collection('requests');
-    var response = await collection
-        .where('approvers', arrayContains: currentUser.email)
-        .where('status', isEqualTo: RequestStatus.pending.index)
-        .get(src == null ? null : GetOptions(source: src));
-    List<QueryDocumentSnapshot<Map<String, dynamic>>> docs = response.docs;
-    final List<Request> requests = [];
-    final List<String> types = [];
-    for (final doc in docs) {
-      if (int.tryParse(doc.id) == null) {
-        types.add(doc.id);
-      } else {
-        requests.add(decodeToRequest(doc.data()));
-      }
-    }
-    if (types.isNotEmpty) {
-      response = await collection
-          .where('type', whereIn: types)
-          .where('status', isEqualTo: RequestStatus.pending.index)
-          .get(src == null ? null : GetOptions(source: src));
-      docs = response.docs;
-      requests.addAll(docs.map((doc) {
-        final data = doc.data();
-        return decodeToRequest(data);
-      }));
-    }
-    return requests;
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -178,6 +121,7 @@ class _RequestsListState extends State<RequestsList> {
                     : getApproverRequests)
                 : ({src}) async => widget.requests,
           ),
+          const SizedBox(height: 35),
         ],
       ),
     );

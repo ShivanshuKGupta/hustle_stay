@@ -6,6 +6,7 @@ import 'package:hustle_stay/models/category/category.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
+import 'package:hustle_stay/screens/complaints/resolved_complaints_screen.dart';
 import 'package:hustle_stay/screens/drawers/main_drawer.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_category_view.dart';
@@ -35,86 +36,120 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
       backgroundColor: Colors.transparent,
       drawer: const MainDrawer(),
-      body: ComplaintsBuilder(
-        src: src,
-        loadingWidget: Center(child: circularProgressIndicator()),
-        builder: (ctx, complaints) {
-          src = Source.cache;
-          List<Widget> children =
-              calculateUI(settings.complaintsGrouping, complaints);
-          return RefreshIndicator(
-            onRefresh: () async {
-              try {
-                await fetchAllCategories();
-                await fetchComplaints();
-              } catch (e) {
-                showMsg(context, e.toString());
-              }
-              src = Source.serverAndCache;
-              if (context.mounted) {
-                setState(() {});
-              }
+      body: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          ComplaintsBuilder(
+            src: src,
+            loadingWidget: Center(child: circularProgressIndicator()),
+            builder: (ctx, complaints) {
+              src = Source.cache;
+              List<Widget> children =
+                  calculateUI(settings.complaintsGrouping, complaints);
+              return RefreshIndicator(
+                onRefresh: () async {
+                  try {
+                    await fetchAllCategories();
+                    await fetchComplaints();
+                  } catch (e) {
+                    showMsg(context, e.toString());
+                  }
+                  src = Source.serverAndCache;
+                  if (context.mounted) {
+                    setState(() {});
+                  }
+                },
+                child: ListView.builder(
+                  itemBuilder: (ctx, index) {
+                    if (index == 0) {
+                      return currentUser
+                                  .readonly.permissions.complaints.create ==
+                              true
+                          ? ComplaintCategoryView(
+                              onTap: (category) {
+                                navigatorPush(
+                                  context,
+                                  ComplaintForm(
+                                      category: category,
+                                      afterSubmit: _afterAddComplaint),
+                                );
+                                // _addComplaint(category);
+                              },
+                            )
+                          : Container();
+                    } else if (index == 1) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 20),
+                        child: shaderText(
+                          context,
+                          title: 'Pending Complaints',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge!
+                              .copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      );
+                    } else if (index == children.length + 2) {
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: children.isEmpty
+                            ? [
+                                AnimateIcon(
+                                  onTap: () {},
+                                  iconType: IconType.continueAnimation,
+                                  animateIcon: AnimateIcons.cool,
+                                ),
+                                Text(
+                                  currentUser.readonly.type == 'student'
+                                      ? 'There aren\'t any Complaints Yet'
+                                      : 'No Pending Complaints Yet',
+                                  textAlign: TextAlign.center,
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium,
+                                ),
+                              ]
+                            : [
+                                const SizedBox(height: 40),
+                              ],
+                      );
+                    } else {
+                      index -= 2;
+                    }
+                    return children[index];
+                  },
+                  itemCount: children.length + 3,
+                ),
+              );
             },
-            child: ListView.builder(
-              itemBuilder: (ctx, index) {
-                if (index == 0) {
-                  return currentUser.readonly.permissions.complaints.create ==
-                          true
-                      ? ComplaintCategoryView(
-                          onTap: (category) {
-                            navigatorPush(
-                              context,
-                              ComplaintForm(
-                                  category: category,
-                                  afterSubmit: _afterAddComplaint),
-                            );
-                            // _addComplaint(category);
-                          },
-                        )
-                      : Container();
-                } else if (index == 1) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 20),
-                    child: shaderText(
-                      context,
-                      title:
-                          '${currentUser.readonly.type == 'student' ? 'Your' : 'Pending'} Complaints',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge!
-                          .copyWith(fontWeight: FontWeight.bold),
-                    ),
-                  );
-                } else if (index == children.length + 2) {
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: children.isEmpty
-                        ? [
-                            AnimateIcon(
-                              onTap: () {},
-                              iconType: IconType.continueAnimation,
-                              animateIcon: AnimateIcons.cool,
-                            ),
-                            Text(
-                              currentUser.readonly.type == 'student'
-                                  ? 'There aren\'t any Complaints Yet'
-                                  : 'No Pending Complaints Yet',
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                          ]
-                        : [],
-                  );
-                } else {
-                  index -= 2;
-                }
-                return children[index];
+          ),
+          SafeArea(
+            child: ElevatedButton.icon(
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  useSafeArea: true,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  builder: (context) {
+                    return DraggableScrollableSheet(
+                      expand: false,
+                      builder: (context, scrollController) {
+                        return ResolvedComplaintsScreen(
+                          scrollController: scrollController,
+                        );
+                      },
+                    );
+                  },
+                );
               },
-              itemCount: children.length + 3,
+              icon: const Icon(Icons.history_rounded),
+              label: const Text('Resolved Complaints'),
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }

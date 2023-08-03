@@ -60,13 +60,32 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
         },
         onLongPress: () => _showComplaintInfo(),
         title: Text(widget.complaint.title.replaceAll('_', ' ')),
-        subtitle: widget.complaint.description == null
-            ? null
-            : Text(
+        subtitle: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (widget.complaint.description != null)
+              Text(
                 widget.complaint.description!,
-                overflow: TextOverflow.fade,
-                maxLines: 4,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
+            if (widget.complaint.deletedAt != null)
+              Text(
+                'Deleted at: ${ddmmyyyy(widget.complaint.deletedAt!)} ${timeFrom(widget.complaint.deletedAt!)}',
+                style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                      color: Colors.red,
+                    ),
+              ),
+            if (widget.complaint.resolvedAt != null)
+              Text(
+                'Resolved at: ${ddmmyyyy(DateTime.fromMillisecondsSinceEpoch(widget.complaint.resolvedAt!))} ${timeFrom(DateTime.fromMillisecondsSinceEpoch(widget.complaint.resolvedAt!))}',
+                style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+              ),
+          ],
+        ),
         leading: CategoryBuilder(
           id: widget.complaint.category ?? 'Other',
           builder: (ctx, category) => Stack(
@@ -156,7 +175,7 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
   Future<bool> deleteMe() async {
     final response = await askUser(
       context,
-      'Do you really wish to delete this complaint?',
+      'Do you really wish to ${widget.complaint.deletedAt == null ? "delete" : "restore"} this complaint?',
       yes: true,
       no: true,
     );
@@ -190,7 +209,19 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
             actionsPadding: const EdgeInsets.only(bottom: 15),
             contentPadding: const EdgeInsets.only(top: 15, left: 20, right: 20),
             actionsAlignment: MainAxisAlignment.spaceAround,
-            title: Text(widget.complaint.title),
+            title: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(widget.complaint.title.replaceAll('_', ' ')),
+                if (widget.complaint.description != null &&
+                    widget.complaint.description!.isNotEmpty)
+                  Text(
+                    widget.complaint.description!,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+              ],
+            ),
             actions: [
               if (currentUser.email == widget.complaint.from ||
                   currentUser.readonly.permissions.complaints.update == true)
@@ -219,17 +250,6 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (widget.complaint.description != null &&
-                    widget.complaint.description!.isNotEmpty)
-                  Text(
-                    "Description: ",
-                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                  ),
-                if (widget.complaint.description != null &&
-                    widget.complaint.description!.isNotEmpty)
-                  Text(widget.complaint.description!),
                 Text(
                   "Complainant: ",
                   style: Theme.of(context).textTheme.bodySmall!.copyWith(
@@ -247,13 +267,13 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
                       ),
                 ),
                 Text("${widget.complaint.to}"),
-                Text(
-                  "Category: ",
-                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                ),
-                Text("${widget.complaint.category}"),
+                // Text(
+                //   "Category: ",
+                //   style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                //         color: Theme.of(context).colorScheme.primary,
+                //       ),
+                // ),
+                // Text("${widget.complaint.category}"),
                 Text(
                   "Scope: ",
                   style: Theme.of(context).textTheme.bodySmall!.copyWith(
@@ -284,31 +304,44 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
                     children: [
                       Text(
                         "Resolved At: ",
-                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
                               color: Theme.of(context).colorScheme.primary,
                             ),
                       ),
                       Text(
                         "${ddmmyyyy(resolvedAt!)} ${timeFrom(resolvedAt)}",
                         textAlign: TextAlign.right,
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
-                  ),
-                if (widget.complaint.deletedAt != null)
+                  )
+                else if (widget.complaint.deletedAt != null)
                   Wrap(
                     alignment: WrapAlignment.spaceBetween,
                     children: [
                       Text(
                         "Deleted At: ",
-                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
                               color: Colors.red,
                             ),
                       ),
                       Text(
                         "${ddmmyyyy(widget.complaint.deletedAt!)} ${timeFrom(widget.complaint.deletedAt!)}",
                         textAlign: TextAlign.right,
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
+                  )
+                else
+                  Text(
+                    "This request is pending...",
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withOpacity(0.5),
+                          fontStyle: FontStyle.italic,
+                        ),
                   ),
               ],
             ),

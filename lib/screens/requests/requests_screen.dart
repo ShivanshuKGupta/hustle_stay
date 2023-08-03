@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/screens/requests/attendance/attendance_request_screen.dart';
+import 'package:hustle_stay/screens/requests/closed_requests_screen.dart';
 import 'package:hustle_stay/screens/requests/mess/mess_request_screen.dart';
 import 'package:hustle_stay/screens/requests/other/other_request_screen.dart';
 import 'package:hustle_stay/screens/requests/vehicle/vehicle_requests_screen.dart';
@@ -38,12 +39,41 @@ class RequestsScreen extends StatefulWidget {
 class _RequestsScreenState extends State<RequestsScreen> {
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(10.0),
-          child: RequestsList(),
-        ),
+    return Scaffold(
+      body: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(10.0),
+            child: RequestsList(),
+          ),
+          SafeArea(
+            child: ElevatedButton.icon(
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  useSafeArea: true,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  builder: (context) {
+                    return DraggableScrollableSheet(
+                      expand: false,
+                      builder: (context, scrollController) {
+                        return ClosedRequestsScreen(
+                          scrollController: scrollController,
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+              icon: const Icon(Icons.history_rounded),
+              label: const Text('Closed Requests'),
+            ),
+          ),
+        ],
       ),
     );
   }

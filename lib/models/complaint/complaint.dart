@@ -5,6 +5,7 @@ import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/category/category.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/chat/message.dart';
+import 'package:hustle_stay/models/requests/request.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/state_switch.dart';
 import 'package:hustle_stay/tools.dart';
@@ -178,8 +179,12 @@ Future<ComplaintData> fetchComplaint(int id) async {
 }
 
 /// fetches all complaints
-Future<List<ComplaintData>> fetchComplaints(
-    {Source? src, bool resolved = false}) async {
+Future<List<ComplaintData>> fetchComplaints({
+  Source? src,
+  bool resolved = false,
+  int startID = infDateMillisec,
+  int? limit,
+}) async {
   // Fetching all public complaints
   final publicComplaints = await firestore
       .collection('complaints')

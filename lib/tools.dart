@@ -6,6 +6,8 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+const intMax = 9223372036854775807;
+
 /// A widget which is primarily used to show a [CircularProgressIndicator]
 /// in a sizedbox
 SizedBox circularProgressIndicator({
@@ -446,7 +448,7 @@ String ddmmyyyy(DateTime dateTime) {
 
 /// A function to show time in a certain format
 String timeFrom(DateTime dateTime) {
-  return "${dateTime.hour > 12 ? dateTime.hour - 12 : dateTime.hour}:${dateTime.minute} ${dateTime.hour < 12 ? 'am' : 'pm'}";
+  return "${dateTime.hour > 12 ? dateTime.hour - 12 : dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')} ${dateTime.hour < 12 ? 'am' : 'pm'}";
 }
 
 /// Glass Widget

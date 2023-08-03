@@ -21,7 +21,8 @@ import 'package:hustle_stay/widgets/requests/requests_bottom_bar.dart';
 
 enum RequestStatus { pending, approved, denied }
 
-final infDate = DateTime.fromMillisecondsSinceEpoch(8640000000000000);
+const infDateMillisec = 8640000000000000;
+final infDate = DateTime.fromMillisecondsSinceEpoch(infDateMillisec);
 
 abstract class Request {
   /// Constructor
@@ -418,6 +419,61 @@ Request decodeToRequest(Map<String, dynamic> data) {
       ..load(data);
   }
   throw "No such type exists: '$type'";
+}
+
+/// It returns requests and fetches required approvers as well
+Future<List<Request>> getStudentRequests({Source? src}) async {
+  final collection = firestore.collection('requests');
+  final response = await collection
+      .where('requestingUserEmail', isEqualTo: currentUser.email)
+      .where(
+        'expiryDate',
+        isGreaterThan: DateTime.now().millisecondsSinceEpoch,
+      )
+      .get(src == null ? null : GetOptions(source: src));
+  final docs = response.docs;
+  Set<String> requestTypes = {};
+  List<Request> requests = docs.map((doc) {
+    final data = doc.data();
+    final type = data['type'];
+    requestTypes.add(type);
+    return decodeToRequest(data);
+  }).toList();
+  for (var e in requestTypes) {
+    fetchApproversOfRequestType(e, src: src);
+  }
+  return requests;
+}
+
+/// It returns requests and fetches required approvers as well
+Future<List<Request>> getApproverRequests({Source? src}) async {
+  final collection = firestore.collection('requests');
+  var response = await collection
+      .where('approvers', arrayContains: currentUser.email)
+      .where('status', isEqualTo: RequestStatus.pending.index)
+      .get(src == null ? null : GetOptions(source: src));
+  List<QueryDocumentSnapshot<Map<String, dynamic>>> docs = response.docs;
+  final List<Request> requests = [];
+  final List<String> types = [];
+  for (final doc in docs) {
+    if (int.tryParse(doc.id) == null) {
+      types.add(doc.id);
+    } else {
+      requests.add(decodeToRequest(doc.data()));
+    }
+  }
+  if (types.isNotEmpty) {
+    response = await collection
+        .where('type', whereIn: types)
+        .where('status', isEqualTo: RequestStatus.pending.index)
+        .get(src == null ? null : GetOptions(source: src));
+    docs = response.docs;
+    requests.addAll(docs.map((doc) {
+      final data = doc.data();
+      return decodeToRequest(data);
+    }));
+  }
+  return requests;
 }
 
 class RequestItem extends StatefulWidget {

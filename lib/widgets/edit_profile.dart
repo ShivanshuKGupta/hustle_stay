@@ -66,6 +66,7 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                 if (widget.user.email == null)
                   TextFormField(
                     maxLength: 50,
+                    keyboardType: TextInputType.emailAddress,
                     enabled: widget.user.email == null,
                     decoration: const InputDecoration(
                       label: Text("Email"),
@@ -79,7 +80,6 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                     },
                   ),
                 TextFormField(
-                  key: UniqueKey(),
                   maxLength: 50,
                   enabled:
                       widget.user.email == null || currentUser.readonly.isAdmin,

@@ -75,7 +75,7 @@ class ChatScreen extends StatelessWidget {
                   right: 10,
                 ),
                 child: Text(
-                  'This chat is locked.\nContact administrator if this is a mistake.',
+                  'This chat is locked.',
                   style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                         fontStyle: FontStyle.italic,
                       ),

@@ -34,7 +34,7 @@ class _SelectOneState<T> extends State<SelectOne<T>> {
       spacing: 5,
       children: widget.allOptions
           .map((e) => SelectOneTile(
-                enabled: widget.disabledOptions.contains(e.toString()),
+                enabled: !widget.disabledOptions.contains(e.toString()),
                 label: e.toString(),
                 isSelected: widget.selectedOption == e,
                 onPressed: () {
