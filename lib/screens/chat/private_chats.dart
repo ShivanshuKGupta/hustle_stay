@@ -61,7 +61,7 @@ class ChatsScreen extends StatelessWidget {
                                     context,
                                     ImagePreview(
                                       image: Hero(
-                                        tag: user.email!,
+                                        tag: user.name ?? user.email!,
                                         child: CachedNetworkImage(
                                           imageUrl: user.imgUrl!,
                                         ),
@@ -70,7 +70,7 @@ class ChatsScreen extends StatelessWidget {
                                   );
                                 },
                           child: Hero(
-                            tag: user.email!,
+                            tag: user.name ?? user.email!,
                             child: CircleAvatar(
                               backgroundImage: user.imgUrl == null
                                   ? null
@@ -121,9 +121,15 @@ class ChatsScreen extends StatelessWidget {
               }
               return CacheBuilder(
                 src: Source.cache,
+                loadingWidget: Container(),
                 builder: (ctx, user) {
                   return ListTile(
                     title: Text(user.name ?? user.email!),
+                    onLongPress: () {
+                      if (user.email != null) {
+                        showUserPreview(context, user);
+                      }
+                    },
                     subtitle: Text(
                       data['recipients'].toString(),
                       overflow: TextOverflow.ellipsis,
@@ -140,7 +146,7 @@ class ChatsScreen extends StatelessWidget {
                                 context,
                                 ImagePreview(
                                   image: Hero(
-                                    tag: user.email!,
+                                    tag: user.name ?? user.email!,
                                     child: CachedNetworkImage(
                                       imageUrl: user.imgUrl!,
                                     ),
@@ -149,7 +155,7 @@ class ChatsScreen extends StatelessWidget {
                               );
                             },
                       child: Hero(
-                        tag: user.email!,
+                        tag: user.name ?? user.email!,
                         child: CircleAvatar(
                           backgroundImage: user.imgUrl == null
                               ? null
@@ -174,7 +180,6 @@ class ChatsScreen extends StatelessWidget {
                 provider: ({src}) async {
                   if (title != null) {
                     return UserData(
-                      email: title,
                       name: title,
                     );
                   }

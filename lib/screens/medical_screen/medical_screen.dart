@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user/medical_info.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/firestore_cache_builder.dart';
-import 'package:hustle_stay/screens/profile/profile_preview.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/other/loading_builder.dart';
 import 'package:hustle_stay/widgets/other/loading_elevated_button.dart';
@@ -134,18 +133,7 @@ class _MedicalScreenState extends State<MedicalScreen> {
                           final user = filteredUsers[index];
                           return ListTile(
                             onTap: () {
-                              Navigator.of(context).push(
-                                DialogRoute(
-                                  context: context,
-                                  builder: (context) {
-                                    return AlertDialog(
-                                      contentPadding:
-                                          const EdgeInsets.only(top: 20),
-                                      content: ProfilePreview(user: user),
-                                    );
-                                  },
-                                ),
-                              );
+                              showUserPreview(context, user);
                             },
                             title: Text(user.name ?? user.email!),
                             subtitle: Wrap(

@@ -38,12 +38,12 @@ class ProfileDetailsScreen extends StatelessWidget {
             Section(
               title: 'Personal Information',
               children: [
-                if (user.phoneNumber != null)
+                if (user.phoneNumber != null && user.phoneNumber!.isNotEmpty)
                   KeyValueRow(
                     attribute: 'Phone Number',
                     value: user.phoneNumber!,
                   ),
-                if (user.address != null)
+                if (user.address != null && user.address!.isNotEmpty)
                   KeyValueRow(
                     attribute: 'Address',
                     value: user.address!,
@@ -53,12 +53,14 @@ class ProfileDetailsScreen extends StatelessWidget {
             Section(
               title: 'Hostel Information',
               children: [
-                if (user.readonly.hostelName != null)
+                if (user.readonly.hostelName != null &&
+                    user.readonly.hostelName!.isNotEmpty)
                   KeyValueRow(
                     attribute: 'Hostel',
                     value: user.readonly.hostelName!,
                   ),
-                if (user.readonly.roomName != null)
+                if (user.readonly.roomName != null &&
+                    user.readonly.roomName!.isNotEmpty)
                   KeyValueRow(
                     attribute: 'Room',
                     value: user.readonly.roomName!,
@@ -79,7 +81,8 @@ class ProfileDetailsScreen extends StatelessWidget {
                     attribute: 'Date of Birth',
                     value: ddmmyyyy(user.medicalInfo.dob!),
                   ),
-                if (user.medicalInfo.phoneNumber != null)
+                if (user.medicalInfo.phoneNumber != null &&
+                    user.medicalInfo.phoneNumber!.isNotEmpty)
                   KeyValueRow(
                     attribute: 'Emergency Phone Number',
                     value: user.medicalInfo.phoneNumber!,
@@ -104,22 +107,26 @@ class ProfileDetailsScreen extends StatelessWidget {
                     attribute: 'Organ Donor?',
                     value: user.medicalInfo.organDonor! ? 'Yes' : 'No',
                   ),
-                if (user.medicalInfo.allergies != null)
+                if (user.medicalInfo.allergies != null &&
+                    user.medicalInfo.allergies!.isNotEmpty)
                   KeyValueRow(
                     attribute: 'Allergies',
                     value: user.medicalInfo.allergies!.toString(),
                   ),
-                if (user.medicalInfo.medicalConditions != null)
+                if (user.medicalInfo.medicalConditions != null &&
+                    user.medicalInfo.medicalConditions!.isNotEmpty)
                   KeyValueRow(
                     attribute: 'Medical Conditions',
                     value: user.medicalInfo.medicalConditions!.toString(),
                   ),
-                if (user.medicalInfo.medications != null)
+                if (user.medicalInfo.medications != null &&
+                    user.medicalInfo.medications!.isNotEmpty)
                   KeyValueRow(
                     attribute: 'Medications',
                     value: user.medicalInfo.medications!.toString(),
                   ),
-                if (user.medicalInfo.remarks != null)
+                if (user.medicalInfo.remarks != null &&
+                    user.medicalInfo.remarks!.isNotEmpty)
                   KeyValueRow(
                     attribute: 'Remarks',
                     value: user.medicalInfo.remarks!.toString(),
