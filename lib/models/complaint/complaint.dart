@@ -185,6 +185,7 @@ Future<List<ComplaintData>> fetchComplaints({
       .collection('complaints')
       .where('scope', isEqualTo: 'public')
       .where('deletedAt', isNull: true)
+      .where('resolved', isEqualTo: false)
       .get(src != null ? GetOptions(source: src) : null);
   List<ComplaintData> ans = publicComplaints.docs
       .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
@@ -195,6 +196,7 @@ Future<List<ComplaintData>> fetchComplaints({
       .where('from', isEqualTo: currentUser.email)
       .where('scope', isEqualTo: 'private')
       .where('deletedAt', isNull: true)
+      .where('resolved', isEqualTo: false)
       .get(src != null ? GetOptions(source: src) : null);
   ans += myComplaints.docs
       .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
@@ -205,6 +207,7 @@ Future<List<ComplaintData>> fetchComplaints({
       .where('to', arrayContains: currentUser.email)
       .where('scope', isEqualTo: 'private')
       .where('deletedAt', isNull: true)
+      .where('resolved', isEqualTo: false)
       .get(src != null ? GetOptions(source: src) : null);
   ans += includedComplaints.docs
       .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
