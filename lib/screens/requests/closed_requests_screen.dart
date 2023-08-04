@@ -79,10 +79,10 @@ class _ClosedRequestsScreenState extends State<ClosedRequestsScreen> {
               showOthers: showOthers,
               types: types,
             );
-            debugPrint("Last doc: ${savePoint['lastDoc']!.id}");
+            // debugPrint("Last doc: ${savePoint['lastDoc']!.id}");
             return requests.map(
               (request) {
-                debugPrint(request.id.toString());
+                // debugPrint(request.id.toString());
                 return request.widget(context);
               },
             );

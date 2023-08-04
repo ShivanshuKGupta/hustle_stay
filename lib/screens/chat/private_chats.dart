@@ -5,6 +5,7 @@ import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/firestore_cache_builder.dart';
+import 'package:hustle_stay/screens/chat/image_preview.dart';
 import 'package:hustle_stay/tools.dart';
 
 class ChatsScreen extends StatelessWidget {
@@ -25,6 +26,17 @@ class ChatsScreen extends StatelessWidget {
                 title: const Text('Who to chat with?'),
               ),
               body: UsersBuilder(
+                src: Source.cache,
+                loadingWidget: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      circularProgressIndicator(),
+                      const Text('Fetching all Users From Cache'),
+                    ],
+                  ),
+                ),
+                provider: fetchUsers,
                 builder: (ctx, users) {
                   return ListView.builder(
                     itemBuilder: (context, index) {
@@ -41,9 +53,38 @@ class ChatsScreen extends StatelessWidget {
                           showChat(context, id: id, emails: [user.email!]);
                         },
                         title: Text(user.name ?? user.email!),
-                        leading: user.imgUrl == null
-                            ? null
-                            : CachedNetworkImage(imageUrl: user.imgUrl!),
+                        leading: GestureDetector(
+                          onTap: user.imgUrl == null
+                              ? null
+                              : () {
+                                  navigatorPush(
+                                    context,
+                                    ImagePreview(
+                                      image: Hero(
+                                        tag: user.email!,
+                                        child: CachedNetworkImage(
+                                          imageUrl: user.imgUrl!,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                          child: Hero(
+                            tag: user.email!,
+                            child: CircleAvatar(
+                              backgroundImage: user.imgUrl == null
+                                  ? null
+                                  : CachedNetworkImageProvider(user.imgUrl!),
+                              radius: 20,
+                              child: user.imgUrl != null
+                                  ? null
+                                  : const Icon(
+                                      Icons.person_rounded,
+                                      size: 20,
+                                    ),
+                            ),
+                          ),
+                        ),
                       );
                     },
                     itemCount: users.length,
@@ -78,33 +119,70 @@ class ChatsScreen extends StatelessWidget {
                   title = doc.id;
                 }
               }
-              return ListTile(
-                title: CacheBuilder(
-                  src: Source.cache,
-                  builder: (ctx, name) => Text(name),
-                  provider: ({src}) async {
-                    if (title != null) return title;
-                    final user = (await fetchUserData(
-                      person2,
-                      readonly: true,
-                      src: src,
-                    ));
-                    return user.name ?? user.email!;
-                  },
-                ),
-                subtitle: Text(
-                  data['recipients'].toString(),
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
+              return CacheBuilder(
+                src: Source.cache,
+                builder: (ctx, user) {
+                  return ListTile(
+                    title: Text(user.name ?? user.email!),
+                    subtitle: Text(
+                      data['recipients'].toString(),
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                      maxLines: 1,
+                    ),
+                    leading: GestureDetector(
+                      onTap: user.imgUrl == null
+                          ? null
+                          : () {
+                              navigatorPush(
+                                context,
+                                ImagePreview(
+                                  image: Hero(
+                                    tag: user.email!,
+                                    child: CachedNetworkImage(
+                                      imageUrl: user.imgUrl!,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                      child: Hero(
+                        tag: user.email!,
+                        child: CircleAvatar(
+                          backgroundImage: user.imgUrl == null
+                              ? null
+                              : CachedNetworkImageProvider(user.imgUrl!),
+                          radius: 20,
+                          child: user.imgUrl != null
+                              ? null
+                              : const Icon(
+                                  Icons.person_rounded,
+                                  size: 20,
+                                ),
+                        ),
                       ),
-                  maxLines: 1,
-                ),
-                onTap: () => showChat(
-                  context,
-                  id: doc.id,
-                  emails: receipeints,
-                ),
+                    ),
+                    onTap: () => showChat(
+                      context,
+                      id: doc.id,
+                      emails: receipeints,
+                    ),
+                  );
+                },
+                provider: ({src}) async {
+                  if (title != null) {
+                    return UserData(
+                      email: title,
+                      name: title,
+                    );
+                  }
+                  return await fetchUserData(
+                    person2,
+                    src: src,
+                  );
+                },
               );
             },
             itemCount: docs.length,
