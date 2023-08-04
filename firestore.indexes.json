@@ -1,0 +1,135 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "complaints",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "deletedAt",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "from",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "resolved",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "scope",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "resolvedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "complaints",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "deletedAt",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "resolved",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "scope",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "resolvedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "complaints",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "to",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "deletedAt",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "resolved",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "scope",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "resolvedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "requests",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "approvers",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "closedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "requests",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "requestingUserEmail",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "closedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "requests",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "requestingUserEmail",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "expiryDate",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "requests",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "type",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "closedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

@@ -1,0 +1,205 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+  	// Functions
+      function getPermission(type, permission){
+        let allowed = request.auth!=null && get(/databases/$(database)/documents/users/$(request.auth.token.email)).data.permissions[type][permission];
+        return allowed;
+      }
+  
+  	// for admins
+    match /{document=**} {
+    	// Allow all kinds of read/writes if you're an admin
+      allow read, write: if request.auth!=null && get(/databases/$(database)/documents/users/$(request.auth.token.email)).data.isAdmin == true;
+    }
+    
+    // for hostels
+    match /hostels/{document=**}{
+    	// TODO: Sani - Change these rules to match your own implementation
+    	// SHORTCIRCUITING HOSTELS
+    	allow read, write: if request.auth!=null;
+    }
+    
+    // for readonly details of the user
+    match /users/{emailID}{
+      allow read:	if getPermission('users', 'read')||request.auth.token.email == emailID;
+      allow update: if getPermission('users', 'update');
+      allow delete: if getPermission('users', 'delete');
+      allow create: if getPermission('users', 'create');
+    }
+    
+    // for editable details of a user
+    match /users/{emailID}/editable/details {
+      allow read:	if getPermission('users', 'read');
+      allow update: if getPermission('users', 'update');
+      allow delete: if getPermission('users', 'delete');
+      allow create: if getPermission('users', 'create');
+    	
+      // allowing write on his own editable details
+      allow read, write: if request.auth.token.email == emailID;
+    }
+    
+    // for complaints
+    match /complaints/{complaintID} {
+      allow read:	if getPermission('complaints', 'read');
+      allow update: if getPermission('complaints', 'update');
+      allow delete: if getPermission('complaints', 'delete');
+      allow create: if getPermission('complaints', 'create');
+    	
+    	// allowing read/write if the complaint is posted by the user itself
+      allow read, update: if request.auth.token.email==resource.data.from;
+      
+      // Allowing read on any public complaint by any authenticated user
+      allow read: if request.auth!=null && resource.data.scope == "public";
+      
+      // Allowing read if the user in included in the complaint
+      allow read: if request.auth.token.email in resource.data.to;
+    }
+    
+    // for messages in chat of complaints
+    match /complaints/{complaintID}/chat/{msgID} {
+    		// Allowing to update readBy to include this person in it
+    		allow update: if request.auth!=null && canUpdateReadBy();
+        
+        function canUpdateReadBy(){
+        	return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy']) 
+          && request.resource.data.readBy.hasAll(resource.data.readBy) 
+          && request.resource.data.readBy.hasAll([request.auth.token.email])
+          && !resource.data.readBy.hasAll([request.auth.token.email])
+          && request.resource.data.readBy.size() == resource.data.readBy.size()+1;
+        }
+        
+        // Allowing to update deletedAt
+    		allow update: if request.auth!=null && 
+        // if user was the creator of the msg
+        request.auth.token.email == resource.data.from && 
+        // if the message was not indicative
+        (!('indicative' in resource.data) || resource.data.indicative == false) &&
+        isDeleting();
+        
+        function isDeleting(){
+        	// If changing only deletedAt
+        	return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['deletedAt']);
+        }
+
+      	// Allow read, create a msg
+      	allow read, create:
+        // if user is the owner
+        if (request.auth.token.email == 
+        get(/databases/$(database)/documents/complaints/$(complaintID)).data.from)
+        ||
+    		// or if he is included in the chat
+        request.auth.token.email in get(/databases/$(database)/documents/complaints/$(complaintID)).data.to;
+      	
+        // Allow read, create msg if the chat is public
+      	allow read, create: 
+        if request.auth != null && 
+        get(/databases/$(database)/documents/complaints/$(complaintID)).data.scope == "public";
+        
+        // Allow deleting a message if the user was the creator
+        // and the messages is not indicative
+        allow delete: if(request.auth!=null && request.auth.token.email==resource.data.from
+        && (!('indicative' in resource.data) || resource.data.indicative == false));
+      }
+    
+    // For Categories
+    match /categories/{id}{
+    	allow read:	if getPermission('categories', 'read');
+      allow update: if getPermission('categories', 'update');
+      allow delete: if getPermission('categories', 'delete');
+      allow create: if getPermission('categories', 'create');
+    }
+      
+      
+    // For requests
+    match /requests/{id}{
+      allow read:	if getPermission('requests', 'read');
+      allow update: if getPermission('requests', 'update');
+      allow delete: if getPermission('requests', 'delete');
+      allow create: if getPermission('requests', 'create');
+    	
+      // For approver's data
+      allow read:	if getPermission('approvers', 'read') && 
+      !('requestingUserEmail' in get(/databases/$(database)/documents/requests/$(id)).data);
+      allow update: if getPermission('approvers', 'update') && 
+      !('requestingUserEmail' in get(/databases/$(database)/documents/requests/$(id)).data);
+      allow delete: if getPermission('approvers', 'delete') && 
+      !('requestingUserEmail' in get(/databases/$(database)/documents/requests/$(id)).data);
+      allow create: if getPermission('approvers', 'create') && 
+      !('requestingUserEmail' in get(/databases/$(database)/documents/requests/$(id)).data);
+      
+      // Allowing read if the user was the one to create this request
+    	allow read: if request.auth.token.email==resource.data.requestingUserEmail;
+      
+      // Allowing read/update if the user is an approver
+      allow read, update: if request.auth.token.email in getApprovers();
+    
+    	// Allowing update if the request is requested by the user and 
+      // is still pending
+    	allow update: if request.auth.token.email == resource.data.requestingUserEmail && 
+      resource.data.status == 0;
+    
+      function getApprovers(){
+        let type = get(/databases/$(database)/documents/requests/$(id)).data.type;
+        return get(/databases/$(database)/documents/requests/$(type)).data.approvers;
+      }
+    }
+    
+    // For chat of requests
+    match /requests/{id}/chat/{msgID} {
+        // Allowing to update readBy to include this person in it
+    		allow update: if request.auth!=null && canUpdateReadBy();
+        
+        function canUpdateReadBy(){
+        	return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy']) 
+          && request.resource.data.readBy.hasAll(resource.data.readBy) 
+          && request.resource.data.readBy.hasAll([request.auth.token.email])
+          && !resource.data.readBy.hasAll([request.auth.token.email])
+          && request.resource.data.readBy.size() == resource.data.readBy.size()+1;
+        }
+        
+        // Allowing to update deletedAt
+    		allow update: if request.auth!=null && 
+        // if user was the creator of the msg
+        request.auth.token.email == resource.data.from && 
+        // if the message was not indicative
+        (!('indicative' in resource.data) || resource.data.indicative == false) &&
+        isDeleting();
+        
+        function isDeleting(){
+        	// If changing only deletedAt
+        	return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['deletedAt']);
+        }
+        
+      	// Allow read, create a msg
+      	allow read, create:
+        // if user is the owner
+        if (request.auth.token.email == 
+        get(/databases/$(database)/documents/requests/$(id)).data.requestingUserEmail)
+        ||
+    		// or if he is included in the chat
+        request.auth.token.email in getApprovers();
+      	
+        // Allow deleting a message if the user was the creator
+        // and the messages is not indicative
+        allow delete: if(request.auth!=null && request.auth.token.email==resource.data.from
+        && (!('indicative' in resource.data) || resource.data.indicative == false));
+        
+        
+        function getApprovers(){
+          let type = get(/databases/$(database)/documents/requests/$(id)).data.type;
+          return (type == 'Other') ? 
+          get(/databases/$(database)/documents/requests/$(id)).data.approvers:
+          get(/databases/$(database)/documents/requests/$(type)).data.approvers;
+        }
+      }
+      
+      match /chats/{id}{
+      	allow read, write;
+        match /chat/{msgID}{
+        	allow read,write;
+        }
+      }
+  }
+}
