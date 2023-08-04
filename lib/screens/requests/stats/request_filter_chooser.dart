@@ -8,8 +8,8 @@ import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/filter_screen/select_one_tile.dart';
 import 'package:hustle_stay/tools.dart';
-import 'package:hustle_stay/widgets/complaints/selection_vault.dart';
-import 'package:hustle_stay/widgets/select_many.dart';
+import 'package:hustle_stay/widgets/other/selection_vault.dart';
+import 'package:hustle_stay/widgets/other/select_many.dart';
 
 class RequestsFilterChooserScreen extends ConsumerStatefulWidget {
   final Map<String, dynamic> filters;

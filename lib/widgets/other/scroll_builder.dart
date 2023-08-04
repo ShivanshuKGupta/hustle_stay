@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/tools.dart';
-import 'package:hustle_stay/widgets/loading_elevated_button.dart';
+import 'package:hustle_stay/widgets/other/loading_elevated_button.dart';
 
 class ScrollBuilder extends StatefulWidget {
   final Future<Iterable<Widget>> Function(

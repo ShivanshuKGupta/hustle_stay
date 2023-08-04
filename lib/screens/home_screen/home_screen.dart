@@ -7,8 +7,8 @@ import 'package:hustle_stay/screens/filter_screen/stats_screen.dart';
 import 'package:hustle_stay/screens/profile/profile_preview.dart';
 import 'package:hustle_stay/screens/requests/stats/requests_stats_screen.dart';
 import 'package:hustle_stay/tools.dart';
+import 'package:hustle_stay/widgets/other/dark_light_mode_icon_button.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
-import 'package:hustle_stay/widgets/settings/dark_light_mode_icon_button.dart';
 
 class HomeScreen extends StatelessWidget {
   final void Function(int value) pageChanger;

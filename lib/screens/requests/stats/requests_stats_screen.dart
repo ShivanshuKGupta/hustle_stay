@@ -9,7 +9,7 @@ import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/requests/stats/request_filter_chooser.dart';
 import 'package:hustle_stay/screens/requests/stats/request_stats.dart';
 import 'package:hustle_stay/tools.dart';
-import 'package:hustle_stay/widgets/complaints/select_one.dart';
+import 'package:hustle_stay/widgets/other/select_one.dart';
 import 'package:hustle_stay/widgets/requests/student_view.dart';
 
 // ignore: must_be_immutable

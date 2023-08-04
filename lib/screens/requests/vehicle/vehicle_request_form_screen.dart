@@ -5,7 +5,7 @@ import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/screens/chat/chat_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/chat/template_messages.dart';
-import 'package:hustle_stay/widgets/complaints/select_one.dart';
+import 'package:hustle_stay/widgets/other/select_one.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
 
 // ignore: must_be_immutable

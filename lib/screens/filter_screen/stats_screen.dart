@@ -11,7 +11,7 @@ import 'package:hustle_stay/screens/filter_screen/filter_choser_screen.dart';
 import 'package:hustle_stay/screens/filter_screen/stats.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/complaints/complaints_list_view.dart';
-import 'package:hustle_stay/widgets/complaints/select_one.dart';
+import 'package:hustle_stay/widgets/other/select_one.dart';
 
 // ignore: must_be_immutable
 class StatisticsPage extends ConsumerStatefulWidget {

@@ -5,10 +5,11 @@ import 'package:hustle_stay/screens/admin_panel/admin_panel_screen.dart';
 import 'package:hustle_stay/screens/chat/private_chats.dart';
 import 'package:hustle_stay/screens/filter_screen/stats_screen.dart';
 import 'package:hustle_stay/screens/help/help_screen.dart';
+import 'package:hustle_stay/screens/medical_screen/medical_screen.dart';
 import 'package:hustle_stay/screens/profile/profile_preview.dart';
 import 'package:hustle_stay/screens/requests/stats/requests_stats_screen.dart';
 import 'package:hustle_stay/tools.dart';
-import 'package:hustle_stay/widgets/settings/dark_light_mode_icon_button.dart';
+import 'package:hustle_stay/widgets/other/dark_light_mode_icon_button.dart';
 import 'package:hustle_stay/widgets/settings/sign_out_button.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -107,24 +108,12 @@ class SettingsScreen extends StatelessWidget {
             const SignOutButton(),
             ElevatedButton.icon(
               onPressed: () {
-                showMsg(context, 'In Development');
+                navigatorPush(context, const MedicalScreen());
               },
               style: ElevatedButton.styleFrom(foregroundColor: Colors.red),
               icon: const Icon(Icons.warning_amber_rounded),
               label: const Text('Medical Emergency'),
             ),
-// LoadingElevatedButton(
-//     icon: const Icon(Icons.airport_shuttle_rounded),
-//     label: const Text('Ask for vehicle permission too.'),
-//     onPressed: () async {
-//       VehicleRequest request = VehicleRequest(
-//         requestingUserEmail: currentUser.email!,
-//         title: 'Night_Travel',
-//         dateTime: DateTime.now(),
-//       );
-//       request.reason = "Ghar jana hai mujhe 😭";
-//       await request.update();
-//     })
           ],
         ),
       ),

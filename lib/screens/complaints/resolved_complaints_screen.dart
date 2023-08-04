@@ -4,7 +4,7 @@ import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/widgets/complaints/complaint_list_item.dart';
-import 'package:hustle_stay/widgets/scroll_builder.dart/scroll_builder.dart';
+import 'package:hustle_stay/widgets/other/scroll_builder.dart';
 
 class ResolvedComplaintsScreen extends StatelessWidget {
   final ScrollController? scrollController;

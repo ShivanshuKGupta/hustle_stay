@@ -6,7 +6,8 @@ import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/state_switch.dart';
 import 'package:hustle_stay/tools.dart';
-import 'package:hustle_stay/widgets/chat/multi_choser.dart';
+import 'package:hustle_stay/widgets/other/selection_vault.dart';
+import 'package:hustle_stay/widgets/other/loading_elevated_button.dart';
 
 // ignore: must_be_immutable
 class ComplaintBottomBar extends ConsumerWidget {
@@ -38,7 +39,7 @@ class ComplaintBottomBar extends ConsumerWidget {
               (complaint.resolvedAt != null ? 'Unresolve' : 'Resolve'),
         ),
       ),
-      ElevatedButton.icon(
+      LoadingElevatedButton(
         icon: const Icon(Icons.person_add_rounded),
         style: ElevatedButton.styleFrom(
           backgroundColor: Theme.of(context).colorScheme.primary,
@@ -81,17 +82,21 @@ class ComplaintBottomBar extends ConsumerWidget {
           context: context,
           builder: (ctx) {
             return AlertDialog(
+              title: const Text('Complainees'),
               scrollable: true,
               insetPadding: EdgeInsets.zero,
-              contentPadding: const EdgeInsets.only(top: 20),
+              contentPadding: const EdgeInsets.only(
+                top: 20,
+                left: 10,
+                right: 10,
+              ),
               actionsAlignment: MainAxisAlignment.center,
-              content: MultiChooser(
-                hintTxt: "Select a receipient",
-                label: 'Complainees',
-                allOptions: allUsers,
-                chosenOptions: chosenUsers,
-                onUpdate: (newUsers) {
-                  chosenUsers = newUsers;
+              content: SelectionVault(
+                helpText: "Add a receipient",
+                allItems: allUsers.toSet(),
+                chosenItems: chosenUsers.toSet(),
+                onChange: (newUsers) {
+                  chosenUsers = newUsers.toList();
                 },
               ),
               actions: [

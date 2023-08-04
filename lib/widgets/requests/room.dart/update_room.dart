@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user/user.dart';
-import 'package:hustle_stay/widgets/complaints/select_one.dart';
+import 'package:hustle_stay/widgets/other/select_one.dart';
 
 import '../../../models/hostel/hostels.dart';
 import '../../../models/hostel/rooms/room.dart';
@@ -123,8 +123,8 @@ class _UpdateRoomWidgetState extends State<UpdateRoomWidget> {
                 if (value != "" && widget.isSwap == false)
                   SingleChildScrollView(
                     child: TextField(
-                      decoration:
-                          InputDecoration(label: Text('Enter your reason')),
+                      decoration: const InputDecoration(
+                          label: Text('Enter your reason')),
                       maxLines: 5,
                       onChanged: (value) {
                         reason.value = value;
@@ -139,7 +139,7 @@ class _UpdateRoomWidgetState extends State<UpdateRoomWidget> {
                             ? () {
                                 ScaffoldMessenger.of(context).clearSnackBars();
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
+                                    const SnackBar(
                                         content: Text('Enter reason first!')));
                               }
                             : () async {
@@ -152,7 +152,7 @@ class _UpdateRoomWidgetState extends State<UpdateRoomWidget> {
                                 request.reason = valueText;
                                 await request.update();
                               },
-                        icon: Icon(Icons.add_circle_outline_outlined),
+                        icon: const Icon(Icons.add_circle_outline_outlined),
                         label: const Text('Submit Request')),
                   ),
                 if (value != "" && widget.isSwap)
@@ -206,7 +206,8 @@ class _UpdateRoomWidgetState extends State<UpdateRoomWidget> {
             children: [
               SingleChildScrollView(
                 child: TextField(
-                  decoration: InputDecoration(label: Text('Enter your reason')),
+                  decoration:
+                      const InputDecoration(label: Text('Enter your reason')),
                   maxLines: 5,
                   onChanged: (value) {
                     reason.value = value;
@@ -221,7 +222,7 @@ class _UpdateRoomWidgetState extends State<UpdateRoomWidget> {
                           ? () {
                               ScaffoldMessenger.of(context).clearSnackBars();
                               ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
+                                  const SnackBar(
                                       content: Text('Enter reason first!')));
                             }
                           : () async {
@@ -232,7 +233,7 @@ class _UpdateRoomWidgetState extends State<UpdateRoomWidget> {
                               request.reason = valueText;
                               await request.update();
                             },
-                      icon: Icon(Icons.add_circle_outline_outlined),
+                      icon: const Icon(Icons.add_circle_outline_outlined),
                       label: const Text('Submit Request')),
                 )
             ],

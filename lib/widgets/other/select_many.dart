@@ -28,6 +28,13 @@ class SelectMany<T> extends StatefulWidget {
 }
 
 class _SelectManyState<T> extends State<SelectMany<T>> {
+  late Set<T> selectedOptions;
+  @override
+  void initState() {
+    super.initState();
+    selectedOptions = widget.selectedOptions.map((e) => e).toSet();
+  }
+
   @override
   Widget build(BuildContext context) {
     final Wrap body = Wrap(
@@ -39,16 +46,16 @@ class _SelectManyState<T> extends State<SelectMany<T>> {
       children: widget.allOptions
           .map((e) => SelectOneTile(
                 label: e.toString(),
-                isSelected: widget.selectedOptions.contains(e),
+                isSelected: selectedOptions.contains(e),
                 onPressed: () {
                   setState(() {
-                    if (widget.selectedOptions.contains(e)) {
-                      widget.selectedOptions.remove(e);
+                    if (selectedOptions.contains(e)) {
+                      selectedOptions.remove(e);
                     } else {
-                      widget.selectedOptions.add(e);
+                      selectedOptions.add(e);
                     }
                   });
-                  widget.onChange(widget.selectedOptions);
+                  widget.onChange(selectedOptions);
                 },
               ))
           .toList(),
@@ -60,35 +67,38 @@ class _SelectManyState<T> extends State<SelectMany<T>> {
           Padding(
             padding:
                 widget.padding ?? const EdgeInsets.symmetric(horizontal: 10.0),
-            child: Row(
-              children: [
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.title!,
-                      style:
-                          widget.style ?? Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    if (widget.subtitle != null)
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        widget.subtitle!,
-                        style: Theme.of(context).textTheme.bodySmall,
+                        widget.title!,
+                        style: widget.style ??
+                            Theme.of(context).textTheme.bodyLarge,
                       ),
-                  ],
-                ),
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      widget.expanded = !widget.expanded;
-                    });
-                  },
-                  icon: Icon(widget.expanded
-                      ? Icons.keyboard_arrow_up_rounded
-                      : Icons.keyboard_arrow_down_rounded),
-                ),
-              ],
+                      if (widget.subtitle != null)
+                        Text(
+                          widget.subtitle!,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                    ],
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        widget.expanded = !widget.expanded;
+                      });
+                    },
+                    icon: Icon(widget.expanded
+                        ? Icons.keyboard_arrow_up_rounded
+                        : Icons.keyboard_arrow_down_rounded),
+                  ),
+                ],
+              ),
             ),
           ),
         if (widget.expanded)

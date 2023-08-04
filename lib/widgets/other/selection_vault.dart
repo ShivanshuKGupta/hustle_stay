@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/widgets/complaints/vault_tile.dart';
+import 'package:hustle_stay/widgets/other/vault_tile.dart';
 
 // ignore: must_be_immutable
 class SelectionVault extends StatefulWidget {

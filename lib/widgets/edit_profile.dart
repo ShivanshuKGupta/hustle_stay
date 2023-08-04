@@ -6,7 +6,7 @@ import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/image.dart';
 import 'package:hustle_stay/screens/admin_panel/permission.dart';
 import 'package:hustle_stay/tools.dart';
-import 'package:hustle_stay/widgets/loading_elevated_button.dart';
+import 'package:hustle_stay/widgets/other/loading_elevated_button.dart';
 import 'package:hustle_stay/widgets/profile_image.dart';
 import 'package:hustle_stay/widgets/settings/section.dart';
 

@@ -5,7 +5,7 @@ import 'package:hustle_stay/models/category/category.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/tools.dart';
-import 'package:hustle_stay/widgets/chat/multi_choser.dart';
+import 'package:hustle_stay/widgets/other/selection_vault.dart';
 
 // ignore: must_be_immutable
 class ComplaintFormOLD extends StatefulWidget {
@@ -210,12 +210,11 @@ class _ComplaintFormOLDState extends State<ComplaintFormOLD> {
           if (complaint.category == null || complaint.category == 'Other')
             (_userFetchLoading)
                 ? circularProgressIndicator()
-                : MultiChooser(
-                    hintTxt: "Select a receipient",
-                    label: 'Complainees',
-                    allOptions: recepients,
-                    chosenOptions: complaint.to,
-                    onUpdate: (value) => complaint.to = value,
+                : SelectionVault(
+                    helpText: "Select a receipient",
+                    allItems: recepients.toSet(),
+                    chosenItems: complaint.to.toSet(),
+                    onChange: (value) => complaint.to = value.toList(),
                   ),
           const SizedBox(height: 10),
           Row(

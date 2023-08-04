@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/category/category.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/tools.dart';
-import 'package:hustle_stay/widgets/choose_icon.dart';
-import 'package:hustle_stay/widgets/complaints/select_one.dart';
-import 'package:hustle_stay/widgets/complaints/selection_vault.dart';
-import 'package:hustle_stay/widgets/loading_elevated_button.dart';
+import 'package:hustle_stay/widgets/other/choose_icon.dart';
+import 'package:hustle_stay/widgets/other/select_one.dart';
+import 'package:hustle_stay/widgets/other/selection_vault.dart';
+import 'package:hustle_stay/widgets/other/loading_elevated_button.dart';
 
 // ignore: must_be_immutable
 class EditCategoryForm extends StatefulWidget {

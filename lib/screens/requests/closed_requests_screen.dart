@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/requests/request.dart';
 import 'package:hustle_stay/models/user/user.dart';
-import 'package:hustle_stay/widgets/scroll_builder.dart/scroll_builder.dart';
+import 'package:hustle_stay/widgets/other/scroll_builder.dart';
 
 // ignore: must_be_immutable
 class ClosedRequestsScreen extends StatefulWidget {

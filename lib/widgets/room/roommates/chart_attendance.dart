@@ -6,7 +6,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../../../screens/hostel/rooms/attendance_stats_student.dart';
 import '../../../tools.dart';
-import '../../complaints/select_one.dart';
+import '../../other/select_one.dart';
 
 class AttendancePieChart extends StatefulWidget {
   const AttendancePieChart({
@@ -483,7 +483,7 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
     Set<String> statusSet = chartData.map((data) => data.status).toSet();
 
     // Create a separate line series for each status
-    statusSet.forEach((status) {
+    for (var status in statusSet) {
       Color lineColor;
       switch (status) {
         case 'present':
@@ -511,7 +511,7 @@ class _AttendancePieChartState extends State<AttendancePieChart> {
         enableTooltip: true,
         legendItemText: status,
       ));
-    });
+    }
 
     return series;
   }

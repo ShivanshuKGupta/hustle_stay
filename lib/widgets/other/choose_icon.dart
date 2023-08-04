@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/widgets/search_icon.dart';
+import 'package:hustle_stay/widgets/other/search_icon.dart';
 
 // ignore: must_be_immutable
 class ChooseIconWidget extends StatefulWidget {
