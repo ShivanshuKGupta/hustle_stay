@@ -3,20 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/user/user.dart';
-import 'package:hustle_stay/screens/auth/edit_profile_screen.dart';
 import 'package:hustle_stay/screens/chat/image_preview.dart';
+import 'package:hustle_stay/screens/profile/profile_details_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ProfilePreview extends StatelessWidget {
   final UserData user;
-  final bool showChatButton, showCallButton, showMailButton;
+  final bool showChatButton, showCallButton, showMailButton, showDetailsPage;
   const ProfilePreview({
     super.key,
     required this.user,
     this.showChatButton = true,
     this.showCallButton = true,
     this.showMailButton = true,
+    this.showDetailsPage = true,
   });
 
   @override
@@ -56,11 +57,8 @@ class ProfilePreview extends StatelessWidget {
           ),
         ),
         InkWell(
-          onTap: (user.email == currentUser.email ||
-                  currentUser.readonly.permissions.users.update == true)
-              ? () {
-                  navigatorPush(context, EditProfile(user: user));
-                }
+          onTap: showDetailsPage
+              ? () => navigatorPush(context, ProfileDetailsScreen(user: user))
               : null,
           child: Padding(
             padding: const EdgeInsets.all(15.0),
