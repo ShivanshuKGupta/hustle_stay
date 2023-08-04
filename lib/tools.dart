@@ -6,8 +6,6 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-const intMax = 9223372036854775807;
-
 /// A widget which is primarily used to show a [CircularProgressIndicator]
 /// in a sizedbox
 SizedBox circularProgressIndicator({
