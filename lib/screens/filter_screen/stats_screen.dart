@@ -125,7 +125,7 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                   onRefresh: () async {
                     try {
                       await _complaintsProvider();
-                      await fetchAllUserReadonlyProperties();
+                      await fetchUsers();
                       await fetchComplainees();
                       await fetchAllCategories();
                       if (context.mounted) {

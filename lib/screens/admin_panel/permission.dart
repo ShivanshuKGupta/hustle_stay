@@ -53,15 +53,15 @@ class PermissionWidget extends StatelessWidget {
           expanded: expanded,
           allOptions: CRUD.values,
           selectedOptions: CRUD.values
-              .where((e) => user.readonly.permissions[type]![e] == true)
+              .where((e) => user.permissions[type]![e] == true)
               .toSet(),
           onChange: (chosenOptions) {
             for (var element in CRUD.values) {
-              user.readonly.permissions[type]![element] =
+              user.permissions[type]![element] =
                   chosenOptions.contains(element);
             }
             if (onChange != null) {
-              onChange!(user.readonly.permissions[type]!);
+              onChange!(user.permissions[type]!);
             }
           },
         ),

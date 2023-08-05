@@ -38,6 +38,7 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
     if (_formKeyList[index].currentState!.validate()) {
       _formKeyList[index].currentState!.save();
       try {
+        // TODO: Sani change these functions to use any function in user.dart
         final userCheck =
             await storage.collection('users').doc(roommateEmail).get();
         if (!userCheck.exists) {
@@ -117,8 +118,8 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
                 });
               },
               icon: selectRoommate
-                  ? Icon(Icons.edit_note_rounded)
-                  : Icon(Icons.filter_list_sharp)),
+                  ? const Icon(Icons.edit_note_rounded)
+                  : const Icon(Icons.filter_list_sharp)),
           if (selectRoommate)
             IconButton(
                 onPressed: () async {
@@ -137,13 +138,13 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
                     ));
                   } else {
                     ScaffoldMessenger.of(context).clearSnackBars();
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                         content: Text(
                             'Operation Failed. Someone Else might have updated the records at the same time. Kindly refresh and try again.')));
                   }
                   setState(() {});
                 },
-                icon: Icon(Icons.add_circle))
+                icon: const Icon(Icons.add_circle))
         ],
       ),
       body: selectRoommate
@@ -362,7 +363,7 @@ class _UserTileOptionState extends State<UserTileOption> {
             child: ListTile(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
-                  side: BorderSide(
+                  side: const BorderSide(
                     color: Colors.black,
                   )),
               onTap: () {
@@ -382,7 +383,7 @@ class _UserTileOptionState extends State<UserTileOption> {
                 } else {
                   ScaffoldMessenger.of(context).clearSnackBars();
                   ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Capcity Overflow!')));
+                      const SnackBar(content: Text('Capcity Overflow!')));
                 }
               },
               tileColor: isSelected ? Colors.green : null,
@@ -394,15 +395,16 @@ class _UserTileOptionState extends State<UserTileOption> {
                     child: AspectRatio(
                       aspectRatio: 1.0,
                       child: widget.user.imgUrl == null
-                          ? Icon(Icons.person)
+                          ? const Icon(Icons.person)
                           : CachedNetworkImage(
                               imageUrl: widget.user.imgUrl!,
                               fit: BoxFit.cover,
                             ),
                     ),
                   )),
-              trailing:
-                  isSelected ? Icon(Icons.check_circle_outline_outlined) : null,
+              trailing: isSelected
+                  ? const Icon(Icons.check_circle_outline_outlined)
+                  : null,
             ),
           ),
         );

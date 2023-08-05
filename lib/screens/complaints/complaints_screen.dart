@@ -62,9 +62,7 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
                 child: ListView.builder(
                   itemBuilder: (ctx, index) {
                     if (index == 0) {
-                      return currentUser
-                                  .readonly.permissions.complaints.create ==
-                              true
+                      return currentUser.permissions.complaints.create == true
                           ? ComplaintCategoryView(
                               onTap: (category) {
                                 navigatorPush(
@@ -101,7 +99,7 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
                                   animateIcon: AnimateIcons.cool,
                                 ),
                                 Text(
-                                  currentUser.readonly.type == 'student'
+                                  currentUser.type == 'student'
                                       ? 'There aren\'t any Complaints Yet'
                                       : 'No Pending Complaints Yet',
                                   textAlign: TextAlign.center,

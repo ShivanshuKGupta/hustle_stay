@@ -8,8 +8,8 @@ import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/filter_screen/select_one_tile.dart';
 import 'package:hustle_stay/tools.dart';
-import 'package:hustle_stay/widgets/other/selection_vault.dart';
 import 'package:hustle_stay/widgets/other/select_many.dart';
+import 'package:hustle_stay/widgets/other/selection_vault.dart';
 
 class RequestsFilterChooserScreen extends ConsumerStatefulWidget {
   final Map<String, dynamic> filters;
@@ -98,12 +98,12 @@ class _RequestsFilterChooserScreenState
         ),
         builder: (ctx, users) {
           final Map<String, Set<String>> hostels = {};
-          users.where((element) => element.readonly.hostelName != null).forEach(
-              (e) => hostels[e.readonly.hostelName!] =
-                  (hostels[e.readonly.hostelName!] ?? {})..add(e.email!));
+          users.where((element) => element.hostelName != null).forEach((e) =>
+              hostels[e.hostelName!] = (hostels[e.hostelName!] ?? {})
+                ..add(e.email!));
 
           final students = users
-              .where((element) => element.readonly.type == 'student')
+              .where((element) => element.type == 'student')
               .map((e) => e.email!)
               .toSet();
           students.add('code_soc@students.iiitr.ac.in');
@@ -155,7 +155,7 @@ class _RequestsFilterChooserScreenState
       body: RefreshIndicator(
         onRefresh: () async {
           /// Updating all cached information
-          await fetchAllUserReadonlyProperties();
+          await fetchUsers();
           await fetchComplainees();
         },
         child: ListView.separated(

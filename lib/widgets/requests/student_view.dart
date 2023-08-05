@@ -28,7 +28,7 @@ class _RequestsListState extends State<RequestsList> {
       onRefresh: () async {
         try {
           if (widget.requests.isEmpty) {
-            if (currentUser.readonly.type == 'student') {
+            if (currentUser.type == 'student') {
               await getStudentRequests();
             } else {
               await getApproverRequests();
@@ -41,7 +41,7 @@ class _RequestsListState extends State<RequestsList> {
       },
       child: ListView(
         children: [
-          if (currentUser.readonly.permissions.requests.create == true &&
+          if (currentUser.permissions.requests.create == true &&
               widget.showPostRequestOptions)
             const PostRequestOptions(),
           CacheBuilder(
@@ -58,7 +58,7 @@ class _RequestsListState extends State<RequestsList> {
                 },
               );
               final children = data.map((e) => e.widget(context)).toList();
-              if (children.isEmpty && currentUser.readonly.type != 'student') {
+              if (children.isEmpty && currentUser.type != 'student') {
                 return SizedBox(
                   height: mediaQuery.size.height -
                       mediaQuery.viewInsets.top -
@@ -94,7 +94,7 @@ class _RequestsListState extends State<RequestsList> {
                     child: shaderText(
                       context,
                       title:
-                          '${currentUser.readonly.type == 'student' ? 'Your' : 'Pending'} Requests',
+                          '${currentUser.type == 'student' ? 'Your' : 'Pending'} Requests',
                       style: theme.textTheme.titleLarge!
                           .copyWith(fontWeight: FontWeight.bold),
                     ),
@@ -116,7 +116,7 @@ class _RequestsListState extends State<RequestsList> {
               );
             },
             provider: widget.requests.isEmpty
-                ? (currentUser.readonly.type == 'student'
+                ? (currentUser.type == 'student'
                     ? getStudentRequests
                     : getApproverRequests)
                 : ({src}) async => widget.requests,

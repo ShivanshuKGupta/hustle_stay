@@ -37,7 +37,7 @@ class _CompleteDetailsState extends State<CompleteDetails> {
   }
 
   bool isDeleting = false;
-  bool showStats = !currentUser.readonly.isAdmin;
+  bool showStats = !currentUser.isAdmin;
   bool showLeaveData = false;
   @override
   Widget build(BuildContext context) {
@@ -45,7 +45,7 @@ class _CompleteDetailsState extends State<CompleteDetails> {
         appBar: AppBar(
           title: shaderText(
             context,
-            title: currentUser.readonly.isAdmin
+            title: currentUser.isAdmin
                 ? '${widget.user.name ?? widget.user.email}\'s Profile'
                 : 'Your Attendance Records',
           ),
@@ -69,7 +69,7 @@ class _CompleteDetailsState extends State<CompleteDetails> {
                   icon: showStats
                       ? const Icon(Icons.person)
                       : const Icon(Icons.bar_chart_rounded)),
-            if (!isDeleting && currentUser.readonly.isAdmin)
+            if (!isDeleting && currentUser.isAdmin)
               IconButton(
                   onPressed: () async {
                     final response = await askUser(

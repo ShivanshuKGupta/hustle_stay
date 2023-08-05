@@ -84,8 +84,7 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                   ),
                 TextFormField(
                   maxLength: 50,
-                  enabled:
-                      widget.user.email == null || currentUser.readonly.isAdmin,
+                  enabled: widget.user.email == null || currentUser.isAdmin,
                   decoration: const InputDecoration(
                     label: Text("Name"),
                   ),
@@ -124,10 +123,10 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                     widget.user.address = value!.trim();
                   },
                 ),
-                if (currentUser.readonly.isAdmin)
+                if (currentUser.isAdmin)
                   DropdownButtonFormField(
                       decoration: const InputDecoration(label: Text('Type')),
-                      value: widget.user.readonly.type,
+                      value: widget.user.type,
                       items: ['attender', 'warden', 'student', 'other', "club"]
                           .map(
                             (e) => DropdownMenuItem(
@@ -137,13 +136,13 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                           )
                           .toList(),
                       onChanged: (value) {
-                        widget.user.readonly.type = value ?? "student";
+                        widget.user.type = value ?? "student";
                       }),
                 if (widget.user.email != currentUser.email &&
-                    currentUser.readonly.isAdmin)
+                    currentUser.isAdmin)
                   DropdownButtonFormField(
                       decoration: const InputDecoration(label: Text('Admin')),
-                      value: widget.user.readonly.isAdmin,
+                      value: widget.user.isAdmin,
                       items: [true, false]
                           .map(
                             (e) => DropdownMenuItem(
@@ -153,7 +152,7 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                           )
                           .toList(),
                       onChanged: (value) {
-                        widget.user.readonly.isAdmin = value ?? false;
+                        widget.user.isAdmin = value ?? false;
                       }),
               ]),
               Section(title: 'Medical Information', children: [
@@ -359,7 +358,7 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                   },
                 ),
               ]),
-              if (currentUser.readonly.isAdmin)
+              if (currentUser.isAdmin)
                 Section(
                   title: 'Permissions',
                   children: [
@@ -369,7 +368,7 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                       expanded: false,
                       showSaveButton: false,
                       onChange: (crud) =>
-                          widget.user.readonly.permissions.attendance = crud,
+                          widget.user.permissions.attendance = crud,
                     ),
                     PermissionWidget(
                       user: widget.user,
@@ -377,7 +376,7 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                       expanded: false,
                       showSaveButton: false,
                       onChange: (crud) =>
-                          widget.user.readonly.permissions.categories = crud,
+                          widget.user.permissions.categories = crud,
                     ),
                     PermissionWidget(
                       user: widget.user,
@@ -385,7 +384,7 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                       expanded: false,
                       showSaveButton: false,
                       onChange: (crud) =>
-                          widget.user.readonly.permissions.complaints = crud,
+                          widget.user.permissions.complaints = crud,
                     ),
                     PermissionWidget(
                       user: widget.user,
@@ -393,15 +392,14 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                       expanded: false,
                       showSaveButton: false,
                       onChange: (crud) =>
-                          widget.user.readonly.permissions.requests = crud,
+                          widget.user.permissions.requests = crud,
                     ),
                     PermissionWidget(
                       user: widget.user,
                       type: 'users',
                       expanded: false,
                       showSaveButton: false,
-                      onChange: (crud) =>
-                          widget.user.readonly.permissions.users = crud,
+                      onChange: (crud) => widget.user.permissions.users = crud,
                     ),
                     PermissionWidget(
                       user: widget.user,
@@ -409,7 +407,7 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                       expanded: false,
                       showSaveButton: false,
                       onChange: (crud) =>
-                          widget.user.readonly.permissions.approvers = crud,
+                          widget.user.permissions.approvers = crud,
                     ),
                   ],
                 ),

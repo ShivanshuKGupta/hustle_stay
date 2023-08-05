@@ -441,7 +441,7 @@ class _RequestItemState extends State<RequestItem> {
                   : Colors.redAccent,
             ),
           );
-    if (currentUser.readonly.type != 'student' &&
+    if (currentUser.type != 'student' &&
         widget.request.status == RequestStatus.pending) {
       // TODO: Remove shortcircuiting
       trailing = Row(
@@ -494,7 +494,7 @@ class _RequestItemState extends State<RequestItem> {
             await navigatorPush(
               context,
               ChatScreen(
-                bottomBar: (currentUser.readonly.type == 'student')
+                bottomBar: (currentUser.type == 'student')
                     ? null
                     : RequestBottomBar(request: widget.request),
                 showInfo: () =>
@@ -552,7 +552,7 @@ class _RequestItemState extends State<RequestItem> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (widget.detailWidget != null) widget.detailWidget!,
-              if (currentUser.readonly.type != 'student')
+              if (currentUser.type != 'student')
                 UserBuilder(
                   email: widget.request.requestingUserEmail,
                   builder: (ctx, userData) => Text(

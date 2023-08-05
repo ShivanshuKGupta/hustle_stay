@@ -213,8 +213,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                             children: [
                               Text(
                                 widget.userdata != null
-                                    ? widget.userdata!.readonly.name!
-                                    : currentUser.readonly.name!,
+                                    ? widget.userdata!.name!
+                                    : currentUser.name!,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -284,8 +284,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         SizedBox(height: screenheight * 0.02),
                         Text(
                           widget.userdata != null
-                              ? widget.userdata!.readonly.name!
-                              : currentUser.readonly.name!,
+                              ? widget.userdata!.name!
+                              : currentUser.name!,
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,

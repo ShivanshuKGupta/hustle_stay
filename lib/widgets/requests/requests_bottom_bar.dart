@@ -17,7 +17,7 @@ class RequestBottomBar extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             shrinkWrap: true,
             children: [
-              if (currentUser.readonly.type != 'student')
+              if (currentUser.type != 'student')
                 ElevatedButton.icon(
                   onPressed: () async {
                     final response = await askUser(
@@ -42,7 +42,7 @@ class RequestBottomBar extends StatelessWidget {
                   style:
                       ElevatedButton.styleFrom(foregroundColor: Colors.green),
                 ),
-              if (currentUser.readonly.type != 'student')
+              if (currentUser.type != 'student')
                 ElevatedButton.icon(
                   onPressed: () async {
                     final response = await askUser(

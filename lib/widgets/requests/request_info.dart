@@ -85,7 +85,7 @@ class _RequestInfoState extends State<RequestInfo> {
       actions: [
         if ((widget.request.requestingUserEmail == currentUser.email &&
                 widget.request.status == RequestStatus.pending) ||
-            currentUser.readonly.permissions.requests.update == true)
+            currentUser.permissions.requests.update == true)
           TextButton.icon(
             onPressed: () {
               Navigator.of(context).pop();
@@ -126,7 +126,7 @@ class _RequestInfoState extends State<RequestInfo> {
           ),
         if ((widget.request.requestingUserEmail == currentUser.email &&
                 widget.request.status == RequestStatus.pending) ||
-            currentUser.readonly.permissions.requests.delete == true)
+            currentUser.permissions.requests.delete == true)
           TextButton.icon(
             onPressed: () async {
               final response = await askUser(
@@ -150,7 +150,7 @@ class _RequestInfoState extends State<RequestInfo> {
             label: const Text('Withdraw'),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
           ),
-        if (currentUser.readonly.type != 'student')
+        if (currentUser.type != 'student')
           TextButton.icon(
             onPressed: () async {
               final response = await askUser(
@@ -174,7 +174,7 @@ class _RequestInfoState extends State<RequestInfo> {
             label: const Text('Accept'),
             style: TextButton.styleFrom(foregroundColor: Colors.green),
           ),
-        if (currentUser.readonly.type != 'student')
+        if (currentUser.type != 'student')
           TextButton.icon(
             onPressed: () async {
               final response = await askUser(

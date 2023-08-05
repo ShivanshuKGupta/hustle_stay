@@ -1,9 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/attendance.dart';
 import 'package:hustle_stay/models/user/user.dart';
-import 'package:hustle_stay/tools.dart';
-import 'package:intl/intl.dart';
 
 class RoommateData {
   String email;
@@ -573,8 +570,8 @@ Future<Map<String, dynamic>?> getUserAttendanceRecord(String email,
     {bool isCurrentUser = false, String? hostelName}) async {
   Map<String, dynamic> list = {};
   if (!isCurrentUser) {
-    if (currentUser.readonly.hostelName != null) {
-      hostelName = currentUser.readonly.hostelName;
+    if (currentUser.hostelName != null) {
+      hostelName = currentUser.hostelName;
     } else {
       return null;
     }

@@ -133,7 +133,7 @@ class _RequestsStatisticsPageState
                   onRefresh: () async {
                     try {
                       await _requestsProvider();
-                      await fetchAllUserReadonlyProperties();
+                      await fetchUsers();
                       await fetchComplainees();
                       if (context.mounted) {
                         setState(() {});

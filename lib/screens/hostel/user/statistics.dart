@@ -19,7 +19,7 @@ class _StatisticsUserState extends State<StatisticsUser> {
       ),
       body: AttendancePieChart(
         email: currentUser.email,
-        hostelName: currentUser.readonly.hostelName!,
+        hostelName: currentUser.hostelName!,
       ),
     );
   }

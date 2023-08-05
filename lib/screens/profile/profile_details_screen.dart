@@ -15,7 +15,7 @@ class ProfileDetailsScreen extends StatelessWidget {
       appBar: AppBar(
         actions: [
           if (user.email == currentUser.email ||
-              currentUser.readonly.permissions.users.update == true)
+              currentUser.permissions.users.update == true)
             IconButton(
               onPressed: () {
                 navigatorPush(context, EditProfile(user: user));
@@ -53,17 +53,15 @@ class ProfileDetailsScreen extends StatelessWidget {
             Section(
               title: 'Hostel Information',
               children: [
-                if (user.readonly.hostelName != null &&
-                    user.readonly.hostelName!.isNotEmpty)
+                if (user.hostelName != null && user.hostelName!.isNotEmpty)
                   KeyValueRow(
                     attribute: 'Hostel',
-                    value: user.readonly.hostelName!,
+                    value: user.hostelName!,
                   ),
-                if (user.readonly.roomName != null &&
-                    user.readonly.roomName!.isNotEmpty)
+                if (user.roomName != null && user.roomName!.isNotEmpty)
                   KeyValueRow(
                     attribute: 'Room',
-                    value: user.readonly.roomName!,
+                    value: user.roomName!,
                   ),
               ],
             ),

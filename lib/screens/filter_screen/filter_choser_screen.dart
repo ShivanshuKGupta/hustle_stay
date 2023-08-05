@@ -89,12 +89,12 @@ class _FilterChooserScreenState extends ConsumerState<FilterChooserScreen> {
         ),
         builder: (ctx, users) {
           final Map<String, Set<String>> hostels = {};
-          users.where((element) => element.readonly.hostelName != null).forEach(
-              (e) => hostels[e.readonly.hostelName!] =
-                  (hostels[e.readonly.hostelName!] ?? {})..add(e.email!));
+          users.where((element) => element.hostelName != null).forEach((e) =>
+              hostels[e.hostelName!] = (hostels[e.hostelName!] ?? {})
+                ..add(e.email!));
 
           final students = users
-              .where((element) => element.readonly.type == 'student')
+              .where((element) => element.type == 'student')
               .map((e) => e.email!)
               .toSet();
           students.add('code_soc@students.iiitr.ac.in');
@@ -146,7 +146,7 @@ class _FilterChooserScreenState extends ConsumerState<FilterChooserScreen> {
       body: RefreshIndicator(
         onRefresh: () async {
           /// Updating all cached information
-          await fetchAllUserReadonlyProperties();
+          await fetchUsers();
           await fetchAllCategories();
           await fetchComplainees();
         },

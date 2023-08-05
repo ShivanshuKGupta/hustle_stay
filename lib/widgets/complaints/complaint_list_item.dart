@@ -224,13 +224,13 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
             ),
             actions: [
               if (currentUser.email == widget.complaint.from ||
-                  currentUser.readonly.permissions.complaints.update == true)
+                  currentUser.permissions.complaints.update == true)
                 IconButton(
                   onPressed: () => editMe(),
                   icon: const Icon(Icons.edit_rounded),
                 ),
               if (currentUser.email == widget.complaint.from ||
-                  currentUser.readonly.permissions.complaints.delete == true)
+                  currentUser.permissions.complaints.delete == true)
                 IconButton(
                   onPressed: () async {
                     if (await deleteMe() == true) {

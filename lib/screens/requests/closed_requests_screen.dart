@@ -25,7 +25,7 @@ class _ClosedRequestsScreenState extends State<ClosedRequestsScreen> {
       appBar: AppBar(
         title: const FittedBox(child: Text('Closed Requests')),
         actions: [
-          if (currentUser.readonly.type != 'student')
+          if (currentUser.type != 'student')
             FittedBox(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -58,7 +58,7 @@ class _ClosedRequestsScreenState extends State<ClosedRequestsScreen> {
           loader: (ctx, start, interval) async {
             if (types.isEmpty &&
                 savePoint.isEmpty &&
-                currentUser.readonly.type != 'student') {
+                currentUser.type != 'student') {
               final response = await firestore
                   .collection('requests')
                   .where('isType', isEqualTo: true)

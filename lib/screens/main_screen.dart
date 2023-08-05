@@ -28,8 +28,8 @@ class _HomeScreenState extends ConsumerState<MainScreen> {
   }
 
 // CompleteDetails(
-//               hostelName: currentUser.readonly.hostelName ?? '',
-//               roomName: currentUser.readonly.roomName ?? '',
+//               hostelName: currentUser.hostelName ?? '',
+//               roomName: currentUser.roomName ?? '',
 //               user: UserData(
 //                   email: currentUser.email,
 //                   address: currentUser.address,
@@ -45,7 +45,7 @@ class _HomeScreenState extends ConsumerState<MainScreen> {
     bool canExit = false;
     int i = 0;
     List<Widget> bodyList = [
-      currentUser.readonly.type == 'student'
+      currentUser.type == 'student'
           ? const AttendanceScreen()
           : const HostelScreen(),
       const ComplaintsScreen(),
