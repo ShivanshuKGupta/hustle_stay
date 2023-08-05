@@ -72,7 +72,7 @@ Future<List<String>> fetchHostelNames({Source? src}) async {
   return list;
 }
 
-Future<bool> deleteHostel(String hostelName) async {
+Future<bool> deleteHostel(String hostelName, bool isDisabled) async {
   try {
     await FirebaseFirestore.instance
         .collection('hostels')

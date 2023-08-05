@@ -54,20 +54,7 @@ class _RoomDataWidgetState extends State<RoomDataWidget> {
     final Brightness brightness = Theme.of(context).brightness;
     int random = Random().nextInt(colorList.length);
     final Color cardColor = colorList[random];
-    LinearGradient? gradient;
-    gradient = LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: brightness == Brightness.light
-          ? [
-              cardColor.withOpacity(0.2),
-              Colors.white,
-            ]
-          : [
-              cardColor.withOpacity(0.4),
-              Colors.black,
-            ],
-    );
+
     return Container(
       padding: EdgeInsets.all(widthScreen * 0.01),
       child: Card(
@@ -79,10 +66,7 @@ class _RoomDataWidgetState extends State<RoomDataWidget> {
                     ? Colors.black
                     : Colors.white),
             borderRadius: BorderRadius.circular(16.0),
-            gradient: brightness == Brightness.light ? null : gradient,
-            color: brightness == Brightness.light
-                ? cardColor.withOpacity(0.2)
-                : null,
+            color: cardColor.withOpacity(0.2),
             boxShadow: brightness == Brightness.light
                 ? null
                 : [

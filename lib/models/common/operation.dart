@@ -15,3 +15,9 @@ class Operations {
       this.imgUrl,
       this.hostel});
 }
+
+class ColorLabel {
+  final Color color;
+  final String label;
+  ColorLabel({required this.color, required this.label});
+}

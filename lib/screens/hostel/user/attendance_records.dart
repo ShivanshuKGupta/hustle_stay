@@ -1,7 +1,9 @@
 import 'package:animated_icon/animated_icon.dart';
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/widgets/labels.dart';
 
 import '../../../models/attendance.dart';
+import '../../../models/common/operation.dart';
 
 class AttendanceRecord extends StatefulWidget {
   const AttendanceRecord({super.key, this.email});
@@ -12,12 +14,20 @@ class AttendanceRecord extends StatefulWidget {
 }
 
 class _AttendanceRecordState extends State<AttendanceRecord> {
+  List<ColorLabel> colorLabelList = [
+    ColorLabel(color: Colors.green, label: "Present"),
+    ColorLabel(color: Colors.red, label: "Absent"),
+    ColorLabel(color: Colors.yellow, label: "Late"),
+    ColorLabel(color: Colors.orange, label: "Internship"),
+    ColorLabel(color: Colors.cyan, label: "Leave"),
+    ColorLabel(color: Colors.grey, label: "Not Taken"),
+  ];
   DateTime _selectedDate = DateTime.now();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Attendance Record'),
+        title: const Text('Attendance Record'),
       ),
       body: FutureBuilder(
         builder: (context, snapshot) {
@@ -107,25 +117,28 @@ class _AttendanceRecordState extends State<AttendanceRecord> {
               final day = index - _firstWeekdayOfMonth() + 1;
               final date =
                   DateTime(_selectedDate.year, _selectedDate.month, day);
-
+              final colorVal = _getAttendanceStatusColor(data[date]);
               return Container(
                 alignment: Alignment.center,
                 decoration: day <= 0
                     ? null
                     : BoxDecoration(
                         shape: BoxShape.circle,
-                        color: _getAttendanceStatusColor(data[date]) ??
-                            Colors.grey,
+                        color: colorVal != null
+                            ? colorVal.withOpacity(0.5)
+                            : Colors.grey.withOpacity(0.5),
                       ),
                 child: Text(
                   day <= 0 ? "" : day.toString(),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               );
             },
           ),
+          SizedBox(height: 10),
+          Labels(list: colorLabelList),
         ],
       ),
     );
