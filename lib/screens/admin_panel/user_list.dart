@@ -108,13 +108,12 @@ class _UserListState extends State<UserList> {
           child: ListTile(
             shape: const CircleBorder(),
             title: Text(list[index].name ?? list[index].email!),
-            subtitle: Text(list[index].readonly.type == 'student'
+            subtitle: Text(list[index].type == 'student'
                 ? list[index].email!.substring(0, 9).toUpperCase()
                 : list[index].email!),
-            trailing:
-                userType == 'other' && list[index].readonly.type != 'other'
-                    ? Text('UserType: ${list[index].readonly.type}')
-                    : null,
+            trailing: userType == 'other' && list[index].type != 'other'
+                ? Text('UserType: ${list[index].type}')
+                : null,
           ),
         );
       },

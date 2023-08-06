@@ -31,7 +31,7 @@ class _RequestsStatsState extends State<RequestsStats> {
     super.initState();
     complainees = {};
     widget.users.forEach((key, value) {
-      if (value.readonly.type != 'student') {
+      if (value.type != 'student') {
         complainees[key] = value;
       }
     });
@@ -313,8 +313,7 @@ Map<String, List<Request>> groupRequests({
           key = request.status.name;
           break;
         case 'Hostel':
-          key = users[request.requestingUserEmail]!.readonly.hostelName ??
-              "No Hostel";
+          key = users[request.requestingUserEmail]!.hostelName ?? "No Hostel";
           break;
         case 'Requester':
           key = request.requestingUserEmail;

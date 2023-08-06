@@ -40,12 +40,12 @@ class AttendanceRequestScreen extends StatelessWidget {
               ),
               color: theme.colorScheme.background,
             ),
-            if (currentUser.readonly.hostelName == null)
+            if (currentUser.hostelName == null)
               const Text(
                 'Sorry, it seems that you aren\'t assigned a hostel yet. Contact administrator for more info.',
                 textAlign: TextAlign.center,
               )
-            else if (currentUser.readonly.roomName == null)
+            else if (currentUser.roomName == null)
               const Text(
                 'Sorry, it seems that you aren\'t assigned a room yet. Contact administrator for more info.',
                 textAlign: TextAlign.center,
@@ -63,8 +63,8 @@ class AttendanceRequestScreen extends StatelessWidget {
                         await navigatorPush(
                           context,
                           CompleteDetails(
-                            hostelName: currentUser.readonly.hostelName ?? '',
-                            roomName: currentUser.readonly.roomName ?? '',
+                            hostelName: currentUser.hostelName ?? '',
+                            roomName: currentUser.roomName ?? '',
                             showLeaveData: true,
                             user: UserData(
                                 email: currentUser.email,
@@ -124,8 +124,8 @@ class AttendanceRequestScreen extends StatelessWidget {
                     //           Scaffold(
                     //             appBar: AppBar(),
                     //             body: LeaveWidget(
-                    //               hostelName: currentUser.readonly.hostelName!,
-                    //               roomName: currentUser.readonly.roomName!,
+                    //               hostelName: currentUser.hostelName!,
+                    //               roomName: currentUser.roomName!,
                     //               user: currentUser,
                     //               roommateData:
                     //                   RoommateData(email: currentUser.email!),

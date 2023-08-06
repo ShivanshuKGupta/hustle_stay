@@ -64,8 +64,7 @@ class _LeaveScreenState extends State<LeaveScreen> {
           }
           return leavesWid(snapshot.data!);
         },
-        future: fetchLeaves(
-            currentUser.readonly.hostelName!, currentUser.email!,
+        future: fetchLeaves(currentUser.hostelName!, currentUser.email!,
             getAll: true),
       ),
     );

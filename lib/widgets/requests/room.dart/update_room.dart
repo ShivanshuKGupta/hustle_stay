@@ -77,9 +77,8 @@ class _UpdateRoomWidgetState extends State<UpdateRoomWidget> {
                         return FutureBuilder(
                           future: fetchRoomNames(value,
                               roomname: value == widget.hostelName ||
-                                      value == currentUser.readonly.hostelName
-                                  ? widget.roomName ??
-                                      currentUser.readonly.roomName
+                                      value == currentUser.hostelName
+                                  ? widget.roomName ?? currentUser.roomName
                                   : null),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==

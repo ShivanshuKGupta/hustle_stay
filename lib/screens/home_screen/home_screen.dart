@@ -72,7 +72,7 @@ class HomeScreen extends StatelessWidget {
                     color: Colors.blueAccent,
                     onTap: () => pageChanger(3),
                   ),
-                  if (currentUser.readonly.isAdmin)
+                  if (currentUser.isAdmin)
                     GridTileLogo(
                       title: 'Admin Panel',
                       icon: const Icon(
@@ -93,7 +93,7 @@ class HomeScreen extends StatelessWidget {
                     color: Colors.deepPurpleAccent,
                     onTap: () => pageChanger(4),
                   ),
-                  if (currentUser.readonly.permissions.complaints.read == true)
+                  if (currentUser.permissions.complaints.read == true)
                     GridTileLogo(
                       title: 'Complaint Stats',
                       icon: const Icon(
@@ -105,7 +105,7 @@ class HomeScreen extends StatelessWidget {
                         navigatorPush(context, const StatisticsPage());
                       },
                     ),
-                  if (currentUser.readonly.permissions.requests.read == true)
+                  if (currentUser.permissions.requests.read == true)
                     GridTileLogo(
                       title: 'Requests Stats',
                       icon: const Icon(

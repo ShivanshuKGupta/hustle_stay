@@ -44,7 +44,7 @@ class SettingsScreen extends StatelessWidget {
           navigatorPush(context, const ChatsScreen());
         },
       ),
-      if (currentUser.readonly.isAdmin)
+      if (currentUser.isAdmin)
         ListTile(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(50),
@@ -58,7 +58,7 @@ class SettingsScreen extends StatelessWidget {
             navigatorPush(context, const AdminPanel());
           },
         ),
-      if (currentUser.readonly.permissions.complaints.read == true)
+      if (currentUser.permissions.complaints.read == true)
         ListTile(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(50),
@@ -71,7 +71,7 @@ class SettingsScreen extends StatelessWidget {
             navigatorPush(context, const StatisticsPage());
           },
         ),
-      if (currentUser.readonly.permissions.requests.read == true)
+      if (currentUser.permissions.requests.read == true)
         ListTile(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(50),

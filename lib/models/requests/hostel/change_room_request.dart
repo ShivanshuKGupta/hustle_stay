@@ -49,9 +49,9 @@ class ChangeRoomRequest extends Request {
 
     /// TODO: Sani | make use of this transaction to do things atomically
     /// using it will ensure that approving is done atomically
-    final user = await fetchHostelAndRoom(requestingUserEmail);
-    final ref = await changeRoom(requestingUserEmail, user['hostelName']!,
-        user['roomName']!, targetHostel, targetRoomName);
+    final user = await fetchUserData(requestingUserEmail);
+    final ref = await changeRoom(requestingUserEmail, user.hostelName!,
+        user.roomName!, targetHostel, targetRoomName);
     if (ref) {
       return;
     }

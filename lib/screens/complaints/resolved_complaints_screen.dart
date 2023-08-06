@@ -45,7 +45,7 @@ Future<List<ComplaintData>> fetchResolvedComplaints({
       firestore.collection('complaints').where('scope', isEqualTo: 'public');
 
   publicComplaints = publicComplaints
-      .where('resolved', isEqualTo: true)
+      .where('resolvedAt', isNull: false)
       .where('deletedAt', isNull: true)
       .orderBy('resolvedAt');
   if (savePoint['publicComplaints'] != null) {
@@ -69,7 +69,7 @@ Future<List<ComplaintData>> fetchResolvedComplaints({
       .where('scope', isEqualTo: 'private');
 
   myComplaints = myComplaints
-      .where('resolved', isEqualTo: true)
+      .where('resolvedAt', isNull: false)
       .where('deletedAt', isNull: true)
       .orderBy('resolvedAt');
 
@@ -93,7 +93,7 @@ Future<List<ComplaintData>> fetchResolvedComplaints({
       .where('scope', isEqualTo: 'private');
 
   includedComplaints = includedComplaints
-      .where('resolved', isEqualTo: true)
+      .where('resolvedAt', isNull: false)
       .where('deletedAt', isNull: true)
       .orderBy('resolvedAt');
 

@@ -66,6 +66,27 @@ void main() async {
   if (auth.currentUser != null) {
     currentUser = await fetchUserData(auth.currentUser!.email!);
   }
+  // Correction code for editable of users
+  // if (kDebugMode && currentUser.isAdmin) {
+  //   final users = await fetchUsers();
+  //   for (var user in users) {
+  //     print("Updating ${user.email}...");
+  //     try {
+  //       await firestore
+  //           .collection('users')
+  //           .doc(user.email!)
+  //           .collection('editable')
+  //           .doc('details')
+  //           .get()
+  //           .then((doc) async {
+  //         user.load(doc.data() ?? {});
+  //         await updateUserData(user);
+  //       });
+  //     } catch (e) {
+  //       print("Error | ${user.email}: $e");
+  //     }
+  //   }
+  // }
   runApp(const ProviderScope(child: HustleStayApp()));
 }
 

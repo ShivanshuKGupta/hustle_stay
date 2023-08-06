@@ -31,7 +31,7 @@ class _StatsState extends State<Stats> {
     super.initState();
     complainees = {};
     widget.users.forEach((key, value) {
-      if (value.readonly.type != 'student') {
+      if (value.type != 'student') {
         complainees[key] = value;
       }
     });
@@ -315,7 +315,7 @@ Map<String, List<ComplaintData>> groupComplaints({
           key = complaint.scope.name;
           break;
         case 'Hostel':
-          key = users[complaint.from]!.readonly.hostelName ?? "No Hostel";
+          key = users[complaint.from]!.hostelName ?? "No Hostel";
           break;
         case 'Complainant':
           key = complaint.from;

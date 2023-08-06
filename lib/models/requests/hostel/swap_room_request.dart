@@ -43,16 +43,16 @@ class SwapRoomRequest extends Request {
   Future<void> onApprove(transaction) async {
     /// TODO: Sani | make use of this transaction to do things atomically
     /// using it will ensure that approving is done atomically
-    final user = await fetchHostelAndRoom(requestingUserEmail);
-    final userToswap = await fetchHostelAndRoom(targetUserEmail!);
+    final user = await fetchUserData(requestingUserEmail);
+    final userToswap = await fetchUserData(targetUserEmail!);
 
     final ref = await swapRoom(
         requestingUserEmail,
-        user['hostelName']!,
-        user['roomName']!,
+        user.hostelName!,
+        user.roomName!,
         targetUserEmail!,
-        userToswap['hostelName']!,
-        userToswap['roomName']!);
+        userToswap.hostelName!,
+        userToswap.roomName!);
     if (ref) {
       return;
     }
