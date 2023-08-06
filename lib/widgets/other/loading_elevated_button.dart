@@ -7,6 +7,7 @@ class LoadingElevatedButton extends StatefulWidget {
   final Widget label;
   final ButtonStyle? style;
   final bool enabled;
+  final bool? loading;
   final void Function(dynamic err)? errorHandler;
   const LoadingElevatedButton({
     super.key,
@@ -16,6 +17,7 @@ class LoadingElevatedButton extends StatefulWidget {
     this.style,
     this.enabled = true,
     this.errorHandler,
+    this.loading,
   });
 
   @override
@@ -27,6 +29,7 @@ class _LoadingElevatedButtonState extends State<LoadingElevatedButton> {
 
   @override
   Widget build(BuildContext context) {
+    _loading = widget.loading ?? _loading;
     return ElevatedButton.icon(
       style: widget.style,
       onPressed: _loading || !widget.enabled

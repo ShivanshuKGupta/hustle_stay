@@ -1,5 +1,4 @@
 import 'package:animated_icon/animated_icon.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/category/category.dart';
@@ -23,8 +22,6 @@ class ComplaintsScreen extends ConsumerStatefulWidget {
 }
 
 class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
-  static Source src = Source.serverAndCache;
-
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(settingsProvider);
@@ -40,21 +37,18 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
         alignment: Alignment.bottomCenter,
         children: [
           ComplaintsBuilder(
-            src: src,
             loadingWidget: Center(child: circularProgressIndicator()),
             builder: (ctx, complaints) {
-              src = Source.cache;
               List<Widget> children =
                   calculateUI(settings.complaintsGrouping, complaints);
               return RefreshIndicator(
                 onRefresh: () async {
                   try {
                     await fetchAllCategories();
-                    await fetchComplaints();
+                    await initializeComplaints();
                   } catch (e) {
                     showMsg(context, e.toString());
                   }
-                  src = Source.serverAndCache;
                   if (context.mounted) {
                     setState(() {});
                   }

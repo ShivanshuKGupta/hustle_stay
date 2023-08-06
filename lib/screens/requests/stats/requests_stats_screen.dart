@@ -144,7 +144,6 @@ class _RequestsStatisticsPageState
                     if (context.mounted) setState(() {});
                   },
                   child: UsersBuilder(
-                    src: Source.cache,
                     builder: (ctx, users) => RequestsStats(
                       interval: settings.interval,
                       requests: requests,

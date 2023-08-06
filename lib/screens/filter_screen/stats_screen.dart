@@ -114,7 +114,6 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
       ),
       body: ComplaintsBuilder(
         complaintsProvider: _complaintsProvider,
-        src: Source.cache,
         loadingWidget: Center(child: circularProgressIndicator()),
         builder: (ctx, complaints) {
           return Column(
@@ -137,7 +136,6 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                     if (context.mounted) setState(() {});
                   },
                   child: UsersBuilder(
-                    src: Source.cache,
                     builder: (ctx, users) => Stats(
                       interval: settings.interval,
                       complaints: complaints,

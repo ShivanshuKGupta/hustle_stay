@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -89,7 +88,6 @@ class _RequestsFilterChooserScreenState
         },
       ),
       UsersBuilder(
-        src: Source.cache,
         loadingWidget: Center(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
@@ -121,7 +119,6 @@ class _RequestsFilterChooserScreenState
       ),
       UsersBuilder(
         provider: fetchComplainees,
-        src: Source.cache,
         loadingWidget: Center(
           child: Padding(
             padding: const EdgeInsets.all(20.0),

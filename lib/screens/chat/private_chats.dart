@@ -26,7 +26,6 @@ class ChatsScreen extends StatelessWidget {
                 title: const Text('Who to chat with?'),
               ),
               body: UsersBuilder(
-                src: Source.cache,
                 loadingWidget: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -183,10 +182,7 @@ class ChatsScreen extends StatelessWidget {
                       name: title,
                     );
                   }
-                  return await fetchUserData(
-                    person2,
-                    src: src,
-                  );
+                  return await fetchUserData(person2);
                 },
               );
             },

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/user/user.dart';
-import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/tools.dart';
 
 class SignOutButton extends ConsumerWidget {
@@ -25,7 +24,7 @@ class SignOutButton extends ConsumerWidget {
           }
         }
         currentUser = UserData();
-        ref.read(settingsProvider.notifier).clearSettings();
+        // ref.read(settingsProvider.notifier).clearSettings();
         auth.signOut();
       },
       icon: const Icon(Icons.logout_rounded),

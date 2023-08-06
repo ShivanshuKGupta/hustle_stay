@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,12 +28,17 @@ class ComplaintData {
   late Scope scope;
   late List<String> to;
   String? category;
+
+  /// title is synonymous to category
   String get title {
     return category ?? 'Other';
   }
 
   /// DateTime of deletion
   DateTime? deletedAt;
+
+  /// DateTime of deletion
+  int modifiedAt = 0;
 
   ComplaintData({
     this.description = "",
@@ -51,16 +58,34 @@ class ComplaintData {
       "scope": scope.name,
       "to": to,
       "resolvedAt": resolvedAt,
-      "deletedAt": deletedAt,
+      "resolved": resolvedAt != null,
+      "modifiedAt": modifiedAt,
+      "deletedAt": deletedAt == null ? null : deletedAt!.millisecondsSinceEpoch,
       "category": category,
       "createdAt": id,
     };
   }
 
-  @override
-  String toString() {
-    return "Description: $description\nComplainees: $to\nScope: ${scope.name}}\nCategory: $category";
-  }
+// bool complaintsInitialized = false;
+
+//   Future<void> initializeUsers() async {
+//     const String key = 'complaintsLastModifiedAt';
+//     final int usersLastModifiedAt = prefs!.getInt(key) ?? -1;
+//     final response = await firestore
+//         .collection('complaints')
+//         .where(
+//           'modifiedAt',
+//           isGreaterThan: usersLastModifiedAt,
+//         )
+//         .get();
+//     int maxModifiedAt = usersLastModifiedAt;
+//     for (var doc in response.docs) {
+//       maxModifiedAt = max(maxModifiedAt,
+//           (UserData(email: doc.id)..load(doc.data())).modifiedAt);
+//     }
+//     prefs!.setInt(key, maxModifiedAt);
+//     complaintsInitialized = true;
+//   }
 
   String operator -(ComplaintData newComplaint) {
     String ans = "";
@@ -95,9 +120,16 @@ class ComplaintData {
     scope = Scope.values
         .firstWhere((element) => element.name == complaintData["scope"]);
     resolvedAt = complaintData["resolvedAt"];
+    modifiedAt = complaintData["modifiedAt"] ?? 0;
+    // if (complaintData["deletedAt"] != null &&
+    //     complaintData["deletedAt"] is Timestamp) {
+    //   deletedAt = DateTime.fromMillisecondsSinceEpoch(
+    //       (complaintData["deletedAt"] as Timestamp).millisecondsSinceEpoch);
+    // } else {
     deletedAt = complaintData["deletedAt"] == null
         ? null
         : DateTime.fromMillisecondsSinceEpoch(complaintData["deletedAt"]);
+    // }
     category = complaintData["category"];
     to = (complaintData["to"] as List<dynamic>)
         .map((e) => e.toString())
@@ -119,6 +151,48 @@ class ComplaintData {
   }
 }
 
+ValueNotifier<String?> complaintsInitialized = ValueNotifier(null);
+
+Future<void> initializeComplaints() async {
+  complaintsInitialized.value = "Fetching Complaints";
+  const String key = 'complaintsLastModifiedAt';
+  int complaintsLastModifiedAt = prefs!.getInt(key) ?? -1;
+  // If complaintsLastModifiedAt is not yet available then
+  // find it from cache
+  if (complaintsLastModifiedAt == -1) {
+    try {
+      complaintsLastModifiedAt = (await firestore
+              .collection('complaints')
+              .orderBy('modifiedAt', descending: true)
+              .limit(1)
+              .get(const GetOptions(source: Source.cache)))
+          .docs[0]
+          .data()['modifiedAt'];
+    } catch (e) {
+      // if data doesn't exists in cache then do nothing
+    }
+  }
+  final complaints = await fetchComplaints(
+    src: Source.server,
+    resolved: false,
+    lastModifiedAt: complaintsLastModifiedAt,
+  );
+  complaintsInitialized.value = "Fetching Resolved Complaints";
+  complaints.addAll(
+    await fetchComplaints(
+      src: Source.server,
+      resolved: true,
+      lastModifiedAt: complaintsLastModifiedAt,
+    ),
+  );
+  int maxModifiedAt = complaintsLastModifiedAt;
+  for (var complaint in complaints) {
+    maxModifiedAt = max(maxModifiedAt, complaint.modifiedAt);
+  }
+  prefs!.setInt(key, maxModifiedAt);
+  complaintsInitialized.value = null;
+}
+
 bool equalList(List<String> a, List<String> b) {
   if (a.length != b.length) return false;
   for (int i = a.length; i-- > 0;) {
@@ -137,6 +211,7 @@ Future<ComplaintData> updateComplaint(ComplaintData complaint) async {
     }
     complaint.to = category.defaultReceipient;
   }
+  complaint.modifiedAt = DateTime.now().millisecondsSinceEpoch;
   await firestore.doc('complaints/${complaint.id}').set(complaint.encode());
   return complaint;
 }
@@ -145,6 +220,7 @@ Future<ComplaintData> updateComplaint(ComplaintData complaint) async {
 Future<void> deleteComplaint(ComplaintData complaint) async {
   final bool isDeleted = complaint.deletedAt != null;
   final now = DateTime.now();
+  complaint.modifiedAt = DateTime.now().millisecondsSinceEpoch;
   await firestore
       .doc('complaints/${complaint.id}')
       .update({'deletedAt': isDeleted ? null : now.millisecondsSinceEpoch});
@@ -169,66 +245,66 @@ Future<void> deleteComplaint(ComplaintData complaint) async {
 
 /// fetches a complaint of given ID
 Future<ComplaintData> fetchComplaint(int id) async {
-  final response = await firestore.doc('complaints/$id').get();
+  final response = await firestore
+      .doc('complaints/$id')
+      .get(const GetOptions(source: Source.cache));
   if (!response.exists) throw "Complaint Doesn't exists";
   final data = response.data();
   if (data == null) throw "Data not found";
   return ComplaintData.load(id, data);
 }
 
-/// fetches all complaints
-Future<List<ComplaintData>> fetchComplaints({
-  Source? src,
-}) async {
-  // Fetching all public complaints
-  final publicComplaints = await firestore
-      .collection('complaints')
-      .where('scope', isEqualTo: 'public')
-      .where('deletedAt', isNull: true)
-      .where('resolvedAt', isNull: true)
-      .get(src != null ? GetOptions(source: src) : null);
-  List<ComplaintData> ans = publicComplaints.docs
-      .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
-      .toList();
-  // Fetching Private Complaints made by the user itself
-  final myComplaints = await firestore
-      .collection('complaints')
-      .where('from', isEqualTo: currentUser.email)
-      .where('scope', isEqualTo: 'private')
-      .where('deletedAt', isNull: true)
-      .where('resolvedAt', isNull: true)
-      .get(src != null ? GetOptions(source: src) : null);
-  ans += myComplaints.docs
-      .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
-      .toList();
-  // Fetching all complaints in which the user is included
-  final includedComplaints = await firestore
-      .collection('complaints')
-      .where('to', arrayContains: currentUser.email)
-      .where('scope', isEqualTo: 'private')
-      .where('deletedAt', isNull: true)
-      .where('resolvedAt', isNull: true)
-      .get(src != null ? GetOptions(source: src) : null);
-  ans += includedComplaints.docs
-      .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
-      .toList();
-  ans.sort((a, b) => (a.id < b.id) ? 1 : 0);
-  return ans;
-}
+// /// fetches all complaints
+// Future<List<ComplaintData>> fetchComplaints({
+//   Source? src,
+// }) async {
+//   // Fetching all public complaints
+//   final publicComplaints = await firestore
+//       .collection('complaints')
+//       .where('scope', isEqualTo: 'public')
+//       .where('deletedAt', isNull: true)
+//       .where('resolvedAt', isNull: true)
+//       .get(src != null ? GetOptions(source: src) : null);
+//   List<ComplaintData> ans = publicComplaints.docs
+//       .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
+//       .toList();
+//   // Fetching Private Complaints made by the user itself
+//   final myComplaints = await firestore
+//       .collection('complaints')
+//       .where('from', isEqualTo: currentUser.email)
+//       .where('scope', isEqualTo: 'private')
+//       .where('deletedAt', isNull: true)
+//       .where('resolvedAt', isNull: true)
+//       .get(src != null ? GetOptions(source: src) : null);
+//   ans += myComplaints.docs
+//       .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
+//       .toList();
+//   // Fetching all complaints in which the user is included
+//   final includedComplaints = await firestore
+//       .collection('complaints')
+//       .where('to', arrayContains: currentUser.email)
+//       .where('scope', isEqualTo: 'private')
+//       .where('deletedAt', isNull: true)
+//       .where('resolvedAt', isNull: true)
+//       .get(src != null ? GetOptions(source: src) : null);
+//   ans += includedComplaints.docs
+//       .map((e) => ComplaintData.load(int.parse(e.id), e.data()))
+//       .toList();
+//   ans.sort((a, b) => (a.id < b.id) ? 1 : 0);
+//   return ans;
+// }
 
 /// A widget used to display a child widget using a list of Complaints
 class ComplaintsBuilder extends ConsumerWidget {
   final Widget Function(BuildContext ctx, List<ComplaintData> complaints)
       builder;
   final Future<List<ComplaintData>> Function({Source? src})? complaintsProvider;
-  final Source? src;
   final Widget? loadingWidget;
   const ComplaintsBuilder({
     super.key,
     this.complaintsProvider,
     required this.builder,
     this.loadingWidget,
-    this.src,
   });
 
   /// Use this to store data
@@ -239,34 +315,16 @@ class ComplaintsBuilder extends ConsumerWidget {
     ref.watch(complaintBuilderSwitch);
     return FutureBuilder(
       future: complaintsProvider != null
-          ? complaintsProvider!(src: src)
-          : fetchComplaints(src: src),
+          ? complaintsProvider!()
+          : fetchComplaints(),
       builder: (ctx, snapshot) {
         if (snapshot.hasError) {
           throw snapshot.error.toString();
         }
         if (!snapshot.hasData) {
-          if (src == Source.cache) {
-            return complaints.isEmpty && loadingWidget != null
-                ? loadingWidget!
-                : builder(context, complaints);
-          }
-          return FutureBuilder(
-            future: complaintsProvider != null
-                ? complaintsProvider!(src: src)
-                : fetchComplaints(src: Source.cache),
-            builder: (ctx, snapshot) {
-              if (!snapshot.hasData) {
-                // Returning this Widget when nothing has arrived
-                return complaints.isEmpty && loadingWidget != null
-                    ? loadingWidget!
-                    : builder(context, complaints);
-              }
-              // Returning this widget from cache while data arrives from server
-              ComplaintsBuilder.complaints = snapshot.data!;
-              return builder(ctx, complaints);
-            },
-          );
+          return complaints.isEmpty && loadingWidget != null
+              ? loadingWidget!
+              : builder(context, complaints);
         }
         // Returning this widget when data arrives from server
         ComplaintsBuilder.complaints = snapshot.data!;
@@ -277,3 +335,112 @@ class ComplaintsBuilder extends ConsumerWidget {
 }
 
 final complaintBuilderSwitch = createSwitch();
+
+/// set lastModified to fetch only complaints after a certain modifiedAt
+Future<List<ComplaintData>> fetchComplaints({
+  bool resolved = false,
+  int? limit,
+  Map<String, DocumentSnapshot>? savePoint,
+  int? lastModifiedAt,
+  Source src = Source.cache,
+}) async {
+  assert(lastModifiedAt == null || savePoint == null || savePoint.isEmpty);
+
+  // FETCHING PUBLIC COMPLAINTS
+  Query<Map<String, dynamic>> publicComplaints = firestore
+      .collection('complaints')
+      .where('scope', isEqualTo: 'public')
+      .where('deletedAt', isNull: true)
+      .where('resolved', isEqualTo: resolved);
+  if (lastModifiedAt != null) {
+    publicComplaints =
+        publicComplaints.where('modifiedAt', isGreaterThan: lastModifiedAt);
+  }
+  publicComplaints = publicComplaints.orderBy(
+      lastModifiedAt != null
+          ? 'modifiedAt'
+          : (resolved ? 'resolvedAt' : 'createdAt'),
+      descending: true);
+  if (savePoint != null && savePoint['publicComplaints'] != null) {
+    publicComplaints =
+        publicComplaints.startAfterDocument(savePoint['publicComplaints']!);
+  }
+  if (limit != null) {
+    publicComplaints = publicComplaints.limit(limit);
+  }
+  QuerySnapshot<Map<String, dynamic>> response =
+      await publicComplaints.get(GetOptions(source: src));
+  if (response.docs.isNotEmpty && savePoint != null) {
+    savePoint['publicComplaints'] = response.docs.last;
+  }
+  List<ComplaintData> ans = response.docs
+      .map((doc) => ComplaintData.load(int.parse(doc.id), doc.data()))
+      .toList();
+
+  // FETCHING PRIVATE COMPLAINTS
+  Query<Map<String, dynamic>> privateComplaints = firestore
+      .collection('complaints')
+      .where('scope', isEqualTo: 'private')
+      .where('from', isEqualTo: currentUser.email)
+      .where('deletedAt', isNull: true)
+      .where('resolved', isEqualTo: resolved);
+  if (lastModifiedAt != null) {
+    privateComplaints =
+        privateComplaints.where('modifiedAt', isGreaterThan: lastModifiedAt);
+  }
+  privateComplaints = privateComplaints.orderBy(
+      lastModifiedAt != null
+          ? 'modifiedAt'
+          : (resolved ? 'resolvedAt' : 'createdAt'),
+      descending: true);
+  if (savePoint != null && savePoint['privateComplaints'] != null) {
+    privateComplaints =
+        privateComplaints.startAfterDocument(savePoint['privateComplaints']!);
+  }
+  if (limit != null) {
+    privateComplaints = privateComplaints.limit(limit);
+  }
+  response = await privateComplaints.get(GetOptions(source: src));
+  if (response.docs.isNotEmpty && savePoint != null) {
+    savePoint['privateComplaints'] = response.docs.last;
+  }
+  ans += response.docs
+      .map((doc) => ComplaintData.load(int.parse(doc.id), doc.data()))
+      .toList();
+
+  // FETCHING COMPLAINTS IN WHICH USER IS INCLUDED
+  Query<Map<String, dynamic>> includedComplaints = firestore
+      .collection('complaints')
+      .where('scope', isEqualTo: 'private')
+      .where('to', arrayContains: currentUser.email)
+      .where('deletedAt', isNull: true)
+      .where('resolved', isEqualTo: resolved);
+  if (lastModifiedAt != null) {
+    includedComplaints =
+        includedComplaints.where('modifiedAt', isGreaterThan: lastModifiedAt);
+  }
+  includedComplaints = includedComplaints.orderBy(
+      lastModifiedAt != null
+          ? 'modifiedAt'
+          : (resolved ? 'resolvedAt' : 'createdAt'),
+      descending: true);
+  if (savePoint != null && savePoint['includedComplaints'] != null) {
+    includedComplaints =
+        includedComplaints.startAfterDocument(savePoint['includedComplaints']!);
+  }
+  if (limit != null) {
+    includedComplaints = includedComplaints.limit(limit);
+  }
+  response = await includedComplaints.get(GetOptions(source: src));
+  if (response.docs.isNotEmpty && savePoint != null) {
+    savePoint['includedComplaints'] = response.docs.last;
+  }
+  ans += response.docs
+      .map((doc) => ComplaintData.load(int.parse(doc.id), doc.data()))
+      .toList();
+
+  ans.sort((a, b) =>
+      (resolved ? (a.resolvedAt! < b.resolvedAt!) : (a.id < b.id)) ? 1 : 0);
+
+  return ans;
+}

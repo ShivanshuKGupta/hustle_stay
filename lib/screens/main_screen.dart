@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/attendance_screen.dart';
@@ -25,18 +26,9 @@ class _HomeScreenState extends ConsumerState<MainScreen> {
     super.initState();
     _pageController =
         PageController(initialPage: ref.read(settingsProvider).currentPage);
+    initializeEverything(context);
   }
 
-// CompleteDetails(
-//               hostelName: currentUser.hostelName ?? '',
-//               roomName: currentUser.roomName ?? '',
-//               user: UserData(
-//                   email: currentUser.email,
-//                   address: currentUser.address,
-//                   imgUrl: currentUser.imgUrl,
-//                   name: currentUser.name,
-//                   phoneNumber: currentUser.phoneNumber),
-//               roommateData: RoommateData(email: currentUser.email!))
   @override
   Widget build(BuildContext context) {
     final settings = ref.read(settingsProvider);

@@ -1,5 +1,6 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/user/medical_info.dart';
@@ -81,54 +82,52 @@ class UserData {
   }
 }
 
-// Future<Map<String, String>> fetchHostelAndRoom(String email) async {
-//   final ref =
-//       await FirebaseFirestore.instance.collection('users').doc(email).get();
-//   Map<String, String> data = {
-//     'hostelName': ref.data()!['hostelName'],
-//     'roomName': ref.data()!['roomName']
-//   };
-//   return data;
-// }
-
-// Future<bool> modifyPermissions(Map<String, dynamic> data, String email) async {
-//   try {
-//     await FirebaseFirestore.instance
-//         .collection('users')
-//         .doc(email)
-//         .set({'permissions': data}, SetOptions(merge: true));
-//     return true;
-//   } catch (e) {
-//     return false;
-//   }
-// }
-
-Future<UserData> fetchUserData(
-  String email, {
-  Source? src,
-}) async {
-  UserData userData = UserData(email: email);
-  DocumentSnapshot<Map<String, dynamic>>? response;
-  try {
-    response = await firestore.collection('users').doc(email).get(
-          src == null ? null : GetOptions(source: src),
-        );
-  } catch (e) {
-    if (src == Source.cache) {
-      response = await firestore.collection('users').doc(email).get();
-    } else {
-      rethrow;
+Future<void> initializeUsers() async {
+  const String key = 'usersLastModifiedAt';
+  int usersLastModifiedAt = prefs!.getInt(key) ?? -1;
+  if (usersLastModifiedAt == -1) {
+    try {
+      usersLastModifiedAt = (await firestore
+              .collection('users')
+              .orderBy('modifiedAt', descending: true)
+              .limit(1)
+              .get(const GetOptions(source: Source.cache)))
+          .docs[0]
+          .data()['modifiedAt'];
+    } catch (e) {
+      // if data doesn't exists in cache then do nothing
     }
   }
+  final response = await firestore
+      .collection('users')
+      .where(
+        'modifiedAt',
+        isGreaterThan: usersLastModifiedAt,
+      )
+      .get();
+  int maxModifiedAt = usersLastModifiedAt;
+  for (var doc in response.docs) {
+    maxModifiedAt = max(
+        maxModifiedAt, (UserData(email: doc.id)..load(doc.data())).modifiedAt);
+  }
+  prefs!.setInt(key, maxModifiedAt);
+}
+
+Future<UserData> fetchUserData(String email) async {
+  UserData userData = UserData(email: email);
+  DocumentSnapshot<Map<String, dynamic>>? response;
+  response = await firestore.collection('users').doc(email).get(
+        const GetOptions(source: Source.cache),
+      );
   userData.load(response.data() ?? {});
   return userData;
 }
 
 /// this fetches all properties
-Future<List<UserData>> fetchUsers({List<String>? emails, Source? src}) async {
+Future<List<UserData>> fetchUsers({List<String>? emails}) async {
   final response = await firestore
       .collection('users')
-      .get(src == null ? null : GetOptions(source: src));
+      .get(const GetOptions(source: Source.cache));
   return response.docs
       .map((doc) => UserData(email: doc.id)..load(doc.data()))
       .toList();
@@ -137,7 +136,7 @@ Future<List<UserData>> fetchUsers({List<String>? emails, Source? src}) async {
   // }
   // return [
   //   for (final doc in (await firestore.collection('users').get(
-  //             src == null ? null : GetOptions(source: src),
+  //             GetOptions(source: Source.cache),
   //           ))
   //       .docs)
   //     await fetchUserData(doc.id, src: src)
@@ -145,35 +144,36 @@ Future<List<UserData>> fetchUsers({List<String>? emails, Source? src}) async {
 }
 
 /// This only fetches readonly properties
-Future<List<UserData>> fetchComplainees({Source? src}) async {
+Future<List<UserData>> fetchComplainees() async {
   final querySnapshot =
       await firestore.collection('users').where('type', whereIn: [
     'attender',
     'warden',
     'other',
     'club',
-  ]).get(src == null ? null : GetOptions(source: src));
+  ]).get(const GetOptions(source: Source.cache));
   return querySnapshot.docs
       .map((e) => UserData(email: e.id)..load(e.data()))
       .toList();
 }
 
 Future<void> updateUserData(UserData userData) async {
+  userData.modifiedAt = DateTime.now().millisecondsSinceEpoch;
   firestore.collection('users').doc(userData.email).set(
         userData.encode(),
       );
   // if account doesn't exists create one
-  try {
-    await auth.createUserWithEmailAndPassword(
-      email: userData.email!,
-      password: "123456",
-    );
-    // login(currentUser.email!, '123456');
-  } on FirebaseAuthException catch (e) {
-    if (e.code != 'email-already-in-use') {
-      rethrow;
-    }
-  }
+  // try {
+  //   await auth.createUserWithEmailAndPassword(
+  //     email: userData.email!,
+  //     password: "123456",
+  //   );
+  //   // login(currentUser.email!, '123456');
+  // } on FirebaseAuthException catch (e) {
+  //   if (e.code != 'email-already-in-use') {
+  //     rethrow;
+  //   }
+  // }
 }
 
 /// This function is responsible for logging user in
@@ -189,14 +189,12 @@ UserData currentUser = UserData();
 class UserBuilder extends StatelessWidget {
   final String email;
   final Widget Function(BuildContext ctx, UserData userData) builder;
-  final Source? src;
   final Widget? loadingWidget;
   UserBuilder({
     super.key,
     required this.email,
     required this.builder,
     this.loadingWidget,
-    this.src,
   });
 
   UserData userData = UserData();
@@ -204,25 +202,12 @@ class UserBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: fetchUserData(email, src: src),
+      future: fetchUserData(email),
       builder: (ctx, snapshot) {
         if (!snapshot.hasData) {
           userData = UserData(email: email, name: email);
-          if (src == Source.cache) {
-            return loadingWidget ?? builder(ctx, userData);
-          }
-          return FutureBuilder(
-            future: fetchUserData(email, src: Source.cache),
-            builder: (ctx, snapshot) {
-              if (!snapshot.hasData) {
-                // Returning this Widget when nothing has arrived
-                return loadingWidget ?? builder(ctx, userData);
-              }
-              // Returning this widget from cache while data arrives from server
-              userData = snapshot.data!;
-              return builder(ctx, userData);
-            },
-          );
+          // Returning this Widget when nothing has arrived
+          return loadingWidget ?? builder(ctx, userData);
         }
         // Returning this widget when data arrives from server
         userData = snapshot.data!;
@@ -238,14 +223,12 @@ class UserBuilder extends StatelessWidget {
 class UsersBuilder extends StatelessWidget {
   final List<String>? emails;
   final Widget Function(BuildContext ctx, List<UserData> users) builder;
-  final Future<List<UserData>> Function({Source? src})? provider;
-  final Source? src;
+  final Future<List<UserData>> Function()? provider;
   final Widget? loadingWidget;
   const UsersBuilder({
     super.key,
     required this.builder,
     this.loadingWidget,
-    this.src,
     this.provider,
     this.emails,
   });
@@ -253,32 +236,11 @@ class UsersBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: provider != null
-          ? provider!(src: src)
-          : fetchUsers(emails: emails, src: src),
+      future: provider != null ? provider!() : fetchUsers(emails: emails),
       builder: (ctx, snapshot) {
-        if (snapshot.hasError && src == Source.cache) {
-          return UsersBuilder(builder: builder, loadingWidget: loadingWidget);
-        }
         if (!snapshot.hasData) {
-          if (src == Source.cache) {
-            return loadingWidget ?? circularProgressIndicator();
-          }
-          return FutureBuilder(
-            future: provider != null
-                ? provider!(src: Source.cache)
-                : fetchUsers(emails: emails, src: Source.cache),
-            builder: (ctx, snapshot) {
-              if (!snapshot.hasData) {
-                // Returning this Widget when nothing has arrived
-                return loadingWidget ?? circularProgressIndicator();
-              }
-              // Returning this widget from cache while data arrives from server
-              return builder(ctx, snapshot.data!);
-            },
-          );
+          return loadingWidget ?? circularProgressIndicator();
         }
-        // Returning this widget when data arrives from server
         return builder(ctx, snapshot.data!);
       },
     );
@@ -295,22 +257,21 @@ Future<List<UserData>> fetchSpecificUsers(String userType) async {
     userRef = await FirebaseFirestore.instance
         .collection('users')
         .where('type', isEqualTo: userType)
-        .get();
+        .get(const GetOptions(source: Source.cache));
   } else if (userType == 'admin') {
     userRef = await FirebaseFirestore.instance
         .collection('users')
         .where('isAdmin', isEqualTo: true)
-        .get();
+        .get(const GetOptions(source: Source.cache));
   } else {
-    userRef = await FirebaseFirestore.instance
-        .collection('users')
-        .where('type', whereIn: ['other', 'club']).get();
+    userRef = await FirebaseFirestore.instance.collection('users').where('type',
+        whereIn: ['other', 'club']).get(const GetOptions(source: Source.cache));
   }
 
   /// No need of this now ----------------------------------
   // final List<Future<DocumentSnapshot<Map<String, dynamic>>>> userDataFutures =
   //     userRef.docs
-  //         .map((x) => x.reference.collection('editable').doc('details').get())
+  //         .map((x) => x.reference.collection('editable').doc('details').get(const GetOptions(source: Source.cache)))
   //         .toList();
 
   final List<UserData> users = userRef.docs
@@ -353,7 +314,7 @@ Future<List<UserData>> fetchNoHostelUsers() async {
           .collection('users')
           .where('type', isEqualTo: 'student')
           .where('hostelName', isNull: true)
-          .get();
+          .get(const GetOptions(source: Source.cache));
 
   return querySnapshot.docs
       .map((doc) => UserData(email: doc.id)..load(doc.data()))
@@ -365,7 +326,7 @@ Future<List<UserData>> fetchNoHostelUsers() async {
   //   querySnapshot.docs.map(
   //     (x) async {
   //       final userDataSnapshot =
-  //           await x.reference.collection('editable').doc('details').get();
+  //           await x.reference.collection('editable').doc('details').get(const GetOptions(source: Source.cache));
   //       if (userDataSnapshot.exists) {
   //         list.add(
   //           UserData(

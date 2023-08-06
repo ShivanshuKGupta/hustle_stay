@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/requests/other/other_request.dart';
@@ -68,7 +67,6 @@ class _OtherRequestScreenState extends State<OtherRequestScreen> {
               const SizedBox(height: 40),
               UsersBuilder(
                 provider: fetchComplainees,
-                src: Source.cache,
                 loadingWidget: Center(
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
