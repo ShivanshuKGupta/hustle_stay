@@ -31,17 +31,13 @@ class RoommateInfo {
 }
 
 Future<String> getAttendanceData(
-    RoommateData roommateData, String hostelName, DateTime date) async {
+    RoommateData roommateData, DateTime date) async {
   final storage = FirebaseFirestore.instance;
-  final documentAddRef = storage
-      .collection('hostels')
-      .doc('hostelMates')
-      .collection('Roommates')
-      .doc(roommateData.email);
-  final documentRef = documentAddRef
-      .collection('Attendance')
-      .doc(DateFormat('yyyy-MM-dd').format(date));
+  final documentAddRef = storage.collection('users').doc(roommateData.email);
+  final documentRef =
+      documentAddRef.collection('Attendance').doc(date.year.toString());
   final batch = storage.batch();
+  print('hi');
   if (roommateData.leaveStartDate != null &&
       (roommateData.leaveStartDate!.isBefore(date)) &&
       roommateData.leaveEndDate != null &&
@@ -50,7 +46,9 @@ Future<String> getAttendanceData(
         roommateData.internship != null && roommateData.internship == true
             ? 'onInternship'
             : 'onLeave';
-    await documentRef.set({'status': val}, SetOptions(merge: false));
+    await documentRef.set({
+      'attendance': {DateTime(date.year, date.month, date.day).toString(): val}
+    }, SetOptions(merge: false));
     return val;
   } else if (roommateData.leaveStartDate != null &&
       roommateData.leaveEndDate != null) {
@@ -62,16 +60,31 @@ Future<String> getAttendanceData(
           'onInternship': false,
         },
         SetOptions(merge: true));
-    batch.set(documentRef, {'status': 'absent'}, SetOptions(merge: true));
+    batch.set(
+        documentRef,
+        {
+          'attendance': {
+            DateTime(date.year, date.month, date.day).toString(): 'absent'
+          }
+        },
+        SetOptions(merge: true));
     await batch.commit();
     return 'absent';
   }
-
   final documentSnapshot = await documentRef.get();
-  if (documentSnapshot.exists) {
-    return documentSnapshot['status'];
+
+  if (documentSnapshot.exists &&
+      documentSnapshot['attendance']
+              [DateTime(date.year, date.month, date.day).toString()] !=
+          null) {
+    return documentSnapshot['attendance']
+        [DateTime(date.year, date.month, date.day).toString()];
   } else {
-    await documentRef.set({'status': 'absent'}, SetOptions(merge: true));
+    await documentRef.set({
+      'attendance': {
+        DateTime(date.year, date.month, date.day).toString(): 'absent'
+      }
+    }, SetOptions(merge: true));
     return 'absent';
   }
 }
@@ -86,18 +99,18 @@ Future<String> setAttendanceData(String email, String hostelName,
             ? 'presentLate'
             : 'present';
     final docRef = FirebaseFirestore.instance
-        .collection('hostels')
-        .doc('hostelMates')
-        .collection('Roommates')
+        .collection('users')
         .doc(email)
         .collection('Attendance')
-        .doc(DateFormat('yyyy-MM-dd').format(date));
+        .doc(date.year.toString());
 
     await FirebaseFirestore.instance.runTransaction((transaction) async {
       transaction.set(
           docRef,
           {
-            'status': statusVal,
+            'attendance': {
+              DateTime(date.year, date.month, date.day).toString(): statusVal
+            },
           },
           SetOptions(merge: true));
     });
@@ -141,11 +154,8 @@ Future<bool> markAllAttendance(
     final statusVal = status ? 'present' : 'absent';
     final storage = FirebaseFirestore.instance;
     final batch = storage.batch();
-    final roommatesRef = storage
-        .collection('hostels')
-        .doc('hostelMates')
-        .collection('Roommates')
-        .where('hostelName', isEqualTo: hostelName);
+    final roommatesRef =
+        storage.collection('users').where('hostelName', isEqualTo: hostelName);
 
     List<QueryDocumentSnapshot<Map<String, dynamic>>> roommateDocs = [];
     if (DateTime(selectedDate.year, selectedDate.month, selectedDate.day) !=
@@ -162,7 +172,6 @@ Future<bool> markAllAttendance(
       for (final x in roommatesLeaveQuery.docs) {
         final dData = x.data()['leaveEndDate'];
         if (dData != null && selectedDate.isBefore(dData.toDate())) {
-          print('hi');
           leaveMembers.add(x.id);
           final attendanceDocRef = x.reference
               .collection('Attendance')
