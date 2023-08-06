@@ -112,9 +112,12 @@ class SettingsScreen extends StatelessWidget {
               builder: (context, value, child) {
                 return LoadingElevatedButton(
                   loading: value != null,
+                  errorHandler: (err) {
+                    everythingInitialized.value = null;
+                  },
                   icon: const Icon(Icons.refresh_rounded),
                   label: Text(value ?? 'Refresh Local Database'),
-                  onPressed: () async => await initializeEverything(context),
+                  onPressed: initializeEverything,
                 );
               },
             ),

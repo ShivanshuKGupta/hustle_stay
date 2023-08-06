@@ -173,14 +173,14 @@ Future<void> initializeComplaints() async {
     }
   }
   final complaints = await fetchComplaints(
-    src: Source.server,
+    src: Source.serverAndCache,
     resolved: false,
     lastModifiedAt: complaintsLastModifiedAt,
   );
   complaintsInitialized.value = "Fetching Resolved Complaints";
   complaints.addAll(
     await fetchComplaints(
-      src: Source.server,
+      src: Source.serverAndCache,
       resolved: true,
       lastModifiedAt: complaintsLastModifiedAt,
     ),

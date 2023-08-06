@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:animated_icon/animated_icon.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -21,8 +23,8 @@ import 'package:hustle_stay/widgets/requests/requests_bottom_bar.dart';
 
 enum RequestStatus { pending, approved, denied }
 
-const infDateMillisec = 8640000000000000;
-final infDate = DateTime.fromMillisecondsSinceEpoch(infDateMillisec);
+// const infDateMillisec = 8640000000000000;
+// final infDate = DateTime.fromMillisecondsSinceEpoch(infDateMillisec);
 
 abstract class Request {
   /// Constructor
@@ -45,8 +47,8 @@ abstract class Request {
   /// This represents when was the request approved or denied
   int closedAt = 0;
 
-  /// The date after which the request will disappear from the UI
-  DateTime expiryDate = infDate; // infinite time
+  /// This represents when was the request last modified
+  int modifiedAt = 0;
 
   /// Deleted At
   DateTime? deletedAt;
@@ -96,9 +98,10 @@ abstract class Request {
       "type": type,
       "reason": reason,
       "requestingUserEmail": requestingUserEmail,
-      "expiryDate": expiryDate.millisecondsSinceEpoch,
+      // "expiryDate": expiryDate.millisecondsSinceEpoch,
       "deletedAt": deletedAt == null ? null : deletedAt!.millisecondsSinceEpoch,
       "closedAt": closedAt,
+      "modifiedAt": modifiedAt,
       if (type == 'Other') 'approvers': approvers,
     };
   }
@@ -111,8 +114,9 @@ abstract class Request {
     type = data['type'] ?? type;
     reason = data['reason'] ?? reason;
     closedAt = data['closedAt'] ?? closedAt;
+    modifiedAt = data['modifiedAt'] ?? modifiedAt;
     requestingUserEmail = data['requestingUserEmail'] ?? requestingUserEmail;
-    expiryDate = DateTime.fromMillisecondsSinceEpoch(data['expiryDate'] ?? 0);
+    // expiryDate = DateTime.fromMillisecondsSinceEpoch(data['expiryDate'] ?? 0);
     deletedAt = data['deletedAt'] == null
         ? null
         : DateTime.fromMillisecondsSinceEpoch(data['deletedAt']);
@@ -176,7 +180,7 @@ abstract class Request {
   }
 
   /// Does what it does
-  Future<void> update({DateTime? chosenExpiryDate}) async {
+  Future<void> update() async {
     await firestore.runTransaction((transaction) async {
       // Some checks
       if (!beforeUpdate()) return;
@@ -190,22 +194,11 @@ abstract class Request {
             await onApprove(transaction);
           }
         }
-
-        // if expiry date is not set yet
-        if (expiryDate == infDate) {
-          final closedDateTime = DateTime.fromMillisecondsSinceEpoch(closedAt);
-          // setting the expiry to 7 days after closedAt
-          expiryDate = DateTime(closedDateTime.year, closedDateTime.month,
-              closedDateTime.day + 7);
-        }
-      }
-
-      // If a custom expiry date is specified
-      if (chosenExpiryDate != null) {
-        expiryDate = chosenExpiryDate;
       }
 
       final doc = firestore.collection('requests').doc(id.toString());
+
+      modifiedAt = DateTime.now().millisecondsSinceEpoch;
 
       // Finally updating the doc
       transaction.set(doc, encode());
@@ -220,16 +213,16 @@ abstract class Request {
     load(response.data() ?? {});
   }
 
-  /// Does what it does
+  /// Does what it says
   Future<void> delete() async {
-    final doc = firestore.collection('requests').doc(id.toString());
-    await doc.delete();
+    deletedAt = DateTime.now();
+    await update();
   }
 
   /// Use this function to get this request's list of approvers
   Future<List<String>> fetchApprovers({Source? src}) async {
     if (type != 'Other') {
-      return await fetchApproversOfRequestType(type, src: src);
+      return await fetchApproversOfRequestType(type);
     } else {
       return approvers;
     }
@@ -239,10 +232,18 @@ abstract class Request {
   Future<void> updateApprovers({required List<String> newApprovers}) async {
     if (type != 'Other') {
       final doc = firestore.collection('requests').doc(type);
-      await doc.set({'approvers': newApprovers});
+      await doc.set({
+        'approvers': newApprovers,
+        'modifiedAt': DateTime.now().millisecondsSinceEpoch,
+        'isType': true,
+        'status': RequestStatus.pending.index,
+      });
     } else {
       final doc = firestore.collection('requests').doc(id.toString());
-      await doc.update({'approvers': newApprovers});
+      await doc.update({
+        'approvers': newApprovers,
+        'modifiedAt': DateTime.now().millisecondsSinceEpoch,
+      });
     }
     approvers = newApprovers;
   }
@@ -275,6 +276,8 @@ abstract class Request {
           details: {
             'From': requestingUserEmail,
             'Requested at': ddmmyyyy(DateTime.fromMillisecondsSinceEpoch(id)),
+            'Last Modified at':
+                ddmmyyyy(DateTime.fromMillisecondsSinceEpoch(modifiedAt)),
             'Status': status.name,
             if (status != RequestStatus.pending)
               'Closed at':
@@ -290,21 +293,62 @@ abstract class Request {
   }
 }
 
+ValueNotifier<String?> requestsIntialized = ValueNotifier(null);
+
+Future<void> initializeApprovers() async {
+  requestsIntialized.value = "Fetching Approvers";
+  const String key = 'approversLastModifiedAt';
+  int approversLastModifiedAt = -1;
+  final docs = await fetchAllApprovers(
+    src: Source.serverAndCache,
+    lastModifiedAt: approversLastModifiedAt,
+  );
+  int maxModifiedAt = approversLastModifiedAt;
+  for (final doc in docs) {
+    maxModifiedAt = max(maxModifiedAt, doc.data()['modifiedAt']);
+  }
+  prefs!.setInt(key, maxModifiedAt);
+  requestsIntialized.value = null;
+}
+
+Future<void> initializeRequests() async {
+  await initializeApprovers();
+  requestsIntialized.value = "Fetching Requests";
+  const String key = 'requestsLastModifiedAt';
+  int requestsLastModifiedAt = prefs!.getInt(key) ?? -1;
+  // If requestsLastModifiedAt is not yet available then
+  // find it from cache
+  if (requestsLastModifiedAt == -1) {
+    try {
+      requestsLastModifiedAt = (await firestore
+              .collection('requests')
+              .orderBy('modifiedAt', descending: true)
+              .limit(1)
+              .get(const GetOptions(source: Source.cache)))
+          .docs[0]
+          .data()['modifiedAt'];
+    } catch (e) {
+      // if data doesn't exists in cache then do nothing
+    }
+  }
+  final requests = await fetchRequests(
+    src: Source.serverAndCache,
+    lastModifiedAt: requestsLastModifiedAt,
+  );
+  int maxModifiedAt = requestsLastModifiedAt;
+  for (var request in requests) {
+    maxModifiedAt = max(maxModifiedAt, request.modifiedAt);
+  }
+  prefs!.setInt(key, maxModifiedAt);
+  requestsIntialized.value = null;
+}
+
 /// Fetch approvers of specific request type (type shouldn't be Other)
-Future<List<String>> fetchApproversOfRequestType(String requestType,
-    {Source? src}) async {
+Future<List<String>> fetchApproversOfRequestType(String requestType) async {
   if (requestType == 'Other') return [];
   final doc = firestore.collection('requests').doc(requestType);
   DocumentSnapshot<Map<String, dynamic>>? response;
-  try {
-    response = await doc.get(src == null ? null : GetOptions(source: src));
-  } catch (e) {
-    if (src == Source.cache) return fetchApproversOfRequestType(requestType);
-    rethrow;
-  }
-  if (response.data() == null && src == Source.cache) {
-    response = await doc.get();
-  }
+  response = await doc.get(const GetOptions(source: Source.cache));
   final data = response.data()!;
   Request.allApprovers[requestType] =
       (data['approvers'] as List<dynamic>).map((e) => e.toString()).toList();
@@ -344,61 +388,6 @@ Request decodeToRequest(Map<String, dynamic> data) {
       ..load(data);
   }
   throw "No such type exists: '$type'";
-}
-
-/// It returns requests and fetches required approvers as well
-Future<List<Request>> getStudentRequests({Source? src}) async {
-  final collection = firestore.collection('requests');
-  final response = await collection
-      .where('requestingUserEmail', isEqualTo: currentUser.email)
-      .where(
-        'expiryDate',
-        isGreaterThan: DateTime.now().millisecondsSinceEpoch,
-      )
-      .get(src == null ? null : GetOptions(source: src));
-  final docs = response.docs;
-  Set<String> requestTypes = {};
-  List<Request> requests = docs.map((doc) {
-    final data = doc.data();
-    final type = data['type'];
-    requestTypes.add(type);
-    return decodeToRequest(data);
-  }).toList();
-  for (var e in requestTypes) {
-    fetchApproversOfRequestType(e, src: src);
-  }
-  return requests;
-}
-
-/// It returns requests and fetches required approvers as well
-Future<List<Request>> getApproverRequests({Source? src}) async {
-  final collection = firestore.collection('requests');
-  var response = await collection
-      .where('approvers', arrayContains: currentUser.email)
-      .where('status', isEqualTo: RequestStatus.pending.index)
-      .get(src == null ? null : GetOptions(source: src));
-  List<QueryDocumentSnapshot<Map<String, dynamic>>> docs = response.docs;
-  final List<Request> requests = [];
-  final List<String> types = [];
-  for (final doc in docs) {
-    if (int.tryParse(doc.id) == null) {
-      types.add(doc.id);
-    } else {
-      requests.add(decodeToRequest(doc.data()));
-    }
-  }
-  if (types.isNotEmpty) {
-    response = await collection
-        .where('type', whereIn: types)
-        .where('status', isEqualTo: RequestStatus.pending.index)
-        .get(src == null ? null : GetOptions(source: src));
-    docs = response.docs;
-    requests.addAll(docs.map((doc) {
-      final data = doc.data();
-      return decodeToRequest(data);
-    }));
-  }
-  return requests;
 }
 
 class RequestItem extends StatefulWidget {
@@ -441,7 +430,7 @@ class _RequestItemState extends State<RequestItem> {
                   : Colors.redAccent,
             ),
           );
-    if (currentUser.type != 'student' &&
+    if (widget.request.approvers.contains(currentUser.email) &&
         widget.request.status == RequestStatus.pending) {
       // TODO: Remove shortcircuiting
       trailing = Row(
@@ -494,9 +483,10 @@ class _RequestItemState extends State<RequestItem> {
             await navigatorPush(
               context,
               ChatScreen(
-                bottomBar: (currentUser.type == 'student')
-                    ? null
-                    : RequestBottomBar(request: widget.request),
+                bottomBar:
+                    (widget.request.approvers.contains(currentUser.email))
+                        ? null
+                        : RequestBottomBar(request: widget.request),
                 showInfo: () =>
                     widget.request.showInfo(context, widget.otherDetails),
                 chat: widget.request.chatData,
@@ -552,7 +542,7 @@ class _RequestItemState extends State<RequestItem> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (widget.detailWidget != null) widget.detailWidget!,
-              if (currentUser.type != 'student')
+              if (widget.request.approvers.contains(currentUser.email))
                 UserBuilder(
                   email: widget.request.requestingUserEmail,
                   builder: (ctx, userData) => Text(
@@ -568,4 +558,142 @@ class _RequestItemState extends State<RequestItem> {
       ),
     );
   }
+}
+
+bool approversInitialized = false;
+
+/// Fetch All Approvers
+Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> fetchAllApprovers({
+  int? lastModifiedAt,
+  Source src = Source.cache,
+}) async {
+  Query<Map<String, dynamic>> query =
+      firestore.collection('requests').where('isType', isEqualTo: true);
+  if (lastModifiedAt != null) {
+    query = query.where('modifiedAt', isGreaterThan: lastModifiedAt);
+  }
+  final response = await query.get(GetOptions(source: src));
+  for (var doc in response.docs) {
+    Request.allApprovers[doc.id] = (doc.data()['approvers'] as List<dynamic>)
+        .map((e) => e.toString())
+        .toList();
+  }
+  approversInitialized = true;
+  return response.docs;
+}
+
+/// Before calling this function make sure that
+/// you first initialize approvers as well
+Future<List<Request>> fetchRequests({
+  RequestStatus? status,
+  int? limit,
+  Map<String, DocumentSnapshot>? savePoint,
+  int? lastModifiedAt,
+  Source src = Source.cache,
+}) async {
+  assert(lastModifiedAt == null || savePoint == null || savePoint.isEmpty);
+
+  if (approversInitialized == false) {
+    await fetchAllApprovers();
+  }
+
+  final List<Request> ans = [];
+
+  /// REQUESTS POSTED BY THIS USER
+  Query<Map<String, dynamic>> query = firestore
+      .collection('requests')
+      .where('requestingUserEmail', isEqualTo: currentUser.email);
+  query = sanitizeRequestsQuery(
+    query,
+    status,
+    limit,
+    savePoint,
+    'myRequests',
+    lastModifiedAt,
+  );
+  QuerySnapshot<Map<String, dynamic>> response =
+      await query.get(GetOptions(source: src));
+  if (response.docs.isNotEmpty && savePoint != null) {
+    savePoint['myRequests'] = response.docs.last;
+  }
+  ans.addAll(response.docs.map((doc) => decodeToRequest(doc.data())));
+
+  /// REQUESTS OF WHOM THE USER IS AN APPROVER
+  List<String> types = [];
+
+  /// Fetching my types
+  response = await firestore
+      .collection('requests')
+      .where('isType', isEqualTo: true)
+      .where('approvers', arrayContains: currentUser.email)
+      .get(const GetOptions(source: Source.cache));
+  types = response.docs.map((e) => e.id).toList();
+  if (types.isEmpty) return ans;
+
+  /// Fetching requests of [types]
+  query = firestore.collection('requests').where('type', whereIn: types);
+  query = sanitizeRequestsQuery(
+    query,
+    status,
+    limit,
+    savePoint,
+    'approversRequests',
+    lastModifiedAt,
+  );
+  response = await query.get(GetOptions(source: src));
+  if (response.docs.isNotEmpty && savePoint != null) {
+    savePoint['approversRequests'] = response.docs.last;
+  }
+  ans.addAll(response.docs.map((doc) => decodeToRequest(doc.data())));
+
+  // FETCHING REQUESTS OF TYPE 'OTHER'
+  query = firestore
+      .collection('requests')
+      .where('type', isEqualTo: 'Other')
+      .where('approvers', arrayContains: currentUser.email);
+  query = sanitizeRequestsQuery(
+    query,
+    status,
+    limit,
+    savePoint,
+    'otherRequests',
+    lastModifiedAt,
+  );
+  response = await query.get(GetOptions(source: src));
+  if (response.docs.isNotEmpty && savePoint != null) {
+    savePoint['otherRequests'] = response.docs.last;
+  }
+  ans.addAll(response.docs.map((doc) => decodeToRequest(doc.data())));
+  return ans;
+}
+
+Query<Map<String, dynamic>> sanitizeRequestsQuery(
+  Query<Map<String, dynamic>> query,
+  RequestStatus? status,
+  int? limit,
+  Map<String, DocumentSnapshot>? savePoint,
+  String saveKey,
+  int? lastModifiedAt,
+) {
+  query = query.where('deletedAt', isNull: true);
+  if (status != null) {
+    query = query.where('status', isEqualTo: status.index);
+  }
+  if (lastModifiedAt != null) {
+    query = query.where('modifiedAt', isGreaterThan: lastModifiedAt);
+  }
+  query = query.orderBy(
+      lastModifiedAt != null
+          ? 'modifiedAt'
+          : (status == null || status == RequestStatus.pending
+              ? 'id'
+              : 'closedAt'),
+      descending: true);
+  if (savePoint != null && savePoint[saveKey] != null) {
+    query = query.startAfterDocument(savePoint[saveKey]!);
+  }
+  if (limit != null) {
+    query = query.limit(limit);
+  }
+  return query;
 }

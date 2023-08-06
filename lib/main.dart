@@ -2,11 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
+import 'package:hustle_stay/models/requests/request.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/auth/auth_screen.dart';
@@ -69,16 +69,17 @@ void main() async {
     currentUser = await fetchUserData(auth.currentUser!.email!);
   }
   // Correction code
-  if (kDebugMode && currentUser.isAdmin) {
-    final complaints = (await firestore.collection('complaints').get())
-        .docs
-        .map((doc) => ComplaintData.load(int.parse(doc.id), doc.data()))
-        .toList();
-    for (var complaint in complaints) {
-      print("Updating ${complaint.id}...");
-      await updateComplaint(complaint);
-    }
-  }
+  // if (kDebugMode && currentUser.isAdmin) {
+  //   final requests = (await firestore.collection('requests').get())
+  //       .docs
+  //       .where((doc) => doc.data()['isType'] != true)
+  //       .map((doc) => decodeToRequest(doc.data()))
+  //       .toList();
+  //   for (var request in requests) {
+  //     print("Updating ${request.id}...");
+  //     await request.update();
+  //   }
+  // }
   runApp(const ProviderScope(child: HustleStayApp()));
 }
 
@@ -160,15 +161,12 @@ class HustleStayApp extends ConsumerWidget {
 
 ValueNotifier<String?> everythingInitialized = ValueNotifier(null);
 
-Future<void> initializeEverything(context) async {
-  try {
-    everythingInitialized.value = "Updating users";
-    await initializeUsers();
-    everythingInitialized.value = "Updating complaints";
-    await initializeComplaints();
-    // everythingInitialized.value = "Initializing requests";
-  } catch (e) {
-    showMsg(context, e.toString());
-  }
+Future<void> initializeEverything() async {
+  everythingInitialized.value = "Fetching users";
+  await initializeUsers();
+  everythingInitialized.value = "Fetching complaints";
+  await initializeComplaints();
+  everythingInitialized.value = "Fetching requests";
+  await initializeRequests();
   everythingInitialized.value = null;
 }

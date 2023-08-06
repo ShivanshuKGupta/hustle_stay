@@ -26,7 +26,10 @@ class _HomeScreenState extends ConsumerState<MainScreen> {
     super.initState();
     _pageController =
         PageController(initialPage: ref.read(settingsProvider).currentPage);
-    initializeEverything(context);
+    initializeEverything().onError((error, stackTrace) {
+      everythingInitialized.value = null;
+      showMsg(context, error.toString());
+    });
   }
 
   @override

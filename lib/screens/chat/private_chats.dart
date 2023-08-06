@@ -122,6 +122,9 @@ class ChatsScreen extends StatelessWidget {
                 src: Source.cache,
                 loadingWidget: Container(),
                 builder: (ctx, user) {
+                  if (user.email == null && user.name == null) {
+                    user.name = title ?? person2;
+                  }
                   return ListTile(
                     title: Text(user.name ?? user.email!),
                     onLongPress: () {

@@ -26,7 +26,7 @@ class UserData {
 
   UserData.other({
     this.email,
-    String? name,
+    this.name,
     this.phoneNumber,
     this.address,
     this.imgUrl,
@@ -35,7 +35,7 @@ class UserData {
 
   UserData({
     this.email,
-    String? name,
+    this.name,
     this.phoneNumber,
     this.address,
     this.imgUrl,

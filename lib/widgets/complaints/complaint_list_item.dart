@@ -197,6 +197,8 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
 
   void _showComplaintInfo() {
     final createdAt = DateTime.fromMillisecondsSinceEpoch(widget.complaint.id);
+    final modifiedAt =
+        DateTime.fromMillisecondsSinceEpoch(widget.complaint.modifiedAt);
     final DateTime? resolvedAt = widget.complaint.resolvedAt == null
         ? null
         : DateTime.fromMillisecondsSinceEpoch(widget.complaint.resolvedAt!);
@@ -293,6 +295,22 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
                     ),
                     Text(
                       "${ddmmyyyy(createdAt)} ${timeFrom(createdAt)}",
+                      textAlign: TextAlign.right,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Last Modified At: ",
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                    ),
+                    Text(
+                      "${ddmmyyyy(modifiedAt)} ${timeFrom(modifiedAt)}",
                       textAlign: TextAlign.right,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),

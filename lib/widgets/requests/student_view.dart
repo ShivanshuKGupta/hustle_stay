@@ -28,11 +28,7 @@ class _RequestsListState extends State<RequestsList> {
       onRefresh: () async {
         try {
           if (widget.requests.isEmpty) {
-            if (currentUser.type == 'student') {
-              await getStudentRequests();
-            } else {
-              await getApproverRequests();
-            }
+            await initializeRequests();
           }
         } catch (e) {
           showMsg(context, e.toString());
@@ -116,9 +112,7 @@ class _RequestsListState extends State<RequestsList> {
               );
             },
             provider: widget.requests.isEmpty
-                ? (currentUser.type == 'student'
-                    ? getStudentRequests
-                    : getApproverRequests)
+                ? ({src}) => fetchRequests()
                 : ({src}) async => widget.requests,
           ),
           const SizedBox(height: 35),
