@@ -117,10 +117,10 @@ class _MedicalScreenState extends State<MedicalScreen> {
                             (dobRange == null ||
                                 (user.medicalInfo.dob != null &&
                                     dobRange!.start
-                                            .compareTo(user.medicalInfo.dob!) >=
+                                            .compareTo(user.medicalInfo.dob!) <=
                                         0 &&
                                     dobRange!.end
-                                            .compareTo(user.medicalInfo.dob!) <=
+                                            .compareTo(user.medicalInfo.dob!) >=
                                         0));
                       },
                     ).toList();
@@ -161,6 +161,7 @@ class _MedicalScreenState extends State<MedicalScreen> {
                                               .primary,
                                         ),
                                   ),
+                                const SizedBox(width: 10),
                                 if (user.medicalInfo.dob != null)
                                   Text(
                                     ddmmyyyy(user.medicalInfo.dob!),

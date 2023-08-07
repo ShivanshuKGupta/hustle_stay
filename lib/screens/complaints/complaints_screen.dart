@@ -78,7 +78,7 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
                           title: 'Pending Complaints',
                           style: Theme.of(context)
                               .textTheme
-                              .titleLarge!
+                              .titleMedium!
                               .copyWith(fontWeight: FontWeight.bold),
                         ),
                       );

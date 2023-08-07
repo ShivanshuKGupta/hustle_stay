@@ -159,19 +159,19 @@ Future<void> initializeComplaints() async {
   int complaintsLastModifiedAt = prefs!.getInt(key) ?? -1;
   // If complaintsLastModifiedAt is not yet available then
   // find it from cache
-  if (complaintsLastModifiedAt == -1) {
-    try {
-      complaintsLastModifiedAt = (await firestore
-              .collection('complaints')
-              .orderBy('modifiedAt', descending: true)
-              .limit(1)
-              .get(const GetOptions(source: Source.cache)))
-          .docs[0]
-          .data()['modifiedAt'];
-    } catch (e) {
-      // if data doesn't exists in cache then do nothing
-    }
-  }
+  // if (complaintsLastModifiedAt == -1) {
+  //   try {
+  //     complaintsLastModifiedAt = (await firestore
+  //             .collection('complaints')
+  //             .orderBy('modifiedAt', descending: true)
+  //             .limit(1)
+  //             .get(const GetOptions(source: Source.cache)))
+  //         .docs[0]
+  //         .data()['modifiedAt'];
+  //   } catch (e) {
+  //     // if data doesn't exists in cache then do nothing
+  //   }
+  // }
   final complaints = await fetchComplaints(
     src: Source.serverAndCache,
     resolved: false,

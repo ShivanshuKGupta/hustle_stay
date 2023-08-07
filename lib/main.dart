@@ -17,6 +17,7 @@ import 'package:hustle_stay/screens/requests/mess/mess_request_screen.dart';
 import 'package:hustle_stay/screens/requests/other/other_request_screen.dart';
 import 'package:hustle_stay/screens/requests/vehicle/vehicle_requests_screen.dart';
 import 'package:hustle_stay/tools.dart';
+import 'package:hustle_stay/widgets/other/loading_builder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'firebase_options.dart';
@@ -64,10 +65,13 @@ void main() async {
   );
   // Initializing prefs here in main to avoid any delay in activating settings
   prefs = await SharedPreferences.getInstance();
-  // Fetching CurrentUser Info
-  if (auth.currentUser != null) {
-    currentUser = await fetchUserData(auth.currentUser!.email!);
-  }
+  try {
+    if (auth.currentUser != null) {
+      currentUser = await fetchUserData(
+        auth.currentUser!.email!,
+      );
+    }
+  } catch (e) {}
   // Correction code
   // if (kDebugMode && currentUser.isAdmin) {
   //   final requests = (await firestore.collection('requests').get())
@@ -120,21 +124,40 @@ class HustleStayApp extends ConsumerWidget {
                   if (user.hasData) {
                     return currentUser.email != null
                         ? const MainScreen()
-                        : UserBuilder(
-                            email: user.data!.email!,
-                            loadingWidget: Scaffold(
-                              body: Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    circularProgressIndicator(),
-                                    const Text('Fetching user details'),
-                                  ],
+                        : LoadingBuilder(
+                            loadingWidgetBuilder: (context, value, child) {
+                              return Scaffold(
+                                body: Center(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      circularProgressIndicator(),
+                                      ValueListenableBuilder(
+                                        valueListenable: everythingInitialized,
+                                        builder: (context, value, child) {
+                                          return Text(
+                                            (value ??
+                                                    'Fetching Database for first time use...')
+                                                .replaceAll(
+                                                    'Fetching', 'Initializing'),
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ),
-                            builder: (context, user) {
-                              currentUser = user;
+                              );
+                            },
+                            builder: (context, progress) async {
+                              await initializeUsers();
+                              if (auth.currentUser != null) {
+                                currentUser = await fetchUserData(
+                                  auth.currentUser!.email!,
+                                );
+                              }
                               return const MainScreen();
                             },
                           );

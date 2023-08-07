@@ -15,7 +15,6 @@ import 'package:hustle_stay/models/requests/mess/menu_change_request.dart';
 import 'package:hustle_stay/models/requests/other/other_request.dart';
 import 'package:hustle_stay/models/requests/vehicle/vehicle_request.dart';
 import 'package:hustle_stay/models/user/user.dart';
-import 'package:hustle_stay/providers/firestore_cache_builder.dart';
 import 'package:hustle_stay/screens/chat/chat_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/requests/request_info.dart';
@@ -318,19 +317,19 @@ Future<void> initializeRequests() async {
   int requestsLastModifiedAt = prefs!.getInt(key) ?? -1;
   // If requestsLastModifiedAt is not yet available then
   // find it from cache
-  if (requestsLastModifiedAt == -1) {
-    try {
-      requestsLastModifiedAt = (await firestore
-              .collection('requests')
-              .orderBy('modifiedAt', descending: true)
-              .limit(1)
-              .get(const GetOptions(source: Source.cache)))
-          .docs[0]
-          .data()['modifiedAt'];
-    } catch (e) {
-      // if data doesn't exists in cache then do nothing
-    }
-  }
+  // if (requestsLastModifiedAt == -1) {
+  //   try {
+  //     requestsLastModifiedAt = (await firestore
+  //             .collection('requests')
+  //             .orderBy('modifiedAt', descending: true)
+  //             .limit(1)
+  //             .get(const GetOptions(source: Source.cache)))
+  //         .docs[0]
+  //         .data()['modifiedAt'];
+  //   } catch (e) {
+  //     // if data doesn't exists in cache then do nothing
+  //   }
+  // }
   final requests = await fetchRequests(
     src: Source.serverAndCache,
     lastModifiedAt: requestsLastModifiedAt,
@@ -500,38 +499,38 @@ class _RequestItemState extends State<RequestItem> {
           leading: Stack(
             children: [
               Icon(widget.request.uiElement['icon'], size: 50),
-              Positioned(
-                right: 0,
-                child: CacheBuilder(
-                    loadingWidget: AnimateIcon(
-                      height: 15,
-                      width: 15,
-                      color: Colors.blue.withOpacity(0.1),
-                      onTap: () {},
-                      iconType: IconType.continueAnimation,
-                      animateIcon: AnimateIcons.loading7,
-                    ),
-                    builder: (ctx, msg) {
-                      if (msg == null ||
-                          msg.readBy.contains(currentUser.email!)) {
-                        return Container();
-                      }
-                      return AnimateIcon(
-                        height: 15,
-                        width: 15,
-                        color: Colors.red,
-                        onTap: () {},
-                        iconType: IconType.continueAnimation,
-                        animateIcon: AnimateIcons.bell,
-                      );
-                    },
-                    provider: ({Source? src}) async {
-                      return await fetchLastMessage(
-                        "requests/${widget.request.id}",
-                        // src: src,
-                      );
-                    }),
-              ),
+              // Positioned(
+              //   right: 0,
+              //   child: CacheBuilder(
+              //       loadingWidget: AnimateIcon(
+              //         height: 15,
+              //         width: 15,
+              //         color: Colors.blue.withOpacity(0.1),
+              //         onTap: () {},
+              //         iconType: IconType.continueAnimation,
+              //         animateIcon: AnimateIcons.loading7,
+              //       ),
+              //       builder: (ctx, msg) {
+              //         if (msg == null ||
+              //             msg.readBy.contains(currentUser.email!)) {
+              //           return Container();
+              //         }
+              //         return AnimateIcon(
+              //           height: 15,
+              //           width: 15,
+              //           color: Colors.red,
+              //           onTap: () {},
+              //           iconType: IconType.continueAnimation,
+              //           animateIcon: AnimateIcons.bell,
+              //         );
+              //       },
+              //       provider: ({Source? src}) async {
+              //         return await fetchLastMessage(
+              //           "requests/${widget.request.id}",
+              //           // src: src,
+              //         );
+              //       }),
+              // ),
             ],
           ),
           title: Text('${widget.request.type.replaceAll('_', ' ')} Request',

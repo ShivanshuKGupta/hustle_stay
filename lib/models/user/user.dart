@@ -85,19 +85,19 @@ class UserData {
 Future<void> initializeUsers() async {
   const String key = 'usersLastModifiedAt';
   int usersLastModifiedAt = prefs!.getInt(key) ?? -1;
-  if (usersLastModifiedAt == -1) {
-    try {
-      usersLastModifiedAt = (await firestore
-              .collection('users')
-              .orderBy('modifiedAt', descending: true)
-              .limit(1)
-              .get(const GetOptions(source: Source.cache)))
-          .docs[0]
-          .data()['modifiedAt'];
-    } catch (e) {
-      // if data doesn't exists in cache then do nothing
-    }
-  }
+  // if (usersLastModifiedAt == -1) {
+  //   try {
+  //     usersLastModifiedAt = (await firestore
+  //             .collection('users')
+  //             .orderBy('modifiedAt', descending: true)
+  //             .limit(1)
+  //             .get(const GetOptions(source: Source.cache)))
+  //         .docs[0]
+  //         .data()['modifiedAt'];
+  //   } catch (e) {
+  //     // if data doesn't exists in cache then do nothing
+  //   }
+  // }
   final response = await firestore
       .collection('users')
       .where(
