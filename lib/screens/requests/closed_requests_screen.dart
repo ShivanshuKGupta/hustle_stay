@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/requests/request.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/widgets/other/scroll_builder.dart';
@@ -58,19 +57,7 @@ class _ClosedRequestsScreenState extends State<ClosedRequestsScreen> {
             if (types.isEmpty &&
                 savePoint.isEmpty &&
                 currentUser.type != 'student') {
-              final response = await firestore
-                  .collection('requests')
-                  .where('isType', isEqualTo: true)
-                  .get();
-              for (var doc in response.docs) {
-                Request.allApprovers[doc.id] =
-                    (doc.data()['approvers'] as List<dynamic>)
-                        .map((e) => e.toString())
-                        .toList();
-                if (Request.allApprovers[doc.id]!.contains(currentUser.email)) {
-                  types.add(doc.id);
-                }
-              }
+              await fetchAllApprovers();
             }
             final List<Request> requests = await fetchRequests(
               limit: interval,

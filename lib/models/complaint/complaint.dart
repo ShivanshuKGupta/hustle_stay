@@ -344,6 +344,7 @@ Future<List<ComplaintData>> fetchComplaints({
   int? lastModifiedAt,
   Source src = Source.cache,
 }) async {
+  debugPrint("Fetching complaints from $src");
   assert(lastModifiedAt == null || savePoint == null || savePoint.isEmpty);
 
   // FETCHING PUBLIC COMPLAINTS

@@ -591,6 +591,7 @@ Future<List<Request>> fetchRequests({
   int? lastModifiedAt,
   Source src = Source.cache,
 }) async {
+  debugPrint("Fetching requests from $src");
   assert(lastModifiedAt == null || savePoint == null || savePoint.isEmpty);
 
   if (approversInitialized == false) {

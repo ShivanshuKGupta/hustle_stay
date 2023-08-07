@@ -4,7 +4,7 @@ import 'package:hustle_stay/screens/requests/closed_requests_screen.dart';
 import 'package:hustle_stay/screens/requests/mess/mess_request_screen.dart';
 import 'package:hustle_stay/screens/requests/other/other_request_screen.dart';
 import 'package:hustle_stay/screens/requests/vehicle/vehicle_requests_screen.dart';
-import 'package:hustle_stay/widgets/requests/student_view.dart';
+import 'package:hustle_stay/widgets/requests/requests_list.dart';
 
 const requestMainPageElements = <String, Map<String, dynamic>>{
   'Attendance': {
@@ -39,7 +39,6 @@ class RequestsScreen extends StatefulWidget {
 class _RequestsScreenState extends State<RequestsScreen> {
   @override
   Widget build(BuildContext context) {
-    // return Container();
     return Scaffold(
       body: Stack(
         alignment: Alignment.bottomCenter,
