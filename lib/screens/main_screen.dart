@@ -108,8 +108,8 @@ class _HomeScreenState extends ConsumerState<MainScreen> {
                     // ),
                     GButton(
                       icon: settings.currentPage == i++
-                          ? Icons.airport_shuttle_rounded
-                          : Icons.airport_shuttle_outlined,
+                          ? Icons.assignment_turned_in_rounded
+                          : Icons.assignment_turned_in_outlined,
                       text: 'Requests',
                     ),
                     GButton(

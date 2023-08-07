@@ -1,3 +1,4 @@
+import 'package:animated_icon/animated_icon.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -115,6 +116,30 @@ class _RequestsListState extends ConsumerState<RequestsList> {
             savePoint: savePoint,
             status: settings.requestViewStatus,
           );
+          if (savePoint.isEmpty) {
+            return [
+              SizedBox(
+                height: mediaQuery.size.height - 200,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AnimateIcon(
+                        color: Theme.of(context).colorScheme.primary,
+                        onTap: () {},
+                        iconType: IconType.continueAnimation,
+                        animateIcon: AnimateIcons.cool,
+                      ),
+                      Text(
+                        'There are no ${settings.requestViewStatus == null ? '' : "${settings.requestViewStatus!.name} "}requests',
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            ];
+          }
           return requests.map(
             (request) {
               return request.widget(context);
