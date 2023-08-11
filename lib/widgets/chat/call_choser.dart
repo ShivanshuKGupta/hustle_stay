@@ -4,8 +4,10 @@ import 'package:hustle_stay/tools.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class CallChoser extends StatefulWidget {
-  final List<UserData> phoneNumbers;
-  const CallChoser({super.key, required this.phoneNumbers});
+  /// These are users who will definitely have a phone number and
+  /// the length of this array would >=1
+  final List<UserData> users;
+  const CallChoser({super.key, required this.users});
 
   @override
   State<CallChoser> createState() => _CallChoserState();
@@ -15,10 +17,10 @@ class _CallChoserState extends State<CallChoser> {
   @override
   void initState() {
     super.initState();
-    phone = widget.phoneNumbers[0].phoneNumber!;
+    defaultUser = widget.users[0];
   }
 
-  late String phone;
+  late UserData defaultUser;
 
   @override
   Widget build(BuildContext context) {
@@ -26,28 +28,29 @@ class _CallChoserState extends State<CallChoser> {
       title: const Text('Who to call?'),
       actions: [
         DropdownButton(
-          items: widget.phoneNumbers
+          items: widget.users
               .map(
-                (e) => DropdownMenuItem(
-                  value: e.phoneNumber!,
-                  child: Text(e.name ?? e.email!),
+                (user) => DropdownMenuItem(
+                  value: user.email,
+                  child: Text(user.name ?? user.email!),
                 ),
               )
               .toList(),
-          value: phone,
+          value: defaultUser,
           onChanged: ((value) {
             if (value != null) {
               setState(() {
-                phone = value;
+                defaultUser =
+                    widget.users.firstWhere((user) => user.email == value);
               });
             }
           }),
         ),
         IconButton(
             onPressed: () {
-              launchUrl(Uri.parse("tel:+91$phone"));
-              final user = widget.phoneNumbers
-                  .firstWhere((element) => element.phoneNumber == phone);
+              launchUrl(Uri.parse("tel:+91${defaultUser.phoneNumber}"));
+              final user = widget.users.firstWhere(
+                  (element) => element.phoneNumber == defaultUser.phoneNumber);
               showMsg(context, 'Calling ${user.name ?? user.email}');
             },
             icon: const Icon(Icons.call_rounded))

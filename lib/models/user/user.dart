@@ -113,11 +113,12 @@ Future<void> initializeUsers() async {
   prefs!.setInt(key, maxModifiedAt);
 }
 
-Future<UserData> fetchUserData(String email) async {
+Future<UserData> fetchUserData(String email,
+    {Source? src = Source.cache}) async {
   UserData userData = UserData(email: email);
   DocumentSnapshot<Map<String, dynamic>>? response;
   response = await firestore.collection('users').doc(email).get(
-        const GetOptions(source: Source.cache),
+        src == null ? null : GetOptions(source: src),
       );
   userData.load(response.data() ?? {});
   return userData;
@@ -125,15 +126,15 @@ Future<UserData> fetchUserData(String email) async {
 
 /// this fetches all properties
 Future<List<UserData>> fetchUsers({List<String>? emails}) async {
+  if (emails != null) {
+    return [for (final email in emails) await fetchUserData(email)];
+  }
   final response = await firestore
       .collection('users')
       .get(const GetOptions(source: Source.cache));
   return response.docs
       .map((doc) => UserData(email: doc.id)..load(doc.data()))
       .toList();
-  // if (emails != null) {
-  //   return [for (final email in emails) await fetchUserData(email, src: src)];
-  // }
   // return [
   //   for (final doc in (await firestore.collection('users').get(
   //             GetOptions(source: Source.cache),

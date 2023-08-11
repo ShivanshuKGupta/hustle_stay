@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
@@ -11,6 +13,7 @@ class Category {
   String id;
   List<String> defaultReceipient;
   List<String> allrecipients;
+  int modifiedAt = 0;
 
   /// Higher the number higer is the priority
   Priority defaultPriority;
@@ -46,6 +49,7 @@ class Category {
       "defaultPriority": defaultPriority.index,
       // "cooldown": cooldown.inSeconds,
       "color": color.value,
+      "modifiedAt": modifiedAt,
       "icon": {
         'codePoint': icon.codePoint,
         'fontFamily': icon.fontFamily,
@@ -58,26 +62,11 @@ class Category {
     defaultReceipient = ((data["defaultReceipient"] ?? []) as List<dynamic>)
         .map((e) => e.toString())
         .toList();
-    // defaultReceipient = defaultReceipient.map((e) {
-    //   if (e == 'Attender') {
-    //     return 'attender@iiitr.ac.in';
-    //   } else if (e == 'Alka Chaddha') {
-    //     return 'chiefwarden@iiitr.ac.in';
-    //   }
-    //   return e;
-    // }).toList();
     allrecipients = ((data["allrecipients"] ?? []) as List<dynamic>)
         .map((e) => e.toString())
         .toList();
-    // allrecipients = allrecipients.map((e) {
-    //   if (e == 'Attender') {
-    //     return 'attender@iiitr.ac.in';
-    //   } else if (e == 'Alka Chaddha') {
-    //     return 'chiefwarden@iiitr.ac.in';
-    //   }
-    //   return e;
-    // }).toList();
     defaultPriority = Priority.values[data['defaultPriority'] ?? 0];
+    modifiedAt = data['modifiedAt'] ?? modifiedAt;
     // cooldown = Duration(seconds: data['cooldown'] ?? 0);
     color = Color(data['color'] ?? 0);
     if (data['icon'] != null) {
@@ -94,35 +83,48 @@ class Category {
   }
 }
 
-Future<Category> fetchCategory(
-  String id, {
-  Source? src,
-}) async {
+ValueNotifier<String?> categoriesInitialized = ValueNotifier(null);
+
+Future<void> initializeCategories() async {
+  categoriesInitialized.value = "Fetching Categories";
+  const String key = 'categoriesLastModifiedAt';
+  int catgeoriesLastModifiedAt = prefs!.getInt(key) ?? -1;
+  final catgeories = await fetchAllCategories(
+    lastModifiedAt: catgeoriesLastModifiedAt,
+    src: Source.serverAndCache,
+  );
+  int maxModifiedAt = catgeoriesLastModifiedAt;
+  for (var category in catgeories) {
+    maxModifiedAt = max(maxModifiedAt, category.modifiedAt);
+  }
+  prefs!.setInt(key, maxModifiedAt);
+  categoriesInitialized.value = null;
+}
+
+Future<Category> fetchCategory(String id) async {
   Category category = Category(id);
   DocumentSnapshot<Map<String, dynamic>>? response;
-  try {
-    /// Trying with given config
-    response = await firestore.collection('categories').doc(id).get(
-          src == null ? null : GetOptions(source: src),
-        );
-  } catch (e) {
-    /// If failed then use default configuration
-    if (src == Source.cache) {
-      response = await firestore.collection('categories').doc(id).get();
-    }
-  }
-  category.load(response!.data() ?? {});
+  response = await firestore.collection('categories').doc(id).get(
+        const GetOptions(source: Source.cache),
+      );
+  category.load(response.data() ?? {});
   return category;
 }
 
-Future<List<Category>> fetchCategories(List<String> ids, {Source? src}) async {
-  return [for (final id in ids) await fetchCategory(id, src: src)];
+Future<List<Category>> fetchCategories(List<String> ids) async {
+  return [for (final id in ids) await fetchCategory(id)];
 }
 
-Future<List<Category>> fetchAllCategories({Source? src}) async {
-  final response = await firestore
-      .collection('categories')
-      .get(src == null ? null : GetOptions(source: src));
+Future<List<Category>> fetchAllCategories({
+  int? lastModifiedAt,
+  Source? src = Source.cache,
+}) async {
+  Query<Map<String, dynamic>> query = firestore.collection('categories');
+  if (lastModifiedAt != null) {
+    query = query.where('modifiedAt', isGreaterThan: lastModifiedAt);
+  }
+  final response =
+      await query.get(src == null ? null : GetOptions(source: src));
   return response.docs
       .map((doc) => Category(doc.id)..load(doc.data()))
       .toList();
@@ -133,6 +135,7 @@ Future<void> updateCategory(Category category) async {
     category.allrecipients = [];
     category.defaultReceipient = [];
   }
+  category.modifiedAt = DateTime.now().millisecondsSinceEpoch;
   await firestore
       .collection('categories')
       .doc(category.id)
@@ -184,13 +187,11 @@ class CategoryBuilder extends StatelessWidget {
   final String id;
   final Widget Function(BuildContext ctx, Category category) builder;
   final Widget? loadingWidget;
-  final Source? src;
   const CategoryBuilder({
     super.key,
     required this.id,
     required this.builder,
     this.loadingWidget,
-    this.src,
   });
 
   @override
@@ -199,22 +200,8 @@ class CategoryBuilder extends StatelessWidget {
       future: fetchCategory(id),
       builder: (ctx, snapshot) {
         if (!snapshot.hasData) {
-          if (src == Source.cache) {
-            return loadingWidget ?? circularProgressIndicator();
-          }
-          return FutureBuilder(
-            future: fetchCategory(id, src: Source.cache),
-            builder: (ctx, snapshot) {
-              if (!snapshot.hasData) {
-                // Returning this Widget when nothing has arrived
-                return loadingWidget ?? circularProgressIndicator();
-              }
-              // Returning this widget from cache while data arrives from server
-              return builder(ctx, snapshot.data!);
-            },
-          );
+          return loadingWidget ?? circularProgressIndicator();
         }
-        // Returning this widget when data arrives from server
         return builder(ctx, snapshot.data!);
       },
     );

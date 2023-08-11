@@ -74,15 +74,14 @@ void main() async {
   } catch (e) {}
   // Correction code
   // if (kDebugMode && currentUser.isAdmin) {
-  //   final requests = (await firestore.collection('requests').get())
-  //       .docs
-  //       .where((doc) => doc.data()['isType'] != true)
-  //       .map((doc) => decodeToRequest(doc.data()))
-  //       .toList();
-  //   for (var request in requests) {
-  //     print("Updating ${request.id}...");
-  //     await request.update();
-  //   }
+  //   Query<Map<String, dynamic>> query = firestore.collection('categories');
+  //   final response = await query.get();
+  //   response.docs.map((doc) => Category(doc.id)..load(doc.data())).forEach(
+  //     (element) async {
+  //       debugPrint('Updating Category: ${element.id}');
+  //       await updateCategory(element);
+  //     },
+  //   );
   // }
   runApp(const ProviderScope(child: HustleStayApp()));
 }
@@ -124,10 +123,10 @@ class HustleStayApp extends ConsumerWidget {
                   if (user.hasData) {
                     return currentUser.email != null
                         ? const MainScreen()
-                        : LoadingBuilder(
-                            loadingWidgetBuilder: (context, value, child) {
-                              return Scaffold(
-                                body: Center(
+                        : Scaffold(
+                            body: LoadingBuilder(
+                              loadingWidgetBuilder: (context, value, child) {
+                                return Center(
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
@@ -135,31 +134,21 @@ class HustleStayApp extends ConsumerWidget {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       circularProgressIndicator(),
-                                      ValueListenableBuilder(
-                                        valueListenable: everythingInitialized,
-                                        builder: (context, value, child) {
-                                          return Text(
-                                            (value ??
-                                                    'Fetching Database for first time use...')
-                                                .replaceAll(
-                                                    'Fetching', 'Initializing'),
-                                          );
-                                        },
-                                      ),
+                                      const Text('Fetching user details...'),
                                     ],
                                   ),
-                                ),
-                              );
-                            },
-                            builder: (context, progress) async {
-                              await initializeUsers();
-                              if (auth.currentUser != null) {
-                                currentUser = await fetchUserData(
-                                  auth.currentUser!.email!,
                                 );
-                              }
-                              return const MainScreen();
-                            },
+                              },
+                              builder: (context, progress) async {
+                                if (auth.currentUser != null) {
+                                  currentUser = await fetchUserData(
+                                    auth.currentUser!.email!,
+                                    src: null,
+                                  );
+                                }
+                                return const MainScreen();
+                              },
+                            ),
                           );
                   }
                   return const AuthScreen();

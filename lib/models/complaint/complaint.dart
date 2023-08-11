@@ -154,6 +154,7 @@ class ComplaintData {
 ValueNotifier<String?> complaintsInitialized = ValueNotifier(null);
 
 Future<void> initializeComplaints() async {
+  await initializeCategories();
   complaintsInitialized.value = "Fetching Complaints";
   const String key = 'complaintsLastModifiedAt';
   int complaintsLastModifiedAt = prefs!.getInt(key) ?? -1;
@@ -344,7 +345,6 @@ Future<List<ComplaintData>> fetchComplaints({
   int? lastModifiedAt,
   Source src = Source.cache,
 }) async {
-  debugPrint("Fetching complaints from $src");
   assert(lastModifiedAt == null || savePoint == null || savePoint.isEmpty);
 
   // FETCHING PUBLIC COMPLAINTS
