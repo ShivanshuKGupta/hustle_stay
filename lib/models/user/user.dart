@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/user/medical_info.dart';
@@ -164,17 +165,17 @@ Future<void> updateUserData(UserData userData) async {
         userData.encode(),
       );
   // if account doesn't exists create one
-  // try {
-  //   await auth.createUserWithEmailAndPassword(
-  //     email: userData.email!,
-  //     password: "123456",
-  //   );
-  //   // login(currentUser.email!, '123456');
-  // } on FirebaseAuthException catch (e) {
-  //   if (e.code != 'email-already-in-use') {
-  //     rethrow;
-  //   }
-  // }
+  try {
+    await auth.createUserWithEmailAndPassword(
+      email: userData.email!,
+      password: "123456",
+    );
+    // login(currentUser.email!, '123456');
+  } on FirebaseAuthException catch (e) {
+    if (e.code != 'email-already-in-use') {
+      rethrow;
+    }
+  }
 }
 
 /// This function is responsible for logging user in

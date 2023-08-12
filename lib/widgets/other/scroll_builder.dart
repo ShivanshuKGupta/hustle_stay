@@ -9,6 +9,7 @@ class ScrollBuilder extends StatefulWidget {
   final int interval;
   final Widget? loadingWidget;
   final bool automaticLoading;
+  final bool reverse;
   final ScrollController? scrollController;
   final Widget? header;
   final Widget? footer;
@@ -18,6 +19,7 @@ class ScrollBuilder extends StatefulWidget {
     this.interval = 20,
     this.loadingWidget,
     this.automaticLoading = false,
+    this.reverse = false,
     this.scrollController,
     this.separatorBuilder,
     this.header,
@@ -64,6 +66,7 @@ class _ScrollBuilderState extends State<ScrollBuilder> {
     return !initialized
         ? Center(child: widget.loadingWidget ?? circularProgressIndicator())
         : ListView.separated(
+            reverse: widget.reverse,
             separatorBuilder:
                 widget.separatorBuilder ?? (ctx, index) => Container(),
             // key: , add key here if the widgets rebuild on their own

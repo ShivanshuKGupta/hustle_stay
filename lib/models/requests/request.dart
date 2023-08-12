@@ -83,7 +83,7 @@ abstract class Request {
       owner: requestingUserEmail,
       receivers: approvers,
       title: type.replaceAll('_', ' '),
-      locked: status != RequestStatus.pending,
+      // locked: status != RequestStatus.pending,
       path: 'requests/$id',
     );
   }
@@ -389,176 +389,6 @@ Request decodeToRequest(Map<String, dynamic> data) {
   throw "No such type exists: '$type'";
 }
 
-class RequestItem extends StatefulWidget {
-  final Request request;
-  final Widget? detailWidget;
-  final Map<String, String> otherDetails;
-  const RequestItem(
-      {super.key,
-      required this.request,
-      this.detailWidget,
-      required this.otherDetails});
-
-  @override
-  State<RequestItem> createState() => _RequestItemState();
-}
-
-class _RequestItemState extends State<RequestItem> {
-  @override
-  Widget build(BuildContext context) {
-    Widget trailing = widget.request.status == RequestStatus.pending
-        ? AnimateIcon(
-            color: Theme.of(context).colorScheme.primary,
-            onTap: () {
-              showMsg(context, 'This request is yet to be approved.');
-            },
-            iconType: IconType.continueAnimation,
-            animateIcon: AnimateIcons.hourglass,
-          )
-        : IconButton(
-            onPressed: () {
-              showMsg(
-                  context, 'This request is ${widget.request.status.name}.');
-            },
-            icon: Icon(
-              widget.request.status == RequestStatus.approved
-                  ? Icons.check_circle_outline_rounded
-                  : Icons.cancel_outlined,
-              color: widget.request.status == RequestStatus.approved
-                  ? Colors.greenAccent
-                  : Colors.redAccent,
-            ),
-          );
-    if (widget.request.approvers.contains(currentUser.email) &&
-        widget.request.status == RequestStatus.pending) {
-      // TODO: Remove shortcircuiting
-      trailing = Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            onPressed: () async {
-              final response = await askUser(
-                context,
-                'Do you want to approve this ${widget.request.type} request?',
-                yes: true,
-                no: true,
-              );
-              if (response == 'yes') {
-                widget.request.approve();
-              }
-            },
-            icon: const Icon(
-              Icons.check_rounded,
-              color: Colors.green,
-            ),
-          ),
-          IconButton(
-            onPressed: () async {
-              final response = await askUser(
-                context,
-                'Do you want to deny this ${widget.request.type} request?',
-                yes: true,
-                no: true,
-              );
-              if (response == 'yes') {
-                widget.request.deny();
-              }
-            },
-            icon: const Icon(
-              Icons.close,
-              color: Colors.red,
-            ),
-          ),
-        ],
-      );
-    }
-    return GlassWidget(
-      radius: 30,
-      child: Container(
-        color: widget.request.uiElement['color'].withOpacity(0.2),
-        child: ListTile(
-          contentPadding: const EdgeInsets.only(left: 10),
-          onTap: () async {
-            await navigatorPush(
-              context,
-              ChatScreen(
-                bottomBar:
-                    (widget.request.approvers.contains(currentUser.email))
-                        ? null
-                        : RequestBottomBar(request: widget.request),
-                showInfo: () =>
-                    widget.request.showInfo(context, widget.otherDetails),
-                chat: widget.request.chatData,
-              ),
-            );
-            setState(() {});
-          },
-          onLongPress: () {
-            widget.request.showInfo(context, widget.otherDetails);
-          },
-          leading: Stack(
-            children: [
-              Icon(widget.request.uiElement['icon'], size: 50),
-              // Positioned(
-              //   right: 0,
-              //   child: CacheBuilder(
-              //       loadingWidget: AnimateIcon(
-              //         height: 15,
-              //         width: 15,
-              //         color: Colors.blue.withOpacity(0.1),
-              //         onTap: () {},
-              //         iconType: IconType.continueAnimation,
-              //         animateIcon: AnimateIcons.loading7,
-              //       ),
-              //       builder: (ctx, msg) {
-              //         if (msg == null ||
-              //             msg.readBy.contains(currentUser.email!)) {
-              //           return Container();
-              //         }
-              //         return AnimateIcon(
-              //           height: 15,
-              //           width: 15,
-              //           color: Colors.red,
-              //           onTap: () {},
-              //           iconType: IconType.continueAnimation,
-              //           animateIcon: AnimateIcons.bell,
-              //         );
-              //       },
-              //       provider: ({Source? src}) async {
-              //         return await fetchLastMessage(
-              //           "requests/${widget.request.id}",
-              //           // src: src,
-              //         );
-              //       }),
-              // ),
-            ],
-          ),
-          title: Text('${widget.request.type.replaceAll('_', ' ')} Request',
-              overflow: TextOverflow.fade),
-          trailing: trailing,
-          subtitle: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (widget.detailWidget != null) widget.detailWidget!,
-              if (widget.request.approvers.contains(currentUser.email))
-                UserBuilder(
-                  email: widget.request.requestingUserEmail,
-                  builder: (ctx, userData) => Text(
-                    userData.name ?? userData.email!,
-                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                          color: widget.request.uiElement['color'],
-                        ),
-                  ),
-                )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 bool approversInitialized = false;
 
 /// Fetch All Approvers
@@ -667,14 +497,65 @@ Future<List<Request>> fetchRequests({
   return ans;
 }
 
-Query<Map<String, dynamic>> sanitizeRequestsQuery(
-  Query<Map<String, dynamic>> query,
-  RequestStatus? status,
+ValueNotifier<String?> vehicleRequestsIntialized = ValueNotifier(null);
+
+Future<void> initializeVehicleRequests() async {
+  vehicleRequestsIntialized.value = "Fetching Vehicle Requests";
+  const String key = 'vehicleRequestsLastModifiedAt';
+  int vehicleRequestsLastModifiedAt = prefs!.getInt(key) ?? -1;
+  final requests = await fetchVehicleRequests(
+    src: Source.serverAndCache,
+    lastModifiedAt: vehicleRequestsLastModifiedAt,
+  );
+  int maxModifiedAt = vehicleRequestsLastModifiedAt;
+  for (var request in requests) {
+    maxModifiedAt = max(maxModifiedAt, request.modifiedAt);
+  }
+  prefs!.setInt(key, maxModifiedAt);
+  vehicleRequestsIntialized.value = null;
+}
+
+Future<List<VehicleRequest>> fetchVehicleRequests({
+  RequestStatus? status = RequestStatus.approved,
   int? limit,
   Map<String, DocumentSnapshot>? savePoint,
-  String saveKey,
   int? lastModifiedAt,
-) {
+  Source src = Source.cache,
+}) async {
+  assert(lastModifiedAt == null || savePoint == null || savePoint.isEmpty);
+
+  final List<VehicleRequest> ans = [];
+
+  /// VEHICLE REQUESTS
+  Query<Map<String, dynamic>> query =
+      firestore.collection('requests').where('type', isEqualTo: 'Vehicle');
+  query = sanitizeRequestsQuery(
+    query,
+    status,
+    limit,
+    savePoint,
+    'vehicleRequests',
+    lastModifiedAt,
+    orderBy: lastModifiedAt == null ? "dateTime" : null,
+  );
+  QuerySnapshot<Map<String, dynamic>> response =
+      await query.get(GetOptions(source: src));
+  if (response.docs.isNotEmpty && savePoint != null) {
+    savePoint['vehicleRequests'] = response.docs.last;
+  }
+  ans.addAll(response.docs
+      .map((doc) => decodeToRequest(doc.data()) as VehicleRequest));
+  return ans;
+}
+
+Query<Map<String, dynamic>> sanitizeRequestsQuery(
+    Query<Map<String, dynamic>> query,
+    RequestStatus? status,
+    int? limit,
+    Map<String, DocumentSnapshot>? savePoint,
+    String saveKey,
+    int? lastModifiedAt,
+    {String? orderBy}) {
   query = query.where('deletedAt', isNull: true);
   if (status != null) {
     query = query.where('status', isEqualTo: status.index);
@@ -683,11 +564,12 @@ Query<Map<String, dynamic>> sanitizeRequestsQuery(
     query = query.where('modifiedAt', isGreaterThan: lastModifiedAt);
   }
   query = query.orderBy(
-      lastModifiedAt != null
-          ? 'modifiedAt'
-          : (status == null || status == RequestStatus.pending
-              ? 'id'
-              : 'closedAt'),
+      orderBy ??
+          (lastModifiedAt != null
+              ? 'modifiedAt'
+              : (status == null || status == RequestStatus.pending
+                  ? 'id'
+                  : 'closedAt')),
       descending: true);
   if (savePoint != null && savePoint[saveKey] != null) {
     query = query.startAfterDocument(savePoint[saveKey]!);
@@ -696,4 +578,174 @@ Query<Map<String, dynamic>> sanitizeRequestsQuery(
     query = query.limit(limit);
   }
   return query;
+}
+
+class RequestItem extends StatefulWidget {
+  final Request request;
+  final Widget? detailWidget;
+  final Map<String, String> otherDetails;
+  const RequestItem(
+      {super.key,
+      required this.request,
+      this.detailWidget,
+      required this.otherDetails});
+
+  @override
+  State<RequestItem> createState() => _RequestItemState();
+}
+
+class _RequestItemState extends State<RequestItem> {
+  @override
+  Widget build(BuildContext context) {
+    Widget trailing = widget.request.status == RequestStatus.pending
+        ? AnimateIcon(
+            color: Theme.of(context).colorScheme.primary,
+            onTap: () {
+              showMsg(context, 'This request is yet to be approved.');
+            },
+            iconType: IconType.continueAnimation,
+            animateIcon: AnimateIcons.hourglass,
+          )
+        : IconButton(
+            onPressed: () {
+              showMsg(
+                  context, 'This request is ${widget.request.status.name}.');
+            },
+            icon: Icon(
+              widget.request.status == RequestStatus.approved
+                  ? Icons.check_circle_outline_rounded
+                  : Icons.cancel_outlined,
+              color: widget.request.status == RequestStatus.approved
+                  ? Colors.greenAccent
+                  : Colors.redAccent,
+            ),
+          );
+    if (widget.request.approvers.contains(currentUser.email) &&
+        widget.request.status == RequestStatus.pending) {
+      // TODO: Remove shortcircuiting
+      trailing = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            onPressed: () async {
+              final response = await askUser(
+                context,
+                'Do you want to approve this ${widget.request.type} request?',
+                yes: true,
+                no: true,
+              );
+              if (response == 'yes') {
+                widget.request.approve();
+              }
+            },
+            icon: const Icon(
+              Icons.check_rounded,
+              color: Colors.green,
+            ),
+          ),
+          IconButton(
+            onPressed: () async {
+              final response = await askUser(
+                context,
+                'Do you want to deny this ${widget.request.type} request?',
+                yes: true,
+                no: true,
+              );
+              if (response == 'yes') {
+                widget.request.deny();
+              }
+            },
+            icon: const Icon(
+              Icons.close,
+              color: Colors.red,
+            ),
+          ),
+        ],
+      );
+    }
+    return GlassWidget(
+      radius: 30,
+      child: Container(
+        color: widget.request.uiElement['color'].withOpacity(0.2),
+        child: ListTile(
+          contentPadding: const EdgeInsets.only(left: 10),
+          onTap: () async {
+            await navigatorPush(
+              context,
+              ChatScreen(
+                bottomBar:
+                    (!widget.request.approvers.contains(currentUser.email))
+                        ? null
+                        : RequestBottomBar(request: widget.request),
+                showInfo: () =>
+                    widget.request.showInfo(context, widget.otherDetails),
+                chat: widget.request.chatData,
+              ),
+            );
+            setState(() {});
+          },
+          onLongPress: () {
+            widget.request.showInfo(context, widget.otherDetails);
+          },
+          leading: Stack(
+            children: [
+              Icon(widget.request.uiElement['icon'], size: 50),
+              // Positioned(
+              //   right: 0,
+              //   child: CacheBuilder(
+              //       loadingWidget: AnimateIcon(
+              //         height: 15,
+              //         width: 15,
+              //         color: Colors.blue.withOpacity(0.1),
+              //         onTap: () {},
+              //         iconType: IconType.continueAnimation,
+              //         animateIcon: AnimateIcons.loading7,
+              //       ),
+              //       builder: (ctx, msg) {
+              //         if (msg == null ||
+              //             msg.readBy.contains(currentUser.email!)) {
+              //           return Container();
+              //         }
+              //         return AnimateIcon(
+              //           height: 15,
+              //           width: 15,
+              //           color: Colors.red,
+              //           onTap: () {},
+              //           iconType: IconType.continueAnimation,
+              //           animateIcon: AnimateIcons.bell,
+              //         );
+              //       },
+              //       provider: ({Source? src}) async {
+              //         return await fetchLastMessage(
+              //           "requests/${widget.request.id}",
+              //           // src: src,
+              //         );
+              //       }),
+              // ),
+            ],
+          ),
+          title: Text('${widget.request.type.replaceAll('_', ' ')} Request',
+              overflow: TextOverflow.fade),
+          trailing: trailing,
+          subtitle: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (widget.detailWidget != null) widget.detailWidget!,
+              if (widget.request.approvers.contains(currentUser.email))
+                UserBuilder(
+                  email: widget.request.requestingUserEmail,
+                  builder: (ctx, userData) => Text(
+                    userData.name ?? userData.email!,
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color: widget.request.uiElement['color'],
+                        ),
+                  ),
+                )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

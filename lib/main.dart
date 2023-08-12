@@ -174,11 +174,15 @@ class HustleStayApp extends ConsumerWidget {
 ValueNotifier<String?> everythingInitialized = ValueNotifier(null);
 
 Future<void> initializeEverything() async {
-  everythingInitialized.value = "Fetching users";
-  await initializeUsers();
+  if (currentUser.permissions.users.read == true) {
+    everythingInitialized.value = "Fetching users";
+    await initializeUsers();
+  }
   everythingInitialized.value = "Fetching complaints";
   await initializeComplaints();
   everythingInitialized.value = "Fetching requests";
   await initializeRequests();
+  everythingInitialized.value = "Fetching vehicle requests";
+  await initializeVehicleRequests();
   everythingInitialized.value = null;
 }

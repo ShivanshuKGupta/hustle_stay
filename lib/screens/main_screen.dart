@@ -9,6 +9,7 @@ import 'package:hustle_stay/screens/complaints/complaints_screen.dart';
 import 'package:hustle_stay/screens/hostel/hostel_screen.dart';
 import 'package:hustle_stay/screens/requests/requests_screen.dart';
 import 'package:hustle_stay/screens/settings/settings_screen.dart';
+import 'package:hustle_stay/screens/vehicle/vehicle_screen.dart';
 import 'package:hustle_stay/tools.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
@@ -44,7 +45,7 @@ class _HomeScreenState extends ConsumerState<MainScreen> {
           ? const AttendanceScreen()
           : const HostelScreen(),
       const ComplaintsScreen(),
-      // HomeScreen(pageChanger: _switchPage),
+      VehicleScreen(),
       const RequestsScreen(),
       const SettingsScreen(),
     ];
@@ -100,12 +101,12 @@ class _HomeScreenState extends ConsumerState<MainScreen> {
                           : Icons.info_outline_rounded,
                       text: 'Complaints',
                     ),
-                    // GButton(
-                    //   icon: settings.currentPage == i++
-                    //       ? Icons.home_rounded
-                    //       : Icons.home_outlined,
-                    //   text: 'Home',
-                    // ),
+                    GButton(
+                      icon: settings.currentPage == i++
+                          ? Icons.airport_shuttle_rounded
+                          : Icons.airport_shuttle_outlined,
+                      text: 'Vehicle',
+                    ),
                     GButton(
                       icon: settings.currentPage == i++
                           ? Icons.assignment_turned_in_rounded

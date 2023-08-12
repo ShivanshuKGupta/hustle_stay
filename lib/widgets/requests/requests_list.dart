@@ -46,6 +46,7 @@ class _RequestsListState extends ConsumerState<RequestsList> {
       },
       child: ScrollBuilder(
         key: UniqueKey(),
+        automaticLoading: true,
         header: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,12 +112,17 @@ class _RequestsListState extends ConsumerState<RequestsList> {
         ),
         separatorBuilder: (context, index) => const SizedBox(height: 10),
         loader: (ctx, start, interval) async {
-          final List<Request> requests = await fetchRequests(
-            limit: interval,
-            savePoint: savePoint,
-            status: settings.requestViewStatus,
-          );
-          if (savePoint.isEmpty) {
+          if (widget.requests.isNotEmpty && start != 0) {
+            return [];
+          }
+          final List<Request> requests = widget.requests.isNotEmpty
+              ? widget.requests
+              : await fetchRequests(
+                  limit: interval,
+                  savePoint: savePoint,
+                  status: settings.requestViewStatus,
+                );
+          if (savePoint.isEmpty && requests.isEmpty) {
             return [
               SizedBox(
                 height: mediaQuery.size.height - 200,
