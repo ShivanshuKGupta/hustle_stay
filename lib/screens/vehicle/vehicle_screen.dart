@@ -53,6 +53,7 @@ class _VehicleScreenState extends State<VehicleScreen> {
         ],
       ),
       body: ScrollBuilder(
+        automaticLoading: true,
         loadingWidget: ValueListenableBuilder(
           valueListenable: vehicleRequestsIntialized,
           builder: (context, value, child) {
@@ -126,7 +127,7 @@ class _VehicleScreenState extends State<VehicleScreen> {
                                   context,
                                   ImagePreview(
                                     image: Hero(
-                                      tag: userData.name ?? userData.email!,
+                                      tag: request.id,
                                       child: CachedNetworkImage(
                                         imageUrl: userData.imgUrl!,
                                       ),
@@ -135,7 +136,7 @@ class _VehicleScreenState extends State<VehicleScreen> {
                                 );
                               },
                         child: Hero(
-                          tag: userData.name ?? userData.email!,
+                          tag: request.id,
                           child: CircleAvatar(
                             backgroundImage: userData.imgUrl == null
                                 ? null
@@ -172,7 +173,7 @@ class _VehicleScreenState extends State<VehicleScreen> {
           );
           List<Widget> widgets = [];
           widgets.addAll(requestTiles);
-          final now = DateTime.now().subtract(const Duration(hours: 1));
+          final now = DateTime.now();
           bool indicator = false;
           Widget todayIndicator = Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -195,7 +196,8 @@ class _VehicleScreenState extends State<VehicleScreen> {
               ],
             ),
           );
-          if (requests.last.dateTime!.compareTo(now) > 0) {
+          if (requests.isNotEmpty &&
+              requests.last.dateTime!.compareTo(now) > 0) {
             widgets.add(todayIndicator);
           } else {
             for (int i = widgets.length; i-- > 0;) {
