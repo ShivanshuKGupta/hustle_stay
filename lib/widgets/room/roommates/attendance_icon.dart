@@ -51,6 +51,7 @@ class _AttendanceIconState extends State<AttendanceIcon> {
   Future<void> _getAttendanceData() async {
     String resp = await getAttendanceData(
       widget.roommateData,
+      widget.hostelName,
       widget.selectedDate,
     );
     if (mounted) {

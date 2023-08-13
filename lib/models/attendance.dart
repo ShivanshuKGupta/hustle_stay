@@ -31,13 +31,13 @@ class RoommateInfo {
 }
 
 Future<String> getAttendanceData(
-    RoommateData roommateData, DateTime date) async {
+    RoommateData roommateData, String hostelName, DateTime date) async {
   final storage = FirebaseFirestore.instance;
   final documentAddRef = storage.collection('users').doc(roommateData.email);
-  final documentRef =
-      documentAddRef.collection('Attendance').doc(date.year.toString());
+  final documentRef = documentAddRef
+      .collection('Attendance')
+      .doc(DateFormat('yyyy-MM-dd').format(date));
   final batch = storage.batch();
-  print('hi');
   if (roommateData.leaveStartDate != null &&
       (roommateData.leaveStartDate!.isBefore(date)) &&
       roommateData.leaveEndDate != null &&
@@ -46,9 +46,7 @@ Future<String> getAttendanceData(
         roommateData.internship != null && roommateData.internship == true
             ? 'onInternship'
             : 'onLeave';
-    await documentRef.set({
-      'attendance': {DateTime(date.year, date.month, date.day).toString(): val}
-    }, SetOptions(merge: false));
+    await documentRef.set({'status': val}, SetOptions(merge: false));
     return val;
   } else if (roommateData.leaveStartDate != null &&
       roommateData.leaveEndDate != null) {
@@ -60,31 +58,16 @@ Future<String> getAttendanceData(
           'onInternship': false,
         },
         SetOptions(merge: true));
-    batch.set(
-        documentRef,
-        {
-          'attendance': {
-            DateTime(date.year, date.month, date.day).toString(): 'absent'
-          }
-        },
-        SetOptions(merge: true));
+    batch.set(documentRef, {'status': 'absent'}, SetOptions(merge: true));
     await batch.commit();
     return 'absent';
   }
-  final documentSnapshot = await documentRef.get();
 
-  if (documentSnapshot.exists &&
-      documentSnapshot['attendance']
-              [DateTime(date.year, date.month, date.day).toString()] !=
-          null) {
-    return documentSnapshot['attendance']
-        [DateTime(date.year, date.month, date.day).toString()];
+  final documentSnapshot = await documentRef.get();
+  if (documentSnapshot.exists) {
+    return documentSnapshot['status'];
   } else {
-    await documentRef.set({
-      'attendance': {
-        DateTime(date.year, date.month, date.day).toString(): 'absent'
-      }
-    }, SetOptions(merge: true));
+    await documentRef.set({'status': 'absent'}, SetOptions(merge: true));
     return 'absent';
   }
 }
@@ -102,15 +85,13 @@ Future<String> setAttendanceData(String email, String hostelName,
         .collection('users')
         .doc(email)
         .collection('Attendance')
-        .doc(date.year.toString());
+        .doc(DateFormat('yyyy-MM-dd').format(date));
 
     await FirebaseFirestore.instance.runTransaction((transaction) async {
       transaction.set(
           docRef,
           {
-            'attendance': {
-              DateTime(date.year, date.month, date.day).toString(): statusVal
-            },
+            'status': statusVal,
           },
           SetOptions(merge: true));
     });
@@ -128,9 +109,7 @@ Future<List<DateTime>> fetchAttendanceByStudent(
   List<DateTime> list = [];
 
   final attendanceDataRef = await storage
-      .collection('hostels')
-      .doc('hostelMates')
-      .collection('Roommates')
+      .collection('users')
       .doc(email)
       .collection('Attendance')
       .where('status', isEqualTo: status)
@@ -183,7 +162,6 @@ Future<bool> markAllAttendance(
             batch.set(attendanceDocRef, {'status': 'onLeave'});
           }
         } else {
-          print('bye');
           roommateDocs.add(x);
         }
       }
@@ -248,9 +226,7 @@ Future<bool> markAllRoommateAttendance(String hostelName, String roomName,
     String statusVal = status ? 'present' : 'absent';
     final storage = FirebaseFirestore.instance;
     final docsRoommatesRef = await storage
-        .collection('hostels')
-        .doc('hostelMates')
-        .collection('Roommates')
+        .collection('users')
         .where('hostelName', isEqualTo: hostelName)
         .where('roomName', isEqualTo: roomName)
         .get();
@@ -296,9 +272,7 @@ Future<Map<String, dynamic>> getAttendanceStatistics(
 
   final storage = FirebaseFirestore.instance;
   final docsAttendanceRef = await storage
-      .collection('hostels')
-      .doc('hostelMates')
-      .collection('Roommates')
+      .collection('users')
       .doc(email)
       .collection('Attendance')
       .get();
@@ -354,9 +328,7 @@ Future<Map<String, dynamic>> getHostelAttendanceStatistics(
   double total = 0;
 
   final roommatesQuery = await storage
-      .collection('hostels')
-      .doc('hostelMates')
-      .collection('Roommates')
+      .collection('users')
       .where('hostelName', isEqualTo: hostelName)
       .get(source == null ? null : GetOptions(source: source));
   total = roommatesQuery.docs.length.toDouble();
@@ -429,9 +401,7 @@ Future<Map<String, Map<String, int>>> getHostelRangeAttendanceStatistics(
   double total = 0;
 
   final roommatesQuery = await storage
-      .collection('hostels')
-      .doc('hostelMates')
-      .collection('Roommates')
+      .collection('users')
       .where('hostelName', isEqualTo: hostelName)
       .get(source == null ? null : GetOptions(source: source));
   total = roommatesQuery.docs.length.toDouble();
@@ -482,9 +452,7 @@ Future<List<RoommateInfo>> getFilteredStudents(
   final storage = FirebaseFirestore.instance;
 
   final QuerySnapshot<Map<String, dynamic>> roommatesQuery = await storage
-      .collection('hostels')
-      .doc('hostelMates')
-      .collection('Roommates')
+      .collection('users')
       .where('hostelName', isEqualTo: hostelName)
       .get(source == null ? null : GetOptions(source: source));
 
@@ -538,12 +506,7 @@ Future<List<RoommateInfo>> getFilteredStudents(
 }
 
 Future<LeaveData?> fetchCurrentLeave(String hostelName, String email) async {
-  final refR = await storage
-      .collection('hostels')
-      .doc('hostelMates')
-      .collection('Roommates')
-      .doc(email)
-      .get();
+  final refR = await storage.collection('users').doc(email).get();
 
   final leaveStartDate = refR.data()!['leaveStartDate'];
   final leaveEndDate = refR.data()!['leaveEndDate'];
@@ -568,12 +531,7 @@ Future<LeaveData?> fetchCurrentLeave(String hostelName, String email) async {
 
 Future<List<LeaveData>> fetchLeaves(String hostelName, String email,
     {bool? getAll}) async {
-  final refR = await storage
-      .collection('hostels')
-      .doc('hostelMates')
-      .collection('Roommates')
-      .doc(email)
-      .get();
+  final refR = await storage.collection('users').doc(email).get();
 
   final leaveStartDate = refR.data()!['leaveStartDate'];
   final onLeave = refR.data()!['onLeave'];
@@ -602,9 +560,7 @@ Future<List<LeaveData>> fetchLeaves(String hostelName, String email,
 
 Future<Map<DateTime, String>> getAttendanceRecord(String? email) async {
   final ref = await storage
-      .collection('hostels')
-      .doc('hostelMates')
-      .collection('Roommates')
+      .collection('users')
       .doc(email ?? currentUser.email)
       .collection('Attendance')
       .get();
@@ -618,4 +574,43 @@ Future<Map<DateTime, String>> getAttendanceRecord(String? email) async {
     data[DateTime(year, month, day)] = x['status'];
   }
   return data;
+}
+
+Future<bool> dataTransfer() async {
+  try {
+    final ref = await FirebaseFirestore.instance
+        .collection('hostels')
+        .doc('hostelMates')
+        .collection('Roommates')
+        .get();
+    final batch = FirebaseFirestore.instance.batch();
+    for (final doc in ref.docs) {
+      final atRef = await doc.reference.collection('Attendance').get();
+      for (final atdoc in atRef.docs) {
+        batch.set(
+            FirebaseFirestore.instance
+                .collection('users')
+                .doc(doc.id)
+                .collection('Attendance')
+                .doc(atdoc.id),
+            atdoc.data());
+        batch.delete(atdoc.reference);
+      }
+      final lRef = await doc.reference.collection('Leaves').get();
+      for (final atdoc in lRef.docs) {
+        batch.set(
+            FirebaseFirestore.instance
+                .collection('users')
+                .doc(doc.id)
+                .collection('Leaves')
+                .doc(atdoc.id),
+            atdoc.data());
+        batch.delete(atdoc.reference);
+      }
+    }
+    await batch.commit();
+    return true;
+  } catch (e) {
+    return false;
+  }
 }

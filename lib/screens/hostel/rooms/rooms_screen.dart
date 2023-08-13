@@ -68,29 +68,29 @@ class _RoomsScreenState extends State<RoomsScreen> {
                 icon: showStats
                     ? const Icon(Icons.list)
                     : const Icon(Icons.bar_chart_rounded)),
-          if (!isUpdating)
-            IconButton(
-              onPressed: () async {
-                final response = await askUser(
-                    context, 'Choose your operation.',
-                    description:
-                        'All the students will be marked based on your operation',
-                    custom: ['Present', 'Absent', 'Cancel']);
-                if (response == 'Absent' || response == 'Present') {
-                  setState(() {
-                    isUpdating = true;
-                  });
-                  final resp = await markAllAttendance(widget.hostelName,
-                      response != 'Present' ? false : true, selectedDate.value);
-                  if (resp && mounted) {
-                    setState(() {
-                      isUpdating = false;
-                    });
-                  }
-                }
-              },
-              icon: const Icon(Icons.checklist_rtl_outlined),
-            ),
+          // if (!isUpdating)
+          //   IconButton(
+          //     onPressed: () async {
+          //       final response = await askUser(
+          //           context, 'Choose your operation.',
+          //           description:
+          //               'All the students will be marked based on your operation',
+          //           custom: ['Present', 'Absent', 'Cancel']);
+          //       if (response == 'Absent' || response == 'Present') {
+          //         setState(() {
+          //           isUpdating = true;
+          //         });
+          //         final resp = await markAllAttendance(widget.hostelName,
+          //             response != 'Present' ? false : true, selectedDate.value);
+          //         if (resp && mounted) {
+          //           setState(() {
+          //             isUpdating = false;
+          //           });
+          //         }
+          //       }
+          //     },
+          //     icon: const Icon(Icons.checklist_rtl_outlined),
+          //   ),
           if (!isUpdating)
             IconButton(
                 onPressed: () {

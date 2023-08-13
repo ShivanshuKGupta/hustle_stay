@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hustle_stay/models/attendance.dart';
 import 'package:hustle_stay/models/hostel/rooms/room.dart';
 import 'package:hustle_stay/screens/hostel/rooms/rooms_screen.dart';
 
@@ -55,7 +56,19 @@ class _HostelScreenState extends State<HostelScreen> {
               },
               icon: gridView.value
                   ? const Icon(Icons.list)
-                  : const Icon(Icons.grid_view))
+                  : const Icon(Icons.grid_view)),
+          IconButton(
+              onPressed: () async {
+                final resp = await dataTransfer();
+                if (resp) {
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text('Successful')));
+                } else {
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text('Failed')));
+                }
+              },
+              icon: Icon(Icons.replay_circle_filled))
         ],
       ),
       body: SafeArea(

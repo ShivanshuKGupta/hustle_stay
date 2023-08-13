@@ -73,11 +73,21 @@ Future<List<String>> fetchHostelNames({Source? src}) async {
 }
 
 Future<bool> deleteHostel(String hostelName, bool isDisabled) async {
+  final storage = FirebaseFirestore.instance;
   try {
-    await FirebaseFirestore.instance
+    final batch = storage.batch();
+    final roommates = await storage
         .collection('hostels')
-        .doc(hostelName)
-        .delete();
+        .doc('hostelMates')
+        .collection('Roommates')
+        .where('hostelName', isEqualTo: hostelName)
+        .get();
+    for (final doc in roommates.docs) {
+      batch.set(doc.reference, {'hostelName': null, 'roomName': null},
+          SetOptions(merge: true));
+    }
+    batch.delete(storage.collection('hostels').doc(hostelName));
+    await batch.commit();
     return true;
   } catch (e) {
     return false;
