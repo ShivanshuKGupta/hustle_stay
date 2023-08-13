@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -84,7 +83,6 @@ class Message extends StatelessWidget {
                     padding: const EdgeInsets.only(right: 5.0, left: 1, top: 2),
                     child: UserBuilder(
                       email: msg.from,
-                      src: Source.cache,
                       builder: (context, userData) {
                         return GestureDetector(
                           onTap: () {

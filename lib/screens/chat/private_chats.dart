@@ -26,7 +26,6 @@ class ChatsScreen extends StatelessWidget {
                 title: const Text('Who to chat with?'),
               ),
               body: UsersBuilder(
-                src: Source.cache,
                 loadingWidget: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -123,6 +122,9 @@ class ChatsScreen extends StatelessWidget {
                 src: Source.cache,
                 loadingWidget: Container(),
                 builder: (ctx, user) {
+                  if (user.email == null && user.name == null) {
+                    user.name = title ?? person2;
+                  }
                   return ListTile(
                     title: Text(user.name ?? user.email!),
                     onLongPress: () {
@@ -183,10 +185,7 @@ class ChatsScreen extends StatelessWidget {
                       name: title,
                     );
                   }
-                  return await fetchUserData(
-                    person2,
-                    src: src,
-                  );
+                  return await fetchUserData(person2);
                 },
               );
             },

@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/tools.dart';
+import 'package:hustle_stay/widgets/other/loading_elevated_button.dart';
 
 /// It is Form made for Authenticating users using email and password
 /// Just give it [onSubmit] function and you're ready to go
@@ -66,6 +68,7 @@ class _AuthFormState extends State<AuthForm> {
             ),
             enabled: !_loading,
             validator: (email) => Validate.email(email),
+            onChanged: (value) => _email = value,
             onSaved: (value) {
               _email = value!;
             },
@@ -109,6 +112,30 @@ class _AuthFormState extends State<AuthForm> {
           //   icon: const Icon(Icons.web),
           //   label: const Text('Google OAuth Provider'),
           // ),
+
+          LoadingElevatedButton(
+            style: TextButton.styleFrom(
+              side: BorderSide.none,
+              foregroundColor: Colors.blue,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+            ),
+            onPressed: () async {
+              _email = _email.trim();
+              String? err = Validate.email(_email, required: true);
+              if (err != null) {
+                showMsg(context, err);
+                return;
+              }
+              if (await askUser(context, 'Send a password reset link for',
+                      description: "$_email ?", yes: true, no: true) ==
+                  'yes') {
+                await auth.sendPasswordResetEmail(email: _email);
+              }
+            },
+            icon: const Icon(Icons.lock_reset_rounded),
+            label: const Text('Reset password'),
+          ),
         ],
       ),
     );

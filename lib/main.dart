@@ -5,6 +5,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hustle_stay/models/complaint/complaint.dart';
+import 'package:hustle_stay/models/requests/request.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/auth/auth_screen.dart';
@@ -15,6 +17,7 @@ import 'package:hustle_stay/screens/requests/mess/mess_request_screen.dart';
 import 'package:hustle_stay/screens/requests/other/other_request_screen.dart';
 import 'package:hustle_stay/screens/requests/vehicle/vehicle_requests_screen.dart';
 import 'package:hustle_stay/tools.dart';
+import 'package:hustle_stay/widgets/other/loading_builder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'firebase_options.dart';
@@ -62,30 +65,23 @@ void main() async {
   );
   // Initializing prefs here in main to avoid any delay in activating settings
   prefs = await SharedPreferences.getInstance();
-  // Fetching CurrentUser Info
-  if (auth.currentUser != null) {
-    currentUser = await fetchUserData(auth.currentUser!.email!);
-  }
-  // Correction code for editable of users
+  try {
+    if (auth.currentUser != null) {
+      currentUser = await fetchUserData(
+        auth.currentUser!.email!,
+      );
+    }
+  } catch (e) {}
+  // Correction code
   // if (kDebugMode && currentUser.isAdmin) {
-  //   final users = await fetchUsers();
-  //   for (var user in users) {
-  //     print("Updating ${user.email}...");
-  //     try {
-  //       await firestore
-  //           .collection('users')
-  //           .doc(user.email!)
-  //           .collection('editable')
-  //           .doc('details')
-  //           .get()
-  //           .then((doc) async {
-  //         user.load(doc.data() ?? {});
-  //         await updateUserData(user);
-  //       });
-  //     } catch (e) {
-  //       print("Error | ${user.email}: $e");
-  //     }
-  //   }
+  //   Query<Map<String, dynamic>> query = firestore.collection('categories');
+  //   final response = await query.get();
+  //   response.docs.map((doc) => Category(doc.id)..load(doc.data())).forEach(
+  //     (element) async {
+  //       debugPrint('Updating Category: ${element.id}');
+  //       await updateCategory(element);
+  //     },
+  //   );
   // }
   runApp(const ProviderScope(child: HustleStayApp()));
 }
@@ -127,24 +123,32 @@ class HustleStayApp extends ConsumerWidget {
                   if (user.hasData) {
                     return currentUser.email != null
                         ? const MainScreen()
-                        : UserBuilder(
-                            email: user.data!.email!,
-                            src: Source.server,
-                            loadingWidget: Scaffold(
-                              body: Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    circularProgressIndicator(),
-                                    const Text('Fetching user details'),
-                                  ],
-                                ),
-                              ),
+                        : Scaffold(
+                            body: LoadingBuilder(
+                              loadingWidgetBuilder: (context, value, child) {
+                                return Center(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      circularProgressIndicator(),
+                                      const Text('Fetching user details...'),
+                                    ],
+                                  ),
+                                );
+                              },
+                              builder: (context, progress) async {
+                                if (auth.currentUser != null) {
+                                  currentUser = await fetchUserData(
+                                    auth.currentUser!.email!,
+                                    src: null,
+                                  );
+                                }
+                                return const MainScreen();
+                              },
                             ),
-                            builder: (context, user) {
-                              currentUser = user;
-                              return const MainScreen();
-                            },
                           );
                   }
                   return const AuthScreen();
@@ -165,4 +169,20 @@ class HustleStayApp extends ConsumerWidget {
       },
     );
   }
+}
+
+ValueNotifier<String?> everythingInitialized = ValueNotifier(null);
+
+Future<void> initializeEverything() async {
+  if (currentUser.permissions.users.read == true) {
+    everythingInitialized.value = "Fetching users";
+    await initializeUsers();
+  }
+  everythingInitialized.value = "Fetching complaints";
+  await initializeComplaints();
+  everythingInitialized.value = "Fetching requests";
+  await initializeRequests();
+  everythingInitialized.value = "Fetching vehicle requests";
+  await initializeVehicleRequests();
+  everythingInitialized.value = null;
 }

@@ -9,15 +9,21 @@ class ScrollBuilder extends StatefulWidget {
   final int interval;
   final Widget? loadingWidget;
   final bool automaticLoading;
+  final bool reverse;
   final ScrollController? scrollController;
+  final Widget? header;
+  final Widget? footer;
   const ScrollBuilder({
     super.key,
     required this.loader,
     this.interval = 20,
     this.loadingWidget,
     this.automaticLoading = false,
+    this.reverse = false,
     this.scrollController,
     this.separatorBuilder,
+    this.header,
+    this.footer,
   });
 
   @override
@@ -53,15 +59,30 @@ class _ScrollBuilderState extends State<ScrollBuilder> {
 
   @override
   Widget build(BuildContext context) {
+    int length = items.length +
+        1 +
+        (widget.header != null ? 1 : 0) +
+        (widget.footer != null ? 1 : 0);
     return !initialized
         ? Center(child: widget.loadingWidget ?? circularProgressIndicator())
         : ListView.separated(
+            reverse: widget.reverse,
             separatorBuilder:
                 widget.separatorBuilder ?? (ctx, index) => Container(),
             // key: , add key here if the widgets rebuild on their own
             controller: widget.scrollController,
-            itemCount: items.length + 1,
+            itemCount: length,
             itemBuilder: (context, index) {
+              if (widget.header != null) {
+                if (index == 0) {
+                  return widget.header;
+                } else {
+                  index--;
+                }
+              }
+              if (widget.footer != null && index == length - 1) {
+                return widget.footer;
+              }
               if (index == items.length) {
                 if (!showLoadMore) {
                   return Container();

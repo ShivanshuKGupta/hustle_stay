@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/main.dart';
+import 'package:hustle_stay/models/requests/request.dart';
 
 class _Settings {
   /// whether dark mode is on
@@ -19,6 +20,9 @@ class _Settings {
   /// Complaints Screen Sorting Parameters
   /// used for showing complaints in groups and in a certain order
   String complaintsGrouping = "none";
+
+  /// Request Screen Default Status Type
+  RequestStatus? requestViewStatus = RequestStatus.pending;
 
   /// The groupBy in Stats of ComplaintsScreen
   String groupBy = 'Category';
@@ -38,6 +42,8 @@ class _Settings {
       "complaintsGrouping": complaintsGrouping,
       "groupBy": groupBy,
       "requestsGroupBy": requestsGroupBy,
+      "requestViewStatus":
+          requestViewStatus == null ? null : requestViewStatus!.index,
       "interval": interval,
       "autoDarkMode": autoDarkMode,
     });
@@ -51,6 +57,9 @@ class _Settings {
     introductionScreenVisited = settings["introductionScreenVisited"] ?? false;
     currentPage = settings["currentPage"] ?? 2;
     complaintsGrouping = (settings["complaintsGrouping"] ?? complaintsGrouping);
+    requestViewStatus = settings["requestViewStatus"] == null
+        ? requestViewStatus
+        : RequestStatus.values[settings["requestViewStatus"]];
     groupBy = (settings["groupBy"] ?? 'Category');
     requestsGroupBy = (settings["requestsGroupBy"] ?? 'Category');
     interval = (settings["interval"] ?? 'Day');

@@ -80,7 +80,6 @@ class _FilterChooserScreenState extends ConsumerState<FilterChooserScreen> {
             chosenCategories: widget.filters['categories'] ?? {}),
       ),
       UsersBuilder(
-        src: Source.cache,
         loadingWidget: Center(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
@@ -112,7 +111,6 @@ class _FilterChooserScreenState extends ConsumerState<FilterChooserScreen> {
       ),
       UsersBuilder(
         provider: fetchComplainees,
-        src: Source.cache,
         loadingWidget: Center(
           child: Padding(
             padding: const EdgeInsets.all(20.0),

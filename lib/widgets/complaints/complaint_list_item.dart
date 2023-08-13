@@ -1,5 +1,3 @@
-import 'package:animated_icon/animated_icon.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,7 +6,6 @@ import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user/user.dart';
-import 'package:hustle_stay/providers/firestore_cache_builder.dart';
 import 'package:hustle_stay/providers/state_switch.dart';
 import 'package:hustle_stay/screens/chat/chat_screen.dart';
 import 'package:hustle_stay/tools.dart';
@@ -90,39 +87,39 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
           id: widget.complaint.category ?? 'Other',
           builder: (ctx, category) => Stack(
             children: [
-              Positioned(
-                right: 0,
-                top: 0,
-                child: CacheBuilder(
-                    loadingWidget: AnimateIcon(
-                      height: 15,
-                      width: 15,
-                      color: Colors.blue.withOpacity(0.1),
-                      onTap: () {},
-                      iconType: IconType.continueAnimation,
-                      animateIcon: AnimateIcons.loading7,
-                    ),
-                    builder: (ctx, msg) {
-                      if (msg == null ||
-                          msg.readBy.contains(currentUser.email!)) {
-                        return Container();
-                      }
-                      return AnimateIcon(
-                        height: 15,
-                        width: 15,
-                        color: Colors.red,
-                        onTap: () {},
-                        iconType: IconType.continueAnimation,
-                        animateIcon: AnimateIcons.bell,
-                      );
-                    },
-                    provider: ({Source? src}) async {
-                      return await fetchLastMessage(
-                        "complaints/${widget.complaint.id}",
-                        src: src,
-                      );
-                    }),
-              ),
+              // Positioned(
+              //   right: 0,
+              //   top: 0,
+              //   child: CacheBuilder(
+              //       loadingWidget: AnimateIcon(
+              //         height: 15,
+              //         width: 15,
+              //         color: Colors.blue.withOpacity(0.1),
+              //         onTap: () {},
+              //         iconType: IconType.continueAnimation,
+              //         animateIcon: AnimateIcons.loading7,
+              //       ),
+              //       builder: (ctx, msg) {
+              //         if (msg == null ||
+              //             msg.readBy.contains(currentUser.email!)) {
+              //           return Container();
+              //         }
+              //         return AnimateIcon(
+              //           height: 15,
+              //           width: 15,
+              //           color: Colors.red,
+              //           onTap: () {},
+              //           iconType: IconType.continueAnimation,
+              //           animateIcon: AnimateIcons.bell,
+              //         );
+              //       },
+              //       provider: ({Source? src}) async {
+              //         return await fetchLastMessage(
+              //           "complaints/${widget.complaint.id}",
+              //           src: src,
+              //         );
+              //       }),
+              // ),
               CircleAvatar(
                 backgroundColor: category.color.withOpacity(0.2),
                 child: Icon(
@@ -197,6 +194,8 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
 
   void _showComplaintInfo() {
     final createdAt = DateTime.fromMillisecondsSinceEpoch(widget.complaint.id);
+    final modifiedAt =
+        DateTime.fromMillisecondsSinceEpoch(widget.complaint.modifiedAt);
     final DateTime? resolvedAt = widget.complaint.resolvedAt == null
         ? null
         : DateTime.fromMillisecondsSinceEpoch(widget.complaint.resolvedAt!);
@@ -293,6 +292,22 @@ class _ComplaintListItemState extends ConsumerState<ComplaintListItem>
                     ),
                     Text(
                       "${ddmmyyyy(createdAt)} ${timeFrom(createdAt)}",
+                      textAlign: TextAlign.right,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Last Modified At: ",
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                    ),
+                    Text(
+                      "${ddmmyyyy(modifiedAt)} ${timeFrom(modifiedAt)}",
                       textAlign: TextAlign.right,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),

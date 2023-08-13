@@ -1,8 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user/medical_info.dart';
 import 'package:hustle_stay/models/user/user.dart';
-import 'package:hustle_stay/providers/firestore_cache_builder.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/other/loading_builder.dart';
 import 'package:hustle_stay/widgets/other/loading_elevated_button.dart';
@@ -25,7 +23,7 @@ class _MedicalScreenState extends State<MedicalScreen> {
       appBar: AppBar(
         title: const Text('Filter Medical Info'),
       ),
-      body: CacheBuilder(
+      body: UsersBuilder(
         loadingWidget: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -35,7 +33,6 @@ class _MedicalScreenState extends State<MedicalScreen> {
             ],
           ),
         ),
-        src: Source.cache,
         builder: (ctx, users) {
           return RefreshIndicator(
             onRefresh: () async {
@@ -120,10 +117,10 @@ class _MedicalScreenState extends State<MedicalScreen> {
                             (dobRange == null ||
                                 (user.medicalInfo.dob != null &&
                                     dobRange!.start
-                                            .compareTo(user.medicalInfo.dob!) >=
+                                            .compareTo(user.medicalInfo.dob!) <=
                                         0 &&
                                     dobRange!.end
-                                            .compareTo(user.medicalInfo.dob!) <=
+                                            .compareTo(user.medicalInfo.dob!) >=
                                         0));
                       },
                     ).toList();
@@ -164,6 +161,7 @@ class _MedicalScreenState extends State<MedicalScreen> {
                                               .primary,
                                         ),
                                   ),
+                                const SizedBox(width: 10),
                                 if (user.medicalInfo.dob != null)
                                   Text(
                                     ddmmyyyy(user.medicalInfo.dob!),
@@ -189,7 +187,6 @@ class _MedicalScreenState extends State<MedicalScreen> {
             ),
           );
         },
-        provider: fetchUsers,
       ),
     );
   }

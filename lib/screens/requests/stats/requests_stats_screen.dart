@@ -10,7 +10,7 @@ import 'package:hustle_stay/screens/requests/stats/request_filter_chooser.dart';
 import 'package:hustle_stay/screens/requests/stats/request_stats.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/other/select_one.dart';
-import 'package:hustle_stay/widgets/requests/student_view.dart';
+import 'package:hustle_stay/widgets/requests/requests_list.dart';
 
 // ignore: must_be_immutable
 class RequestsStatisticsPage extends ConsumerStatefulWidget {
@@ -144,7 +144,6 @@ class _RequestsStatisticsPageState
                     if (context.mounted) setState(() {});
                   },
                   child: UsersBuilder(
-                    src: Source.cache,
                     builder: (ctx, users) => RequestsStats(
                       interval: settings.interval,
                       requests: requests,

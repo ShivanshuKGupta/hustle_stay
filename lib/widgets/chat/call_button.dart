@@ -13,7 +13,7 @@ class CallButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: fetchUsers(emails: emails, src: src),
+      future: fetchUsers(emails: emails),
       builder: (ctx, snapshot) {
         if (snapshot.hasError) {
           showMsg(context, snapshot.error.toString());
@@ -31,7 +31,8 @@ class CallButton extends StatelessWidget {
           }
         }
         List<UserData> users = snapshot.data!;
-        users.removeWhere((element) => element.phoneNumber == null);
+        users.removeWhere((element) =>
+            element.phoneNumber == null || element.phoneNumber!.isEmpty);
         if (users.isEmpty) {
           return Container();
         }
@@ -54,7 +55,7 @@ class CallButton extends StatelessWidget {
               await Navigator.of(context).push(
                 DialogRoute(
                   context: context,
-                  builder: (ctx) => CallChoser(phoneNumbers: users),
+                  builder: (ctx) => CallChoser(users: users),
                 ),
               );
             }

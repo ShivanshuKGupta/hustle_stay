@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/screens/about/about_screen.dart';
 import 'package:hustle_stay/screens/admin_panel/admin_panel_screen.dart';
@@ -10,6 +11,7 @@ import 'package:hustle_stay/screens/profile/profile_preview.dart';
 import 'package:hustle_stay/screens/requests/stats/requests_stats_screen.dart';
 import 'package:hustle_stay/tools.dart';
 import 'package:hustle_stay/widgets/other/dark_light_mode_icon_button.dart';
+import 'package:hustle_stay/widgets/other/loading_elevated_button.dart';
 import 'package:hustle_stay/widgets/settings/sign_out_button.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -104,6 +106,20 @@ class SettingsScreen extends StatelessWidget {
               },
               icon: const Icon(Icons.help_outline_rounded),
               label: const Text('Help'),
+            ),
+            ValueListenableBuilder(
+              valueListenable: everythingInitialized,
+              builder: (context, value, child) {
+                return LoadingElevatedButton(
+                  loading: value != null,
+                  errorHandler: (err) {
+                    everythingInitialized.value = null;
+                  },
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: Text(value ?? 'Refresh Local Database'),
+                  onPressed: initializeEverything,
+                );
+              },
             ),
             const SignOutButton(),
             ElevatedButton.icon(

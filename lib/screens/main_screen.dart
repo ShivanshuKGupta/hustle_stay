@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/attendance_screen.dart';
@@ -8,6 +9,7 @@ import 'package:hustle_stay/screens/complaints/complaints_screen.dart';
 import 'package:hustle_stay/screens/hostel/hostel_screen.dart';
 import 'package:hustle_stay/screens/requests/requests_screen.dart';
 import 'package:hustle_stay/screens/settings/settings_screen.dart';
+import 'package:hustle_stay/screens/vehicle/vehicle_screen.dart';
 import 'package:hustle_stay/tools.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
@@ -25,18 +27,12 @@ class _HomeScreenState extends ConsumerState<MainScreen> {
     super.initState();
     _pageController =
         PageController(initialPage: ref.read(settingsProvider).currentPage);
+    initializeEverything().onError((error, stackTrace) {
+      everythingInitialized.value = null;
+      showMsg(context, error.toString());
+    });
   }
 
-// CompleteDetails(
-//               hostelName: currentUser.hostelName ?? '',
-//               roomName: currentUser.roomName ?? '',
-//               user: UserData(
-//                   email: currentUser.email,
-//                   address: currentUser.address,
-//                   imgUrl: currentUser.imgUrl,
-//                   name: currentUser.name,
-//                   phoneNumber: currentUser.phoneNumber),
-//               roommateData: RoommateData(email: currentUser.email!))
   @override
   Widget build(BuildContext context) {
     final settings = ref.read(settingsProvider);
@@ -49,7 +45,7 @@ class _HomeScreenState extends ConsumerState<MainScreen> {
           ? const AttendanceScreen()
           : const HostelScreen(),
       const ComplaintsScreen(),
-      // HomeScreen(pageChanger: _switchPage),
+      VehicleScreen(),
       const RequestsScreen(),
       const SettingsScreen(),
     ];
@@ -105,16 +101,16 @@ class _HomeScreenState extends ConsumerState<MainScreen> {
                           : Icons.info_outline_rounded,
                       text: 'Complaints',
                     ),
-                    // GButton(
-                    //   icon: settings.currentPage == i++
-                    //       ? Icons.home_rounded
-                    //       : Icons.home_outlined,
-                    //   text: 'Home',
-                    // ),
                     GButton(
                       icon: settings.currentPage == i++
                           ? Icons.airport_shuttle_rounded
                           : Icons.airport_shuttle_outlined,
+                      text: 'Vehicle',
+                    ),
+                    GButton(
+                      icon: settings.currentPage == i++
+                          ? Icons.assignment_turned_in_rounded
+                          : Icons.assignment_turned_in_outlined,
                       text: 'Requests',
                     ),
                     GButton(

@@ -28,30 +28,34 @@ class _LoadingBuilderState extends State<LoadingBuilder> {
       future: widget.builder(context, progress),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ElevatedButton.icon(
-                icon: const Icon(Icons.refresh_rounded),
-                onPressed: () {
-                  setState(() {
-                    retryTimes++;
-                  });
-                },
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.red,
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.refresh_rounded),
+                  onPressed: () {
+                    setState(() {
+                      retryTimes++;
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.red,
+                  ),
+                  label: const Text('Retry'),
                 ),
-                label: const Text('Retry'),
-              ),
-              Text(
-                snapshot.error.toString(),
-                textAlign: TextAlign.center,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium!
-                    .copyWith(color: Colors.red),
-              ),
-            ],
+                Text(
+                  snapshot.error.toString(),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium!
+                      .copyWith(color: Colors.red),
+                ),
+              ],
+            ),
           );
         }
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -64,7 +68,7 @@ class _LoadingBuilderState extends State<LoadingBuilder> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         circularProgressIndicator(),
-                        Text("${value.toString()}% done"),
+                        if (value != 0) Text("${value.toString()}% done"),
                       ],
                     );
                   },
