@@ -57,18 +57,6 @@ class _HostelScreenState extends State<HostelScreen> {
               icon: gridView.value
                   ? const Icon(Icons.list)
                   : const Icon(Icons.grid_view)),
-          IconButton(
-              onPressed: () async {
-                final resp = await dataTransfer();
-                if (resp) {
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(SnackBar(content: Text('Successful')));
-                } else {
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(SnackBar(content: Text('Failed')));
-                }
-              },
-              icon: Icon(Icons.replay_circle_filled))
         ],
       ),
       body: SafeArea(
