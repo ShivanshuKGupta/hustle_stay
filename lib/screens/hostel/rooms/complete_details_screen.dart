@@ -69,34 +69,34 @@ class _CompleteDetailsState extends State<CompleteDetails> {
                   icon: showStats
                       ? const Icon(Icons.person)
                       : const Icon(Icons.bar_chart_rounded)),
-            if (!isDeleting && currentUser.isAdmin)
-              IconButton(
-                  onPressed: () async {
-                    final response = await askUser(
-                      context,
-                      'Are you sure, The Deleted Records won\'t be retrieved ?',
-                      yes: true,
-                      no: true,
-                    );
-                    if (response == 'yes') {
-                      setState(() {
-                        isDeleting = true;
-                      });
-                      if (await deleteRoommate(widget.user.email!,
-                          widget.hostelName, widget.roomName)) {
-                        Navigator.of(context).pop(true);
-                      } else {
-                        setState(() {
-                          isDeleting = false;
-                        });
-                        ScaffoldMessenger.of(context).clearSnackBars();
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(
-                                "Error deleting ${widget.user.name ?? widget.user.email}. Try again later.")));
-                      }
-                    }
-                  },
-                  icon: const Icon(Icons.delete))
+            // if (!isDeleting && currentUser.isAdmin)
+            //   IconButton(
+            //       onPressed: () async {
+            //         final response = await askUser(
+            //           context,
+            //           'Are you sure, The Deleted Records won\'t be retrieved ?',
+            //           yes: true,
+            //           no: true,
+            //         );
+            //         if (response == 'yes') {
+            //           setState(() {
+            //             isDeleting = true;
+            //           });
+            //           if (await deleteRoommate(widget.user.email!,
+            //               widget.hostelName, widget.roomName)) {
+            //             Navigator.of(context).pop(true);
+            //           } else {
+            //             setState(() {
+            //               isDeleting = false;
+            //             });
+            //             ScaffoldMessenger.of(context).clearSnackBars();
+            //             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            //                 content: Text(
+            //                     "Error deleting ${widget.user.name ?? widget.user.email}. Try again later.")));
+            //           }
+            //         }
+            //       },
+            //       icon: const Icon(Icons.delete))
           ],
         ),
         body: isDeleting

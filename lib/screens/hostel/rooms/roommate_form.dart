@@ -64,13 +64,7 @@ class _RoommateFormState extends ConsumerState<RoommateForm> {
           });
           return;
         }
-        final loc = storage.collection('hostels').doc('hostelMates');
 
-        await loc.collection('Roommates').doc(roommateEmail).set({
-          'email': roommateEmail,
-          'hostelName': widget.hostelName,
-          'roomName': widget.roomName
-        });
         await storage.collection('users').doc(roommateEmail).set(
             {'hostelName': widget.hostelName, 'roomName': widget.roomName},
             SetOptions(merge: true)).catchError((error) {
