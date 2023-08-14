@@ -30,147 +30,181 @@ class Message extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double r = 13;
+    final size = MediaQuery.of(context).size;
+
     return msg.indicative
         ? IndicativeMessage(
             txt: msg.txt,
           )
-        : Row(
-            mainAxisAlignment:
-                !msgAlignment ? MainAxisAlignment.start : MainAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
+        : Wrap(
+            alignment: !msgAlignment ? WrapAlignment.start : WrapAlignment.end,
+            // mainAxisSize: MainAxisSize.min,
             children: [
-              chatBubble(context),
-            ],
-          );
-  }
-
-  Widget chatBubble(BuildContext context) {
-    double r = 13;
-    final size = MediaQuery.of(context).size;
-
-    return GestureDetector(
-      key: ValueKey(msg.id),
-      onTap: () => showMsgInfo(context, msg),
-      onLongPress: () => showInfo(context, msg),
-      child: Container(
-        constraints: BoxConstraints(
-          minWidth: 100,
-          maxWidth: size.width - 20,
-        ),
-        padding: const EdgeInsets.only(left: 10, right: 10, top: 5),
-        margin: const EdgeInsets.symmetric(
-          horizontal: 10,
-        ),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(first && !msgAlignment ? 0 : r),
-            topRight: Radius.circular(first && msgAlignment ? 0 : r),
-            bottomLeft: Radius.circular(r),
-            bottomRight: Radius.circular(r),
-          ),
-          color: msgAlignment
-              ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
-              : Theme.of(context).colorScheme.secondary.withOpacity(0.3),
-        ),
-        child: Stack(
-          children: [
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (first && msg.from != currentUser.email)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 5.0, left: 1, top: 2),
-                    child: UserBuilder(
-                      email: msg.from,
-                      builder: (context, userData) {
-                        return GestureDetector(
-                          onTap: () {
-                            showUserPreview(context, userData);
-                          },
-                          child: Text(
-                            userData.name ?? userData.email!,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall!
-                                .copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                          ),
-                        );
-                      },
+              if (!msgAlignment)
+                Padding(
+                  padding: const EdgeInsets.all(2.0),
+                  child: UserBuilder(
+                    email: msg.from,
+                    builder: (ctx, userData) => GestureDetector(
+                      onTap: userData.imgUrl == null
+                          ? null
+                          : () {
+                              showUserPreview(context, userData);
+                            },
+                      child: CircleAvatar(
+                        backgroundImage: userData.imgUrl == null
+                            ? null
+                            : CachedNetworkImageProvider(userData.imgUrl!),
+                        radius: 10,
+                        child: userData.imgUrl != null
+                            ? null
+                            : const Icon(
+                                Icons.person_rounded,
+                                size: 10,
+                              ),
+                      ),
                     ),
                   ),
-                if (msg.deletedAt == null)
-                  MarkdownBody(
-                    fitContent: true,
-                    data: msg.txt,
-                    selectable: true,
-                    onTapText: () => showMsgInfo(context, msg),
-                    onTapLink: (text, href, title) {
-                      if (href != null) launchUrl(Uri.parse(href));
-                    },
-                    imageBuilder: (uri, title, alt) =>
-                        imageBuilder(uri, msg.id),
-                  )
-                else
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
+                ).animate().slideX(),
+              GestureDetector(
+                key: ValueKey(msg.id),
+                onTap: () => showMsgInfo(context, msg),
+                onLongPress: () => showInfo(context, msg),
+                child: Container(
+                  constraints: BoxConstraints(
+                    minWidth: 100,
+                    maxWidth: size.width - 35,
+                  ),
+                  padding: const EdgeInsets.only(left: 10, right: 10, top: 5),
+                  margin: const EdgeInsets.only(
+                    right: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(first && !msgAlignment ? 0 : r),
+                      topRight: Radius.circular(first && msgAlignment ? 0 : r),
+                      bottomLeft: Radius.circular(r),
+                      bottomRight: Radius.circular(r),
+                    ),
+                    color: msgAlignment
+                        ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
+                        : Theme.of(context)
+                            .colorScheme
+                            .secondary
+                            .withOpacity(0.3),
+                  ),
+                  child: Stack(
                     children: [
-                      const Icon(
-                        Icons.not_interested_rounded,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        msg.from == currentUser.email
-                            ? 'You deleted this message.'
-                            : 'This message was deleted.',
-                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                              fontStyle: FontStyle.italic,
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (first && msg.from != currentUser.email)
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                  right: 5.0, left: 1, top: 2),
+                              child: UserBuilder(
+                                email: msg.from,
+                                builder: (context, userData) {
+                                  return GestureDetector(
+                                    onTap: () {
+                                      showUserPreview(context, userData);
+                                    },
+                                    child: Text(
+                                      userData.name ?? userData.email!,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall!
+                                          .copyWith(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                          ),
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
+                          if (msg.deletedAt == null)
+                            MarkdownBody(
+                              fitContent: true,
+                              data: msg.txt,
+                              selectable: true,
+                              onTapText: () => showMsgInfo(context, msg),
+                              onTapLink: (text, href, title) {
+                                if (href != null) launchUrl(Uri.parse(href));
+                              },
+                              imageBuilder: (uri, title, alt) =>
+                                  imageBuilder(uri, msg.id),
+                            )
+                          else
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.not_interested_rounded,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 5),
+                                Text(
+                                  msg.from == currentUser.email
+                                      ? 'You deleted this message.'
+                                      : 'This message was deleted.',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium!
+                                      .copyWith(
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          const SizedBox(height: 20)
+                        ],
                       ),
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 2),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                timeFrom(msg.createdAt),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall!
+                                    .copyWith(
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                    ),
+                              ),
+                              const SizedBox(width: 4),
+                              if (msgAlignment)
+                                Icon(
+                                  msg.readBy.containsAll(chat.receivers) &&
+                                          msg.readBy.contains(chat.owner)
+                                      ? Icons.done_all_rounded
+                                      : Icons.done_rounded,
+                                  color: Theme.of(context).colorScheme.primary,
+                                  size: 15,
+                                ),
+                            ],
+                          ),
+                        ),
+                      )
                     ],
                   ),
-                const SizedBox(height: 20)
-              ],
-            ),
-            Positioned(
-              right: 0,
-              bottom: 0,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 2),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      timeFrom(msg.createdAt),
-                      style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                ).animate().fade().slideX(
+                      begin: msgAlignment ? 1 : -1,
+                      end: 0,
+                      curve: Curves.decelerate,
                     ),
-                    const SizedBox(width: 4),
-                    if (msgAlignment)
-                      Icon(
-                        msg.readBy.containsAll(chat.receivers) &&
-                                msg.readBy.contains(chat.owner)
-                            ? Icons.done_all_rounded
-                            : Icons.done_rounded,
-                        color: Theme.of(context).colorScheme.primary,
-                        size: 15,
-                      ),
-                  ],
-                ),
               ),
-            )
-          ],
-        ),
-      ).animate().fade().slideX(
-            begin: msgAlignment ? 1 : -1,
-            end: 0,
-            curve: Curves.decelerate,
-          ),
-    );
+            ],
+          );
   }
 
   showMsgInfo(context, MessageData msg) {
