@@ -20,7 +20,7 @@ class AttendanceRequestScreen extends StatelessWidget {
       appBar: AppBar(
         title: shaderText(
           context,
-          title: 'Attendance Request',
+          title: 'Hostel Request',
           style:
               theme.textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
         ),
@@ -33,9 +33,9 @@ class AttendanceRequestScreen extends StatelessWidget {
               onTap: () async {
                 Navigator.of(context).pop();
               },
-              title: 'Attendance',
+              title: 'Hostel',
               icon: Icon(
-                requestMainPageElements['Attendance']!['icon'],
+                requestMainPageElements['Hostel']!['icon'],
                 size: 50,
               ),
               color: theme.colorScheme.background,
@@ -86,7 +86,7 @@ class AttendanceRequestScreen extends StatelessWidget {
                     ),
                     GridTileLogo(
                       onTap: () async {
-                        await navigatorPush(context, UpdateRoom());
+                        await navigatorPush(context, const UpdateRoom());
                       },
                       title: 'Change Room',
                       icon: Icon(
@@ -103,7 +103,7 @@ class AttendanceRequestScreen extends StatelessWidget {
                       onTap: () async {
                         await navigatorPush(
                             context,
-                            UpdateRoom(
+                            const UpdateRoom(
                               isSwap: true,
                             ));
                       },

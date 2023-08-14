@@ -56,6 +56,7 @@ class DefaultFirebaseOptions {
     projectId: 'hustle-stay',
     authDomain: 'hustle-stay.firebaseapp.com',
     storageBucket: 'hustle-stay.appspot.com',
+    measurementId: 'G-5SHV2ZPSH9',
   );
 
   static const FirebaseOptions android = FirebaseOptions(

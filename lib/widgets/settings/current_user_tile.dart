@@ -4,8 +4,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
-import 'package:hustle_stay/screens/auth/edit_profile_screen.dart';
 import 'package:hustle_stay/screens/chat/image_preview.dart';
+import 'package:hustle_stay/screens/profile/profile_details_screen.dart';
 import 'package:hustle_stay/tools.dart';
 
 class CurrentUserTile extends ConsumerWidget {
@@ -74,7 +74,7 @@ class CurrentUserTile extends ConsumerWidget {
         // ignore: use_build_context_synchronously
         if (await Navigator.of(context).push<bool?>(
               MaterialPageRoute(
-                builder: (ctx) => EditProfile(
+                builder: (ctx) => ProfileDetailsScreen(
                   user: currentUser,
                 ),
               ),

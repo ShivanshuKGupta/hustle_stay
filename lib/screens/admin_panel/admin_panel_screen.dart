@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/screens/admin_panel/manage_categories.dart';
 import 'package:hustle_stay/screens/admin_panel/manage_requests.dart';
 import 'package:hustle_stay/screens/admin_panel/manage_user_permission.dart';
+import 'package:hustle_stay/screens/vehicle/vehicle_screen.dart';
 
 import '../../models/common/operation.dart';
 import 'manage_hostel_attendance.dart';
@@ -30,7 +31,11 @@ class _AdminPanelState extends State<AdminPanel> {
     Operations(
         cardColor: const Color.fromARGB(255, 0, 146, 69),
         operationName: 'Manage Hostels & Attendance',
-        icon: const Icon(Icons.calendar_month))
+        icon: const Icon(Icons.calendar_month)),
+    Operations(
+        cardColor: const Color.fromARGB(255, 0, 136, 146),
+        operationName: 'Vehicle Schedule',
+        icon: const Icon(Icons.airport_shuttle_rounded)),
   ];
 
   @override
@@ -41,16 +46,16 @@ class _AdminPanelState extends State<AdminPanel> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Admin Panel'),
+        title: const Text('Admin Panel'),
       ),
       body: SafeArea(
         child: GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             childAspectRatio: 1,
           ),
           itemBuilder: (context, index) {
-            final Color cardColor = catList[index].cardColor!;
+            final Color cardColor = catList[index].cardColor;
 
             final LinearGradient gradient = LinearGradient(
               begin: Alignment.topCenter,
@@ -83,6 +88,10 @@ class _AdminPanelState extends State<AdminPanel> {
                     case 'Manage Hostels & Attendance':
                       Navigator.of(context).push(MaterialPageRoute(
                           builder: (_) => const ManageHostelPage()));
+                      break;
+                    case 'Vehicle Schedule':
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => const VehicleScreen()));
                       break;
                     default:
                   }

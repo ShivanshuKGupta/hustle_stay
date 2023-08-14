@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,10 +32,61 @@ SharedPreferences? prefs;
 final auth = FirebaseAuth.instance;
 final firestore = FirebaseFirestore.instance;
 final storage = FirebaseStorage.instance;
+final firebaseMessaging = FirebaseMessaging.instance;
 
 /// Main function
 void main() async {
-  // Just to show errors not so rudely
+  /// Just to show errors not so rudely
+  setErrorWidget();
+
+  // Initializing Firebase SDK
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  /// Setting up firebase messaging
+  final fcmToken = await firebaseMessaging.getToken();
+  debugPrint("fcmToken = $fcmToken");
+  initializeFCM();
+
+  // Initializing prefs here in main to avoid any delay in activating settings
+  prefs = await SharedPreferences.getInstance();
+  try {
+    if (auth.currentUser != null) {
+      currentUser = await fetchUserData(
+        auth.currentUser!.email!,
+      );
+    }
+  } catch (e) {}
+  // Correction code
+  // if (kDebugMode && currentUser.isAdmin) {
+  //   Query<Map<String, dynamic>> query = firestore.collection('categories');
+  //   final response = await query.get();
+  //   response.docs.map((doc) => Category(doc.id)..load(doc.data())).forEach(
+  //     (element) async {
+  //       debugPrint('Updating Category: ${element.id}');
+  //       await updateCategory(element);
+  //     },
+  //   );
+  // }
+  runApp(const ProviderScope(child: HustleStayApp()));
+}
+
+void initializeFCM() {
+  firebaseMessaging.onTokenRefresh.listen((fcmToken) {
+    debugPrint("FCM Token was refreshed. The new token is: $fcmToken");
+    // TODO: If necessary send token to application server.
+
+    // Note: This callback is fired at each app startup and whenever a new
+    // token is generated.
+  }).onError((err) {
+    debugPrint("Error: $err");
+    // Error getting token.
+  });
+}
+
+void setErrorWidget() {
   ErrorWidget.builder = (FlutterErrorDetails details) {
     return Material(
         child: Column(
@@ -58,32 +110,6 @@ void main() async {
       ],
     ));
   };
-  WidgetsFlutterBinding.ensureInitialized();
-  // Initializing Firebase SDK
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  // Initializing prefs here in main to avoid any delay in activating settings
-  prefs = await SharedPreferences.getInstance();
-  try {
-    if (auth.currentUser != null) {
-      currentUser = await fetchUserData(
-        auth.currentUser!.email!,
-      );
-    }
-  } catch (e) {}
-  // Correction code
-  // if (kDebugMode && currentUser.isAdmin) {
-  //   Query<Map<String, dynamic>> query = firestore.collection('categories');
-  //   final response = await query.get();
-  //   response.docs.map((doc) => Category(doc.id)..load(doc.data())).forEach(
-  //     (element) async {
-  //       debugPrint('Updating Category: ${element.id}');
-  //       await updateCategory(element);
-  //     },
-  //   );
-  // }
-  runApp(const ProviderScope(child: HustleStayApp()));
 }
 
 /// The main app widget
@@ -182,7 +208,11 @@ Future<void> initializeEverything() async {
   await initializeComplaints();
   everythingInitialized.value = "Fetching requests";
   await initializeRequests();
-  everythingInitialized.value = "Fetching vehicle requests";
-  await initializeVehicleRequests();
+
+  if (currentUser.type == 'warden' ||
+      currentUser.email == 'vehicle@iiitr.ac.in') {
+    everythingInitialized.value = "Fetching vehicle requests";
+    await initializeVehicleRequests();
+  }
   everythingInitialized.value = null;
 }

@@ -46,6 +46,8 @@ class ComplaintCategoryView extends StatelessWidget {
                   groups[category.parent!]!.add(category);
                 }
               }
+              // TODO: Removed other here, just from the UI
+              parents.remove('Other');
               return GridView.extent(
                 physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
