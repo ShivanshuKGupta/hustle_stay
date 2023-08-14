@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/screens/admin_panel/admin_panel_screen.dart';
@@ -109,7 +108,7 @@ class SettingsScreen extends StatelessWidget {
           DarkLightModeIconButton(),
         ],
       ),
-      drawer: kDebugMode ? const MainDrawer() : null,
+      drawer: const MainDrawer(),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
