@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../models/common/operation.dart';
 import '../models/user/user.dart';
-import 'hostel/hostel_screen.dart';
+import '../widgets/requests/grid_tile_logo.dart';
 import 'hostel/user/attendance_records.dart';
 import 'hostel/user/leave_screen.dart';
 import 'hostel/user/statistics.dart';
@@ -30,19 +30,31 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     Operations(
         cardColor: const Color.fromARGB(255, 98, 0, 238),
         operationName: 'View Attendance Records',
-        icon: const Icon(Icons.calendar_month)),
+        icon: const Icon(
+          Icons.calendar_month,
+          size: 50,
+        )),
     Operations(
         cardColor: const Color.fromARGB(255, 239, 108, 0),
         operationName: 'Statistics and Analytics',
-        icon: const Icon(Icons.bar_chart_rounded)),
+        icon: const Icon(
+          Icons.bar_chart_rounded,
+          size: 50,
+        )),
     Operations(
         cardColor: const Color.fromARGB(255, 238, 0, 0),
         operationName: 'View Leaves',
-        icon: const Icon(Icons.time_to_leave_rounded)),
+        icon: const Icon(
+          Icons.time_to_leave_rounded,
+          size: 50,
+        )),
     Operations(
         cardColor: const Color.fromARGB(255, 0, 146, 69),
         operationName: 'Change/Swap Room',
-        icon: const Icon(Icons.reply_all_sharp)),
+        icon: const Icon(
+          Icons.reply_all_sharp,
+          size: 50,
+        )),
   ];
   @override
   Widget build(BuildContext context) {
@@ -99,9 +111,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   Future<String> getStatus(String? email, bool isCurrentUser) async {
     final ref = await FirebaseFirestore.instance
-        .collection('hostels')
-        .doc('hostelMates')
-        .collection('Roommates')
+        .collection('users')
         .doc(email ?? currentUser.email)
         .collection('Attendance')
         .doc(DateFormat('yyyy-MM-dd').format(DateTime.now()))
@@ -146,7 +156,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         icon = const Icon(Icons.work);
         break;
       default:
-        tileColor = Colors.deepOrange;
+        tileColor = Colors.grey;
         currentStatus = 'Not Marked Yet';
         icon = const Icon(Icons.info_sharp);
     }
@@ -163,9 +173,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 screenWidth >= 800 ? screenheight * 0.6 : screenheight * 0.45,
             padding: EdgeInsets.all(screenWidth >= 800 ? 1 : 5),
             decoration: BoxDecoration(
-              color: brightness == Brightness.dark
-                  ? tileColor
-                  : tileColor.withOpacity(0.4),
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
@@ -334,30 +341,16 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           ),
           Expanded(
             child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 1,
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 320,
+                childAspectRatio: 3 / 2,
+                crossAxisSpacing: 5,
+                mainAxisSpacing: 5,
               ),
               itemBuilder: (context, index) {
-                final Color cardColor = catList[index].cardColor;
-                LinearGradient? gradient;
-                gradient = LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: brightness == Brightness.light
-                      ? [
-                          cardColor.withOpacity(0.2),
-                          Colors.white,
-                        ]
-                      : [
-                          cardColor.withOpacity(0.7),
-                          Colors.black,
-                        ],
-                );
-
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(2, 2, 8, 8),
-                  child: GestureDetector(
+                  child: GridTileLogo(
                       onTap: () {
                         switch (catList[index].operationName) {
                           case 'View Attendance Records':
@@ -379,77 +372,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           default:
                         }
                       },
-                      child: Container(
-                        width: screenWidth,
-                        padding: EdgeInsets.all(
-                            catList[index].imgUrl != null ? 4 : 1),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16.0),
-                          gradient:
-                              brightness == Brightness.light ? null : gradient,
-                          color: brightness == Brightness.light
-                              ? cardColor.withOpacity(0.2)
-                              : null,
-                          boxShadow: catList[index].imgUrl != null ||
-                                  brightness == Brightness.light
-                              ? null
-                              : [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.5),
-                                    spreadRadius: 2,
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                        ),
-                        child: Column(
-                          mainAxisAlignment: catList[index].imgUrl == null
-                              ? MainAxisAlignment.center
-                              : MainAxisAlignment.end,
-                          children: [
-                            if (catList[index].imgUrl == null)
-                              Expanded(
-                                child: Icon(
-                                  catList[index].icon!.icon,
-                                  size: screenWidth * 0.3,
-                                ),
-                              ),
-                            if (catList[index].imgUrl != null)
-                              Expanded(
-                                  child: ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: CachedNetworkImage(
-                                  imageUrl: catList[index].imgUrl!,
-                                  fit: BoxFit.cover,
-                                  width: screenWidth - 8,
-                                ),
-                              )),
-                            Divider(
-                              color: brightness == Brightness.light
-                                  ? Colors.black
-                                  : Colors.white,
-                            ),
-                            Text(
-                              catList[index].operationName,
-                              overflow: TextOverflow.clip,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall!
-                                  .copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: brightness == Brightness.light
-                                        ? Colors.black
-                                        : Colors.white,
-                                  ),
-                            ),
-                            Divider(
-                              color: brightness == Brightness.light
-                                  ? Colors.black
-                                  : Colors.white,
-                            ),
-                          ],
-                        ),
-                      )),
+                      title: catList[index].operationName,
+                      icon: catList[index].icon!,
+                      color: catList[index].cardColor),
                 );
               },
               itemCount: catList.length,

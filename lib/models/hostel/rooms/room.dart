@@ -135,9 +135,7 @@ Future<List<RoommateData>> fetchRoommates(String hostelName, String roomName,
     {Source? source}) async {
   List<RoommateData> list = [];
   final roommateSnapshot = await storage
-      .collection('hostels')
-      .doc('hostelMates')
-      .collection('Roommates')
+      .collection('users')
       .where('hostelName', isEqualTo: hostelName)
       .where('roomName', isEqualTo: roomName)
       .get(source == null ? null : GetOptions(source: source));
@@ -148,78 +146,13 @@ Future<List<RoommateData>> fetchRoommates(String hostelName, String roomName,
     final leaveStartDate = data['leaveStartDate'] as Timestamp?;
     final leaveEndDate = data['leaveEndDate'] as Timestamp?;
     list.add(RoommateData(
-      email: data['email'] ?? '',
+      email: x.id,
       leaveStartDate: leaveStartDate?.toDate(),
       leaveEndDate: leaveEndDate?.toDate(),
       internship: internship,
     ));
   }
   return list;
-}
-
-Future<void> copyRoommateData(String email, String hostelName,
-    String? destHostelName, String? destRoomName,
-    {Source? source}) async {
-  try {
-    final collectionRef = storage
-        .collection('hostels')
-        .doc(hostelName)
-        .collection('Roommates')
-        .doc(email);
-
-    final destRef = storage
-        .collection('hostels')
-        .doc('hostelMates')
-        .collection('Roommates')
-        .doc(email);
-
-    final attendanceRef = collectionRef.collection('Attendance');
-    final leaveRef = collectionRef.collection('Leaves');
-
-    final attendanceSnapshot = await attendanceRef
-        .get(source == null ? null : GetOptions(source: source));
-    final leaveSnapshot =
-        await leaveRef.get(source == null ? null : GetOptions(source: source));
-
-    final attendanceDocuments = attendanceSnapshot.docs;
-    final leaveDocuments = leaveSnapshot.docs;
-
-    final batch = storage.batch();
-
-    for (final doc in attendanceDocuments) {
-      batch.set(
-        destRef.collection('Attendance').doc(doc.id),
-        doc.data(),
-        SetOptions(merge: true),
-      );
-    }
-
-    for (final doc in leaveDocuments) {
-      batch.set(
-        destRef.collection('Leaves').doc(doc.id),
-        doc.data(),
-        SetOptions(merge: true),
-      );
-    }
-
-    await batch.commit();
-
-    final deleteBatch = storage.batch();
-
-    for (final doc in attendanceDocuments) {
-      deleteBatch.delete(doc.reference);
-    }
-
-    for (final doc in leaveDocuments) {
-      deleteBatch.delete(doc.reference);
-    }
-
-    await deleteBatch.commit();
-
-    return;
-  } catch (e) {
-    return;
-  }
 }
 
 Future<bool> changeRoom(
@@ -236,11 +169,7 @@ Future<bool> changeRoom(
         .doc(hostelName)
         .collection('Rooms')
         .doc(roomName);
-    final sourceRef = storage
-        .collection('hostels')
-        .doc('hostelMates')
-        .collection('Roommates')
-        .doc(email);
+    final sourceRef = storage.collection('users').doc(email);
 
     final destRoomLoc = storage
         .collection('hostels')
@@ -250,9 +179,6 @@ Future<bool> changeRoom(
     final destRoomSnapshot = await destRoomLoc.get();
     final capacity = destRoomSnapshot['capacity'];
     final numRoommates = destRoomSnapshot['numRoommates'];
-    print(capacity);
-    print(numRoommates);
-
     try {
       if (capacity > numRoommates) {
         print('entered');
@@ -296,10 +222,7 @@ Future<bool> swapRoom(
 ) async {
   try {
     await storage.runTransaction((transaction) async {
-      final sourceLoc = storage
-          .collection('hostels')
-          .doc('hostelMates')
-          .collection('Roommates');
+      final sourceLoc = storage.collection('users');
 
       final destRef = sourceLoc.doc(destRoommateEmail);
       final sourceRef = sourceLoc.doc(email);
@@ -311,12 +234,7 @@ Future<bool> swapRoom(
             sourceRef,
             {'roomName': destRoomName, 'hostelName': destHostelName},
             SetOptions(merge: true));
-        batch.set(
-            storage.collection('users').doc(email),
-            {'roomName': destRoomName, 'hostelName': destHostelName},
-            SetOptions(merge: true));
-        batch.set(storage.collection('users').doc(destRoommateEmail),
-            {'roomName': roomName}, SetOptions(merge: true));
+
         await batch.commit();
         return true;
       } catch (e) {
@@ -354,9 +272,7 @@ Future<List<String>> fetchRoommateNames(String hostelName, String roomName,
   List<String> list = [];
 
   final storageRef = await storage
-      .collection('hostels')
-      .doc('hostelMates')
-      .collection('Roommates')
+      .collection('users')
       .where('hostelName', isEqualTo: hostelName)
       .where('roomName', isEqualTo: roomName)
       .get(src == null ? null : GetOptions(source: src));
@@ -366,43 +282,39 @@ Future<List<String>> fetchRoommateNames(String hostelName, String roomName,
   return list;
 }
 
-Future<bool> deleteRoommate(String email, String hostelName, String? roomName,
-    {Source? source}) async {
-  final user = storage.collection('users').doc(email);
+// Future<bool> deleteRoommate(String email, String hostelName, String? roomName,
+//     {Source? source}) async {
+//   final user = storage.collection('users').doc(email);
 
-  try {
-    final collectionRef = storage
-        .collection('hostels')
-        .doc('hostelMates')
-        .collection('Roommates')
-        .doc(email);
+//   try {
+//     final collectionRef = storage.collection('users').doc(email);
 
-    final attendanceRef = collectionRef.collection('Attendance');
-    final batch = storage.batch();
-    final attendanceSnapshot = await attendanceRef
-        .get(source == null ? null : GetOptions(source: source));
-    final attendanceDocuments = attendanceSnapshot.docs;
-    if (attendanceDocuments.isNotEmpty) {
-      batch.update(user, {'hostelName': null, 'roomName': null});
-      for (final doc in attendanceDocuments) {
-        batch.delete(doc.reference);
-      }
-    }
-    batch.update(
-        storage
-            .collection('hostels')
-            .doc(hostelName)
-            .collection('Rooms')
-            .doc(roomName),
-        {'numRoommates': FieldValue.increment(-1)});
-    batch.delete(collectionRef);
+//     final attendanceRef = collectionRef.collection('Attendance');
+//     final batch = storage.batch();
+//     final attendanceSnapshot = await attendanceRef
+//         .get(source == null ? null : GetOptions(source: source));
+//     final attendanceDocuments = attendanceSnapshot.docs;
+//     if (attendanceDocuments.isNotEmpty) {
+//       batch.update(user, {'hostelName': null, 'roomName': null});
+//       for (final doc in attendanceDocuments) {
+//         batch.delete(doc.reference);
+//       }
+//     }
+//     batch.update(
+//         storage
+//             .collection('hostels')
+//             .doc(hostelName)
+//             .collection('Rooms')
+//             .doc(roomName),
+//         {'numRoommates': FieldValue.increment(-1)});
+//     batch.delete(collectionRef);
 
-    await batch.commit();
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
+//     await batch.commit();
+//     return true;
+//   } catch (e) {
+//     return false;
+//   }
+// }
 
 String capitalizeEachWord(String x) {
   List<String> z = x.split(' ');
@@ -522,12 +434,7 @@ Future<RoommateData?> fetchRoommateData(String email,
       return null;
     }
   }
-  final ref = await storage
-      .collection('hostels')
-      .doc('hostelMates')
-      .collection('Roommates')
-      .doc(email)
-      .get();
+  final ref = await storage.collection('users').doc(email).get();
   return ref.exists
       ? RoommateData(
           email: email,
@@ -547,8 +454,6 @@ Future<bool> addRommates(
       .doc(hostelName)
       .collection('Rooms')
       .doc(roomName);
-  final roommateRef =
-      storage.collection('hostels').doc('hostelMates').collection('Roommates');
   final countCheck = await ref.get();
   if (countCheck.data()!['numRoommates'] + emails.length >
       countCheck.data()!['capacity']) {
@@ -559,8 +464,6 @@ Future<bool> addRommates(
   for (final x in emails) {
     batch.set(userRef.doc(x), {'hostelName': hostelName, 'roomName': roomName},
         SetOptions(merge: true));
-    batch.set(roommateRef.doc(x),
-        {'email': x, 'roomName': roomName, 'hostelName': hostelName});
   }
   await batch.commit();
   return true;
@@ -609,27 +512,4 @@ Future<Map<String, dynamic>?> getUserAttendanceRecord(String email,
   // list['todayStatus'] = dataRef.exists ? dataRef.data()!['status'] : status;
 
   return list;
-}
-
-Future<void> copyAllToHostelmates() async {
-  final ref = await storage.collection('hostels').get();
-  ref.docs.forEach((element) async {
-    final dataRef = await element.reference.collection('Roommates').get();
-    dataRef.docs.forEach((elementVal) async {
-      final sourceData = elementVal.data();
-      await storage.runTransaction((transaction) async {
-        transaction.set(
-            storage
-                .collection('hostels')
-                .doc('hostelMates')
-                .collection('Roommates')
-                .doc(elementVal.id),
-            sourceData);
-
-        await copyRoommateData(elementVal.id, element.id, null, null);
-        transaction.delete(elementVal.reference);
-        return true;
-      });
-    });
-  });
 }

@@ -77,9 +77,7 @@ Future<bool> deleteHostel(String hostelName, bool isDisabled) async {
   try {
     final batch = storage.batch();
     final roommates = await storage
-        .collection('hostels')
-        .doc('hostelMates')
-        .collection('Roommates')
+        .collection('users')
         .where('hostelName', isEqualTo: hostelName)
         .get();
     for (final doc in roommates.docs) {
@@ -95,12 +93,8 @@ Future<bool> deleteHostel(String hostelName, bool isDisabled) async {
 }
 
 Future<void> updateLeaveStatus(String email, String hostelName) async {
-  final ref = await FirebaseFirestore.instance
-      .collection('hostels')
-      .doc('hostelMates')
-      .collection('Roommates')
-      .doc(email)
-      .get();
+  final ref =
+      await FirebaseFirestore.instance.collection('users').doc(email).get();
 
   await ref.reference.set(
       {'onInternship': null, 'leaveStartDate': null, 'leaveEndDate': null},
@@ -117,12 +111,8 @@ Future<bool> setLeave(
     LeaveData? data,
     DateTime? selectedDate}) async {
   try {
-    final ref = await FirebaseFirestore.instance
-        .collection('hostels')
-        .doc('hostelMates')
-        .collection('Roommates')
-        .doc(email)
-        .get();
+    final ref =
+        await FirebaseFirestore.instance.collection('users').doc(email).get();
     if (endleave) {
       final startDate = ref.data()!['leaveStartDate'];
       final endDate = ref.data()!['leaveEndDate'];
