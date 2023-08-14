@@ -5,7 +5,8 @@ import 'package:http/http.dart' as http;
 Future<void> sendNotification({
   String? title,
   String? body,
-  String to = '/topics/all',
+  required String to,
+  Map<String, dynamic> data = const {},
 }) async {
   /// TODO: Dangerous!!! the fcm API key is here and should be moved to a backend
   /// ERR:
@@ -15,6 +16,7 @@ Future<void> sendNotification({
 
   final Map<String, dynamic> notification = {
     'to': to,
+    'data': data,
     'notification': {
       'title': title,
       'body': body,

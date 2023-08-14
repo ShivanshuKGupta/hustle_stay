@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
+import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/notifications/notifications.dart';
 import 'package:hustle_stay/screens/about/about_screen.dart';
 import 'package:hustle_stay/screens/category/edit_category_screen.dart';
@@ -100,11 +101,15 @@ class MainDrawer extends StatelessWidget {
                 if (kDebugMode)
                   LoadingElevatedButton(
                     icon: const Icon(Icons.abc_rounded),
-                    label: const Text('Send notification'),
-                    onPressed: () async => await sendNotification(
-                      title: "Not Title",
-                      body: "Description",
-                    ),
+                    label: const Text('Test notification'),
+                    onPressed: () async {
+                      await sendNotification(
+                        title: "Title",
+                        body: "Body",
+                        to: (await fetchUserData('cs21b1024@iiitr.ac.in'))
+                            .fcmToken!,
+                      );
+                    },
                   ),
                 // if (kDebugMode)
                 //   LoadingElevatedButton(

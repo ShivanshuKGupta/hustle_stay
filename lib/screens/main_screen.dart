@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
@@ -22,6 +23,39 @@ class MainScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<MainScreen> {
   late PageController _pageController;
 
+  void _handleMessage(RemoteMessage message) async {
+    // final String? id = message.data['id'];
+    // if (id == null) {
+    //   debugPrint("Clicked notification id was null!");
+    //   return;
+    // }
+    // debugPrint("Clicked Notification id: $id");
+    // final parts = id.split('/');
+    // if (parts[0] == 'complaints') {
+    //   final complaintID = int.tryParse(parts[1]);
+    //   if (complaintID == null) {
+    //     debugPrint('Complaint id cannot be opbtained for notification id: $id');
+    //   } else {
+    //     await showComplaintChat(context, await fetchComplaint(complaintID));
+    //   }
+    // }
+  }
+
+  void initializeFcmHandlers() async {
+    RemoteMessage? initialMessage =
+        await FirebaseMessaging.instance.getInitialMessage();
+
+    // If the message also contains a data property with a "type" of "chat",
+    // navigate to a chat screen
+    if (initialMessage != null) {
+      _handleMessage(initialMessage);
+    }
+
+    // Also handle any interaction when the app is in the background via a
+    // Stream listener
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -31,6 +65,32 @@ class _HomeScreenState extends ConsumerState<MainScreen> {
       everythingInitialized.value = null;
       showMsg(context, error.toString());
     });
+
+    firebaseMessaging
+        .requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    )
+        .then((notificationSettings) {
+      if (notificationSettings.authorizationStatus !=
+          AuthorizationStatus.authorized) {
+        askUser(
+          context,
+          'The app won\'t be able to send you notifications.',
+          description:
+              "To fix this try restarting the app or try giving the app notification permission in settings.",
+        );
+      } else {
+        debugPrint('Notification permission granted.');
+      }
+    });
+
+    initializeFCM().then((value) => initializeFcmHandlers());
   }
 
   @override
