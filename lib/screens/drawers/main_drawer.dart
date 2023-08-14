@@ -1,8 +1,15 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hustle_stay/main.dart';
+import 'package:hustle_stay/providers/notifications/notifications.dart';
+import 'package:hustle_stay/screens/about/about_screen.dart';
 import 'package:hustle_stay/screens/category/edit_category_screen.dart';
 import 'package:hustle_stay/screens/complaints/resolved_complaints_screen.dart';
+import 'package:hustle_stay/screens/help/help_screen.dart';
 import 'package:hustle_stay/tools.dart';
+import 'package:hustle_stay/widgets/other/loading_elevated_button.dart';
 import 'package:hustle_stay/widgets/settings/current_user_tile.dart';
+import 'package:hustle_stay/widgets/settings/sign_out_button.dart';
 
 class MainDrawer extends StatelessWidget {
   const MainDrawer({super.key});
@@ -32,38 +39,39 @@ class MainDrawer extends StatelessWidget {
       children: [
         const CurrentUserTile(),
         const Divider(),
-        _drawerTile(
-          context,
-          title: "Resolved Complaints",
-          icon: Icons.person_add_rounded,
-          subtitle: "View resolved complaints",
-          onTap: () async {
-            navigatorPush(
-              context,
-              ResolvedComplaintsScreen(),
-            );
-          },
-        ),
-        _drawerTile(
-          context,
-          title: "Add a new category",
-          icon: Icons.person_add_rounded,
-          subtitle: "Categories are used in complaints and requests",
-          onTap: () async {
-            navigatorPush(
-              context,
-              const EditCategoryScreen(),
-            );
-          },
-        ),
+        if (kDebugMode)
+          _drawerTile(
+            context,
+            title: "Resolved Complaints",
+            icon: Icons.person_add_rounded,
+            subtitle: "View resolved complaints",
+            onTap: () async {
+              navigatorPush(
+                context,
+                ResolvedComplaintsScreen(),
+              );
+            },
+          ),
+        if (kDebugMode)
+          _drawerTile(
+            context,
+            title: "Add a new category",
+            icon: Icons.person_add_rounded,
+            subtitle: "Categories are used in complaints and requests",
+            onTap: () async {
+              navigatorPush(
+                context,
+                const EditCategoryScreen(),
+              );
+            },
+          ),
         _drawerTile(
           context,
           title: "How to use?",
           icon: Icons.help_rounded,
           subtitle: "Help on how to use the app",
           onTap: () {
-            // TODO: Add a help screen
-            showMsg(context, "TODO: Add a Help Screen");
+            navigatorPush(context, const HelpScreen());
           },
         ),
         _drawerTile(
@@ -72,8 +80,7 @@ class MainDrawer extends StatelessWidget {
           icon: Icons.info_rounded,
           subtitle: "Know more about us and the app",
           onTap: () {
-            // TODO: add a about us page
-            showMsg(context, "TODO: Add a About us Screen");
+            navigatorPush(context, const AboutScreen());
           },
         ),
       ],
@@ -84,31 +91,66 @@ class MainDrawer extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Divider(),
-        ListTile(
-          contentPadding:
-              const EdgeInsets.only(left: 15, right: 15, bottom: 10),
-          leading: const Icon(
-            Icons.emergency_share_rounded,
-            color: Colors.red,
-          ),
-          title: Text(
-            'Medical Emergency',
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium!
-                .copyWith(color: Colors.red),
-          ),
-          subtitle: Text(
-            'Make emergency vehicle request and inform all wardens',
-            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
+        LayoutBuilder(
+          builder: (context, constraints) => SizedBox(
+            width: constraints.maxWidth,
+            child: Wrap(
+              alignment: WrapAlignment.spaceAround,
+              children: [
+                if (kDebugMode)
+                  LoadingElevatedButton(
+                    icon: const Icon(Icons.abc_rounded),
+                    label: const Text('Send notification'),
+                    onPressed: () async => await sendNotification(
+                      title: "Not Title",
+                      body: "Description",
+                    ),
+                  ),
+                // if (kDebugMode)
+                //   LoadingElevatedButton(
+                //     icon: const Icon(Icons.temple_buddhist_rounded),
+                //     label: const Text('Edit Category'),
+                //     onPressed: () async {
+                //       await navigatorPush(
+                //         context,
+                //         const EditCategoryScreen(
+                //           id: 'Bullying',
+                //         ),
+                //       );
+                //     },
+                //   ),
+                ValueListenableBuilder(
+                  valueListenable: everythingInitialized,
+                  builder: (context, value, child) {
+                    return LoadingElevatedButton(
+                      loading: value != null,
+                      errorHandler: (err) {
+                        everythingInitialized.value = null;
+                      },
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: Text(value ?? 'Refresh Local Database'),
+                      onPressed: initializeEverything,
+                    );
+                  },
                 ),
+                // ElevatedButton.icon(
+                //   onPressed: () {
+                //     navigatorPush(context, const AboutScreen());
+                //   },
+                //   icon: const Icon(Icons.info_outline_rounded),
+                //   label: const Text('About Us'),
+                // ),
+                // ElevatedButton.icon(
+                //   onPressed: () {
+                //     navigatorPush(context, const HelpScreen());
+                //   },
+                //   icon: const Icon(Icons.help_outline_outlined),
+                //   label: const Text('Help'),
+                // ),
+                if (kDebugMode) const SignOutButton(),
+              ],
+            ),
           ),
-          onTap: () {
-            // TODO: add a medical emergency screen
-            showMsg(context, 'TODO: add a medical emergency screen');
-          },
         ),
       ],
     );

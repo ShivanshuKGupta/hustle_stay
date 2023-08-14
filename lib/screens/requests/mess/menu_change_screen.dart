@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/requests/mess/menu_change_request.dart';
 import 'package:hustle_stay/models/user/user.dart';
-import 'package:hustle_stay/screens/chat/chat_screen.dart';
 import 'package:hustle_stay/tools.dart';
-import 'package:hustle_stay/widgets/chat/template_messages.dart';
 import 'package:hustle_stay/widgets/other/select_one.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
 
@@ -184,18 +181,19 @@ class _MenuChangeRequestScreenState extends State<MenuChangeRequestScreen> {
         Navigator.of(context).pop(true);
       }
       if (!isUpdate) {
-        navigatorPush(
-          context,
-          ChatScreen(
-            chat: widget.request!.chatData,
-            initialMsg: MessageData(
-              id: DateTime.now().millisecondsSinceEpoch.toString(),
-              from: currentUser.email!,
-              createdAt: DateTime.now(),
-              txt: messMenuChangeMessage(widget.request!),
-            ),
-          ),
-        );
+        /// TODO: These lines of code allow us to navigate to the chat screen with a template message for the request
+        // navigatorPush(
+        //   context,
+        //   ChatScreen(
+        //     chat: widget.request!.chatData,
+        //     initialMsg: MessageData(
+        //       id: DateTime.now().millisecondsSinceEpoch.toString(),
+        //       from: currentUser.email!,
+        //       createdAt: DateTime.now(),
+        //       txt: messMenuChangeMessage(widget.request!),
+        //     ),
+        //   ),
+        // );
       }
     }
   }

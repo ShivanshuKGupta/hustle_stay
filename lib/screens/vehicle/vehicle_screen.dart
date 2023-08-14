@@ -18,6 +18,7 @@ class VehicleScreen extends StatefulWidget {
 
 class _VehicleScreenState extends State<VehicleScreen> {
   Map<String, DocumentSnapshot> savePoint = {};
+  int i = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +29,7 @@ class _VehicleScreenState extends State<VehicleScreen> {
         backgroundColor: Colors.transparent,
         title: shaderText(
           context,
-          title: 'Vehicle',
+          title: 'Vehicle Schedule',
           style: Theme.of(context).textTheme.titleLarge!.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -44,6 +45,7 @@ class _VehicleScreenState extends State<VehicleScreen> {
                 onPressed: () async {
                   await initializeVehicleRequests();
                   setState(() {
+                    i++;
                     savePoint.clear();
                   });
                 },
@@ -62,8 +64,7 @@ class _VehicleScreenState extends State<VehicleScreen> {
           },
           child: Container(),
         ),
-        key: UniqueKey(),
-        reverse: true,
+        key: ValueKey(i),
         loader: (ctx, start, limit) async {
           final requests = await fetchVehicleRequests(
             limit: limit,
@@ -101,14 +102,14 @@ class _VehicleScreenState extends State<VehicleScreen> {
                       Text(
                         request.dateTime!.day.toString(),
                         style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                            // fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.bold,
                             ),
                       ),
                       Text(
                         getMonth(request.dateTime!.month),
                         style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                              fontSize: 8,
-                              // fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
                             ),
                       ),
                     ],

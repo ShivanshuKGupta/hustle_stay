@@ -7,9 +7,9 @@ import 'package:hustle_stay/screens/requests/vehicle/vehicle_requests_screen.dar
 import 'package:hustle_stay/widgets/requests/requests_list.dart';
 
 const requestMainPageElements = <String, Map<String, dynamic>>{
-  'Attendance': {
+  'Hostel': {
     'color': Colors.red,
-    'icon': Icons.calendar_month_rounded,
+    'icon': Icons.account_balance_outlined,
     'route': AttendanceRequestScreen.routeName,
   },
   'Vehicle': {

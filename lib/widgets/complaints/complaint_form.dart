@@ -5,8 +5,6 @@ import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/complaint/complaint.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/tools.dart';
-import 'package:hustle_stay/widgets/chat/template_messages.dart';
-import 'package:hustle_stay/widgets/complaints/complaint_list_item.dart';
 import 'package:hustle_stay/widgets/other/select_one.dart';
 import 'package:hustle_stay/widgets/other/selection_vault.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
@@ -109,18 +107,19 @@ class _ComplaintFormState extends State<ComplaintForm> {
         );
       }
     } else {
-      if (context.mounted) {
-        await showComplaintChat(
-          context,
-          complaint,
-          initialMsg: MessageData(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            from: currentUser.email!,
-            createdAt: DateTime.now(),
-            txt: complaintTemplateMessage(complaint),
-          ),
-        );
-      }
+      /// TODO: These lines of code allow us to navigate to the chat screen with a template message for the complaint
+      // if (context.mounted) {
+      //   await showComplaintChat(
+      //     context,
+      //     complaint,
+      //     initialMsg: MessageData(
+      //       id: DateTime.now().millisecondsSinceEpoch.toString(),
+      //       from: currentUser.email!,
+      //       createdAt: DateTime.now(),
+      //       txt: complaintTemplateMessage(complaint),
+      //     ),
+      //   );
+      // }
     }
     if (widget.afterSubmit != null) {
       widget.afterSubmit!(complaint);

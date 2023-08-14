@@ -45,10 +45,16 @@ class _HomeScreenState extends ConsumerState<MainScreen> {
           ? const AttendanceScreen()
           : const HostelScreen(),
       const ComplaintsScreen(),
-      VehicleScreen(),
-      const RequestsScreen(),
       const SettingsScreen(),
+      const RequestsScreen(),
+      if (currentUser.type == 'warden' ||
+          currentUser.email == 'vehicle@iiitr.ac.in')
+        const VehicleScreen(),
     ];
+    if (settings.currentPage >= bodyList.length) {
+      settings.currentPage = bodyList.length - 1;
+      settingsClass.saveSettings();
+    }
     return WillPopScope(
       onWillPop: () async {
         if (canExit) return true;
@@ -103,9 +109,9 @@ class _HomeScreenState extends ConsumerState<MainScreen> {
                     ),
                     GButton(
                       icon: settings.currentPage == i++
-                          ? Icons.airport_shuttle_rounded
-                          : Icons.airport_shuttle_outlined,
-                      text: 'Vehicle',
+                          ? Icons.person_rounded
+                          : Icons.person_outlined,
+                      text: 'Profile',
                     ),
                     GButton(
                       icon: settings.currentPage == i++
@@ -113,12 +119,14 @@ class _HomeScreenState extends ConsumerState<MainScreen> {
                           : Icons.assignment_turned_in_outlined,
                       text: 'Requests',
                     ),
-                    GButton(
-                      icon: settings.currentPage == i++
-                          ? Icons.settings_rounded
-                          : Icons.settings_outlined,
-                      text: 'Settings',
-                    ),
+                    if (currentUser.type == 'warden' ||
+                        currentUser.email == 'vehicle@iiitr.ac.in')
+                      GButton(
+                        icon: settings.currentPage == i++
+                            ? Icons.airport_shuttle_rounded
+                            : Icons.airport_shuttle_outlined,
+                        text: 'Vehicle',
+                      ),
                   ],
                 ),
               ),

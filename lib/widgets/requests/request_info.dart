@@ -130,7 +130,7 @@ class _RequestInfoState extends State<RequestInfo> {
           TextButton.icon(
             onPressed: () async {
               final response = await askUser(
-                  context, 'Do you really want to withdraw this request?',
+                  context, 'Do you really want to deactivate this request?',
                   yes: true, no: true);
               if (response == 'yes') {
                 try {
@@ -147,7 +147,7 @@ class _RequestInfoState extends State<RequestInfo> {
               }
             },
             icon: const Icon(Icons.close_rounded),
-            label: const Text('Withdraw'),
+            label: const Text('Deactivate'),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
           ),
         if (currentUser.type != 'student')

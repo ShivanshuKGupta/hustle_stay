@@ -54,6 +54,8 @@ dependencies:
   flutter_colorpicker: ^1.0.3
   syncfusion_flutter_charts: ^22.1.37
   rive: ^0.7.16
+  firebase_messaging: ^14.6.5
+  firebase_analytics: ^10.4.4
 
 dev_dependencies:
   flutter_test:
