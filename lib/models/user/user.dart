@@ -18,6 +18,7 @@ class UserData {
   String? hostelName;
   String? roomName;
   Permissions permissions = Permissions();
+  String? fcmToken;
   int modifiedAt = 0;
 
   /// Editable
@@ -51,6 +52,7 @@ class UserData {
       "isAdmin": isAdmin,
       "modifiedAt": modifiedAt,
       "type": type,
+      "fcmToken": fcmToken,
       if (name != null) "name": name,
       "permissions": permissions.encode(),
       if (type == 'student') "hostelName": hostelName,
@@ -68,6 +70,7 @@ class UserData {
     hostelName = data['hostelName'] ?? hostelName;
     roomName = data['roomName'] ?? roomName;
     name = data['name'] ?? name;
+    fcmToken = data['fcmToken'] ?? fcmToken;
     modifiedAt = data['modifiedAt'] ?? modifiedAt;
     permissions.load(
       ((data['permissions'] ?? permissions.encode()) as Map<String, dynamic>)

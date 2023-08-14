@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:hustle_stay/main.dart';
 import 'package:hustle_stay/models/user/user.dart';
+import 'package:hustle_stay/providers/notifications/notifications.dart';
 
 import 'chat.dart';
 
@@ -95,6 +97,23 @@ Future<void> addMessage(ChatData chat, MessageData msg) async {
   await chatMessages
       .doc(DateTime.now().millisecondsSinceEpoch.toString())
       .set(msg.encode());
+  chat.receivers.map((e) => e).toList()
+    ..add(chat.owner)
+    ..forEach((email) async {
+      if (email == currentUser.email) return;
+      final user = await fetchUserData(email);
+      if (user.fcmToken != null) {
+        await sendNotification(
+            to: user.fcmToken!,
+            title: currentUser.name ?? currentUser.email,
+            body: msg.txt,
+            data: {
+              'id': "${chat.path}/${msg.id}",
+            });
+      } else {
+        debugPrint('fcmToken not found for ${user.email}');
+      }
+    });
 }
 
 Future<void> deleteMessage(ChatData chat, MessageData msg) async {

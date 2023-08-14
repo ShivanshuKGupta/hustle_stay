@@ -45,11 +45,6 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  /// Setting up firebase messaging
-  final fcmToken = await firebaseMessaging.getToken();
-  debugPrint("fcmToken = $fcmToken");
-  initializeFCM();
-
   // Initializing prefs here in main to avoid any delay in activating settings
   prefs = await SharedPreferences.getInstance();
   try {
@@ -73,17 +68,52 @@ void main() async {
   runApp(const ProviderScope(child: HustleStayApp()));
 }
 
-void initializeFCM() {
-  firebaseMessaging.onTokenRefresh.listen((fcmToken) {
-    debugPrint("FCM Token was refreshed. The new token is: $fcmToken");
-    // TODO: If necessary send token to application server.
+/// ON BACKGROUND MESSAGE
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  debugPrint("Handling a background message: ${message.messageId}");
+  message.notification!.body;
+}
 
-    // Note: This callback is fired at each app startup and whenever a new
-    // token is generated.
+/// ON FOREGROUND MESSAGE
+Future<void> _firebaseMessagingForegroundHandler(RemoteMessage message) async {
+  debugPrint('Got a message whilst in the foreground!');
+  debugPrint('Message data: ${message.data}');
+  if (message.notification != null) {
+    debugPrint('Message title: ${message.notification!.title}');
+  }
+
+  if (message.notification != null) {
+    debugPrint('Message body: ${message.notification!.body}');
+  }
+
+  if (message.notification != null) {
+    debugPrint(
+        'Message also contained a notification: ${message.notification}');
+  }
+}
+
+Future<void> initializeFCM() async {
+  /// Requesting permission to show notifications is done in MainScreen init method
+  /// ON TOKEN REFRESH METHOD
+  firebaseMessaging.onTokenRefresh.listen((fcmToken) {
+    if (currentUser.fcmToken != fcmToken) {
+      debugPrint("FCM Token was refreshed. The new token is: $fcmToken");
+      currentUser.fcmToken = fcmToken;
+      updateUserData(currentUser).onError((error, stackTrace) {
+        debugPrint('Failed to update fcmToken on Firebase: $error');
+      });
+    }
   }).onError((err) {
-    debugPrint("Error: $err");
-    // Error getting token.
+    debugPrint("Error Getting Firebase token: $err");
   });
+
+  final fcmToken = await firebaseMessaging.getToken();
+  debugPrint("fcmToken = $fcmToken");
+
+  FirebaseMessaging.onMessage.listen(_firebaseMessagingForegroundHandler);
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 }
 
 void setErrorWidget() {
