@@ -79,12 +79,7 @@ class _RoommateDataWidgetState extends ConsumerState<RoommateDataWidget> {
   }
 
   Future<void> getRoommateData(String email, String hostelName) async {
-    final ref = await storage
-        .collection('hostels')
-        .doc('hostelMates')
-        .collection('Roommates')
-        .doc(email)
-        .get();
+    final ref = await storage.collection('users').doc(email).get();
     if (ref.exists) {
       final data = ref.data();
       final internship = data!['onInternship'] ?? false;
