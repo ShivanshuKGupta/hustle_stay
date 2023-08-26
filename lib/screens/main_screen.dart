@@ -29,6 +29,8 @@ class MainScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<MainScreen> {
   late PageController _pageController;
 
+  /// TODO: Sani
+  /// This function will be called when the notification be clicked
   Future<void> _handleMessage(RemoteMessage message) async {
     final String? path = message.data['path'];
     debugPrint("Clicked Notification path: $path");

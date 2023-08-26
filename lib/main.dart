@@ -227,12 +227,12 @@ Future<void> initializeFCM() async {
   });
 
   final fcmToken = await firebaseMessaging.getToken();
-  // if (fcmToken != null) {
-  //   currentUser.fcmToken = fcmToken;
-  //   updateUserData(currentUser).onError((error, stackTrace) {
-  //     debugPrint('Failed to update fcmToken on Firebase: $error');
-  //   });
-  // }
+  if (fcmToken != null) {
+    currentUser.fcmToken = fcmToken;
+    updateUserData(currentUser).onError((error, stackTrace) {
+      debugPrint('Failed to update fcmToken on Firebase: $error');
+    });
+  }
   debugPrint("fcmToken = $fcmToken");
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
