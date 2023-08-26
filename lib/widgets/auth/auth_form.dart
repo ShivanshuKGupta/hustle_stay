@@ -19,34 +19,17 @@ class AuthForm extends StatefulWidget {
 }
 
 class _AuthFormState extends State<AuthForm> {
+  /// TODO: remove the below default values when moving to production
   String _email = kDebugMode ? "code_soc@students.iiitr.ac.in" : '',
       _password = kDebugMode ? "123456" : '';
 
-  /// TODO: remove the above default values when moving to production
-
-  /// The form key
   final _formkey = GlobalKey<FormState>();
 
-  /// a laoding var indicating the current state of the form
-  bool _loading = false;
-
-  /// This Function is called when the save button is pressed
-  void _save() async {
+  Future<void> _save() async {
     FocusScope.of(context).unfocus();
     if (!_formkey.currentState!.validate()) return;
     _formkey.currentState!.save();
-    setState(() {
-      _loading = true;
-    });
-    try {
-      await widget.onSubmit(_email.trim(), _password);
-      return;
-    } catch (e) {
-      showMsg(context, e.toString());
-    }
-    setState(() {
-      _loading = false;
-    });
+    await widget.onSubmit(_email.trim(), _password);
   }
 
   @override
@@ -66,7 +49,6 @@ class _AuthFormState extends State<AuthForm> {
               iconColor: Theme.of(context).colorScheme.onBackground,
               label: const Text('Email'),
             ),
-            enabled: !_loading,
             validator: (email) => Validate.email(email),
             onChanged: (value) => _email = value,
             onSaved: (value) {
@@ -78,7 +60,6 @@ class _AuthFormState extends State<AuthForm> {
           TextFormField(
             key: const ValueKey('pwd'),
             initialValue: _password,
-            enabled: !_loading,
             decoration: const InputDecoration(
                 icon: Icon(Icons.password_rounded), label: Text('Password')),
             obscureText: true,
@@ -92,27 +73,13 @@ class _AuthFormState extends State<AuthForm> {
           const SizedBox(height: 10),
 
           /// The elevated button for save
-          ElevatedButton.icon(
-            onPressed: _loading ? null : _save,
-            icon: const Icon(
-              Icons.login_rounded,
-            ),
-            label: _loading ? circularProgressIndicator() : const Text('Login'),
+          LoadingElevatedButton(
+            onPressed: _save,
+            icon: const Icon(Icons.login_rounded),
+            label: const Text('Login'),
           ),
 
           /// The textbutton for reset
-          // TextButton.icon(
-          //   style: TextButton.styleFrom(
-          //     foregroundColor: Colors.blue,
-          //   ),
-          //   onPressed: () {
-          //     // TODO: add a google oauth provider
-          //     showMsg(context, "TODO: add a google oauth provider");
-          //   },
-          //   icon: const Icon(Icons.web),
-          //   label: const Text('Google OAuth Provider'),
-          // ),
-
           LoadingElevatedButton(
             style: TextButton.styleFrom(
               side: BorderSide.none,

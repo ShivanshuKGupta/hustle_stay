@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/models/requests/mess/menu_change_request.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/tools.dart';
+import 'package:hustle_stay/widgets/other/loading_elevated_button.dart';
 import 'package:hustle_stay/widgets/other/select_one.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
 
@@ -140,7 +141,7 @@ class _MenuChangeRequestScreenState extends State<MenuChangeRequestScreen> {
                 },
               ),
               const SizedBox(height: 20),
-              ElevatedButton.icon(
+              LoadingElevatedButton(
                 onPressed: _txtController.text.trim().isEmpty ? null : _save,
                 icon: _loading
                     ? circularProgressIndicator()

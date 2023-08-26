@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class IntroApp extends StatelessWidget {
@@ -14,6 +15,7 @@ class IntroApp extends StatelessWidget {
           Image.asset(
             'assets/transparent.png',
             color: Theme.of(context).colorScheme.primary,
+            fit: kIsWeb ? BoxFit.cover : BoxFit.none,
           ),
           const SizedBox(
             height: 20,

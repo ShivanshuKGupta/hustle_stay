@@ -212,8 +212,14 @@ Future<ComplaintData> updateComplaint(ComplaintData complaint) async {
     }
     complaint.to = category.defaultReceipient;
   }
+  final batch = firestore.batch();
   complaint.modifiedAt = DateTime.now().millisecondsSinceEpoch;
-  await firestore.doc('complaints/${complaint.id}').set(complaint.encode());
+  debugPrint("updating complaint.modifiedAt: ${complaint.modifiedAt}");
+  batch.set(firestore.doc('complaints/${complaint.id}'), complaint.encode());
+  batch.set(firestore.doc('modifiedAt/complaints'), {
+    "lastModifiedAt": complaint.modifiedAt,
+  });
+  await batch.commit();
   return complaint;
 }
 
@@ -221,10 +227,11 @@ Future<ComplaintData> updateComplaint(ComplaintData complaint) async {
 Future<void> deleteComplaint(ComplaintData complaint) async {
   final bool isDeleted = complaint.deletedAt != null;
   final now = DateTime.now();
-  complaint.modifiedAt = DateTime.now().millisecondsSinceEpoch;
-  await firestore
-      .doc('complaints/${complaint.id}')
-      .update({'deletedAt': isDeleted ? null : now.millisecondsSinceEpoch});
+  complaint.deletedAt = isDeleted ? null : now;
+  await updateComplaint(complaint);
+  // await firestore
+  //     .doc('complaints/${complaint.id}')
+  //     .update({'deletedAt': isDeleted ? null : now.millisecondsSinceEpoch});
   await addMessage(
     ChatData(
       path: "complaints/${complaint.id}",

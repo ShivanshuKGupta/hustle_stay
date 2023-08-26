@@ -65,6 +65,7 @@ class _HomeScreenState extends ConsumerState<MainScreen> {
       everythingInitialized.value = null;
       showMsg(context, error.toString());
     });
+    debugPrint(DateTime.now().millisecondsSinceEpoch.toString());
 
     firebaseMessaging
         .requestPermission(

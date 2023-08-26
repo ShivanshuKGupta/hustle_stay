@@ -3,6 +3,7 @@ import 'package:hustle_stay/models/requests/other/other_request.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/screens/filter_screen/filter_choser_screen.dart';
 import 'package:hustle_stay/tools.dart';
+import 'package:hustle_stay/widgets/other/loading_elevated_button.dart';
 import 'package:hustle_stay/widgets/requests/grid_tile_logo.dart';
 
 // ignore: must_be_immutable
@@ -98,7 +99,7 @@ class _OtherRequestScreenState extends State<OtherRequestScreen> {
                 keyboardType: TextInputType.multiline,
               ),
               const SizedBox(height: 20),
-              ElevatedButton.icon(
+              LoadingElevatedButton(
                 onPressed: _txtController.text.trim().isEmpty ||
                         widget.request!.approvers.isEmpty
                     ? null

@@ -128,13 +128,14 @@ abstract class Request {
 
   Future<void> approve() async {
     status = RequestStatus.approved;
+    final now = DateTime.now();
     await update();
     await addMessage(
       chatData,
       MessageData(
-        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        id: now.microsecondsSinceEpoch.toString(),
         txt:
-            "${currentUser.name ?? currentUser.email} ${status.name} the request at \n${ddmmyyyy(DateTime.now())} ${timeFrom(DateTime.now())}",
+            "${currentUser.name ?? currentUser.email} ${status.name} the request at \n${ddmmyyyy(now)} ${timeFrom(now)}",
         from: currentUser.email!,
         createdAt: DateTime.now(),
         indicative: true,
@@ -144,13 +145,14 @@ abstract class Request {
 
   Future<void> deny() async {
     status = RequestStatus.denied;
+    final now = DateTime.now();
     await update();
     await addMessage(
       chatData,
       MessageData(
-        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        id: now.microsecondsSinceEpoch.toString(),
         txt:
-            "${currentUser.name ?? currentUser.email} ${status.name} the request at \n${ddmmyyyy(DateTime.now())} ${timeFrom(DateTime.now())}",
+            "${currentUser.name ?? currentUser.email} ${status.name} the request at \n${ddmmyyyy(now)} ${timeFrom(now)}",
         from: currentUser.email!,
         createdAt: DateTime.now(),
         indicative: true,
@@ -201,6 +203,9 @@ abstract class Request {
 
       // Finally updating the doc
       transaction.set(doc, encode());
+      transaction.update(firestore.doc('modifiedAt/requests'), {
+        "lastModifiedAt": modifiedAt,
+      });
     });
   }
 
@@ -229,21 +234,27 @@ abstract class Request {
 
   /// Use this function to update this request's list of approvers
   Future<void> updateApprovers({required List<String> newApprovers}) async {
+    final batch = firestore.batch();
+    final modifiedAt = DateTime.now().millisecondsSinceEpoch;
     if (type != 'Other') {
       final doc = firestore.collection('requests').doc(type);
-      await doc.set({
+      batch.set(doc, {
         'approvers': newApprovers,
-        'modifiedAt': DateTime.now().millisecondsSinceEpoch,
+        'modifiedAt': modifiedAt,
         'isType': true,
         'status': RequestStatus.pending.index,
       });
     } else {
       final doc = firestore.collection('requests').doc(id.toString());
-      await doc.update({
+      batch.update(doc, {
         'approvers': newApprovers,
-        'modifiedAt': DateTime.now().millisecondsSinceEpoch,
+        'modifiedAt': modifiedAt,
       });
     }
+    batch.set(firestore.doc('modifiedAt/requests'), {
+      "lastModifiedAt": modifiedAt,
+    });
+    await batch.commit();
     approvers = newApprovers;
   }
 

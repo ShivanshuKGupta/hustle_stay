@@ -163,22 +163,30 @@ Future<List<UserData>> fetchComplainees() async {
 }
 
 Future<void> updateUserData(UserData userData) async {
+  final batch = firestore.batch();
   userData.modifiedAt = DateTime.now().millisecondsSinceEpoch;
-  firestore.collection('users').doc(userData.email).set(
-        userData.encode(),
-      );
+  batch.set(
+    firestore.collection('users').doc(userData.email),
+    userData.encode(),
+  );
   // if account doesn't exists create one
-  try {
-    await auth.createUserWithEmailAndPassword(
-      email: userData.email!,
-      password: "123456",
-    );
-    // login(currentUser.email!, '123456');
-  } on FirebaseAuthException catch (e) {
-    if (e.code != 'email-already-in-use') {
-      rethrow;
+  if (currentUser.isAdmin == true) {
+    try {
+      await auth.createUserWithEmailAndPassword(
+        email: userData.email!,
+        password: "123456",
+      );
+      // login(currentUser.email!, '123456');
+    } on FirebaseAuthException catch (e) {
+      if (e.code != 'email-already-in-use') {
+        rethrow;
+      }
     }
   }
+  batch.set(firestore.doc('modifiedAt/users'), {
+    "lastModifiedAt": userData.modifiedAt,
+  });
+  await batch.commit();
 }
 
 /// This function is responsible for logging user in

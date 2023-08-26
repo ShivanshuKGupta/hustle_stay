@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hustle_stay/tools.dart';
 
 class LoadingElevatedButton extends StatefulWidget {
-  final Future<void> Function() onPressed;
+  final Future<void> Function()? onPressed;
   final Widget icon;
   final Widget label;
   final ButtonStyle? style;
@@ -32,14 +32,14 @@ class _LoadingElevatedButtonState extends State<LoadingElevatedButton> {
     _loading = widget.loading ?? _loading;
     return ElevatedButton.icon(
       style: widget.style,
-      onPressed: _loading || !widget.enabled
+      onPressed: _loading || !widget.enabled || widget.onPressed == null
           ? null
           : () async {
               setState(() {
                 _loading = true;
               });
               try {
-                await widget.onPressed();
+                await widget.onPressed!();
               } catch (e) {
                 showMsg(context, e.toString());
                 if (widget.errorHandler != null) widget.errorHandler!(e);
