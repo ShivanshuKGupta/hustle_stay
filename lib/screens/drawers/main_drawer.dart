@@ -106,8 +106,8 @@ class MainDrawer extends StatelessWidget {
                       await sendNotification(
                         title: "Title",
                         body: "Body",
-                        to: (await fetchUserData('cs21b1024@iiitr.ac.in'))
-                            .fcmToken!,
+                        data: {},
+                        toEmail: currentUser.email!,
                       );
                     },
                   ),

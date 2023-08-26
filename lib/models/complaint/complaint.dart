@@ -8,6 +8,7 @@ import 'package:hustle_stay/models/category/category.dart';
 import 'package:hustle_stay/models/chat/chat.dart';
 import 'package:hustle_stay/models/chat/message.dart';
 import 'package:hustle_stay/models/user/user.dart';
+import 'package:hustle_stay/providers/notifications/notifications.dart';
 import 'package:hustle_stay/providers/state_switch.dart';
 import 'package:hustle_stay/tools.dart';
 
@@ -204,6 +205,8 @@ bool equalList(List<String> a, List<String> b) {
 
 /// updates an exisiting complaint or will create if complaint does not exists
 Future<ComplaintData> updateComplaint(ComplaintData complaint) async {
+  bool newComplaint = false;
+  if (complaint.id == 0) newComplaint = true;
   if (complaint.id == 0) complaint.id = DateTime.now().millisecondsSinceEpoch;
   if (complaint.to.isEmpty) {
     Category category = await fetchCategory(complaint.category ?? 'Other');
@@ -220,6 +223,17 @@ Future<ComplaintData> updateComplaint(ComplaintData complaint) async {
     "lastModifiedAt": complaint.modifiedAt,
   });
   await batch.commit();
+  complaint.to.map((e) => e).forEach((email) async {
+    await sendNotification(
+      toEmail: email,
+      title: complaint.title,
+      body: complaint.description,
+      data: {
+        'path': "complaints/${complaint.id}",
+        'type': newComplaint ? 'creation' : 'updation',
+      },
+    );
+  });
   return complaint;
 }
 
@@ -252,10 +266,11 @@ Future<void> deleteComplaint(ComplaintData complaint) async {
 }
 
 /// fetches a complaint of given ID
-Future<ComplaintData> fetchComplaint(int id) async {
+Future<ComplaintData> fetchComplaint(int id,
+    {Source? src = Source.cache}) async {
   final response = await firestore
       .doc('complaints/$id')
-      .get(const GetOptions(source: Source.cache));
+      .get(src == null ? null : GetOptions(source: src));
   if (!response.exists) throw "Complaint Doesn't exists";
   final data = response.data();
   if (data == null) throw "Data not found";

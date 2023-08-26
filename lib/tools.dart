@@ -347,6 +347,51 @@ Future<String?> askUser(
   );
 }
 
+Future<dynamic> loadingIndicator(
+  context,
+  Future<dynamic> Function() loader,
+  String title, {
+  String? description,
+  bool cancel = false,
+}) async {
+  bool dialogExists = true;
+  List<Widget> buttons = [
+    if (cancel == true)
+      TextButton.icon(
+        label: const Text("Cancel"),
+        onPressed: () {
+          dialogExists = false;
+          Navigator.of(context).pop(null);
+        },
+        icon: const Icon(Icons.close_rounded),
+      ),
+  ];
+  Navigator.push(
+    context,
+    DialogRoute(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: Text(title),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            circularProgressIndicator(),
+            if (description != null) Text(description),
+          ],
+        ),
+        actions: buttons,
+        actionsAlignment: MainAxisAlignment.spaceAround,
+      ),
+    ),
+  );
+  final ans = await loader();
+  if (dialogExists) {
+    Navigator.of(context).pop();
+  }
+  return ans;
+}
+
 Future<String?> promptUser(BuildContext context,
     {String? question, String? description}) async {
   String? ans;

@@ -1,8 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:hustle_stay/main.dart';
+import 'package:hustle_stay/models/chat/chat.dart';
+import 'package:hustle_stay/models/complaint/complaint.dart';
+import 'package:hustle_stay/models/requests/request.dart';
 import 'package:hustle_stay/models/user/user.dart';
 import 'package:hustle_stay/providers/settings.dart';
 import 'package:hustle_stay/screens/attendance_screen.dart';
@@ -12,6 +17,7 @@ import 'package:hustle_stay/screens/requests/requests_screen.dart';
 import 'package:hustle_stay/screens/settings/settings_screen.dart';
 import 'package:hustle_stay/screens/vehicle/vehicle_screen.dart';
 import 'package:hustle_stay/tools.dart';
+import 'package:hustle_stay/widgets/complaints/complaint_list_item.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -23,30 +29,56 @@ class MainScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<MainScreen> {
   late PageController _pageController;
 
-  void _handleMessage(RemoteMessage message) async {
-    // final String? id = message.data['id'];
-    // if (id == null) {
-    //   debugPrint("Clicked notification id was null!");
-    //   return;
-    // }
-    // debugPrint("Clicked Notification id: $id");
-    // final parts = id.split('/');
-    // if (parts[0] == 'complaints') {
-    //   final complaintID = int.tryParse(parts[1]);
-    //   if (complaintID == null) {
-    //     debugPrint('Complaint id cannot be opbtained for notification id: $id');
-    //   } else {
-    //     await showComplaintChat(context, await fetchComplaint(complaintID));
-    //   }
-    // }
+  Future<void> _handleMessage(RemoteMessage message) async {
+    final String? path = message.data['path'];
+    debugPrint("Clicked Notification path: $path");
+    if (path == null) return;
+    final parts = path.split('/');
+    switch (parts[0]) {
+      case 'complaints':
+        await _handleComplaintNotification(message);
+        return;
+      case 'requests':
+        await _handleRequestNotification(message);
+        return;
+      case 'chats':
+        await _handleChatNotification(message);
+        return;
+    }
   }
 
+  Future<void> _handleForegroundMessage(RemoteMessage message) async {
+    final title = message.notification?.title;
+    final body = message.notification?.body;
+    final data = message.data;
+    final String? type = data['type'];
+    String txt = "";
+    switch (type) {
+      case 'message':
+        txt = "$title says '$body'";
+        break;
+      case 'creation':
+        txt = "creation: $title $body";
+        break;
+      case 'deletion':
+        txt = "deletion: $title $body";
+        break;
+      case 'updation':
+        txt = "updation: $title $body";
+        break;
+    }
+    showMsg(context, txt);
+    if (kDebugMode) {
+      await _handleMessage(message);
+    }
+  }
+
+  /// Sets up fcm handlers (other than background handler)
   void initializeFcmHandlers() async {
     RemoteMessage? initialMessage =
         await FirebaseMessaging.instance.getInitialMessage();
 
-    // If the message also contains a data property with a "type" of "chat",
-    // navigate to a chat screen
+    // If the app is opened from a notification
     if (initialMessage != null) {
       _handleMessage(initialMessage);
     }
@@ -54,6 +86,8 @@ class _HomeScreenState extends ConsumerState<MainScreen> {
     // Also handle any interaction when the app is in the background via a
     // Stream listener
     FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
+
+    FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
   }
 
   @override
@@ -65,7 +99,6 @@ class _HomeScreenState extends ConsumerState<MainScreen> {
       everythingInitialized.value = null;
       showMsg(context, error.toString());
     });
-    debugPrint(DateTime.now().millisecondsSinceEpoch.toString());
 
     firebaseMessaging
         .requestPermission(
@@ -213,5 +246,90 @@ class _HomeScreenState extends ConsumerState<MainScreen> {
       curve: Curves.decelerate,
       duration: const Duration(milliseconds: 500),
     );
+  }
+
+  Future<void> _handleComplaintNotification(RemoteMessage message) async {
+    final title = message.notification?.title;
+    final body = message.notification?.body;
+    final data = message.data;
+    final String path = data['path'];
+    final String? type = data['type'];
+    debugPrint("Handling complaint notification of type: $type");
+    final parts = path.split('/');
+    // parts[0] is equals to 'complaints'
+    final complaintID = int.tryParse(parts[1]);
+    if (complaintID == null) {
+      debugPrint('Complaint id cannot be obtained for notification id: $path');
+      return;
+    }
+    try {
+      await fetchComplaint(complaintID);
+    } catch (e) {
+      // doc doesn't exists in cache
+      await loadingIndicator(
+        context,
+        () async =>
+            await fetchComplaint(complaintID, src: Source.serverAndCache),
+        'Fetching Complaint $title',
+        description: '$body',
+      );
+    }
+    if (type == 'message') {
+      // ignore: use_build_context_synchronously
+      await showComplaintChat(
+        context,
+        await fetchComplaint(complaintID),
+      );
+    } else {
+      _switchPage(1); // showing complaints screen
+    }
+  }
+
+  Future<void> _handleRequestNotification(RemoteMessage message) async {
+    final title = message.notification?.title;
+    final body = message.notification?.body;
+    final data = message.data;
+    final String path = data['path'];
+    final String? type = data['type'];
+    debugPrint("Handling request notification of type: $type");
+    final parts = path.split('/');
+    // parts[0] is equals to 'requests'
+    final requestID = int.tryParse(parts[1]);
+    if (requestID == null) {
+      debugPrint('Request id cannot be obtained for notification id: $path');
+      return;
+    }
+    if (type == 'message') {
+      try {
+        await firestore.doc(path).get(const GetOptions(source: Source.cache));
+      } catch (e) {
+        // doc doesn't exists in cache
+        await loadingIndicator(
+          context,
+          () async => await firestore.doc(path).get(),
+          'Fetching Request $title',
+          description: '$body',
+        );
+      }
+      final response =
+          await firestore.doc(path).get(const GetOptions(source: Source.cache));
+      if (response.data() != null) {
+        decodeToRequest(response.data()!);
+      } else {
+        debugPrint('Unable to fetch request from the server');
+      }
+    } else {
+      _switchPage(3); // showing complaints screen
+    }
+  }
+
+  Future<void> _handleChatNotification(RemoteMessage message) async {
+    final data = message.data;
+    String path = data['path'];
+    final parts = path.split('/');
+    final response = await firestore.doc(path).get();
+    // ignore: use_build_context_synchronously
+    await showChat(context,
+        id: parts[1], emails: response.data()!['recipients']);
   }
 }
