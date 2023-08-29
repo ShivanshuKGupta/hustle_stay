@@ -338,21 +338,6 @@ Future<void> initializeRequests() async {
   requestsIntialized.value = "Fetching Requests";
   const String key = 'requestsLastModifiedAt';
   int requestsLastModifiedAt = prefs!.getInt(key) ?? -1;
-  // If requestsLastModifiedAt is not yet available then
-  // find it from cache
-  // if (requestsLastModifiedAt == -1) {
-  //   try {
-  //     requestsLastModifiedAt = (await firestore
-  //             .collection('requests')
-  //             .orderBy('modifiedAt', descending: true)
-  //             .limit(1)
-  //             .get(const GetOptions(source: Source.cache)))
-  //         .docs[0]
-  //         .data()['modifiedAt'];
-  //   } catch (e) {
-  //     // if data doesn't exists in cache then do nothing
-  //   }
-  // }
   final requests = await fetchRequests(
     src: Source.serverAndCache,
     lastModifiedAt: requestsLastModifiedAt,
